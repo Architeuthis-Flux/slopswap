@@ -5,20 +5,82 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Jumperless V6</title>
 <link rel="stylesheet" href="../styles/jumperless.css">
-<style>ul.docs{list-style:none;padding:0} ul.docs li{padding:.7em 0;border-bottom:1px solid var(--line);margin:0} ul.docs a{font-weight:700;font-family:var(--font-display);font-size:1.1rem;text-decoration:none} ul.docs p{margin:.2em 0 0;color:var(--muted);font-size:.95rem}</style>
+<style>
+  .lede{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:.5rem 2rem;margin:0 0 1.5rem}
+  .lede h1{margin:0}
+  .lede p{margin:0;color:var(--muted);max-width:44ch}
+  .cards{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(17rem,1fr));gap:1rem}
+  .card{position:relative;display:flex;flex-direction:column;gap:.55rem;min-width:0;padding:1.1rem 1.2rem 1rem;border:1px solid var(--line);border-radius:8px;background:var(--surface);border-top:5px solid var(--accent)}
+  .card h2{margin:0;padding:0;border:0;font-size:1rem;line-height:1.3}
+  .card h2 a{color:var(--fg);text-decoration:none}
+  .card h2 a::after{content:"";position:absolute;inset:0}
+  .card:hover{border-color:var(--fg)}
+  .card p{margin:0;font-size:.92rem;color:var(--muted);flex:1}
+  .card .meta{display:flex;justify-content:space-between;gap:.5rem;font-family:var(--font-pixel);font-size:.55rem;color:var(--muted)}
+  .card:nth-child(10n+1){border-top-color:var(--r1)} .card:nth-child(10n+2){border-top-color:var(--r2)}
+  .card:nth-child(10n+3){border-top-color:var(--r3)} .card:nth-child(10n+4){border-top-color:var(--r4)}
+  .card:nth-child(10n+5){border-top-color:var(--r5)} .card:nth-child(10n+6){border-top-color:var(--r6)}
+  .card:nth-child(10n+7){border-top-color:var(--r7)} .card:nth-child(10n+8){border-top-color:var(--r8)}
+  .card:nth-child(10n+9){border-top-color:var(--r9)} .card:nth-child(10n+10){border-top-color:var(--r10)}
+</style>
 </head>
 <body>
-<main class="page">
+<main class="page wide">
 <p class="eyebrow"><a href="../">slopswap</a> / V6</p>
-<h1>Jumperless V6</h1>
-<p>Working documents from the V6 design: an interactive unit-cost model and the decision notes behind it. Prices are LCSC unit prices on the dates each page states; everything is a draft until a board is built.</p>
-<ul class="docs">
-<li><a href="cost-explorer.html">Jumperless V6 Cost Explorer</a><p>Interactive BOM and unit-cost model: display, row isolation, current sense, expansion port, magnetometers, spring clips, cost cuts, board area, margin by price. Selections are remembered in your browser; datasheet links for every part at the bottom. Baseline of 31 October 2026.</p></li>
-<li><a href="chonkbus-ends-and-isolation.html">ChonkBus: bus ends, interlock, row isolation, segments, BOM</a><p>29–31 October 2026. The two identical 0.1 Ω buses, what each can connect to, the hardware/firmware interlock split, row isolation (fitted), latch bit map, BOM; §6: why 90 switches is the floor and the odd/even × top/bottom segment options (up to 4 or 8 nets, sheet <code>b29_bussplit</code>, <a href="b29_bussplit.png">PNG</a>).</p></li>
-<li><a href="expansion-port-and-current-sense.html">Current sense, always-on voltage sense, expansion port, cost cuts</a><p>29–31 October 2026. Why ADCs on a shunt and the 470 Ω INA219 trick fall short; the floated-ground shunt amplifier; the housekeeping mux for ADC pins; M.2 / mini PCIe / SO-DIMM connector survey; the <code>b38_expansion</code> option sheet (<a href="b38_expansion.png">PNG</a>) with 39 routable pins; cost cuts and board area.</p></li>
+
+<div class="splash" data-svg="../styles/ddj-splash.svg" data-recent="recent.json"></div>
+
+<header class="lede">
+  <h1>Jumperless V6</h1>
+  <p>Working documents from the V6 design: calculators, decision notes and specs. The newest eight are on the faces above; everything is below. Drafts until a board is built.</p>
+</header>
+
+<ul class="cards">
+  <li class="card">
+    <div class="meta"><span>CALCULATOR</span><span>31 OCT 2026</span></div>
+    <h2><a href="cost-explorer.html">Jumperless V6 Cost Explorer</a></h2>
+    <p>Unit cost, landed cost and margin for the main board and wig from the staged schematic BOM. Toggle the display, row isolation, bus splits, shunt amplifier, expansion port, magnetometers and the cost cuts; every part links to its datasheet.</p>
+  </li>
+  <li class="card">
+    <div class="meta"><span>NOTE</span><span>29–31 OCT 2026</span></div>
+    <h2><a href="chonkbus-ends-and-isolation.html">ChonkBus: bus ends, interlock, row isolation, segments</a></h2>
+    <p>The two identical 0.1 Ω buses, what each can connect to, the hardware/firmware interlock split, row isolation, the latch bit map and BOM, and why 90 switches is the floor. Includes the odd/even × top/bottom segment options and the <a href="b29_bussplit.png">b29 sheet</a>.</p>
+  </li>
+  <li class="card">
+    <div class="meta"><span>NOTE</span><span>29–31 OCT 2026</span></div>
+    <h2><a href="expansion-port-and-current-sense.html">Current sense, voltage sense, expansion port, cost cuts</a></h2>
+    <p>Why ADCs on a shunt and the INA219 trick fall short, the floated-ground shunt amplifier, the housekeeping mux, the M.2 / mini PCIe / SO-DIMM connector survey and the <a href="b38_expansion.png">b38 option sheet</a> with 39 routable pins.</p>
+  </li>
+  <li class="card">
+    <div class="meta"><span>SPEC</span><span>18 OCT 2026</span></div>
+    <h2><a href="breadboard-shell-im-spec.html">Breadboard Shell Injection-Moulding Spec</a></h2>
+    <p>Target geometry for the moulded shell: the 480-hole lattice, clip channels sized to the Fulimei Spring Clip 6, drafts and walls, the straight-pull tool, PBT, and the T1/T2 acceptance tests, with the cell cross-section drawing.</p>
+  </li>
+  <li class="card">
+    <div class="meta"><span>PLAN</span><span>18 OCT 2026</span></div>
+    <h2><a href="mmc5603-array-plan.html">MMC5603 Array Plan</a></h2>
+    <p>Building the probe tracker from MEMSIC MMC5603NJ magnetometers: operating point, bus topologies for many fixed-address sensors, grid arrangements under the breadboard, and two ways a probe can talk back through the same sensors.</p>
+  </li>
+  <li class="card">
+    <div class="meta"><span>CALCULATOR</span><span>18 OCT 2026</span></div>
+    <h2><a href="magnet-sensing-planner.html">Magnet Sensing Planner</a></h2>
+    <p>Which sensor, which magnet, how many, how far. Dipole field against distance, each sensor's usable window, the Cramér–Rao position bound for a grid, what a dollar of sensors buys, and what a breadboard circuit puts into the sensors.</p>
+  </li>
+  <li class="card">
+    <div class="meta"><span>PARTS HUNT</span><span>21 OCT 2026</span></div>
+    <h2><a href="hqb-display-finder.html">HQB Display Finder</a></h2>
+    <p>Every colour-ish display from the V6 hunt drawn to one scale: colour PMOLED, AMOLED bars, Mi Band panels, TFTs, e-paper and memory LCD, with prices, verdicts, where to ask in Huaqiangbei and a stall phrasebook.</p>
+  </li>
+  <li class="card">
+    <div class="meta"><span>REWORK GUIDE</span><span>19 OCT 2026</span></div>
+    <h2><a href="wigledmag-rework.html">WigLEDmag Rework</a></h2>
+    <p>Bilingual bench instructions for the WigLEDmag prototype boards: turning all 480 misoriented LEDs in blocks, with true-geometry drawings from the KiCad board, the optional bodges, and the text to show a Huaqiangbei rework shop.</p>
+  </li>
 </ul>
+
 <hr>
-<p class="muted">Jumperless V6 is a work in progress by Kevin Cappuccio; these pages are written with Claude and published on slopswap so they load where claude.ai does not.</p>
+<p class="muted">Jumperless V6 is a work in progress by Kevin Cappuccio. These pages are written with Claude and published on slopswap so they load where claude.ai does not.</p>
 </main>
+<script src="../styles/splash.js"></script>
 </body>
 </html>

@@ -1,42 +1,63 @@
-/* slopswap · Jumperless theme (default for most projects)
-   Link from a doc one folder deep:  <link rel="stylesheet" href="../styles/jumperless.css">
-   Token names are shared with delmar.css, so a page's own CSS can use them under either theme.
-   Fonts are self-hosted: Google Fonts and most CDNs are blocked in China. */
+/* slopswap · Jumperless theme — the site default and the base every artifact links.
+   <link rel="stylesheet" href="../styles/jumperless.css">   (pages live exactly one folder deep)
+
+   Dark only, on purpose: it follows shop.jumperless.org (charcoal, hot pink, cyan, Michroma headings)
+   and carries the rainbow from docs.jumperless.org. There is no OS-preference switch; add
+   data-theme="light" on <html> for the light look.
+
+   Tokens:  --bg --surface --surface-2 --fg --muted --line --accent --accent-2 --accent-3
+            --r1…--r10 (the ten letters of the pixel wordmark, in order)  --rainbow
+            --font-display --font-body --font-mono --font-pixel
+   The same values are exposed as --jl-* so a converted artifact can point its own token names at
+   them (localize_fonts.py --theme writes that block).
+   body.app  = dense tool layout: no document decorations, no column width.
+   .page     = reading column;  .page.wide = 72rem.
+   Fonts are self-hosted in fonts/ (Google Fonts is blocked in China). */
+
 @font-face{font-family:Lato;font-weight:400;font-display:swap;src:url(fonts/Lato-400.woff2) format("woff2")}
 @font-face{font-family:Lato;font-weight:700;font-display:swap;src:url(fonts/Lato-700.woff2) format("woff2")}
-@font-face{font-family:"Roboto Slab";font-weight:700;font-display:swap;src:url(fonts/RobotoSlab-700.woff2) format("woff2")}
+@font-face{font-family:Michroma;font-weight:400;font-display:swap;src:url(fonts/Michroma-400.woff2) format("woff2")}
+@font-face{font-family:"Press Start 2P";font-weight:400;font-display:swap;src:url(fonts/PressStart2P-400.woff2) format("woff2")}
 
 :root{
-  color-scheme:light;
-  --bg:#ffffff; --surface:#f6f3f5; --fg:#1a1414; --muted:#6d6066; --line:#e7e0e4;
-  --accent:#ff4775; --accent-2:#46b3a9;
-  /* the ten colors of the Jumperless wordmark, in order */
-  --r1:#e3255c;--r2:#ea7249;--r3:#f7bc1a;--r4:#e1e031;--r5:#b6d435;
-  --r6:#58bf9b;--r7:#65a5c3;--r8:#5c69b1;--r9:#9a5fa7;--r10:#e14c99;
+  color-scheme:dark;
+  --bg:#1f1f21; --surface:#2a2a2f; --surface-2:#35353c; --fg:#f3f3f5; --muted:#a8a8b4; --line:#3e3e47;
+  --accent:#fc0289; --accent-2:#00fced; --accent-3:#b230fe;
+  --r1:#f03060;--r2:#f030b0;--r3:#c828f8;--r4:#5858f0;--r5:#48a0e8;
+  --r6:#78f8b8;--r7:#c0f848;--r8:#e0e048;--r9:#f0b038;--r10:#e86828;
   --rainbow:linear-gradient(90deg,var(--r1),var(--r2),var(--r3),var(--r4),var(--r5),var(--r6),var(--r7),var(--r8),var(--r9),var(--r10));
-  --font-display:"Roboto Slab",Georgia,"Songti SC","Noto Serif CJK SC",serif;
+  --font-display:Michroma,"Avenir Next","Helvetica Neue",Arial,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
   --font-body:Lato,"Helvetica Neue",Arial,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
   --font-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  --font-pixel:"Press Start 2P","Courier New",monospace;
+  /* aliases for converted artifacts */
+  --jl-bg:var(--bg);--jl-surface:var(--surface);--jl-surface-2:var(--surface-2);--jl-fg:var(--fg);--jl-muted:var(--muted);
+  --jl-line:var(--line);--jl-accent:var(--accent);--jl-accent-2:var(--accent-2);--jl-accent-3:var(--accent-3);
+  --jl-font-display:var(--font-display);--jl-font-body:var(--font-body);--jl-font-mono:var(--font-mono);--jl-font-pixel:var(--font-pixel);
+  --jl-r1:var(--r1);--jl-r2:var(--r2);--jl-r3:var(--r3);--jl-r4:var(--r4);--jl-r5:var(--r5);
+  --jl-r6:var(--r6);--jl-r7:var(--r7);--jl-r8:var(--r8);--jl-r9:var(--r9);--jl-r10:var(--r10);
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme=light]){
-  color-scheme:dark;--bg:#00151d;--surface:#0b2430;--fg:#e9eef0;--muted:#9fb3bb;--line:#1d3843;--accent:#ff5c86;--accent-2:#58bf9b}}
-:root[data-theme=dark]{
-  color-scheme:dark;--bg:#00151d;--surface:#0b2430;--fg:#e9eef0;--muted:#9fb3bb;--line:#1d3843;--accent:#ff5c86;--accent-2:#58bf9b}
+:root[data-theme=light]{
+  color-scheme:light;
+  --bg:#ffffff; --surface:#f5f3f6; --surface-2:#ebe8ec; --fg:#1a1414; --muted:#6a606a; --line:#e3dde2;
+  --accent:#e0007a; --accent-2:#0099a8; --accent-3:#8a1fd6;
+}
 
 *,*::before,*::after{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 var(--font-body);
   padding-block:1.75rem 3rem;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-/* rainbow stripe along the top edge */
+/* the rainbow stripe along the top edge, on every page */
 body::before{content:"";position:fixed;inset:0 0 auto;height:5px;background:var(--rainbow);z-index:10}
 .page{max-width:52rem;margin:0 auto;min-width:0}
+.page.wide{max-width:72rem}
 
-h1,h2,h3,h4{font-family:var(--font-display);font-weight:700;line-height:1.2;text-wrap:balance;margin:2em 0 .6em}
-h1{font-size:2.25rem;margin-top:.5rem}
-h2{font-size:1.5rem;padding-left:.75rem;border-left:.375rem solid var(--accent)}
-h3{font-size:1.2rem}
-h4{font-size:1rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+h1,h2,h3{font-family:var(--font-display);font-weight:400;line-height:1.25;text-wrap:balance;margin:2em 0 .6em;letter-spacing:.01em}
+h1{font-size:1.85rem;margin-top:.5rem}
+h2{font-size:1.2rem;padding-left:.75rem;border-left:.375rem solid var(--accent)}
+h3{font-size:1rem}
+h4{font-family:var(--font-pixel);font-size:.62rem;font-weight:400;letter-spacing:0;color:var(--muted);margin:2em 0 .6em}
 /* sibling sections walk the wordmark rainbow, like the docs sidebar */
 h2:nth-of-type(10n+1){border-color:var(--r1)} h2:nth-of-type(10n+2){border-color:var(--r2)}
 h2:nth-of-type(10n+3){border-color:var(--r3)} h2:nth-of-type(10n+4){border-color:var(--r4)}
@@ -46,14 +67,15 @@ h2:nth-of-type(10n+9){border-color:var(--r9)} h2:nth-of-type(10n+10){border-colo
 
 p,ul,ol,dl,table,pre,blockquote,figure{margin:0 0 1.1em}
 li{margin:.25em 0}
-a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:2px}
-a:hover{color:var(--accent-2)}
+a{color:var(--accent-2);text-decoration-thickness:1px;text-underline-offset:2px}
+a:hover{color:var(--accent)}
 strong{font-weight:700}
 small,.muted{color:var(--muted)}
-.eyebrow{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:.25rem}
+.eyebrow{font-family:var(--font-pixel);font-size:.6rem;line-height:1.8;color:var(--muted);margin:0 0 .75rem}
 .eyebrow a{color:inherit;text-decoration:none}
+.eyebrow a:hover{color:var(--accent-2)}
 hr{border:0;height:3px;background:var(--rainbow);margin:2.5rem 0;border-radius:2px}
-.logo{height:2.75rem;width:auto;display:block;margin-bottom:1rem}
+.logo{height:2.4rem;width:auto;display:block;margin:0 0 1.25rem}
 
 code,kbd,pre{font-family:var(--font-mono);font-size:.9em}
 code,kbd{background:var(--surface);padding:.1em .4em;border-radius:4px}
@@ -63,27 +85,42 @@ pre code{background:none;padding:0;font-size:1em}
 .table-wrap{overflow-x:auto;margin-bottom:1.1em}
 table{border-collapse:collapse;width:100%;font-size:.95rem;font-variant-numeric:tabular-nums}
 th,td{text-align:left;padding:.55em .75em;border-bottom:1px solid var(--line);vertical-align:top}
-th{background:var(--surface);font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+th{background:var(--surface);font-family:var(--font-pixel);font-size:.55rem;font-weight:400;color:var(--muted)}
 
 blockquote{border-left:4px solid var(--accent-2);margin-left:0;padding:.1em 1em;color:var(--muted)}
-.callout{border-left:4px solid var(--accent-2);background:var(--surface);
-  background:color-mix(in srgb,var(--accent-2) 10%,var(--bg));border-radius:4px;padding:.8em 1em;margin:1em 0 1.4em}
+.callout{border-left:4px solid var(--accent-2);background:var(--surface);border-radius:4px;padding:.8em 1em;margin:1em 0 1.4em}
 .callout>:last-child{margin-bottom:0}
-.callout .label{display:block;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--accent-2);margin-bottom:.3em}
-.pill{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
-  padding:.15em .7em;border-radius:999px;background:var(--surface);border:1px solid var(--line);vertical-align:middle}
+.callout .label{display:block;font-family:var(--font-pixel);font-size:.55rem;color:var(--accent-2);margin-bottom:.5em}
+.pill{display:inline-block;font-family:var(--font-pixel);font-size:.5rem;padding:.35em .7em;border-radius:999px;background:var(--surface);border:1px solid var(--line);vertical-align:middle}
 
 img,svg,video{max-width:100%;height:auto}
 figcaption{font-size:.85rem;color:var(--muted)}
 dl.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));gap:1rem}
-dl.meta dt{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+dl.meta dt{font-family:var(--font-pixel);font-size:.55rem;color:var(--muted)}
 dl.meta dd{margin:0}
 
 /* generated index pages */
 ul.docs{list-style:none;padding:0}
 ul.docs li{padding:.55em 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
-ul.docs small{color:var(--muted);text-transform:uppercase;font-size:.72rem;letter-spacing:.08em}
+ul.docs small{font-family:var(--font-pixel);font-size:.5rem;color:var(--muted)}
 
-:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+/* DDJ splash: the artwork with the newest pages' names in the eye boxes (styles/splash.js) */
+.splash{position:relative;width:100%;aspect-ratio:1449/781;margin:0 0 1.5rem}
+.splash>img,.splash>svg{display:block;width:100%;height:100%;overflow:visible}
+.splash text{font-family:var(--font-pixel)}
+.splash a.splash-hot{cursor:pointer;outline:none}
+.splash a.splash-hot>g{transition:transform .25s ease,filter .25s ease;transform-box:fill-box;transform-origin:center}
+.splash a.splash-hot:hover>g,.splash a.splash-hot:focus-visible>g{transform:scale(1.06);filter:drop-shadow(0 4px 18px rgba(0,0,0,.6))}
+
+/* dense tool pages: the artifact brings its own layout, the theme brings fonts, colors and the stripe */
+body.app{font-size:14px;padding-block:1.25rem 2.5rem}
+body.app h1,body.app h2,body.app h3{margin:0 0 .4em}
+body.app h1{font-size:1.35rem}
+body.app h2{font-size:.95rem;border-left:0;padding-left:0}
+body.app th{font-family:var(--font-body);font-size:inherit;background:none;color:var(--muted)}
+body.app p,body.app ul,body.app ol,body.app table,body.app pre{margin-bottom:.6em}
+body.app hr{height:1px;background:var(--line);margin:1rem 0}
+
+:focus-visible{outline:2px solid var(--accent-2);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 @media print{body::before{position:static}body{padding:0}a{color:inherit}}

@@ -5,15 +5,19 @@ Copies every project folder and styles/ into _site/, then writes an index.html
 for the root and for each project folder that does not have its own.
 Run locally:  python3 build.py && python3 -m http.server -d _site 8000
 """
+import datetime
 import html
+import json
 import re
 import shutil
+import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 OUT = ROOT / "_site"
 SKIP = {"_site", "styles"}          # dotfolders (.git, .github) are skipped too
 DEFAULT_THEME = "jumperless"
+RECENT = "recent.json"            # written per folder: newest pages first, read by styles/splash.js
 HEAD_BYTES = 8000                  # only the top of a file is scanned for <title> / stylesheet
 
 
@@ -24,6 +28,31 @@ def head(p: Path) -> str:
 def title_of(p: Path) -> str:
     m = re.search(r"<title>(.*?)</title>", head(p), re.S | re.I)
     return html.unescape(m.group(1).strip()) if m else p.stem.replace("-", " ")
+
+
+def meta(p: Path, name: str) -> str:
+    m = re.search(rf'<meta name="{name}" content="([^"]*)"', head(p))
+    return html.unescape(m.group(1)) if m else ""
+
+
+def added_on(p: Path) -> str:
+    """Date the page was added to git (renames followed); file mtime for uncommitted pages."""
+    try:
+        out = subprocess.run(["git", "log", "--diff-filter=A", "--follow", "-1", "--format=%cs", "--", str(p)],
+                             cwd=ROOT, capture_output=True, text=True, check=True).stdout.strip()
+        if out:
+            return out
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        pass
+    return datetime.date.fromtimestamp(p.stat().st_mtime).isoformat()
+
+
+def recent(folder: Path) -> list:
+    docs = [{"title": title_of(p), "short": meta(p, "short-title") or title_of(p), "href": p.name, "added": added_on(p)}
+            for p in folder.glob("*.html") if p.name not in ("index.html", "index-cards-draft.html")]
+    docs.sort(key=lambda d: d["title"])
+    docs.sort(key=lambda d: d["added"], reverse=True)
+    return docs
 
 
 def theme_of(folder: Path) -> str:
@@ -48,7 +77,7 @@ def page(title: str, theme: str, css_prefix: str, body: str) -> str:
 def listing(folder: Path, href_prefix: str) -> str:
     items = []
     for p in sorted(folder.iterdir()):
-        if p.name.startswith(".") or p.name == "index.html" or p.is_dir():
+        if p.name.startswith(".") or p.name in ("index.html", RECENT) or p.is_dir():
             continue
         if p.suffix == ".html":
             items.append(f'<li><a href="{href_prefix}{p.name}">{html.escape(title_of(p))}</a></li>')
@@ -71,6 +100,7 @@ def main() -> None:
     sections = []
     for d in projects:
         shutil.copytree(d, OUT / d.name)
+        (OUT / d.name / RECENT).write_text(json.dumps(recent(d), ensure_ascii=False, indent=0))
         name = d.name.replace("-", " ")
         if not (d / "index.html").exists():
             crumb = f'<p class="eyebrow"><a href="../">slopswap</a> / {html.escape(d.name)}</p>'
@@ -80,7 +110,8 @@ def main() -> None:
         files = "" if (d / "index.html").exists() else "\n" + listing(d, d.name + "/")
         sections.append(f'<h2><a href="{d.name}/">{html.escape(name)}</a></h2>{files}')
 
-    (OUT / "index.html").write_text(page("slopswap", DEFAULT_THEME, "", "<h1>slopswap</h1>\n" + "\n".join(sections)))
+    (OUT / "index.html").write_text(page("slopswap", DEFAULT_THEME, "",
+        '<img class="logo" src="styles/jumperless-wordmark.png" alt="Jumperless">\n<h1>slopswap</h1>\n' + "\n".join(sections)))
     print(f"built {len(projects)} project folders into {OUT.relative_to(ROOT)}/")
 
 
