@@ -1,0 +1,399 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Magnet Sensing Planner</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* self-hosted fonts: Google Fonts is blocked in China */
+@font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:400;font-display:swap;src:url(../styles/fonts/IBMPlexMono-400.woff2) format("woff2")}
+@font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:500;font-display:swap;src:url(../styles/fonts/IBMPlexMono-500.woff2) format("woff2")}
+@font-face{font-family:"IBM Plex Sans";font-style:normal;font-weight:100 900;font-display:swap;src:url(../styles/fonts/IBMPlexSans-var.woff2) format("woff2")}
+</style>
+<style>
+/* Layout: one column of full-width "instrument" cards; controls pinned in a single filter row above everything they scope. */
+:root{
+  --bg:#f6f7f8; --surface:#fdfdfc; --fg:#101214; --fg-2:#4f5560; --muted:#878d97;
+  --grid:#e3e5e8; --axis:#c4c8cf; --ring:rgba(16,18,20,.10); --accent:#355c7d; --accent-ink:#ffffff;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4; --s6:#008300; --s7:#6250d6; --s8:#e34948;
+  --band:rgba(42,120,214,.10); --warn:#fab219;
+  --font:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0f1113; --surface:#1a1c1f; --fg:#eef0f2; --fg-2:#bfc4cc; --muted:#8a9099;
+  --grid:#2a2d31; --axis:#3a3e44; --ring:rgba(255,255,255,.10); --accent:#8fb4d9; --accent-ink:#0f1113;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#e66767;
+  --band:rgba(57,135,229,.14); color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#0f1113; --surface:#1a1c1f; --fg:#eef0f2; --fg-2:#bfc4cc; --muted:#8a9099;
+  --grid:#2a2d31; --axis:#3a3e44; --ring:rgba(255,255,255,.10); --accent:#8fb4d9; --accent-ink:#0f1113;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#e66767;
+  --band:rgba(57,135,229,.14); color-scheme:dark }
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);font-size:14px;line-height:1.45;
+  padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:18px;align-items:start}
+.main{display:flex;flex-direction:column;gap:18px;min-width:0}
+.side{position:sticky;top:env(safe-area-inset-top,0px);max-height:calc(100vh - env(safe-area-inset-top,0px) - 12px);overflow-y:auto;overscroll-behavior:contain}
+.side .controls{grid-template-columns:1fr}
+.side #sensorToggles{flex-direction:column;align-items:flex-start;gap:5px}
+.side h2{position:sticky;top:0;background:var(--surface);padding-bottom:4px;z-index:1}
+@media (max-width:900px){.layout{grid-template-columns:1fr}.side{position:static;max-height:none;overflow:visible}.side .controls{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}.side #sensorToggles{flex-direction:row;align-items:center}}
+h1{font-size:22px;font-weight:600;margin:0;letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:15px;font-weight:600;margin:0}
+p{margin:0}
+.lede{color:var(--fg-2);max-width:68ch}
+.eyebrow{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.card{background:var(--surface);border:1px solid var(--ring);border-radius:8px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px 14px;align-items:end}
+.ctl{display:flex;flex-direction:column;gap:4px;min-width:0}
+.ctl label{font-size:11.5px;color:var(--fg-2)}
+.ctl input,.ctl select{font:inherit;font-family:var(--mono);font-size:13px;color:var(--fg);background:var(--bg);border:1px solid var(--axis);border-radius:5px;padding:5px 7px;width:100%;min-width:0}
+.ctl input:focus-visible,.ctl select:focus-visible,button:focus-visible,.chk input:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.row{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+.chk{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;cursor:pointer}
+.chk input{accent-color:var(--accent);margin:0}
+.sw{width:14px;height:3px;border-radius:2px;display:inline-block}
+.sw.dash{background:repeating-linear-gradient(90deg,currentColor 0 4px,transparent 4px 7px)}
+.sub{color:var(--fg-2);font-size:12.5px;max-width:80ch}
+.chart{width:100%;position:relative}
+.chart svg{width:100%;height:auto;display:block;overflow:visible}
+.chart svg text{font-family:var(--font);fill:var(--fg-2);font-size:11px}
+.chart svg .tick{fill:var(--muted);font-variant-numeric:tabular-nums}
+.chart svg .ttl{fill:var(--fg);font-weight:500}
+.chart svg .lbl{fill:var(--fg);font-size:11px;font-weight:500}
+.chart svg .grid{stroke:var(--grid);stroke-width:1}
+.chart svg .axis{stroke:var(--axis);stroke-width:1}
+.chart svg .ref{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3}
+.chart svg .series{fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.chart svg .series.dash{stroke-dasharray:5 4}
+.chart svg .cross{stroke:var(--muted);stroke-width:1}
+.tip{position:absolute;pointer-events:none;background:var(--surface);border:1px solid var(--ring);border-radius:6px;padding:6px 8px;font-size:11.5px;box-shadow:0 2px 10px rgba(0,0,0,.12);min-width:150px;max-width:260px;z-index:3}
+.tip .t{color:var(--muted);margin-bottom:3px;font-variant-numeric:tabular-nums}
+.tip .r{display:flex;justify-content:space-between;gap:10px;font-variant-numeric:tabular-nums}
+.tip .r span:first-child{display:flex;align-items:center;gap:5px}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--fg-2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.tile{border:1px solid var(--ring);border-radius:6px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.tile .v{font-size:22px;font-weight:600;letter-spacing:-.01em}
+.tile .k{font-size:11.5px;color:var(--fg-2)}
+.tile .d{font-size:11px;color:var(--muted)}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--grid);white-space:nowrap;vertical-align:top}
+th{color:var(--fg-2);font-weight:500;font-size:11.5px}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono);font-size:12px}
+td .dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:6px;vertical-align:-1px}
+.pill{display:inline-block;font-size:10.5px;padding:1px 6px;border-radius:10px;border:1px solid var(--ring);color:var(--fg-2)}
+.pill.bad{border-color:var(--s8);color:var(--s8)}
+.pill.ok{border-color:var(--s6);color:var(--s6)}
+button.tv{font:inherit;font-size:11.5px;color:var(--fg-2);background:transparent;border:1px solid var(--ring);border-radius:5px;padding:3px 8px;cursor:pointer;align-self:flex-start}
+button.tv:hover{color:var(--fg);border-color:var(--axis)}
+.notes{font-size:12.5px;color:var(--fg-2);display:flex;flex-direction:column;gap:6px;max-width:90ch}
+.notes b{color:var(--fg);font-weight:500}
+.notes a{color:var(--accent)}
+code{font-family:var(--mono);font-size:12px}
+.stack{display:flex;flex-direction:column;gap:18px}
+@media (prefers-reduced-motion:no-preference){.chart svg .series{transition:opacity .15s}}
+</style>
+
+<div class="wrap">
+  <header style="display:flex;flex-direction:column;gap:6px">
+    <div class="eyebrow">Jumperless V6 · under-breadboard magnet tracking</div>
+    <h1>Magnet Sensing Planner</h1>
+    <p class="lede">Which sensor, which magnet, how many, how far. Everything below is recomputed from the controls: dipole field of the magnet, each sensor's saturation and noise, and the Cramér–Rao bound on probe position for a grid of sensors under the breadboard. Prices are LCSC at ~1k, observed 2026‑10‑18.</p>
+  </header>
+
+  <div class="layout">
+  <aside class="card side" aria-label="Scenario controls">
+    <h2>Scenario</h2>
+    <p class="sub">Breadboard surface = minimum height. Sensors sit at z = 0 on the board below. Every chart follows these.</p>
+    <div class="controls">
+      <div class="ctl"><label for="magD">Magnet diameter (mm)</label><input id="magD" type="number" step="0.5" min="0.5" max="20" value="2"></div>
+      <div class="ctl"><label for="magL">Magnet length (mm)</label><input id="magL" type="number" step="0.5" min="0.5" max="20" value="1"></div>
+      <div class="ctl"><label for="magBr">Grade (Br)</label><select id="magBr"><option value="1.20">N35 · 1.20 T</option><option value="1.30" selected>N42 · 1.30 T</option><option value="1.45">N52 · 1.45 T</option></select></div>
+      <div class="ctl"><label for="hmin">Breadboard surface height (mm)</label><input id="hmin" type="number" step="0.5" min="1" max="30" value="7"></div>
+      <div class="ctl"><label for="rate">Position update rate (Hz)</label><input id="rate" type="number" step="10" min="1" max="5000" value="100"></div>
+      <div class="ctl"><label for="amb">Residual ambient after calibration (µT rms)</label><input id="amb" type="number" step="0.1" min="0" max="500" value="1"></div>
+      <div class="ctl"><label for="gcols">Grid columns</label><input id="gcols" type="number" step="1" min="1" max="40" value="6"></div>
+      <div class="ctl"><label for="grows">Grid rows</label><input id="grows" type="number" step="1" min="1" max="40" value="3"></div>
+      <div class="ctl"><label for="pitch">Grid pitch (mm)</label><input id="pitch" type="number" step="1" min="2" max="100" value="20"></div>
+      <div class="ctl"><label for="areaW">Board area W × H (mm), for the cost chart</label><div class="row" style="gap:6px;flex-wrap:nowrap"><input id="areaW" type="number" step="5" min="10" max="400" value="165"><input id="areaH" type="number" step="5" min="10" max="400" value="55"></div></div>
+      <div class="ctl"><label for="bh">Height for the cost chart (mm)</label><input id="bh" type="number" step="1" min="1" max="100" value="20"></div>
+    </div>
+    <div class="row" style="gap:6px"><span class="sub">Magnet presets:</span>
+      <button class="tv" data-preset="1,1">1×1</button><button class="tv" data-preset="2,1">2×1</button><button class="tv" data-preset="3,1">3×1</button><button class="tv" data-preset="2,2">2×2</button><button class="tv" data-preset="5,2">5×2</button>
+    </div>
+    <div class="eyebrow">Sensors shown</div>
+    <div class="row" id="sensorToggles" aria-label="Sensors shown"></div>
+  </aside>
+
+  <main class="main">
+  <section class="tiles" id="tiles"></section>
+
+  <div class="stack">
+    <section class="card">
+      <h2>Field of the chosen magnet vs distance</h2>
+      <p class="sub">On‑axis field of the cylinder (exact formula), with the breadboard surface marked. Horizontal references: each sensor's saturation (solid) and its noise at the chosen update rate (dashed). A sensor reads the magnet where the curve sits between its two lines.</p>
+      <div class="chart" id="cField"></div>
+      <div class="legend" id="lField"></div>
+      <button class="tv" data-table="tField">Show values</button><div class="tbl" id="tField" hidden></div>
+    </section>
+    <section class="card">
+      <h2>Usable distance window per sensor</h2>
+      <p class="sub">From the distance where the nearest sensor saturates to the distance where the signal drops to 10× its noise. The shaded band is below the breadboard surface, unreachable by the probe. In an array only the nearest sensor saturates; the others keep working, so the near edge is soft.</p>
+      <div class="chart" id="cWin"></div>
+      <button class="tv" data-table="tWin">Show values</button><div class="tbl" id="tWin" hidden></div>
+    </section>
+  </div>
+
+  <section class="card">
+    <h2>Best achievable position error vs height above the sensors</h2>
+    <p class="sub">Cramér–Rao bound for one update at the chosen rate: 3‑D rms position error of a dipole with unknown position and moment (6 unknowns), using the whole grid, saturated sensors dropped, worst case over the probe's lateral position (above a sensor, between two, and in the middle of a cell) and over a 45° tilt. Any real filter sits above these lines; time averaging across updates moves them down by √N. The dashed 1‑axis line is ill‑conditioned close to the plane because a single axis can't separate tilt from offset; fixing the magnet strength or height would help it most.</p>
+    <div class="chart" id="cCrlb"></div>
+    <div class="legend" id="lCrlb"></div>
+    <button class="tv" data-table="tCrlb">Show values</button><div class="tbl" id="tCrlb" hidden></div>
+  </section>
+
+  <section class="card">
+    <h2>Position error vs sensor budget per board</h2>
+    <p class="sub">Same bound, but each sensor type is bought up to the budget and spread evenly over the board area. Read it as "what does a dollar buy": a flatter, lower line means the part scales better. Evaluated at the cost-chart height set in the sidebar.</p>
+    <div class="chart" id="cBudget"></div>
+    <div class="legend" id="lBudget"></div>
+    <button class="tv" data-table="tBudget">Show values</button><div class="tbl" id="tBudget" hidden></div>
+  </section>
+
+  <section class="card">
+    <h2>What a breadboard circuit puts into the sensors, 7 mm away</h2>
+    <p class="sub">Static sources are learnable (they don't move while the probe does); dynamic sources are noise unless they are known to the firmware, like the board's own LED currents. The vertical lines are each sensor's noise at the chosen update rate, and the shaded band is the chosen magnet's field between the surface and 40 mm up.</p>
+    <div class="chart" id="cInt"></div>
+    <button class="tv" data-table="tInt">Show values</button><div class="tbl" id="tInt" hidden></div>
+  </section>
+
+  <section class="card">
+    <h2>Sensor sheet for this scenario</h2>
+    <div class="tbl" id="tSheet"></div>
+    <p class="sub">Window and error columns use the controls above. "Grid cost" is price × (rows × cols). Addresses: with a shared‑SCL or decoder bus the address scheme stops mattering; it is listed because it decides how much a mux‑less layout costs.</p>
+  </section>
+
+  <section class="card notes">
+    <h2>Assumptions and sources</h2>
+    <p><b>Magnet.</b> Uniformly magnetized cylinder; the field curve uses the exact on‑axis formula, the position bound uses the dipole approximation with moment m = Br·V/µ0 (within ~10 % beyond two magnet diameters). Field falls as 1/z³ far out, so every sensor's distance window is only (saturation ÷ floor)^(1/3) wide, about 6–8×.</p>
+    <p><b>Noise.</b> Datasheet rms noise at a reference rate, scaled by √(rate) for averaging, then added in quadrature with the residual ambient figure. MMC5603NJ 4 mG at BW=11 (1 kHz, 1.5 mG at 75 Hz); TMAG5273 147 µT XY at 1× (10 kSPS), 24 µT at 32×; TMAG3001 A2 106 µT / A1 95 µT at 1×; MLX90397 ~3 µT at 5 ms; TLV493D‑A1B6 ~100 µT with a 98 µT LSB (floored at LSB/√12); KTH5721 10–30 µT at high OSR (rate not stated, treated as 1 kHz); HAL403SO 2.4 mV rms into 40 mV/mT, one axis. The ambient figure is what calibration leaves behind: Earth's field and fixed hard iron subtract out, drift and moving metal do not.</p>
+    <p><b>Position bound.</b> Fisher information from the dipole Jacobian over all unsaturated sensors, 6 unknowns (x, y, z, m⃗), inverted; reported as √(σx²+σy²+σz²). Constraints you actually have (known magnet strength, probe on the surface so z is known, temporal filtering) all improve on it.</p>
+    <p><b>Interference.</b> Straight wire B = 2×10⁻⁷·I/r; a 2.54 mm supply/return pair ≈ 2×10⁻⁷·I·d/r². Unshielded drum‑core inductor estimated as a dipole with the core at ~0.15 T (≈ a 2×1 mm magnet): order 1 mT at 7 mm at rated current; shielded parts leak a few percent of that. Nickel terminations and magnetized steel leads/screws are the hard‑iron offsets that compass‑grade sensors see (µT to tens of µT, static). Rule of thumb from NXP: B[µT] = I[mA] / (5·r[mm]).</p>
+    <p>Datasheets: <a href="https://www.memsic.com/Public/Uploads/uploadfile/files/20220119/MMC5603NJDatasheetRev.B.pdf">MMC5603NJ</a>, <a href="https://www.ti.com/lit/ds/symlink/tmag5273.pdf">TMAG5273</a>, <a href="https://www.ti.com/lit/gpn/tmag3001">TMAG3001</a>, <a href="https://www.melexis.com/-/media/files/documents/datasheets/mlx90397-datasheet-melexis.pdf">MLX90397</a>, <a href="https://www.infineon.com/cms/en/product/sensor/magnetic-sensors/magnetic-position-sensors/3d-magnetics/tlv493d-a1b6/">TLV493D‑A1B6</a>, <a href="https://www.nxp.com/company/blog/magnetometer-placement-where-and-why:BL-MAGNETOMETER-PLACEMENT-WHERE-WHY">NXP magnetometer placement</a>.</p>
+  </section>
+  </main>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+const MU0=4e-7*Math.PI;
+// ---- sensors: fixed colour slot per identity (never re-assigned on filter) ----
+const SENSORS=[
+ {id:'mmc', name:'MMC5603NJ', axes:3, fs:3,   sig:0.4, fref:1000, maxRate:1000, floor:0,  price:0.15, lcsc:'C404328',   stock:'26k', pkg:'WLP‑4 0.8 mm', addr:'fixed 0x30', slot:1, tech:'AMR'},
+ {id:'t52', name:'TMAG5273A2', axes:3, fs:266, sig:147, fref:10000, maxRate:10000, floor:0, price:0.29, lcsc:'C3715882', stock:'5.4k', pkg:'SOT‑23‑6', addr:'4 letter SKUs + volatile reg', slot:2, tech:'Hall'},
+ {id:'t3a2',name:'TMAG3001A2', axes:3, fs:240, sig:106, fref:10000, maxRate:10000, floor:0, price:0.46, lcsc:'C31115089',stock:'4.6k', pkg:'DSBGA‑6 0.83×1.32', addr:'4 by ADDR pin + volatile reg', slot:3, tech:'Hall'},
+ {id:'t3a1',name:'TMAG3001A1', axes:3, fs:80,  sig:95,  fref:10000, maxRate:10000, floor:0, price:0.76, lcsc:'C29073186',stock:'6.5k', pkg:'DSBGA‑6', addr:'4 by ADDR pin + volatile reg', slot:4, tech:'Hall'},
+ {id:'tlv', name:'TLV493D‑A1B6', axes:3, fs:130, sig:100, fref:3300, maxRate:3300, floor:28, price:0.51, lcsc:'C126688', stock:'3.2k', pkg:'TSOP‑6', addr:'2 by SDA level at boot', slot:5, tech:'Hall 12‑bit'},
+ {id:'mlx', name:'MLX90397', axes:3, fs:50,  sig:3,   fref:200,  maxRate:1400, floor:0, price:1.31, lcsc:'C5369030', stock:'107', pkg:'UTDFN‑8 2×2.5', addr:'fixed 0x0D', slot:6, tech:'Hall 16‑bit'},
+ {id:'kth', name:'KTH5721', axes:3, fs:130, sig:30,  fref:1000, maxRate:7000, floor:0, price:1.18, lcsc:'C51892155',stock:'~700', pkg:'QFN‑16 3×3', addr:'4 by A0/A1 pins', slot:7, tech:'Hall 16‑bit'},
+ {id:'hal', name:'HAL403SO (1‑axis analog)', axes:1, fs:39, sig:60, fref:10000, maxRate:10000, floor:20, price:0.055, lcsc:'C42387470',stock:'18k', pkg:'SOT‑23‑3', addr:'analog, needs ADC + mux', slot:8, tech:'Hall analog'},
+];
+const ENABLED={mmc:true,t52:true,t3a2:true,t3a1:false,tlv:true,mlx:true,kth:false,hal:true};
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const col=s=>css('--s'+s.slot);
+
+// ---- physics ----
+function moment(D,L,Br){const V=Math.PI*Math.pow(D/2e3,2)*(L/1e3);return Br*V/MU0;}
+function onAxis(z,D,L,Br){const R=D/2;return Br/2*((L+z)/Math.hypot(R,L+z)-z/Math.hypot(R,z));} // z mm from face, T
+function dipoleB(px,py,pz,mx,my,mz,sx,sy,sz){const rx=sx-px,ry=sy-py,rz=sz-pz;const r=Math.hypot(rx,ry,rz);const r3=r*r*r;const u=rx/r,v=ry/r,w=rz/r;const d=u*mx+v*my+w*mz;return [1e-7*(3*u*d-mx)/r3,1e-7*(3*v*d-my)/r3,1e-7*(3*w*d-mz)/r3];}
+function inv6(A){const n=6;const M=A.map((r,i)=>[...r,...Array.from({length:n},(_,j)=>i===j?1:0)]);for(let c=0;c<n;c++){let p=c;for(let r=c+1;r<n;r++)if(Math.abs(M[r][c])>Math.abs(M[p][c]))p=r;if(Math.abs(M[p][c])<1e-300)return null;[M[c],M[p]]=[M[p],M[c]];const d=M[c][c];for(let j=0;j<2*n;j++)M[c][j]/=d;for(let r=0;r<n;r++){if(r===c)continue;const f=M[r][c];if(!f)continue;for(let j=0;j<2*n;j++)M[r][j]-=f*M[c][j];}}return M.map(r=>r.slice(n));}
+function sigEff(s,rate,amb){const r=Math.min(rate,s.maxRate);let n=s.sig*Math.sqrt(r/s.fref);n=Math.max(n,s.floor);return Math.hypot(n,amb);} // µT
+// CRLB: position (mm) for magnet at (x,y,z) mm with moment vector m, sensors [[x,y,z]...] mm, sigma T, fs T, axes mask
+function crlb(x,y,z,m,sens,sigT,fsT,axes){
+  const p=[x/1e3,y/1e3,z/1e3,m[0],m[1],m[2]];
+  const ok=[];for(const s of sens){const B=dipoleB(p[0],p[1],p[2],p[3],p[4],p[5],s[0]/1e3,s[1]/1e3,s[2]/1e3);let sat=false;for(let a=0;a<3;a++)if(axes[a]&&Math.abs(B[a])>fsT)sat=true;if(!sat)ok.push(s);}
+  if(ok.length<2)return {err:Infinity,n:ok.length};
+  const F=Array.from({length:6},()=>new Array(6).fill(0));const w=1/(sigT*sigT);
+  for(const s of ok){const J=[];for(let k=0;k<6;k++){const d=k<3?1e-6:Math.max(1e-9,Math.abs(p[k])*1e-5);const pp=p.slice();pp[k]+=d;const pm=p.slice();pm[k]-=d;const Bp=dipoleB(pp[0],pp[1],pp[2],pp[3],pp[4],pp[5],s[0]/1e3,s[1]/1e3,s[2]/1e3);const Bm=dipoleB(pm[0],pm[1],pm[2],pm[3],pm[4],pm[5],s[0]/1e3,s[1]/1e3,s[2]/1e3);J.push([(Bp[0]-Bm[0])/(2*d),(Bp[1]-Bm[1])/(2*d),(Bp[2]-Bm[2])/(2*d)]);}
+    for(let a=0;a<3;a++){if(!axes[a])continue;for(let i=0;i<6;i++)for(let j=0;j<6;j++)F[i][j]+=w*J[i][a]*J[j][a];}}
+  const C=inv6(F);if(!C)return {err:Infinity,n:ok.length};const v=C[0][0]+C[1][1]+C[2][2];return {err:v>0?Math.sqrt(v)*1e3:Infinity,n:ok.length};
+}
+function gridPts(rows,cols,pitch){const out=[];for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)out.push([(c-(cols-1)/2)*pitch,(r-(rows-1)/2)*pitch,0]);return out;}
+function worstErr(sens,pitch,h,mAbs,s,sigT,rows,cols){
+  const axes=s.axes===1?[0,0,1]:[1,1,1];const fsT=s.fs*1e-3;let worst=0;
+  // anchor the lateral samples on the sensor nearest the grid centre, so odd and even grids are tested at the same relative positions
+  let a=sens[0];for(const q of sens)if(Math.hypot(q[0],q[1])<Math.hypot(a[0],a[1]))a=q;
+  const dx=cols>1?pitch*(a[0]<=0?1:-1):0,dy=rows>1?pitch*(a[1]<=0?1:-1):0;
+  const lat=[[a[0],a[1]],[a[0]+0.5*dx,a[1]],[a[0]+0.5*dx,a[1]+0.5*dy],[a[0]+0.25*dx,a[1]+0.25*dy]];
+  for(const [fx,fy] of lat)for(const t of [[0,0,1],[0.7071,0,0.7071]]){const e=crlb(fx,fy,h,[t[0]*mAbs,t[1]*mAbs,t[2]*mAbs],sens,sigT,fsT,axes).err;if(e>worst)worst=e;}
+  return worst;
+}
+function distFor(Bt,D,L,Br){let lo=0.01,hi=2000;if(onAxis(lo,D,L,Br)<Bt)return 0;if(onAxis(hi,D,L,Br)>Bt)return Infinity;for(let i=0;i<70;i++){const m=(lo+hi)/2;if(onAxis(m,D,L,Br)>Bt)lo=m;else hi=m;}return (lo+hi)/2;}
+
+// ---- tiny SVG chart kit ----
+const fmt=(v,d)=>{if(!isFinite(v))return '∞';if(v===0)return '0';const a=Math.abs(v);if(a>=1000)return v.toLocaleString(undefined,{maximumFractionDigits:0});if(a>=100)return v.toFixed(d??0);if(a>=10)return v.toFixed(d??1);if(a>=1)return v.toFixed(d??2);if(a>=0.1)return v.toFixed(d??2);return v.toPrecision(2);};
+const fmtT=v=>{ // tesla -> human
+  if(v>=1)return fmt(v)+' T';if(v>=1e-3)return fmt(v*1e3)+' mT';if(v>=1e-6)return fmt(v*1e6)+' µT';return fmt(v*1e9)+' nT';};
+function logTicks(lo,hi){const t=[];const a=Math.floor(Math.log10(lo)),b=Math.ceil(Math.log10(hi));for(let e=a;e<=b;e++){const v=Math.pow(10,e);if(v>=lo&&v<=hi)t.push(v);}return t;}
+function minorLog(lo,hi){const t=[];const a=Math.floor(Math.log10(lo)),b=Math.ceil(Math.log10(hi));for(let e=a;e<=b;e++)for(let k=2;k<10;k++){const v=k*Math.pow(10,e);if(v>lo&&v<hi)t.push(v);}return t;}
+function svgEl(n,at){const e=document.createElementNS('http://www.w3.org/2000/svg',n);for(const k in at)e.setAttribute(k,at[k]);return e;}
+function lineChart(o){
+  // o: {el, series:[{name,color,dash,pts:[[x,y]]}], xlog,ylog, xd:[lo,hi], yd:[lo,hi], xl, yl, refs:[{y,label,color,dash}], vrefs:[{x,label}], bands:[{x0,x1}], yfmt, xfmt, tipY}
+  const W=chartW(o.el),H=Math.round(W*0.46),ml=62,mr=104,mt=14,mb=42;const pw=W-ml-mr,ph=H-mt-mb;
+  const sx=x=>ml+(o.xlog?(Math.log10(x)-Math.log10(o.xd[0]))/(Math.log10(o.xd[1])-Math.log10(o.xd[0])):(x-o.xd[0])/(o.xd[1]-o.xd[0]))*pw;
+  const sy=y=>mt+ph-(o.ylog?(Math.log10(y)-Math.log10(o.yd[0]))/(Math.log10(o.yd[1])-Math.log10(o.yd[0])):(y-o.yd[0])/(o.yd[1]-o.yd[0]))*ph;
+  const svg=svgEl('svg',{viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':o.aria||''});
+  const g=svgEl('g',{});svg.appendChild(g);
+  (o.bands||[]).forEach(b=>g.appendChild(svgEl('rect',{x:sx(b.x0),y:mt,width:Math.max(0,sx(b.x1)-sx(b.x0)),height:ph,fill:'var(--band)'})));
+  const yt=o.ylog?logTicks(o.yd[0],o.yd[1]):o.yticks;const xt=o.xlog?logTicks(o.xd[0],o.xd[1]):o.xticks;
+  if(o.ylog)minorLog(o.yd[0],o.yd[1]).forEach(v=>g.appendChild(svgEl('line',{x1:ml,x2:ml+pw,y1:sy(v),y2:sy(v),class:'grid',opacity:.45})));
+  yt.forEach(v=>{g.appendChild(svgEl('line',{x1:ml,x2:ml+pw,y1:sy(v),y2:sy(v),class:'grid'}));const t=svgEl('text',{x:ml-8,y:sy(v)+4,'text-anchor':'end',class:'tick'});t.textContent=o.yfmt?o.yfmt(v):fmt(v);g.appendChild(t);});
+  xt.forEach(v=>{g.appendChild(svgEl('line',{x1:sx(v),x2:sx(v),y1:mt,y2:mt+ph,class:'grid'}));const t=svgEl('text',{x:sx(v),y:mt+ph+16,'text-anchor':'middle',class:'tick'});t.textContent=o.xfmt?o.xfmt(v):fmt(v);g.appendChild(t);});
+  g.appendChild(svgEl('line',{x1:ml,x2:ml+pw,y1:mt+ph,y2:mt+ph,class:'axis'}));g.appendChild(svgEl('line',{x1:ml,x2:ml,y1:mt,y2:mt+ph,class:'axis'}));
+  const xl=svgEl('text',{x:ml+pw/2,y:H-4,'text-anchor':'middle'});xl.textContent=o.xl;g.appendChild(xl);
+  const yl=svgEl('text',{x:12,y:mt+ph/2,'text-anchor':'middle',transform:`rotate(-90 12 ${mt+ph/2})`});yl.textContent=o.yl;g.appendChild(yl);
+  (o.vrefs||[]).forEach(r=>{if(r.x<o.xd[0]||r.x>o.xd[1])return;g.appendChild(svgEl('line',{x1:sx(r.x),x2:sx(r.x),y1:mt,y2:mt+ph,class:'ref'}));const t=svgEl('text',{x:sx(r.x)+4,y:mt+10,class:'tick'});t.textContent=r.label;g.appendChild(t);});
+  const rl=[];(o.refs||[]).forEach(r=>{if(r.y<o.yd[0]||r.y>o.yd[1])return;const l=svgEl('line',{x1:ml,x2:ml+pw,y1:sy(r.y),y2:sy(r.y),stroke:r.color||'var(--muted)','stroke-width':1.2,'stroke-dasharray':r.dash?'3 3':'none',opacity:r.dash?.7:.9});g.appendChild(l);if(r.label)rl.push({y:sy(r.y),label:r.label,color:r.color||'var(--muted)'});});
+  rl.sort((a,b)=>a.y-b.y);for(let i=1;i<rl.length;i++)if(rl[i].y-rl[i-1].y<11)rl[i].y=rl[i-1].y+11;
+  rl.forEach(r=>{const t=svgEl('text',{x:ml+pw+4,y:r.y+3.5,class:'tick'});t.style.fill=r.color;t.textContent=r.label;g.appendChild(t);});
+  const clip=svgEl('clipPath',{id:'c'+Math.random().toString(36).slice(2)});clip.appendChild(svgEl('rect',{x:ml,y:mt-2,width:pw,height:ph+4}));svg.appendChild(clip);
+  const sg=svgEl('g',{'clip-path':`url(#${clip.id})`});g.appendChild(sg);
+  const ends=[];
+  o.series.forEach(s=>{let d='';let last=null;s.pts.forEach(p=>{if(!isFinite(p[1])||p[1]<=0||(o.ylog&&p[1]>o.yd[1]*1e3)){d+='';last=null;return;}const X=sx(p[0]),Y=sy(Math.min(Math.max(p[1],o.yd[0]/10),o.yd[1]*10));d+=(last?'L':'M')+X.toFixed(1)+' '+Y.toFixed(1);last=p;});
+    const path=svgEl('path',{d,class:'series'+(s.dash?' dash':''),stroke:s.color});sg.appendChild(path);
+    const lp=[...s.pts].reverse().find(p=>isFinite(p[1])&&p[1]>=o.yd[0]&&p[1]<=o.yd[1]);if(lp)ends.push({y:sy(lp[1]),name:s.short||s.name,color:s.color});});
+  // direct labels at line ends (collision-nudged)
+  ends.sort((a,b)=>a.y-b.y);for(let i=1;i<ends.length;i++)if(ends[i].y-ends[i-1].y<12)ends[i].y=ends[i-1].y+12;
+  ends.forEach(e=>{const t=svgEl('text',{x:ml+pw+6,y:e.y+3.5,class:'lbl',fill:e.color});t.style.fill=e.color;t.textContent=e.name;g.appendChild(t);});
+  // hover crosshair
+  const cross=svgEl('line',{x1:0,x2:0,y1:mt,y2:mt+ph,class:'cross',opacity:0});g.appendChild(cross);
+  const hit=svgEl('rect',{x:ml,y:mt,width:pw,height:ph,fill:'transparent'});g.appendChild(hit);
+  const tip=document.createElement('div');tip.className='tip';tip.hidden=true;
+  const el=o.el;el.replaceChildren(svg,tip);
+  const xs=o.series[0]?o.series[0].pts.map(p=>p[0]):[];
+  function show(ev){const r=svg.getBoundingClientRect();const px=(ev.clientX-r.left)/r.width*W;let xv=o.xlog?Math.pow(10,Math.log10(o.xd[0])+(px-ml)/pw*(Math.log10(o.xd[1])-Math.log10(o.xd[0]))):o.xd[0]+(px-ml)/pw*(o.xd[1]-o.xd[0]);
+    let bi=0,bd=Infinity;xs.forEach((x,i)=>{const d=Math.abs(Math.log(x)-Math.log(xv));if(d<bd){bd=d;bi=i;}});const xn=xs[bi];if(xn===undefined)return;
+    cross.setAttribute('x1',sx(xn));cross.setAttribute('x2',sx(xn));cross.setAttribute('opacity',1);
+    tip.innerHTML=`<div class="t">${o.xl}: ${fmt(xn)}</div>`+o.series.map(s=>{const p=s.pts[bi];return `<div class="r"><span><i class="sw" style="background:${s.color}"></i>${s.short||s.name}</span><span>${p&&isFinite(p[1])?(o.tipY?o.tipY(p[1]):fmt(p[1])):'—'}</span></div>`;}).join('');
+    tip.hidden=false;const tx=(ev.clientX-r.left);tip.style.left=Math.min(tx+12,r.width-tip.offsetWidth-4)+'px';tip.style.top=Math.max(0,(ev.clientY-r.top)-10-tip.offsetHeight)+'px';}
+  hit.addEventListener('pointermove',show);hit.addEventListener('pointerleave',()=>{tip.hidden=true;cross.setAttribute('opacity',0);});
+  return {svg};
+}
+function chartW(el){const w=el&&el.clientWidth?el.clientWidth:720;return Math.max(400,Math.min(820,w));}
+function rangeChart(o){ // horizontal range bars on a log x axis. rows:[{name,color,x0,x1,note}]
+  const W=chartW(o.el),rh=26,ml=W<560?118:150,mr=20,mt=12,mb=40;const H=mt+mb+rh*o.rows.length;const pw=W-ml-mr;
+  const sx=x=>ml+(Math.log10(x)-Math.log10(o.xd[0]))/(Math.log10(o.xd[1])-Math.log10(o.xd[0]))*pw;
+  const svg=svgEl('svg',{viewBox:`0 0 ${W} ${H}`,role:'img'});
+  if(o.band)svg.appendChild(svgEl('rect',{x:ml,y:mt,width:Math.max(0,sx(o.band)-ml),height:rh*o.rows.length,fill:'var(--band)'}));
+  minorLog(o.xd[0],o.xd[1]).forEach(v=>svg.appendChild(svgEl('line',{x1:sx(v),x2:sx(v),y1:mt,y2:mt+rh*o.rows.length,class:'grid',opacity:.45})));
+  logTicks(o.xd[0],o.xd[1]).forEach(v=>{svg.appendChild(svgEl('line',{x1:sx(v),x2:sx(v),y1:mt,y2:mt+rh*o.rows.length,class:'grid'}));const t=svgEl('text',{x:sx(v),y:mt+rh*o.rows.length+16,'text-anchor':'middle',class:'tick'});t.textContent=fmt(v);svg.appendChild(t);});
+  if(o.band){svg.appendChild(svgEl('line',{x1:sx(o.band),x2:sx(o.band),y1:mt,y2:mt+rh*o.rows.length,class:'ref'}));const t=svgEl('text',{x:sx(o.band)+4,y:mt+rh*o.rows.length+30,class:'tick'});t.textContent='breadboard surface '+fmt(o.band)+' mm';svg.appendChild(t);}
+  o.rows.forEach((r,i)=>{const y=mt+i*rh+rh/2;const t=svgEl('text',{x:ml-8,y:y+4,'text-anchor':'end',class:'lbl'});t.textContent=r.name;svg.appendChild(t);
+    const x0=Math.max(r.x0,o.xd[0]),x1=Math.min(r.x1,o.xd[1]);if(x1>x0){const b=svgEl('rect',{x:sx(x0),y:y-6,width:sx(x1)-sx(x0),height:12,rx:3,fill:r.color});const tt=svgEl('title',{});tt.textContent=`${r.name}: ${fmt(r.x0)} – ${fmt(r.x1)} mm`;b.appendChild(tt);svg.appendChild(b);
+      if(isFinite(r.x1)&&r.x1<o.xd[1]*0.6){const l=svgEl('text',{x:sx(x1)+5,y:y+4,class:'tick'});l.textContent=fmt(r.x0)+'–'+fmt(r.x1)+' mm';svg.appendChild(l);}else{const l=svgEl('text',{x:sx(x0)-5,y:y+4,'text-anchor':'end',class:'tick'});l.textContent=fmt(r.x0)+' mm →';if(r.x0>o.xd[0]*3)svg.appendChild(l);}}
+    else{const l=svgEl('text',{x:ml+4,y:y+4,class:'tick'});l.textContent='no window';svg.appendChild(l);}});
+  const xl=svgEl('text',{x:ml+pw/2,y:H-2,'text-anchor':'middle'});xl.textContent='distance from magnet face (mm), log';svg.appendChild(xl);
+  o.el.replaceChildren(svg);
+}
+function dotChart(o){ // sources on log x (µT), vertical refs for sensor floors, band for signal
+  const W=chartW(o.el),rh=22,ml=W<560?190:240,mr=20,mt=14,mb=40;const H=mt+mb+rh*o.rows.length;const pw=W-ml-mr;
+  const sx=x=>ml+(Math.log10(x)-Math.log10(o.xd[0]))/(Math.log10(o.xd[1])-Math.log10(o.xd[0]))*pw;
+  const svg=svgEl('svg',{viewBox:`0 0 ${W} ${H}`,role:'img'});const ph=rh*o.rows.length;
+  if(o.band)svg.appendChild(svgEl('rect',{x:sx(o.band[0]),y:mt,width:Math.max(0,sx(o.band[1])-sx(o.band[0])),height:ph,fill:'var(--band)'}));
+  minorLog(o.xd[0],o.xd[1]).forEach(v=>svg.appendChild(svgEl('line',{x1:sx(v),x2:sx(v),y1:mt,y2:mt+ph,class:'grid',opacity:.45})));
+  logTicks(o.xd[0],o.xd[1]).forEach(v=>{svg.appendChild(svgEl('line',{x1:sx(v),x2:sx(v),y1:mt,y2:mt+ph,class:'grid'}));const t=svgEl('text',{x:sx(v),y:mt+ph+16,'text-anchor':'middle',class:'tick'});t.textContent=v>=1000?fmt(v/1000)+' mT':fmt(v)+' µT';svg.appendChild(t);});
+  (o.refs||[]).forEach((r,i)=>{if(r.x<o.xd[0]||r.x>o.xd[1])return;svg.appendChild(svgEl('line',{x1:sx(r.x),x2:sx(r.x),y1:mt,y2:mt+ph,stroke:r.color,'stroke-width':1.5,'stroke-dasharray':'3 3'}));});
+  if(o.band){const t=svgEl('text',{x:(sx(o.band[0])+sx(o.band[1]))/2,y:mt-3,'text-anchor':'middle',class:'tick'});t.textContent=o.bandLabel;svg.appendChild(t);}
+  o.rows.forEach((r,i)=>{const y=mt+i*rh+rh/2;const t=svgEl('text',{x:ml-8,y:y+4,'text-anchor':'end',class:r.head?'lbl':'tick'});t.textContent=r.name;svg.appendChild(t);if(r.head)return;
+    const x0=Math.max(r.lo,o.xd[0]),x1=Math.min(r.hi,o.xd[1]);const c=r.dyn?'var(--s2)':'var(--fg-2)';
+    if(x1>x0)svg.appendChild(svgEl('rect',{x:sx(x0),y:y-3,width:sx(x1)-sx(x0),height:6,rx:3,fill:c,opacity:.55}));
+    svg.appendChild(svgEl('circle',{cx:sx(Math.min(Math.max(r.v,o.xd[0]),o.xd[1])),cy:y,r:4.5,fill:c}));
+    const tt=svgEl('title',{});tt.textContent=`${r.name}: ${r.v>=1000?fmt(r.v/1000)+' mT':fmt(r.v)+' µT'}`;svg.appendChild(tt);});
+  const xl=svgEl('text',{x:ml+pw/2,y:H-2,'text-anchor':'middle'});xl.textContent='field at the sensor (log)';svg.appendChild(xl);
+  o.el.replaceChildren(svg);
+}
+function tableHTML(cols,rows){return `<table><thead><tr>${cols.map((c,i)=>`<th class="${i?'n':''}">${c}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map((v,i)=>`<td class="${i?'n':''}">${v}</td>`).join('')}</tr>`).join('')}</tbody></table>`;}
+
+// ---- state & render ----
+const $=id=>document.getElementById(id);
+function readState(){return {D:+$('magD').value||1,L:+$('magL').value||1,Br:+$('magBr').value,hmin:+$('hmin').value||7,rate:+$('rate').value||100,amb:+$('amb').value||0,cols:Math.max(1,Math.round(+$('gcols').value||1)),rows:Math.max(1,Math.round(+$('grows').value||1)),pitch:+$('pitch').value||20,areaW:+$('areaW').value||165,areaH:+$('areaH').value||55,bh:+$('bh').value||20};}
+function buildToggles(){const host=$('sensorToggles');host.replaceChildren();SENSORS.forEach(s=>{const l=document.createElement('label');l.className='chk';l.innerHTML=`<input type="checkbox" id="en_${s.id}" ${ENABLED[s.id]?'checked':''}><i class="sw" style="background:${col(s)}"></i>${s.name}`;l.querySelector('input').addEventListener('change',e=>{ENABLED[s.id]=e.target.checked;render();});host.appendChild(l);});}
+let raf=null;function schedule(){if(raf)cancelAnimationFrame(raf);raf=requestAnimationFrame(render);}
+function render(){
+  const st=readState();const mAbs=moment(st.D,st.L,st.Br);const act=SENSORS.filter(s=>ENABLED[s.id]);
+  const sig=s=>sigEff(s,st.rate,st.amb);
+  // --- tiles
+  const Bsurf=onAxis(st.hmin,st.D,st.L,st.Br),B40=onAxis(40,st.D,st.L,st.Br);
+  $('tiles').innerHTML=[
+    {v:fmtT(Bsurf),k:`field at the surface (${fmt(st.hmin)} mm, on axis)`,d:`${st.D}×${st.L} mm, Br ${st.Br} T → m = ${mAbs.toExponential(2)} A·m²`},
+    {v:fmtT(B40),k:'field 40 mm up',d:'falls ~1/z³ beyond a couple of diameters'},
+    {v:fmt(onAxis(0.01,st.D,st.L,st.Br)*1e3)+' mT',k:'field touching the face',d:'what saturates a sensor the magnet is placed on'},
+    {v:`${st.rows}×${st.cols} @ ${fmt(st.pitch)} mm`,k:'sensor grid in the error charts',d:`${st.rows*st.cols} sensors, ${fmt((st.cols-1)*st.pitch)}×${fmt((st.rows-1)*st.pitch)} mm span`},
+  ].map(t=>`<div class="tile"><div class="v">${t.v}</div><div class="k">${t.k}</div><div class="d">${t.d}</div></div>`).join('');
+  // --- field chart
+  const xs=[];for(let e=0;e<=2;e+=0.04)xs.push(Math.pow(10,e));
+  const fieldPts=xs.map(z=>[z,onAxis(z,st.D,st.L,st.Br)]);
+  const refs=[];act.forEach(s=>{refs.push({y:s.fs*1e-3,color:col(s),label:`${s.name.split(' ')[0]} sat`});refs.push({y:sig(s)*1e-6,color:col(s),dash:true,label:`${s.name.split(' ')[0]} noise`});});
+  lineChart({el:$('cField'),series:[{name:`${st.D}×${st.L} mm ${st.Br} T`,color:'var(--fg)',pts:fieldPts}],xlog:true,ylog:true,xd:[1,100],yd:[1e-7,1],xl:'distance from magnet face (mm)',yl:'on‑axis field',yfmt:fmtT,tipY:fmtT,refs,vrefs:[{x:st.hmin,label:'surface'}],bands:[{x0:1,x1:st.hmin}],aria:'Magnet field versus distance'});
+  $('lField').innerHTML=`<span><i class="sw" style="background:var(--fg)"></i>magnet field</span><span><i class="sw" style="background:var(--muted)"></i>saturation (solid)</span><span><i class="sw dash" style="color:var(--muted)"></i>noise at ${st.rate} Hz (dashed)</span>`;
+  $('tField').innerHTML=tableHTML(['distance (mm)','field'],[2,5,7,10,15,20,30,40,60,100].map(z=>[z,fmtT(onAxis(z,st.D,st.L,st.Br))]));
+  // --- windows
+  const win=act.map(s=>{const x0=distFor(s.fs*1e-3,st.D,st.L,st.Br),x1=distFor(10*sig(s)*1e-6,st.D,st.L,st.Br);return {s,x0,x1};});
+  rangeChart({el:$('cWin'),xd:[1,300],band:st.hmin,rows:win.map(w=>({name:w.s.name.replace(' (1‑axis analog)',' 1‑ax'),color:col(w.s),x0:Math.max(w.x0,0.5),x1:w.x1}))});
+  $('tWin').innerHTML=tableHTML(['sensor','saturates inside (mm)','10× noise beyond (mm)','usable above surface (mm)'],win.map(w=>[w.s.name,fmt(w.x0),fmt(w.x1),w.x1>st.hmin?`${fmt(Math.max(w.x0,st.hmin))} – ${fmt(w.x1)}`:'none']));
+  // --- CRLB vs height
+  const sens=gridPts(st.rows,st.cols,st.pitch);const hs=[];for(let h=5;h<=80;h+=(h<20?1.5:h<40?2.5:5))hs.push(+h.toFixed(1));
+  const crSeries=act.map(s=>({name:s.name,short:s.name.split(' ')[0],color:col(s),dash:s.axes===1,pts:hs.map(h=>[h,worstErr(sens,st.pitch,h,mAbs,s,sig(s)*1e-6,st.rows,st.cols)])}));
+  lineChart({el:$('cCrlb'),series:crSeries,xlog:false,ylog:true,xd:[5,80],xticks:[5,10,20,30,40,50,60,70,80],yd:[0.01,1000],xl:'magnet height above the sensors (mm)',yl:'position error bound (mm rms)',yfmt:v=>fmt(v)+' mm',tipY:v=>fmt(v)+' mm',vrefs:[{x:st.hmin,label:'surface'}],bands:[{x0:5,x1:st.hmin}],refs:[{y:1,label:'1 mm'},{y:2.54,label:'one row'}],aria:'Position error versus height'});
+  $('lCrlb').innerHTML=act.map(s=>`<span><i class="sw${s.axes===1?' dash':''}" style="${s.axes===1?'color:'+col(s):'background:'+col(s)}"></i>${s.name}</span>`).join('');
+  const hcols=[7,10,15,20,30,40,60];$('tCrlb').innerHTML=tableHTML(['sensor',...hcols.map(h=>h+' mm')],act.map(s=>[s.name,...hcols.map(h=>fmt(worstErr(sens,st.pitch,h,mAbs,s,sig(s)*1e-6,st.rows,st.cols))+' mm')]));
+  // --- budget
+  const budgets=[0.5,1,1.5,2,3,4,6,8,12,16,24,32];
+  const bSeries=act.map(s=>({name:s.name,short:s.name.split(' ')[0],color:col(s),dash:s.axes===1,pts:budgets.map(b=>{const N=Math.floor(b/s.price);if(N<2)return [b,Infinity];const p=Math.sqrt(st.areaW*st.areaH/N);let c=Math.max(1,Math.round(st.areaW/p)),r=Math.max(1,Math.round(st.areaH/p));while(r*c>N){if(c>=r)c--;else r--;}const pit=Math.min(st.areaW/Math.max(c,1),st.areaH/Math.max(r,1));const g=gridPts(r,c,pit);return [b,worstErr(g,pit,st.bh,mAbs,s,sig(s)*1e-6,r,c)];})}));
+  lineChart({el:$('cBudget'),series:bSeries,xlog:true,ylog:true,xd:[0.5,32],yd:[0.01,1000],xl:'sensor budget per board (USD at ~1k)',yl:`position error at ${st.bh} mm (mm rms)`,xfmt:v=>'$'+fmt(v),yfmt:v=>fmt(v)+' mm',tipY:v=>fmt(v)+' mm',refs:[{y:1,label:'1 mm'},{y:2.54,label:'one row'}],aria:'Position error versus budget'});
+  $('lBudget').innerHTML=$('lCrlb').innerHTML;
+  $('tBudget').innerHTML=tableHTML(['sensor',...budgets.filter((_,i)=>i%2===1).map(b=>'$'+b)],bSeries.map(s=>[s.name,...s.pts.filter((_,i)=>i%2===1).map(p=>fmt(p[1])+' mm')]));
+  // --- interference
+  const r=7;const wire=I=>2e-7*I/(r*1e-3)*1e6;const pair=I=>2e-7*I*2.54e-3/Math.pow(r*1e-3,2)*1e6;
+  const rows=[
+    {name:'Static while the circuit runs',head:true},
+    {name:'Earth\'s field (subtracted)',v:50,lo:25,hi:65},
+    {name:'Jumper carrying 10 mA DC',v:wire(0.01),lo:wire(0.005),hi:wire(0.02)},
+    {name:'Jumper carrying 100 mA DC',v:wire(0.1),lo:wire(0.05),hi:wire(0.2)},
+    {name:'Jumper carrying 1 A DC',v:wire(1),lo:wire(0.5),hi:wire(2)},
+    {name:'Supply + return pair, 1 A, 0.1" apart',v:pair(1),lo:pair(0.5),hi:pair(2)},
+    {name:'Magnetized steel lead / screw / Ni termination',v:10,lo:1,hi:50},
+    {name:'Shielded 5×5 mm inductor @ 1 A (est.)',v:50,lo:10,hi:150},
+    {name:'Unshielded drum inductor @ 1 A (est.)',v:1200,lo:300,hi:3000},
+    {name:'Small DC motor / relay / buzzer magnet',v:1000,lo:100,hi:10000},
+    {name:'Changing with time',head:true},
+    {name:'Mains 50/60 Hz pickup',v:0.3,lo:0.05,hi:1,dyn:true},
+    {name:'SMPS inductor ripple (averaged by sensor)',v:30,lo:5,hi:300,dyn:true},
+    {name:'LED supply trace on this board, 2 A at 1 mm',v:400,lo:100,hi:800,dyn:true},
+    {name:'LED supply trace on this board, 2 A at 3 mm',v:133,lo:30,hi:270,dyn:true},
+    {name:'Metal tools / hands with rings moving nearby',v:5,lo:0.5,hi:50,dyn:true},
+  ];
+  dotChart({el:$('cInt'),xd:[0.03,30000],rows,refs:act.map(s=>({x:sig(s),color:col(s)})),band:[Math.max(0.03,B40*1e6),Bsurf*1e6],bandLabel:`chosen magnet, ${fmt(st.hmin)}–40 mm up`});
+  $('tInt').innerHTML=tableHTML(['source','typical (µT)','range (µT)','kind'],rows.filter(x=>!x.head).map(x=>[x.name,fmt(x.v),`${fmt(x.lo)} – ${fmt(x.hi)}`,x.dyn?'dynamic':'static']))+`<p class="sub" style="margin-top:6px">Sensor noise at ${st.rate} Hz: `+act.map(s=>`${s.name.split(' ')[0]} ${fmt(sig(s))} µT`).join(' · ')+`</p>`;
+  // --- sheet
+  const N=st.rows*st.cols;
+  $('tSheet').innerHTML=`<table><thead><tr><th>sensor</th><th class="n">axes</th><th class="n">full scale</th><th class="n">noise @ ${st.rate} Hz</th><th class="n">price ~1k</th><th class="n">grid cost ×${N}</th><th>LCSC / stock</th><th>package</th><th>addresses on one bus</th><th class="n">window above surface</th><th class="n">σ @ 10 / 20 / 30 mm</th></tr></thead><tbody>`+
+    SENSORS.map(s=>{const w={x0:distFor(s.fs*1e-3,st.D,st.L,st.Br),x1:distFor(10*sig(s)*1e-6,st.D,st.L,st.Br)};const e=[10,20,30].map(h=>worstErr(sens,st.pitch,h,mAbs,s,sig(s)*1e-6,st.rows,st.cols));
+      return `<tr style="${ENABLED[s.id]?'':'opacity:.5'}"><td><i class="dot" style="background:${col(s)}"></i>${s.name}</td><td class="n">${s.axes}</td><td class="n">±${s.fs} mT</td><td class="n">${fmt(sig(s))} µT</td><td class="n">$${s.price.toFixed(s.price<0.1?3:2)}</td><td class="n">$${(s.price*N).toFixed(2)}</td><td><code>${s.lcsc}</code> <span class="pill ${/^\d+$/.test(s.stock)&&+s.stock<500?'bad':'ok'}">${s.stock}</span></td><td>${s.pkg}</td><td>${s.addr}</td><td class="n">${w.x1>st.hmin?fmt(Math.max(w.x0,st.hmin))+' – '+fmt(w.x1)+' mm':'none'}</td><td class="n">${e.map(v=>fmt(v)).join(' / ')} mm</td></tr>`;}).join('')+`</tbody></table>`;
+}
+// wire up
+['magD','magL','magBr','hmin','rate','amb','gcols','grows','pitch','areaW','areaH','bh'].forEach(id=>$(id).addEventListener('input',schedule));
+document.querySelectorAll('[data-preset]').forEach(b=>b.addEventListener('click',()=>{const [d,l]=b.dataset.preset.split(',');$('magD').value=d;$('magL').value=l;render();}));
+document.querySelectorAll('[data-table]').forEach(b=>b.addEventListener('click',()=>{const t=$(b.dataset.table);t.hidden=!t.hidden;b.textContent=t.hidden?'Show values':'Hide values';}));
+buildToggles();render();
+let rt=null;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(render,120);});
+const mq=matchMedia('(prefers-color-scheme: dark)');mq.addEventListener('change',()=>{buildToggles();render();});
+new MutationObserver(()=>{buildToggles();render();}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+})();
+</script>
+
+</body></html>

@@ -1,0 +1,371 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>MMC5603 Array Plan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* self-hosted fonts: Google Fonts is blocked in China */
+@font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:400;font-display:swap;src:url(../styles/fonts/IBMPlexMono-400.woff2) format("woff2")}
+@font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:500;font-display:swap;src:url(../styles/fonts/IBMPlexMono-500.woff2) format("woff2")}
+@font-face{font-family:"IBM Plex Sans";font-style:normal;font-weight:100 900;font-display:swap;src:url(../styles/fonts/IBMPlexSans-var.woff2) format("woff2")}
+</style>
+<style>
+/* Layout: sticky scenario sidebar + one column of instrument cards, same system as the Magnet Sensing Planner. */
+:root{
+  --bg:#f6f7f8; --surface:#fdfdfc; --fg:#101214; --fg-2:#4f5560; --muted:#878d97;
+  --grid:#e3e5e8; --axis:#c4c8cf; --ring:rgba(16,18,20,.10); --accent:#355c7d;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4; --s6:#008300; --s7:#6250d6; --s8:#e34948;
+  --band:rgba(42,120,214,.10); --good:#0ca30c; --warnc:#fab219; --bad:#d03b3b;
+  --font:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0f1113; --surface:#1a1c1f; --fg:#eef0f2; --fg-2:#bfc4cc; --muted:#8a9099;
+  --grid:#2a2d31; --axis:#3a3e44; --ring:rgba(255,255,255,.10); --accent:#8fb4d9;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#e66767;
+  --band:rgba(57,135,229,.14); color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#0f1113; --surface:#1a1c1f; --fg:#eef0f2; --fg-2:#bfc4cc; --muted:#8a9099;
+  --grid:#2a2d31; --axis:#3a3e44; --ring:rgba(255,255,255,.10); --accent:#8fb4d9;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#e66767;
+  --band:rgba(57,135,229,.14); color-scheme:dark }
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--font);font-size:14px;line-height:1.45;
+  padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.layout{display:grid;grid-template-columns:290px minmax(0,1fr);gap:18px;align-items:start}
+.main{display:flex;flex-direction:column;gap:18px;min-width:0}
+.side{position:sticky;top:env(safe-area-inset-top,0px);max-height:calc(100vh - env(safe-area-inset-top,0px) - 12px);overflow-y:auto;overscroll-behavior:contain}
+@media (max-width:900px){.layout{grid-template-columns:1fr}.side{position:static;max-height:none;overflow:visible}.side .controls{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}}
+h1{font-size:22px;font-weight:600;margin:0;letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:15px;font-weight:600;margin:0}
+h3{font-size:13px;font-weight:600;margin:0;color:var(--fg)}
+p{margin:0}
+.lede{color:var(--fg-2);max-width:70ch}
+.eyebrow{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.card{background:var(--surface);border:1px solid var(--ring);border-radius:8px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.controls{display:grid;grid-template-columns:1fr;gap:10px 14px;align-items:end}
+.ctl{display:flex;flex-direction:column;gap:4px;min-width:0}
+.ctl label{font-size:11.5px;color:var(--fg-2)}
+.ctl input,.ctl select{font:inherit;font-family:var(--mono);font-size:13px;color:var(--fg);background:var(--bg);border:1px solid var(--axis);border-radius:5px;padding:5px 7px;width:100%;min-width:0}
+.ctl input:focus-visible,.ctl select:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.row{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center}
+.sw{width:14px;height:3px;border-radius:2px;display:inline-block}
+.sub{color:var(--fg-2);font-size:12.5px;max-width:84ch}
+.chart{width:100%;position:relative}
+.chart svg{width:100%;height:auto;display:block;overflow:visible}
+.chart svg text{font-family:var(--font);fill:var(--fg-2);font-size:11px}
+.chart svg .tick{fill:var(--muted);font-variant-numeric:tabular-nums}
+.chart svg .lbl{fill:var(--fg);font-size:11px;font-weight:500}
+.chart svg .grid{stroke:var(--grid);stroke-width:1}
+.chart svg .axis{stroke:var(--axis);stroke-width:1}
+.chart svg .ref{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3}
+.chart svg .series{fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.chart svg .series.dash{stroke-dasharray:5 4}
+.chart svg .cross{stroke:var(--muted);stroke-width:1}
+.tip{position:absolute;pointer-events:none;background:var(--surface);border:1px solid var(--ring);border-radius:6px;padding:6px 8px;font-size:11.5px;box-shadow:0 2px 10px rgba(0,0,0,.12);min-width:150px;max-width:260px;z-index:3}
+.tip .t{color:var(--muted);margin-bottom:3px;font-variant-numeric:tabular-nums}
+.tip .r{display:flex;justify-content:space-between;gap:10px;font-variant-numeric:tabular-nums}
+.tip .r span:first-child{display:flex;align-items:center;gap:5px}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--fg-2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.tile{border:1px solid var(--ring);border-radius:6px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.tile .v{font-size:22px;font-weight:600;letter-spacing:-.01em}
+.tile .k{font-size:11.5px;color:var(--fg-2)}
+.tile .d{font-size:11px;color:var(--muted)}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--grid);vertical-align:top}
+th{color:var(--fg-2);font-weight:500;font-size:11.5px;white-space:nowrap}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono);font-size:12px;white-space:nowrap}
+td.w{min-width:22ch}
+.pill{display:inline-block;font-size:10.5px;padding:1px 6px;border-radius:10px;border:1px solid var(--ring);color:var(--fg-2);white-space:nowrap}
+.pill.ok{border-color:var(--good);color:var(--good)}
+.pill.warn{border-color:var(--warnc);color:var(--fg-2)}
+.pill.bad{border-color:var(--bad);color:var(--bad)}
+button.tv{font:inherit;font-size:11.5px;color:var(--fg-2);background:transparent;border:1px solid var(--ring);border-radius:5px;padding:3px 8px;cursor:pointer;align-self:flex-start}
+button.tv:hover{color:var(--fg);border-color:var(--axis)}
+.notes{font-size:12.5px;color:var(--fg-2);display:flex;flex-direction:column;gap:6px;max-width:92ch}
+.notes b,.sub b{color:var(--fg);font-weight:500}
+.notes a{color:var(--accent)}
+code{font-family:var(--mono);font-size:12px}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.opt{border:1px solid var(--ring);border-radius:6px;padding:11px 12px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.opt .hd{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.opt .hd h3{font-size:13.5px}
+.opt ul{margin:0;padding-left:16px;font-size:12.5px;color:var(--fg-2);display:flex;flex-direction:column;gap:3px}
+.opt .kv{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;font-size:12px;color:var(--fg-2)}
+.opt .kv b{color:var(--fg);font-weight:500;font-family:var(--mono);font-size:11.5px}
+.rec{border-left:3px solid var(--accent);padding-left:12px}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.step{border:1px solid var(--ring);border-radius:6px;padding:11px 12px;display:flex;flex-direction:column;gap:6px}
+.step .eyebrow{color:var(--accent)}
+.step ul{margin:0;padding-left:16px;font-size:12.5px;color:var(--fg-2);display:flex;flex-direction:column;gap:3px}
+</style>
+
+<div class="wrap">
+  <header style="display:flex;flex-direction:column;gap:6px">
+    <div class="eyebrow">Jumperless V6 · under-breadboard sensing · MEMSIC MMC5603NJ</div>
+    <h1>MMC5603 Array Plan</h1>
+    <p class="lede">Everything specific to building the probe tracker out of MMC5603NJ parts: how to run them, how to wire a lot of them with one fixed address, how to arrange them under the V6 breadboard field, and how a probe can talk back through the same sensors. Live numbers follow the sidebar.</p>
+  </header>
+
+  <div class="layout">
+  <aside class="card side" aria-label="Scenario controls">
+    <h2>Scenario</h2>
+    <div class="controls">
+      <div class="ctl"><label for="nsens">Sensors in the array</label><input id="nsens" type="number" min="2" max="96" step="1" value="24"></div>
+      <div class="ctl"><label for="odr">Sample rate per sensor (Hz)</label><select id="odr"><option value="75">75 · BW00, auto S/R, 0.15 µT</option><option value="150">150 · BW01, auto S/R, 0.2 µT</option><option value="255" selected>255 · BW10/11, auto S/R, 0.3–0.4 µT</option><option value="1000">1000 · BW11 + hpower, periodic SET, 0.4 µT</option></select></div>
+      <div class="ctl"><label for="bytes">Bytes read per sensor</label><select id="bytes"><option value="6">6 · 16-bit X/Y/Z</option><option value="9" selected>9 · 20-bit X/Y/Z</option><option value="10">10 · 20-bit + status</option></select></div>
+      <div class="ctl"><label for="fw">Sensing field W × H under the breadboard (mm)</label><div class="row" style="gap:6px;flex-wrap:nowrap"><input id="fw" type="number" min="20" max="400" step="1" value="76"><input id="fh" type="number" min="20" max="400" step="1" value="45"></div></div>
+      <div class="ctl"><label for="hmin">Breadboard surface height (mm)</label><input id="hmin" type="number" min="1" max="30" step="0.5" value="7"></div>
+      <div class="ctl"><label for="amb">Residual ambient after calibration (µT rms)</label><input id="amb" type="number" min="0" max="100" step="0.1" value="1"></div>
+      <div class="ctl"><label for="magD">Probe magnet D × L (mm)</label><div class="row" style="gap:6px;flex-wrap:nowrap"><input id="magD" type="number" min="0.5" max="20" step="0.5" value="2"><input id="magL" type="number" min="0.5" max="20" step="0.5" value="1"></div></div>
+      <div class="ctl"><label for="subD">Button sub-magnet D × L (mm), flipped by a press</label><div class="row" style="gap:6px;flex-wrap:nowrap"><input id="subD" type="number" min="0.5" max="10" step="0.5" value="1"><input id="subL" type="number" min="0.5" max="10" step="0.5" value="1"></div></div>
+      <div class="ctl"><label for="coilD">Coil: diameter (mm) · turns · current (mA)</label><div class="row" style="gap:6px;flex-wrap:nowrap"><input id="coilD" type="number" min="2" max="30" step="1" value="10"><input id="coilN" type="number" min="5" max="2000" step="5" value="200"><input id="coilI" type="number" min="1" max="1000" step="5" value="50"></div></div>
+    </div>
+    <p class="sub">Grid for the probe-link charts: the smallest arrangement below that covers the field with ≥ the sensor count chosen.</p>
+  </aside>
+
+  <main class="main">
+  <section class="tiles" id="tiles"></section>
+
+  <section class="card">
+    <h2>Operating point: how to run an MMC5603NJ for tracking</h2>
+    <div class="tbl"><table>
+      <thead><tr><th>Setting</th><th>Use</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>Mode</td><td>Continuous, <code>Cmm_freq_en</code> then <code>Cmm_en</code>, ODR register 1Ah</td><td>Free-running sampling; the host just reads when <code>Meas_m_done</code> is set, or on a timer.</td></tr>
+        <tr><td>Bandwidth / rate</td><td>BW=10 or 11 → 255 Hz with auto SET/RESET; BW=11 + <code>hpower</code> → 1000 Hz</td><td>Noise is 3–4 mG (0.3–0.4 µT) at these settings vs 1.5 mG at 75 Hz; the position bound only loses √(rate), the probe link gains bandwidth.</td></tr>
+        <tr><td>SET/RESET</td><td>At 255 Hz: <code>Auto_SR_en</code>. At 1 kHz: <code>En_prd_set</code> with <code>Prd_set</code> = every 100–250 samples</td><td>AMR films flip above ~3.2 mT; a 2×1 magnet reaches 3 mT only inside 5.4 mm, below the surface, and a periodic SET restores the film anyway. Allow 1 ms after a SET.</td></tr>
+        <tr><td>Resolution</td><td>20-bit (9 bytes) for ≤255 Hz; 16-bit (6 bytes) is enough at 1 kHz</td><td>16-bit LSB is 0.1 µT, below the 0.4 µT noise at 1 kHz; at 75–255 Hz the 20-bit read keeps quantization under the 0.15–0.3 µT noise.</td></tr>
+        <tr><td>Readout</td><td>Burst read from 00h; pointer auto-increments X0,X1,Y0,Y1,Z0,Z1,X2,Y2,Z2</td><td>One transaction per sensor per sample; status is optional once timing is known.</td></tr>
+        <tr><td>Decoupling / supply</td><td>2.2 µF per part, 1.8 V or 3.3 V, VIO = bus level</td><td>Datasheet requirement; ~1.3 mA at 255 Hz BW10, 0.75 mA at BW11.</td></tr>
+        <tr><td>Package</td><td>WLP-4, 0.8 × 0.8 × 0.4 mm, 0.4 mm pitch</td><td>Fine-pitch assembly; put the four balls on short stubs with no vias in the pads.</td></tr>
+      </tbody></table></div>
+  </section>
+
+  <section class="card">
+    <h2>Bus topologies for N identical-address sensors</h2>
+    <p class="sub">The MMC5603 is 0x30, period, and its I3C side is documented only as "available" with an I3C-only data-ready interrupt — no dynamic-address or unique-ID details — so I3C does not solve addressing and is treated here as a bandwidth option that needs a bench test. The calculator takes the sidebar's sensor count, rate and bytes per read, and reports what each topology needs. A read costs (3 + bytes) × 9 bit-times plus ~10 % overhead.</p>
+    <div class="tbl" id="tBus"></div>
+    <div class="chart" id="cBus"></div>
+    <p class="sub"><b>Reading it:</b> serial topologies (plain bus, decoder, I3C) are limited by bus time per sample; parallel-SDA and hub topologies read a whole leg in one transaction, so their limit is pins. A 74HC138/74LVC138 decoder costs no bus time at all, it only chooses which sensor hears the clock; it is the right way to make <em>legs</em>, and the parallel-SDA trick is the right way to make a leg fast.</p>
+  </section>
+
+  <section class="card">
+    <h2>Arrangements on the V6 field</h2>
+    <p class="sub">Grids spread evenly over the sensing field (sidebar W × H; 76 × 45 mm is the 16 × 30-hole body). Position error is the Cramér–Rao bound for the sidebar magnet at the chosen rate and ambient, worst case over lateral position and a 45° tilt, saturated sensors dropped. "Reach" is the height where the bound crosses 1.27 mm, half a hole pitch — the height up to which the array can still say which hole the probe is over.</p>
+    <div class="tbl" id="tGrid"></div>
+    <div class="chart" id="cGrid"></div>
+    <div class="legend" id="lGrid"></div>
+    <p class="sub"><b>Rules that fall out:</b> error scales with noise and improves as √N; the between-sensor worst case stays flat while the pitch is no larger than the working height, then degrades; so pitch ≈ the reach you want. A 3×6 at ~13 × 15 mm (18 parts, $2.70) covers the field with ~1 mm at 20 mm up; doubling to 4×8 buys about √2, not 2.</p>
+  </section>
+
+  <section class="card">
+    <h2>Probe link A — passive magnetic buttons</h2>
+    <p class="sub">The dipole fit returns the magnet's moment vector. Its <em>magnitude</em> |m| is independent of where the probe is or how it is tilted, so anything that changes |m| is an unambiguous button. A press that flips a small sub-magnet in the stack changes |m| by 2·m<sub>sub</sub>; sliding a steel shunt over it or rotating it 90° gives smaller steps. The chart is the array's 1σ precision on |m| at the chosen rate, with the flip step and a 15 % level spacing for reference.</p>
+    <div class="chart" id="cMom"></div>
+    <div class="legend" id="lMom"></div>
+    <div class="tbl" id="tMom"></div>
+    <p class="sub"><b>Mechanisms that keep the probe electronics-free:</b> (1) a pivoted 1×1 that flips 180° on a click, bistable with a tiny detent; (2) a sliding magnet that enters a steel sleeve (shunt, ~30–60 % drop); (3) a second button on the opposite side of the stack giving a different step, so two buttons make four distinguishable |m| levels. Direction changes (a transverse magnet rotating about the probe axis) are not usable: they look like the probe rolling. Latency is a few samples: 4–12 ms at 255 Hz–1 kHz.</p>
+  </section>
+
+  <section class="card">
+    <h2>Probe link B — active coil uplink</h2>
+    <p class="sub">A coil on the probe axis adds a controllable moment to the magnet: electrically the same signal as a passive button, decoded the same way (track |m|, demodulate), but it can carry bits. Field at the nearest sensor versus height for the sidebar coil, with the single-sample noise at the chosen rate; the array improves on this by combining sensors and by lock-in detection on a carrier.</p>
+    <div class="chart" id="cCoil"></div>
+    <div class="legend" id="lCoil"></div>
+    <div class="tiles" id="tCoil"></div>
+    <p class="sub"><b>Channel limits:</b> each MMC sample integrates for 1.2 ms (BW11), so symbols shorter than ~3 ms smear: ~250–300 baud at 1 kHz sampling, ~60–80 baud at 255 Hz. Binary on/off keying at SNR ≥ 6 is essentially error-free; four amplitude levels need SNR ≥ 20 and double the rate; a 100–200 Hz carrier with lock-in detection trades rate for range. Budget: enough for button states, a scroll wheel, battery level and a 16-bit tip measurement at 10–20 Hz, not for streaming. The coil costs ~1 mW·s per bit at 50 mA; a CR2032 runs it for months at duty.</p>
+  </section>
+
+  <section class="card">
+    <h2>Probe options side by side</h2>
+    <div class="opts" id="opts"></div>
+  </section>
+
+  <section class="card rec">
+    <h2>Recommended path</h2>
+    <div class="steps">
+      <div class="step"><div class="eyebrow">Board, once</div><h3>Decoder legs + fast legs</h3><ul><li>One SKU: MMC5603NJ, 0x30, 2.2 µF each.</li><li>SCL from a 74LVC138 per 8 sensors (no bus time, 3 select lines shared by all decoders), SDA shared per leg.</li><li>Run legs from RP2350 PIO with parallel SDA for 1 kHz, or serial I2C at 255 Hz for a cheap first spin; the decoder wiring works for both and for I3C on the CH32H417 later.</li><li>Grid 3×6 to 4×8 over the field; 2.2 µF caps and short stubs.</li></ul></div>
+      <div class="step"><div class="eyebrow">Probe, phase 1</div><h3>Magnets and clicks only</h3><ul><li>2×1 main magnet in the tip, one or two 1×1 flip magnets on buttons.</li><li>Zero electronics, zero battery, zero pairing; works at any orientation.</li><li>Firmware: dipole fit → |m| levels → button events, with the background map, LED compensation and residual gating already needed for tracking.</li></ul></div>
+      <div class="step"><div class="eyebrow">Probe, phase 2</div><h3>Add a coil and a CH32V003</h3><ul><li>Same magnets; add a 10 mm × 200-turn coil on the axis, a CH32V003 ($0.18), a coin cell or a tip-charged LiPo.</li><li>100–300 bit/s uplink carries buttons, encoder, battery and the probe's own tip measurement; the board's LEDs under the tip can blink a slow downlink to a photodiode.</li><li>The board and tracker firmware do not change between phase 1 and 2: the coil is just a button the MCU can press.</li></ul></div>
+    </div>
+  </section>
+
+  <section class="card notes">
+    <h2>Assumptions and sources</h2>
+    <p><b>MMC5603NJ facts</b> from the datasheet (Rev. B): ±30 G, 20-bit, noise 1.5/2/3/4 mG rms at BW 00/01/10/11 with 6.6/3.5/2.0/1.2 ms measurement; ODR up to 255 Hz with auto SET/RESET, 1000 Hz with hpower; SET/RESET pulse 375 ns, 1 ms spacing; films tolerate 32 G; I2C 400 kHz; I3C "available", data-ready interrupt I3C only; 0.8 × 0.8 × 0.4 mm WLP. <a href="https://www.memsic.com/Public/Uploads/uploadfile/files/20220119/MMC5603NJDatasheetRev.B.pdf">datasheet</a>.</p>
+    <p><b>Hosts:</b> RP2350B has 2 hardware I2C, 12 PIO state machines, 48 GPIO, no I3C. CH32H417 has 4 I2C (standard/fast), one I3C at up to 12.5 MHz with dynamic addressing and IBI (MIPI I3C v1.1), DMA, and a PIOC. <a href="https://ch32-riscv-ug.github.io/CH32H417/datasheet_en/CH32H417DS0.PDF">CH32H417 datasheet</a>.</p>
+    <p><b>Model.</b> Dipole magnet with m = Br·V/µ0 (N42, 1.30 T); coil moment N·I·A; field at a sensor from the dipole formula; Cramér–Rao bound with 6 unknowns (position + moment vector) from the Jacobian over unsaturated sensors; |m| precision from the moment block of the covariance. Noise = datasheet rms at the selected rate, in quadrature with the residual ambient. Bus time = (3 + bytes) × 9 bit-times × 1.1 at 400 kHz (I2C) or 12.5 MHz (I3C).</p>
+    <p><b>Prior art for coil-to-magnetometer links:</b> Oulu "Pulse" reached 44 bit/s into a phone magnetometer with 80 ms symbols and 4 amplitude levels; the limit there was the phone's ~12 Hz effective sampling and Earth-field drift, both of which an array at 255–1000 Hz with a background map removes. <a href="https://ubicomp.oulu.fi/archives/1109">Pulse</a>.</p>
+  </section>
+  </main>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+const MU0=4e-7*Math.PI;
+const NOISE={75:0.15,150:0.2,255:0.3,1000:0.4}; // µT rms at the sensor
+const PRICE=0.15;
+const $=id=>document.getElementById(id);
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+// ---- physics ----
+function moment(D,L,Br){const V=Math.PI*Math.pow(D/2e3,2)*(L/1e3);return Br*V/MU0;}
+function dipoleB(px,py,pz,mx,my,mz,sx,sy,sz){const rx=sx-px,ry=sy-py,rz=sz-pz;const r=Math.hypot(rx,ry,rz);const r3=r*r*r;const u=rx/r,v=ry/r,w=rz/r;const d=u*mx+v*my+w*mz;return [1e-7*(3*u*d-mx)/r3,1e-7*(3*v*d-my)/r3,1e-7*(3*w*d-mz)/r3];}
+function inv6(A){const n=6;const M=A.map((r,i)=>[...r,...Array.from({length:n},(_,j)=>i===j?1:0)]);for(let c=0;c<n;c++){let p=c;for(let r=c+1;r<n;r++)if(Math.abs(M[r][c])>Math.abs(M[p][c]))p=r;if(Math.abs(M[p][c])<1e-300)return null;[M[c],M[p]]=[M[p],M[c]];const d=M[c][c];for(let j=0;j<2*n;j++)M[c][j]/=d;for(let r=0;r<n;r++){if(r===c)continue;const f=M[r][c];if(!f)continue;for(let j=0;j<2*n;j++)M[r][j]-=f*M[c][j];}}return M.map(r=>r.slice(n));}
+function crlb(x,y,z,m,sens,sigT,fsT){ // returns {pos mm, mrel (sigma|m|/|m|), n}
+  const p=[x/1e3,y/1e3,z/1e3,m[0],m[1],m[2]];const ok=[];
+  for(const s of sens){const B=dipoleB(p[0],p[1],p[2],p[3],p[4],p[5],s[0]/1e3,s[1]/1e3,s[2]/1e3);if(Math.abs(B[0])<fsT&&Math.abs(B[1])<fsT&&Math.abs(B[2])<fsT)ok.push(s);}
+  if(ok.length<2)return {pos:Infinity,mrel:Infinity,n:ok.length};
+  const F=Array.from({length:6},()=>new Array(6).fill(0));const w=1/(sigT*sigT);
+  for(const s of ok){const J=[];for(let k=0;k<6;k++){const d=k<3?1e-6:Math.max(1e-9,Math.abs(p[k])*1e-5);const pp=p.slice();pp[k]+=d;const pm=p.slice();pm[k]-=d;const Bp=dipoleB(pp[0],pp[1],pp[2],pp[3],pp[4],pp[5],s[0]/1e3,s[1]/1e3,s[2]/1e3);const Bm=dipoleB(pm[0],pm[1],pm[2],pm[3],pm[4],pm[5],s[0]/1e3,s[1]/1e3,s[2]/1e3);J.push([(Bp[0]-Bm[0])/(2*d),(Bp[1]-Bm[1])/(2*d),(Bp[2]-Bm[2])/(2*d)]);}
+    for(let a=0;a<3;a++)for(let i=0;i<6;i++)for(let j=0;j<6;j++)F[i][j]+=w*J[i][a]*J[j][a];}
+  const C=inv6(F);if(!C)return {pos:Infinity,mrel:Infinity,n:ok.length};
+  const v=C[0][0]+C[1][1]+C[2][2];const mm=Math.hypot(m[0],m[1],m[2]);const mh=[m[0]/mm,m[1]/mm,m[2]/mm];
+  let vm=0;for(let i=0;i<3;i++)for(let j=0;j<3;j++)vm+=mh[i]*C[3+i][3+j]*mh[j];
+  return {pos:v>0?Math.sqrt(v)*1e3:Infinity,mrel:vm>0?Math.sqrt(vm)/mm:Infinity,n:ok.length};
+}
+function gridPts(rows,cols,px,py){const o=[];for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)o.push([(c-(cols-1)/2)*px,(r-(rows-1)/2)*py,0]);return o;}
+function worst(sens,px,py,rows,cols,h,mAbs,sigT,fsT,key){
+  let a=sens[0];for(const q of sens)if(Math.hypot(q[0],q[1])<Math.hypot(a[0],a[1]))a=q;
+  const dx=cols>1?px*(a[0]<=0?1:-1):0,dy=rows>1?py*(a[1]<=0?1:-1):0;
+  const lat=[[a[0],a[1]],[a[0]+0.5*dx,a[1]],[a[0]+0.5*dx,a[1]+0.5*dy],[a[0]+0.25*dx,a[1]+0.25*dy]];let w=0;
+  for(const [x,y] of lat)for(const t of [[0,0,1],[0.7071,0,0.7071]]){const r=crlb(x,y,h,[t[0]*mAbs,t[1]*mAbs,t[2]*mAbs],sens,sigT,fsT)[key];if(r>w)w=r;}
+  return w;
+}
+// ---- chart kit ----
+const fmt=(v,d)=>{if(!isFinite(v))return '∞';if(v===0)return '0';const a=Math.abs(v);if(a>=1000)return v.toLocaleString(undefined,{maximumFractionDigits:0});if(a>=100)return v.toFixed(d??0);if(a>=10)return v.toFixed(d??1);if(a>=1)return v.toFixed(d??2);if(a>=0.1)return v.toFixed(d??2);return v.toPrecision(2);};
+function logTicks(lo,hi){const t=[];for(let e=Math.floor(Math.log10(lo));e<=Math.ceil(Math.log10(hi));e++){const v=Math.pow(10,e);if(v>=lo&&v<=hi)t.push(v);}return t;}
+function minorLog(lo,hi){const t=[];for(let e=Math.floor(Math.log10(lo));e<=Math.ceil(Math.log10(hi));e++)for(let k=2;k<10;k++){const v=k*Math.pow(10,e);if(v>lo&&v<hi)t.push(v);}return t;}
+function svgEl(n,at){const e=document.createElementNS('http://www.w3.org/2000/svg',n);for(const k in at)e.setAttribute(k,at[k]);return e;}
+function chartW(el){const w=el&&el.clientWidth?el.clientWidth:720;return Math.max(400,Math.min(820,w));}
+function lineChart(o){
+  const W=chartW(o.el),H=Math.round(W*0.44),ml=62,mr=110,mt=14,mb=42;const pw=W-ml-mr,ph=H-mt-mb;
+  const sx=x=>ml+(o.xlog?(Math.log10(x)-Math.log10(o.xd[0]))/(Math.log10(o.xd[1])-Math.log10(o.xd[0])):(x-o.xd[0])/(o.xd[1]-o.xd[0]))*pw;
+  const sy=y=>mt+ph-(o.ylog?(Math.log10(y)-Math.log10(o.yd[0]))/(Math.log10(o.yd[1])-Math.log10(o.yd[0])):(y-o.yd[0])/(o.yd[1]-o.yd[0]))*ph;
+  const svg=svgEl('svg',{viewBox:`0 0 ${W} ${H}`,role:'img','aria-label':o.aria||''});const g=svgEl('g',{});svg.appendChild(g);
+  (o.bands||[]).forEach(b=>g.appendChild(svgEl('rect',{x:sx(b.x0),y:mt,width:Math.max(0,sx(b.x1)-sx(b.x0)),height:ph,fill:'var(--band)'})));
+  const yt=o.ylog?logTicks(o.yd[0],o.yd[1]):o.yticks;const xt=o.xlog?logTicks(o.xd[0],o.xd[1]):o.xticks;
+  if(o.ylog)minorLog(o.yd[0],o.yd[1]).forEach(v=>g.appendChild(svgEl('line',{x1:ml,x2:ml+pw,y1:sy(v),y2:sy(v),class:'grid',opacity:.45})));
+  yt.forEach(v=>{g.appendChild(svgEl('line',{x1:ml,x2:ml+pw,y1:sy(v),y2:sy(v),class:'grid'}));const t=svgEl('text',{x:ml-8,y:sy(v)+4,'text-anchor':'end',class:'tick'});t.textContent=o.yfmt?o.yfmt(v):fmt(v);g.appendChild(t);});
+  xt.forEach(v=>{g.appendChild(svgEl('line',{x1:sx(v),x2:sx(v),y1:mt,y2:mt+ph,class:'grid'}));const t=svgEl('text',{x:sx(v),y:mt+ph+16,'text-anchor':'middle',class:'tick'});t.textContent=o.xfmt?o.xfmt(v):fmt(v);g.appendChild(t);});
+  g.appendChild(svgEl('line',{x1:ml,x2:ml+pw,y1:mt+ph,y2:mt+ph,class:'axis'}));g.appendChild(svgEl('line',{x1:ml,x2:ml,y1:mt,y2:mt+ph,class:'axis'}));
+  const xl=svgEl('text',{x:ml+pw/2,y:H-4,'text-anchor':'middle'});xl.textContent=o.xl;g.appendChild(xl);
+  const yl=svgEl('text',{x:12,y:mt+ph/2,'text-anchor':'middle',transform:`rotate(-90 12 ${mt+ph/2})`});yl.textContent=o.yl;g.appendChild(yl);
+  (o.vrefs||[]).forEach(r=>{if(r.x<o.xd[0]||r.x>o.xd[1])return;g.appendChild(svgEl('line',{x1:sx(r.x),x2:sx(r.x),y1:mt,y2:mt+ph,class:'ref'}));const t=svgEl('text',{x:sx(r.x)+4,y:mt+10,class:'tick'});t.textContent=r.label;g.appendChild(t);});
+  const rl=[];(o.refs||[]).forEach(r=>{if(r.y<o.yd[0]||r.y>o.yd[1])return;g.appendChild(svgEl('line',{x1:ml,x2:ml+pw,y1:sy(r.y),y2:sy(r.y),stroke:r.color||'var(--muted)','stroke-width':1.2,'stroke-dasharray':r.dash?'3 3':'none',opacity:.9}));if(r.label)rl.push({y:sy(r.y),label:r.label,color:r.color||'var(--muted)'});});
+  const clip=svgEl('clipPath',{id:'c'+Math.random().toString(36).slice(2)});clip.appendChild(svgEl('rect',{x:ml,y:mt-2,width:pw,height:ph+4}));svg.appendChild(clip);
+  const sg=svgEl('g',{'clip-path':`url(#${clip.id})`});g.appendChild(sg);const ends=[];
+  o.series.forEach(s=>{let d='',last=null;s.pts.forEach(p=>{if(!isFinite(p[1])||p[1]<=0){last=null;return;}const X=sx(p[0]),Y=sy(Math.min(Math.max(p[1],o.yd[0]/10),o.yd[1]*10));d+=(last?'L':'M')+X.toFixed(1)+' '+Y.toFixed(1);last=p;});
+    sg.appendChild(svgEl('path',{d,class:'series'+(s.dash?' dash':''),stroke:s.color}));
+    const lp=[...s.pts].reverse().find(p=>isFinite(p[1])&&p[1]>=o.yd[0]&&p[1]<=o.yd[1]);if(lp)ends.push({y:sy(lp[1]),name:s.short||s.name,color:s.color});});
+  const labs=[...ends,...rl];labs.sort((a,b)=>a.y-b.y);for(let i=1;i<labs.length;i++)if(labs[i].y-labs[i-1].y<12)labs[i].y=labs[i-1].y+12;
+  labs.forEach(e=>{const t=svgEl('text',{x:ml+pw+6,y:e.y+3.5,class:e.name?'lbl':'tick'});t.style.fill=e.color;t.textContent=e.name||e.label;g.appendChild(t);});
+  const cross=svgEl('line',{x1:0,x2:0,y1:mt,y2:mt+ph,class:'cross',opacity:0});g.appendChild(cross);
+  const hit=svgEl('rect',{x:ml,y:mt,width:pw,height:ph,fill:'transparent'});g.appendChild(hit);
+  const tip=document.createElement('div');tip.className='tip';tip.hidden=true;o.el.replaceChildren(svg,tip);
+  const xs=o.series[0]?o.series[0].pts.map(p=>p[0]):[];
+  hit.addEventListener('pointermove',ev=>{const r=svg.getBoundingClientRect();const px=(ev.clientX-r.left)/r.width*W;const xv=o.xlog?Math.pow(10,Math.log10(o.xd[0])+(px-ml)/pw*(Math.log10(o.xd[1])-Math.log10(o.xd[0]))):o.xd[0]+(px-ml)/pw*(o.xd[1]-o.xd[0]);
+    let bi=0,bd=Infinity;xs.forEach((x,i)=>{const d=Math.abs(x-xv);if(d<bd){bd=d;bi=i;}});const xn=xs[bi];if(xn===undefined)return;
+    cross.setAttribute('x1',sx(xn));cross.setAttribute('x2',sx(xn));cross.setAttribute('opacity',1);
+    tip.innerHTML=`<div class="t">${o.xl}: ${fmt(xn)}</div>`+o.series.map(s=>{const p=s.pts[bi];return `<div class="r"><span><i class="sw" style="background:${s.color}"></i>${s.short||s.name}</span><span>${p&&isFinite(p[1])?(o.tipY?o.tipY(p[1]):fmt(p[1])):'—'}</span></div>`;}).join('');
+    tip.hidden=false;tip.style.left=Math.min(ev.clientX-r.left+12,r.width-tip.offsetWidth-4)+'px';tip.style.top=Math.max(0,ev.clientY-r.top-10-tip.offsetHeight)+'px';});
+  hit.addEventListener('pointerleave',()=>{tip.hidden=true;cross.setAttribute('opacity',0);});
+}
+function barChart(o){ // horizontal bars, linear x. rows:[{name,v,color,label}]
+  const W=chartW(o.el),rh=24,ml=W<560?150:220,mr=70,mt=10,mb=36;const H=mt+mb+rh*o.rows.length;const pw=W-ml-mr;
+  const max=Math.max(1,...o.rows.map(r=>isFinite(r.v)?r.v:0));const sx=v=>ml+Math.min(v,max)/max*pw;
+  const svg=svgEl('svg',{viewBox:`0 0 ${W} ${H}`,role:'img'});
+  const step=max>40?10:max>16?5:max>8?2:1;for(let v=0;v<=max;v+=step){svg.appendChild(svgEl('line',{x1:sx(v),x2:sx(v),y1:mt,y2:mt+rh*o.rows.length,class:'grid'}));const t=svgEl('text',{x:sx(v),y:mt+rh*o.rows.length+16,'text-anchor':'middle',class:'tick'});t.textContent=v;svg.appendChild(t);}
+  o.rows.forEach((r,i)=>{const y=mt+i*rh+rh/2;const t=svgEl('text',{x:ml-8,y:y+4,'text-anchor':'end',class:'lbl'});t.textContent=r.name;svg.appendChild(t);
+    if(isFinite(r.v)){svg.appendChild(svgEl('rect',{x:ml,y:y-7,width:Math.max(2,sx(r.v)-ml),height:14,rx:3,fill:r.color}));const l=svgEl('text',{x:sx(r.v)+6,y:y+4,class:'tick'});l.textContent=r.label;svg.appendChild(l);}
+    else{const l=svgEl('text',{x:ml+4,y:y+4,class:'tick'});l.textContent=r.label||'not feasible';svg.appendChild(l);}});
+  const xl=svgEl('text',{x:ml+pw/2,y:H-2,'text-anchor':'middle'});xl.textContent=o.xl;svg.appendChild(xl);
+  o.el.replaceChildren(svg);
+}
+function tableHTML(cols,rows,cls){return `<table><thead><tr>${cols.map((c,i)=>`<th class="${i&&(!cls||cls[i]!=='w')?'n':''}">${c}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map((v,i)=>`<td class="${i?(cls&&cls[i]==='w'?'w':'n'):''}">${v}</td>`).join('')}</tr>`).join('')}</tbody></table>`;}
+
+// ---- state ----
+function st(){return {N:Math.max(2,Math.round(+$('nsens').value||24)),odr:+$('odr').value,bytes:+$('bytes').value,fw:+$('fw').value||76,fh:+$('fh').value||45,hmin:+$('hmin').value||7,amb:+$('amb').value||0,D:+$('magD').value||2,L:+$('magL').value||1,subD:+$('subD').value||1,subL:+$('subL').value||1,coilD:+$('coilD').value||10,coilN:+$('coilN').value||200,coilI:(+$('coilI').value||50)/1000};}
+const GRIDS=[[2,4],[2,6],[3,5],[3,6],[3,8],[4,8],[4,10],[5,12]];
+function gridFor(s,rows,cols){const px=s.fw/cols,py=s.fh/rows;return {rows,cols,px,py,sens:gridPts(rows,cols,px,py),n:rows*cols};}
+let raf=null;function schedule(){if(raf)cancelAnimationFrame(raf);raf=requestAnimationFrame(render);}
+function render(){
+  const s=st();const noise=NOISE[s.odr];const sig=Math.hypot(noise,s.amb);const sigT=sig*1e-6;const fsT=3e-3;
+  const mAbs=moment(s.D,s.L,1.30),mSub=moment(s.subD,s.subL,1.30);const mCoil=s.coilN*s.coilI*Math.PI*Math.pow(s.coilD/2e3,2);
+  // chosen grid: smallest preset with n >= N
+  let G=null;for(const [r,c] of GRIDS){if(r*c>=s.N){G=gridFor(s,r,c);break;}}if(!G)G=gridFor(s,5,12);
+  // --- tiles
+  const bitT=1/400e3;const readT=(3+s.bytes)*9*bitT*1.1;const frameT=1/s.odr;const perBus=Math.floor(frameT/readT);
+  const Bsurf=2e-7*mAbs/Math.pow(s.hmin*1e-3,3);
+  $('tiles').innerHTML=[
+    {v:`${s.N} × $${PRICE.toFixed(2)} = $${(s.N*PRICE).toFixed(2)}`,k:'sensor cost for the array',d:'LCSC C404328, 26k in stock'},
+    {v:`${fmt(sig)} µT`,k:`noise per axis at ${s.odr} Hz incl. ambient`,d:`sensor ${noise} µT ⊕ ambient ${s.amb} µT`},
+    {v:`${perBus} / bus`,k:`sensors one serial 400 kHz bus reads at ${s.odr} Hz`,d:`${fmt(readT*1e6,0)} µs per ${s.bytes}-byte read, ${fmt(frameT*1e3)} ms frame`},
+    {v:`${fmt(Bsurf*1e3)} mT`,k:`${s.D}×${s.L} magnet at the surface (${s.hmin} mm)`,d:Bsurf<3e-3?'below the 3 mT full scale: never saturates above the surface':'saturates the nearest sensor near the surface'},
+  ].map(t=>`<div class="tile"><div class="v">${t.v}</div><div class="k">${t.k}</div><div class="d">${t.d}</div></div>`).join('');
+  // --- bus topologies
+  const N=s.N;const busesNeeded=Math.ceil(N/Math.max(1,perBus));
+  const i3cRead=(3+s.bytes)*9/12.5e6*1.6;const i3cPerBus=Math.floor(frameT/i3cRead);
+  const legs8=Math.ceil(N/8);const legs12=Math.ceil(N/12);
+  const topo=[
+    {name:'Plain I2C buses (hardware + PIO)',pins:2*busesNeeded,parts:0,feas:busesNeeded<=14,note:`${busesNeeded} bus${busesNeeded>1?'es':''} of ≤${perBus} sensors; RP2350 has 2 hardware + up to 12 PIO; each sensor still needs its own leg, so this only works with one sensor per bus or a decoder — listed for the bandwidth`,how:'serial'},
+    {name:'74LVC138 SCL decoder legs, one serial SDA',pins:2+Math.ceil(Math.log2(Math.max(2,N))),parts:0.11*Math.ceil(N/8),feas:perBus>=N,note:perBus>=N?`all ${N} sensors fit one serial bus at ${s.odr} Hz`:`a single serial bus reads only ${perBus} at ${s.odr} Hz: needs ${busesNeeded} SDA/SCL pairs (each with its own decoders) or a lower rate (${fmt(1/(N*readT),0)} Hz max)`,how:'serial'},
+    {name:'Decoder legs + PIO parallel-SDA (8 SDA per state machine)',pins:1+8*legs8+3,parts:0.11*legs8,feas:legs8<=12,note:`${legs8} state machine${legs8>1?'s':''}, each reads 8 sensors in one ${fmt(readT*1e6,0)} µs transaction; 1 kHz is easy; RP2350B only (PIO)`,how:'parallel'},
+    {name:'PIO parallel-SDA, 12 SDA per state machine',pins:1+12*legs12,parts:0,feas:legs12<=12&&1+12*legs12<=40,note:`${legs12} state machine${legs12>1?'s':''} with 12 consecutive SDA GPIOs each (\`in pins, 12\`); no decoder; most pins`,how:'parallel'},
+    {name:'Hub MCU per 8 sensors (CH32V003) → SPI/UART to host',pins:4+Math.ceil(N/8),parts:0.18*Math.ceil(N/8)+0.05*Math.ceil(N/8),feas:true,note:`${Math.ceil(N/8)} hubs do the parallel trick on a GPIO port and stream frames; host pins = one SPI bus + a CS each; works on either host; adds firmware and production programming`,how:'parallel'},
+    {name:'I3C at 12.5 MHz with decoder legs (CH32H417 hardware I3C)',pins:2+Math.ceil(Math.log2(Math.max(2,N))),parts:0.11*Math.ceil(N/8),feas:i3cPerBus>=N,note:`one bus reads ${i3cPerBus} sensors per frame at ${s.odr} Hz; needs the MMC5603's undocumented I3C mode to actually work, and SETDASA per leg (same dynamic address on every leg is fine, one leg is clocked at a time); no I3C on RP2350`,how:'serial'},
+  ];
+  $('tBus').innerHTML=tableHTML(['topology','host pins','extra parts','feasible at this N and rate','notes'],topo.map(t=>[t.name,t.pins,'$'+t.parts.toFixed(2),t.feas?'<span class="pill ok">yes</span>':'<span class="pill bad">no</span>',t.note]),['', 'n','n','n','w']);
+  barChart({el:$('cBus'),xl:`host GPIO pins for ${N} sensors at ${s.odr} Hz`,rows:topo.map((t,i)=>({name:t.name.split(' (')[0].split(',')[0],v:t.feas?t.pins:Infinity,color:t.how==='parallel'?css('--s1'):css('--s3'),label:t.feas?`${t.pins} pins · $${t.parts.toFixed(2)}`:'not feasible as listed'}))});
+  // --- arrangements
+  const hs=[];for(let h=5;h<=60;h+=(h<20?1.5:h<40?2.5:5))hs.push(+h.toFixed(1));
+  const rowsG=[];const seriesG=[];const palette=['--s1','--s2','--s3','--s4','--s5','--s6','--s7','--s8'];
+  GRIDS.forEach(([r,c],i)=>{const g=gridFor(s,r,c);const pts=hs.map(h=>[h,worst(g.sens,g.px,g.py,r,c,h,mAbs,sigT,fsT,'pos')]);
+    let reach=null;for(let k=pts.length-1;k>=0;k--){if(pts[k][1]<=1.27){reach=pts[k][0];break;}}
+    const e=[10,20,30].map(h=>worst(g.sens,g.px,g.py,r,c,h,mAbs,sigT,fsT,'pos'));
+    rowsG.push([`<i class="sw" style="background:${css(palette[i])};margin-right:6px"></i>${r}×${c}`,g.n,`${fmt(g.px)} × ${fmt(g.py)}`,'$'+(g.n*PRICE).toFixed(2),Math.ceil(g.n/8),e.map(v=>fmt(v)).join(' / '),reach?fmt(reach)+' mm':'< 5 mm']);
+    seriesG.push({name:`${r}×${c}`,color:css(palette[i]),pts});});
+  $('tGrid').innerHTML=tableHTML(['grid','sensors','pitch x × y (mm)','sensor cost','8-sensor legs','σ at 10 / 20 / 30 mm (mm)','reach for half a hole (1.27 mm)'],rowsG);
+  lineChart({el:$('cGrid'),series:seriesG,xlog:false,ylog:true,xd:[5,60],xticks:[5,10,20,30,40,50,60],yd:[0.01,100],xl:'magnet height above the sensors (mm)',yl:'position error bound (mm rms)',yfmt:v=>fmt(v)+' mm',tipY:v=>fmt(v)+' mm',vrefs:[{x:s.hmin,label:'surface'}],bands:[{x0:5,x1:s.hmin}],refs:[{y:1.27,label:'half a hole'},{y:2.54,label:'one hole'}],aria:'Position error versus height per grid'});
+  $('lGrid').innerHTML=seriesG.map(g=>`<span><i class="sw" style="background:${g.color}"></i>${g.name}</span>`).join('');
+  // --- passive buttons: |m| precision vs height, for chosen grid, at three noise levels
+  const momSeries=[[noise,`sensor only (${noise} µT)`,'--s1'],[sig,`with ambient (${fmt(sig)} µT)`,'--s2'],[Math.hypot(noise,3*Math.max(s.amb,1)),`3× worse ambient (${fmt(Math.hypot(noise,3*Math.max(s.amb,1)))} µT)`,'--s3']].map(([sg,name,c])=>({name,short:name.split(' (')[0],color:css(c),pts:hs.map(h=>[h,100*worst(G.sens,G.px,G.py,G.rows,G.cols,h,mAbs,sg*1e-6,fsT,'mrel')])}));
+  const flip=100*2*mSub/mAbs;
+  lineChart({el:$('cMom'),series:momSeries,xlog:false,ylog:true,xd:[5,60],xticks:[5,10,20,30,40,50,60],yd:[0.01,100],xl:'magnet height above the sensors (mm)',yl:'1σ precision of |m| (% of |m|)',yfmt:v=>fmt(v)+' %',tipY:v=>fmt(v)+' %',vrefs:[{x:s.hmin,label:'surface'}],bands:[{x0:5,x1:s.hmin}],refs:[{y:flip/5,label:`flip step ÷ 5 (${fmt(flip)} % step)`,color:css('--s8')},{y:3,label:'15 % levels ÷ 5'}],aria:'Moment precision versus height'});
+  $('lMom').innerHTML=momSeries.map(g=>`<span><i class="sw" style="background:${g.color}"></i>${g.name}</span>`).join('')+`<span><i class="sw" style="background:${css('--s8')}"></i>flip of the ${s.subD}×${s.subL} sub-magnet = ${fmt(flip)} % of |m|; detectable at 5σ below the red line</span>`;
+  const momRows=[7,10,15,20,30,40].map(h=>{const p=100*worst(G.sens,G.px,G.py,G.rows,G.cols,h,mAbs,sigT,fsT,'mrel');return [h+' mm',fmt(p)+' %',fmt(flip/p)+' σ',Math.max(0,Math.floor(Math.log2(Math.max(1,1+flip/(5*p)))))>=2?'<span class="pill ok">two buttons (4 levels)</span>':flip/p>=5?'<span class="pill ok">one button</span>':'<span class="pill bad">none</span>'];});
+  $('tMom').innerHTML=tableHTML(['height','σ|m| (grid '+G.rows+'×'+G.cols+')','flip margin','buttons resolvable'],momRows);
+  // --- coil
+  const coilPts=hs.map(h=>[h,2e-7*mCoil/Math.pow(h*1e-3,3)*1e6]);
+  lineChart({el:$('cCoil'),series:[{name:`${s.coilD} mm, ${s.coilN} t, ${Math.round(s.coilI*1e3)} mA`,short:'coil field',color:css('--s1'),pts:coilPts}],xlog:false,ylog:true,xd:[5,60],xticks:[5,10,20,30,40,50,60],yd:[0.01,10000],xl:'coil height above the sensors (mm)',yl:'field at the nearest sensor (µT)',yfmt:v=>fmt(v)+' µT',tipY:v=>fmt(v)+' µT',vrefs:[{x:s.hmin,label:'surface'}],bands:[{x0:5,x1:s.hmin}],refs:[{y:6*sig,label:'OOK, SNR 6',color:css('--s2')},{y:20*sig,label:'4-level, SNR 20',color:css('--s4')},{y:sig,label:`noise ${fmt(sig)} µT`}],aria:'Coil field versus height'});
+  $('lCoil').innerHTML=`<span><i class="sw" style="background:${css('--s1')}"></i>coil field (moment ${mCoil.toExponential(2)} A·m², a 1×1 magnet is ${moment(1,1,1.3).toExponential(2)})</span>`;
+  const hOOK=hs.filter(h=>2e-7*mCoil/Math.pow(h*1e-3,3)*1e6>=6*sig).pop()||0,h4=hs.filter(h=>2e-7*mCoil/Math.pow(h*1e-3,3)*1e6>=20*sig).pop()||0;
+  const baud=s.odr>=1000?250:s.odr>=255?70:s.odr>=150?40:20;
+  const wire=s.coilN*Math.PI*s.coilD/1e3;const R=wire*2.2;
+  $('tCoil').innerHTML=[
+    {v:`${fmt(hOOK)} mm`,k:'on/off keying reach (SNR ≥ 6, single sensor, one sample)',d:`≈ ${baud} bit/s at ${s.odr} Hz`},
+    {v:`${fmt(h4)} mm`,k:'4-level reach (SNR ≥ 20)',d:`≈ ${2*baud} bit/s`},
+    {v:`${fmt(R,0)} Ω · ${fmt(s.coilI*s.coilI*R*1e3,0)} mW`,k:'coil with 0.1 mm wire, ~'+fmt(wire,1)+' m',d:`${fmt(s.coilI*R)} V drive; duty-cycle for battery life`},
+  ].map(t=>`<div class="tile"><div class="v">${t.v}</div><div class="k">${t.k}</div><div class="d">${t.d}</div></div>`).join('');
+  // --- options
+  const opts=[
+    {t:'Passive: flip-magnet buttons',cost:'$0.05–0.20',rows:[['power','none'],['pairing','none'],['uplink','1–2 bits of state, 4–12 ms latency'],['reach',`as far as |m| is resolved (${momRows[3][1]} at 20 mm)`],['complexity','mechanical detent; firmware already exists for tracking']],pros:['Cheapest, lightest, never needs charging','Works through any orientation; |m| is pose-invariant','Same board and decoder as every other option'],cons:['Buttons only; no analog inputs, no tip measurement','Needs a clean |m| track: background map and LED compensation']},
+    {t:'Electro-passive: button connects a coin cell to the coil',cost:'$0.30',rows:[['power','coin cell, only while pressed'],['pairing','none'],['uplink','1 bit per coil; two coils (axial ±) give 3 levels'],['reach','coil reach above'],['complexity','a tact switch and a coil, no MCU']],pros:['Replaces the mechanical detent with a wire','Step size is set by current, not by magnet size'],cons:['Still state-only','Battery, even if it lasts years']},
+    {t:'Active: CH32V003 + coil + cell',cost:'$0.60–1.50',rows:[['power','CR2032 or tip-charged LiPo'],['pairing','none: the array knows which probe by position'],['uplink',`${baud}–${2*baud} bit/s framed`],['reach',`${fmt(hOOK)} mm OOK, lock-in further`],['complexity','small firmware, Manchester/FSK on a GPIO + MOSFET']],pros:['Carries buttons, a scroll wheel, battery and a 16-bit tip reading at 10–20 Hz','No radio, no regulatory, no stack; position and data arrive together','Downlink for free: the LEDs under the tip blink at a photodiode'],cons:['Hundreds of bit/s, not streaming','Coil current pulses must stay below the AMR flip field at the sensors (easy: < 0.5 mT)']},
+    {t:'Active RF: BLE or 2.4 GHz module',cost:'$1.50–3.00',rows:[['power','LiPo + charger'],['pairing','yes, with its own UX'],['uplink','100 kbit/s and up'],['reach','room'],['complexity','RF module, antenna, stack, certification']],pros:['Streams anything: screen, scope captures, audio','Standard parts'],cons:['Most expensive and heaviest','Pairing and multi-probe identity are real work; magnetic tracking still needed for position']},
+    {t:'Contact channel through the tip',cost:'$0.10',rows:[['power','from the probe'],['pairing','none'],['uplink','kbit/s, only while touching a row'],['reach','contact'],['complexity','a current pattern the Jumperless ADC decodes']],pros:['High rate when it matters most (probing a net)','Reuses the row-sense hardware'],cons:['Nothing while hovering; combine with A or C']},
+  ];
+  $('opts').innerHTML=opts.map(o=>`<div class="opt"><div class="hd"><h3>${o.t}</h3><span class="pill">${o.cost} BOM</span></div><div class="kv">${o.rows.map(r=>`<b>${r[0]}</b><span>${r[1]}</span>`).join('')}</div><ul>${o.pros.map(p=>`<li>+ ${p}</li>`).join('')}${o.cons.map(p=>`<li>− ${p}</li>`).join('')}</ul></div>`).join('');
+}
+['nsens','odr','bytes','fw','fh','hmin','amb','magD','magL','subD','subL','coilD','coilN','coilI'].forEach(id=>$(id).addEventListener('input',schedule));
+render();
+let rt=null;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(render,120);});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',render);
+new MutationObserver(render).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+})();
+</script>
+
+</body></html>

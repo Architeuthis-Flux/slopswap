@@ -1,0 +1,611 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>HQB Display Finder</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* self-hosted fonts: Google Fonts is blocked in China */
+@font-face{font-family:"Archivo Narrow";font-style:normal;font-weight:100 900;font-display:swap;src:url(../styles/fonts/ArchivoNarrow-var.woff2) format("woff2")}
+@font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:400;font-display:swap;src:url(../styles/fonts/IBMPlexMono-400.woff2) format("woff2")}
+@font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:500;font-display:swap;src:url(../styles/fonts/IBMPlexMono-500.woff2) format("woff2")}
+@font-face{font-family:"IBM Plex Sans";font-style:normal;font-weight:100 900;font-display:swap;src:url(../styles/fonts/IBMPlexSans-var.woff2) format("woff2")}
+</style>
+<style>
+/* Layout: a parts-counter sheet — sticky filter bar, a true-scale lineup, then spec cards; every panel drawn at the same mm scale */
+:root{
+  --bg:#f2f4f7; --surface:#ffffff; --surface-2:#e9edf2; --fg:#141a22; --muted:#5c6774; --line:#d6dce4;
+  --accent:#1d5bd8; --accent-ink:#ffffff;
+  --hqb:#b4550a; --hqb-bg:#fdf0e1;
+  --ok:#1a7a4a; --ok-bg:#e1f3e8;
+  --warn:#8f6400; --warn-bg:#faf0cf;
+  --bad:#8d2f2f; --bad-bg:#f8e3e3;
+  --glass:#0a0d12;
+  --display:"Archivo Narrow","Arial Narrow",Arial,sans-serif;
+  --body:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;
+  --mono:"IBM Plex Mono",Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0e1217; --surface:#161c24; --surface-2:#1f2731; --fg:#e7edf3; --muted:#98a4b2; --line:#2a333f;
+  --accent:#7fa8ff; --accent-ink:#0b1220;
+  --hqb:#f0a548; --hqb-bg:#3a2a12;
+  --ok:#5ad08f; --ok-bg:#14301f;
+  --warn:#e6c35a; --warn-bg:#332a10;
+  --bad:#f08a8a; --bad-bg:#3a1a1a;
+  --glass:#05070a; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#0e1217; --surface:#161c24; --surface-2:#1f2731; --fg:#e7edf3; --muted:#98a4b2; --line:#2a333f;
+  --accent:#7fa8ff; --accent-ink:#0b1220;
+  --hqb:#f0a548; --hqb-bg:#3a2a12;
+  --ok:#5ad08f; --ok-bg:#14301f;
+  --warn:#e6c35a; --warn-bg:#332a10;
+  --bad:#f08a8a; --bad-bg:#3a1a1a;
+  --glass:#05070a; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:14px;line-height:1.5;margin:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+a{color:var(--accent)}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.1}
+h1{font-size:28px;font-weight:700;letter-spacing:.01em}
+h2{font-size:20px;font-weight:600}
+h3{font-size:17px;font-weight:600}
+.wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));max-width:1360px;margin:0 auto}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+
+/* header + filters */
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--surface);border-bottom:1px solid var(--line)}
+header .wrap{padding-block:12px;display:grid;gap:10px}
+.titlerow{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px}
+.titlerow p{margin:0;color:var(--muted);max-width:70ch}
+.filters{display:grid;gap:8px}
+.frow{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.flabel{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);min-width:64px}
+.chip{border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:4px 11px;font:500 13px var(--body);cursor:pointer;line-height:1.3}
+.chip:hover{border-color:var(--accent)}
+.chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.chip:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chip.hq[aria-pressed="true"]{background:var(--hqb);border-color:var(--hqb);color:#fff}
+input[type=search],select{border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:8px;padding:6px 10px;font:14px var(--body);min-width:0}
+input[type=search]{flex:1 1 180px}
+.count{color:var(--muted);font-family:var(--mono);font-size:12px;margin-left:auto}
+.linkbtn{background:none;border:0;color:var(--accent);font:13px var(--body);cursor:pointer;padding:0;text-decoration:underline}
+
+/* lineup */
+section.lineup{margin-block:18px 6px}
+.lineup .box{border:1px solid var(--line);background:var(--surface);border-radius:10px;overflow-x:auto;padding:12px 12px 6px}
+.lineup svg{display:block;min-width:100%}
+.lineup .cap{display:flex;flex-wrap:wrap;gap:6px 18px;color:var(--muted);font-size:12px;margin-top:8px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:14px;height:10px;border-radius:2px;display:inline-block;border:1px solid var(--line)}
+
+/* cards */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px;margin-block:12px 28px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;display:grid;grid-template-rows:auto 1fr;min-width:0;overflow:hidden}
+.card.hqb-likely{border-color:color-mix(in srgb,var(--hqb) 55%,var(--line))}
+.fig{background:var(--surface-2);display:flex;align-items:center;justify-content:center;height:150px;position:relative}
+.fig svg{display:block;max-width:100%}
+.fig .scalenote{position:absolute;right:8px;bottom:6px;font:11px var(--mono);color:var(--muted)}
+.body{padding:12px 14px 14px;display:grid;gap:9px;align-content:start;min-width:0}
+.head{display:grid;gap:4px}
+.tags{display:flex;flex-wrap:wrap;gap:5px}
+.tag{font:500 11px/1.4 var(--mono);letter-spacing:.03em;padding:2px 7px;border-radius:5px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.tag.cat{border-color:transparent;background:var(--surface-2);color:var(--fg)}
+.tag.ok{background:var(--ok-bg);color:var(--ok);border-color:transparent}
+.tag.warn{background:var(--warn-bg);color:var(--warn);border-color:transparent}
+.tag.bad{background:var(--bad-bg);color:var(--bad);border-color:transparent}
+.tag.hq{background:var(--hqb-bg);color:var(--hqb);border-color:transparent}
+.specs{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;font-family:var(--mono);font-size:12px;line-height:1.45}
+.specs dt{color:var(--muted);margin:0}
+.specs dd{margin:0;min-width:0;overflow-wrap:anywhere}
+.look{color:var(--fg);font-size:13px;margin:0}
+.pc{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12.5px}
+.pc ul{margin:0;padding-left:16px;display:grid;gap:2px}
+.pc .p li::marker{color:var(--ok)}
+.pc .c li::marker{color:var(--bad)}
+.pc h4{margin:0 0 3px;font:600 11px var(--mono);letter-spacing:.06em;text-transform:uppercase}
+.pc .p h4{color:var(--ok)} .pc .c h4{color:var(--bad)}
+.prices{margin:0;padding:0;list-style:none;display:grid;gap:3px;font-size:12.5px}
+.prices li{display:flex;justify-content:space-between;gap:10px;border-top:1px dashed var(--line);padding-top:3px}
+.prices li span:last-child{font-family:var(--mono);white-space:nowrap;text-align:right}
+.prices a{text-decoration:none}
+.prices a:hover{text-decoration:underline}
+.k1{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:13px}
+.k1 b{font-family:var(--mono);font-weight:500}
+.where{background:var(--hqb-bg);color:var(--fg);border-radius:8px;padding:8px 10px;font-size:12.5px;display:grid;gap:4px}
+.where .lbl{font:600 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--hqb)}
+.zh{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.zh code{font:13px var(--mono);background:var(--surface-2);padding:3px 7px;border-radius:6px;user-select:all;overflow-wrap:anywhere}
+.copy{border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:6px;font:12px var(--body);padding:3px 8px;cursor:pointer}
+.links{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12.5px}
+.empty{color:var(--muted);padding:40px 0;text-align:center;grid-column:1/-1}
+
+/* HQB map */
+.map{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-block:10px 30px}
+.loc{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;gap:6px;align-content:start}
+.loc .addr{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.loc ul{margin:0;padding-left:16px;font-size:13px;display:grid;gap:2px}
+.phrase{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;gap:8px;margin-bottom:30px}
+.phrase p{margin:0;font-size:13px}
+.phrase .zhline{font-family:var(--mono);font-size:13.5px;background:var(--surface-2);padding:8px 10px;border-radius:8px;user-select:all}
+.note{font-size:12.5px;color:var(--muted);max-width:80ch}
+@media (max-width:480px){ .pc{grid-template-columns:1fr} h1{font-size:24px} .flabel{min-width:0;width:100%} }
+@media (prefers-reduced-motion:no-preference){ .chip,.card{transition:border-color .15s,background .15s} }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <pattern id="pat-pmoled" width="4" height="5" patternUnits="userSpaceOnUse">
+      <rect width="4" height="5" fill="#07090c"/>
+      <rect x="0.35" y="0.45" width="0.9" height="3.6" fill="#ff4040"/>
+      <rect x="1.6" y="0.45" width="0.9" height="3.6" fill="#33e06a"/>
+      <rect x="2.85" y="0.45" width="0.9" height="3.6" fill="#3f7dff"/>
+    </pattern>
+    <pattern id="pat-amoled" width="2.1" height="2.1" patternUnits="userSpaceOnUse">
+      <rect width="2.1" height="2.1" fill="#07090c"/>
+      <rect x="0.15" y="0.2" width="0.5" height="1.7" fill="#ff5a5a"/>
+      <rect x="0.8" y="0.2" width="0.5" height="1.7" fill="#4ae878"/>
+      <rect x="1.45" y="0.2" width="0.5" height="1.7" fill="#5a8dff"/>
+    </pattern>
+    <pattern id="pat-mono" width="3" height="3" patternUnits="userSpaceOnUse">
+      <rect width="3" height="3" fill="#07090c"/>
+      <rect x="0.5" y="0.5" width="2" height="2" fill="#8fd0ff"/>
+    </pattern>
+    <pattern id="pat-mono2" width="3" height="3" patternUnits="userSpaceOnUse">
+      <rect width="3" height="3" fill="#07090c"/>
+      <rect x="0.5" y="0.5" width="2" height="2" fill="#ffd34d"/>
+    </pattern>
+    <pattern id="pat-epaper" width="10" height="10" patternUnits="userSpaceOnUse">
+      <rect width="10" height="10" fill="#ebe6d8"/>
+      <rect x="1" y="1" width="2" height="2" fill="#c8362b"/><rect x="6" y="2" width="2" height="2" fill="#e2b519"/>
+      <rect x="3" y="6" width="2" height="2" fill="#2a6fc9"/><rect x="7" y="7" width="2" height="2" fill="#2f9d4a"/>
+      <rect x="0" y="8" width="1.5" height="1.5" fill="#1b1b1b"/>
+    </pattern>
+    <pattern id="pat-ep4" width="10" height="10" patternUnits="userSpaceOnUse">
+      <rect width="10" height="10" fill="#eceadf"/>
+      <rect x="1" y="1" width="3" height="3" fill="#c8362b"/><rect x="6" y="2" width="3" height="3" fill="#e2b519"/>
+      <rect x="2" y="6" width="3" height="3" fill="#1b1b1b"/>
+    </pattern>
+    <pattern id="pat-mip" width="8" height="8" patternUnits="userSpaceOnUse">
+      <rect width="8" height="8" fill="#d9d4cc"/>
+      <rect x="0" y="0" width="4" height="4" fill="#d55a6a"/><rect x="4" y="0" width="4" height="4" fill="#6ab07a"/>
+      <rect x="0" y="4" width="4" height="4" fill="#5e86c9"/><rect x="4" y="4" width="4" height="4" fill="#d9c35a"/>
+    </pattern>
+    <pattern id="pat-cstn" width="4" height="4" patternUnits="userSpaceOnUse">
+      <rect width="4" height="4" fill="#b9c3bd"/>
+      <rect x="0.3" y="0.3" width="1" height="3.4" fill="#d98f8f"/><rect x="1.5" y="0.3" width="1" height="3.4" fill="#9fcf9f"/><rect x="2.7" y="0.3" width="1" height="3.4" fill="#9fb3dd"/>
+    </pattern>
+    <pattern id="pat-seg" width="14" height="8" patternUnits="userSpaceOnUse">
+      <rect width="14" height="8" fill="#0d1014"/>
+      <rect x="1" y="2" width="4" height="4" rx="0.5" fill="#ff7a3d"/><rect x="6" y="2" width="2" height="4" fill="#45e0ff"/><rect x="9" y="2" width="4" height="4" fill="#c7ff5a"/>
+    </pattern>
+    <linearGradient id="g-tft" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2a8cff"/><stop offset="0.6" stop-color="#5fb3ff"/><stop offset="1" stop-color="#e3f1ff"/>
+    </linearGradient>
+    <linearGradient id="g-micro" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff"/><stop offset="0.5" stop-color="#9ad6ff"/><stop offset="1" stop-color="#ff9ad6"/>
+    </linearGradient>
+    <linearGradient id="g-transp" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9ad0ff" stop-opacity="0.9"/><stop offset="1" stop-color="#9ad0ff" stop-opacity="0.25"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<header>
+  <div class="wrap">
+    <div class="titlerow">
+      <h1>HQB Display Finder</h1>
+      <p>Every colour-ish display from the V6 hunt, drawn to the same scale, with prices, verdicts and where to ask in Huaqiangbei. Photos can't be embedded here; the product links have them.</p>
+    </div>
+    <div class="filters">
+      <div class="frow"><span class="flabel">Tech</span><div id="f-cat" class="frow"></div></div>
+      <div class="frow"><span class="flabel">At HQB</span><div id="f-hqb" class="frow"></div></div>
+      <div class="frow"><span class="flabel">$1–3 @1k</span><div id="f-budget" class="frow"></div></div>
+      <div class="frow"><span class="flabel">Size</span><div id="f-size" class="frow"></div></div>
+      <div class="frow">
+        <span class="flabel">Find</span>
+        <input id="q" type="search" placeholder="driver, resolution, name…" aria-label="Search displays">
+        <select id="sort" aria-label="Sort">
+          <option value="k1">Sort: cheapest @1k</option>
+          <option value="size">Sort: smallest</option>
+          <option value="sizedesc">Sort: largest</option>
+          <option value="name">Sort: name</option>
+        </select>
+        <button class="linkbtn" id="clear">Clear filters</button>
+        <span class="count" id="count"></span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="lineup">
+    <div class="eyebrow">Lineup · active areas at one scale · 10 mm bar for reference</div>
+    <div class="box"><svg id="lineup" role="img" aria-label="Filtered displays drawn to a common scale"></svg>
+      <div class="legend">
+        <span><i style="background:url(#pat-pmoled)"></i>colour PMOLED</span>
+        <span><i style="background:#141"></i>AMOLED</span>
+        <span><i style="background:#5fb3ff"></i>TFT</span>
+        <span><i style="background:#ebe6d8"></i>e-paper</span>
+        <span><i style="background:#9fb3dd"></i>memory LCD</span>
+        <span><i style="background:#8fd0ff"></i>mono OLED</span>
+        <span>~ = dimensions estimated from diagonal</span>
+      </div>
+    </div>
+  </section>
+
+  <div id="grid" class="grid"></div>
+
+  <section>
+    <h2>Where to look in Huaqiangbei</h2>
+    <p class="note">Floor placements come from 2025–26 market guides plus the kinds of stalls that carry each part; stalls move, so treat them as starting points. The driver-IC name (SSD1331, SSD1351, SH8501…) is the password at every counter.</p>
+    <div class="map" id="map"></div>
+
+    <h2>Stall phrasebook</h2>
+    <div class="phrase">
+      <p>Colour PMOLED, so you don't get handed an AMOLED or an IPS TFT:</p>
+      <div class="zhline">我要全彩 PMOLED（被动式彩色 OLED），驱动 SSD1331 / SSD1351 / SSD1357 / SSD1333。要裸屏加排线，有没有规格书？1000 片什么价？先拿几片样品。</div>
+      <p>Mi Band panel at a watch-repair stall:</p>
+      <div class="zhline">我要小米手环 7 的屏幕总成（1.62 寸 AMOLED，192×490，带触摸）。现货单价多少？有没有不带触摸、不带盖板的裸屏？驱动 IC 是什么（是不是 Raydium RM69 系列）？排线多少 pin？手环 8、9 用的是同一块屏吗？1000 片什么价？</p>
+      <p>Bar / strip TFT:</p>
+      <div class="zhline">有没有长条形屏？3.71 寸 240×960 ST7701S，或者 1.47 寸 172×320 ST7789 圆角屏。裸屏价和 1000 片价。</div>
+    </div>
+  </section>
+</main>
+
+<script>
+const LINKS = {
+  fc:"https://www.first-components.com/en/display-solutions-oled-pmoled-color",
+  gm:"https://goldenmorninglcd.com/zh-TW/%E5%85%A8%E5%BD%A9oled%E9%A1%AF%E7%A4%BA%E5%B1%8F/",
+  accio:"https://www.accio.com/plp/full-color-oled-display",
+  wsOled:"https://www.waveshare.com/product/raspberry-pi/displays/oled.htm?dir=asc",
+  hqbGuide:"https://chinaguide.in/wholesale-markets/huaqiangbei-electronics/",
+  zhihu:"https://zhuanlan.zhihu.com/p/468140883"
+};
+
+const D = [
+ {id:"pm060",short:"0.6\" PMOLED",name:"0.60\" colour PMOLED 64×64",cat:"pmoled",size:0.60,res:"64×64",w:10.75,h:10.75,driver:"SSD1357",iface:"4-wire SPI · 20-pin ZIF",
+  look:"The newest tiny square; 1/64 duty, 0.168 mm pitch, 65K colours.",
+  pros:["Smallest colour PMOLED made","Same SSD135x code family as your 1.27\""],cons:["Bare panel; needs ~13 V boost","1k price unconfirmed","Not a stall item"],
+  prices:[{l:"BuyDisplay ER-OLED0.60-1C",v:"$7.38",u:"https://www.buydisplay.com/0-6-inch-micro-color-oled-display-panel-rgb-64x64-ssd1357-spi"},{l:"Topwin UG-6464TDDBG01 panel",v:"quote",u:"https://www.tw-display.com/-06-06inch-64x64-pixels-20pin-65k-colorful-zif-type-oled-display-4-spi-interface-ssd1357-driving"}],
+  k1:"~$3–4 est.",k1n:3.5,budget:"edge",hqb:"unlikely",where:"Topwin sales office (Futian, call first) or Taobao 同城",zh:"0.6寸 全彩 OLED SSD1357 64x64 裸屏",links:[{t:"BuyDisplay",u:"https://www.buydisplay.com/0-6-inch-micro-color-oled-display-panel-rgb-64x64-ssd1357-spi"},{t:"Topwin",u:"https://www.tw-display.com/-06-06inch-64x64-pixels-20pin-65k-colorful-zif-type-oled-display-4-spi-interface-ssd1357-driving"}]},
+
+ {id:"pm095",short:"0.95\" PMOLED",name:"0.95\" colour PMOLED 96×64",cat:"pmoled",size:0.95,res:"96×64",w:20.14,h:13.42,driver:"SSD1331",iface:"SPI / 6800 / 8080 · 23-pin FPC",
+  look:"The classic: bars of light with real dark gaps between them. Same look as your 1.27\", smaller.",
+  pros:["Only colour PMOLED that lands near $3 @1k","Stocked at HQB; Adafruit/Waveshare libraries","Alibaba glass $3.10 at ≥1,000"],cons:["SSD1331 has no DC-DC: add a ~13 V boost","96×64 is cramped","Right at the budget ceiling"],
+  prices:[{l:"Alibaba · Liyuan Huida bare glass",v:"$3.60 / 3.40 / 3.10 (5 / 100 / 1k)",u:"https://german.alibaba.com/product-detail/0-95-inch-96x64-full-color-ssd1331-23pin-oled-display-screen-panel-60642389785.html"},{l:"BuyDisplay ER-OLED0.95-2C",v:"$6.99",u:"https://www.buydisplay.com/serial-spi-color-0-95-inch-oled-display-module-96x64-pixels-ssd1331"},{l:"AliExpress 7-pin module",v:"$4.89",u:"https://www.aliexpress.us/item/3256803979912422.html"},{l:"Waveshare 0.95inch RGB OLED",v:"~$10",u:LINKS.wsOled}],
+  k1:"$3.10 (Alibaba, ≥1k)",k1n:3.1,budget:"edge",hqb:"likely",where:"电子世界 1–3F / 赛格 OLED-module stalls — say SSD1331",zh:"0.95寸 全彩 OLED SSD1331 96x64 裸屏",links:[{t:"WiseChip 0.95\" page",u:"https://www.wisechip.com.tw/en/product-379887/0-95%E2%80%9D-Full-Color-Display.html"},{t:"Hemold (Longhua)",u:"https://www.hemoled.com/zh/pmoled/"}]},
+
+ {id:"pm096",short:"0.96\" PMOLED bar",name:"0.96\" colour PMOLED 64×128 portrait",cat:"pmoled",size:0.96,res:"64×128",w:10.862,h:21.736,driver:"SSD1357",iface:"3/4-wire SPI · 31-pin",
+  look:"Very fine columns (0.033×0.146 mm subpixels) in a tall bar; the strongest passive look of the small ones.",
+  pros:["Portrait bar fits an edge","Waveshare module with code"],cons:["$12 retail, ~$5 at 1k","Needs OLED boost"],
+  prices:[{l:"Waveshare 0.96inch RGB OLED Module",v:"$11.97–12.99",u:"https://www.waveshare.com/0.96inch-rgb-oled-module.htm"},{l:"RiTdisplay P43501 (First Components)",v:"€10.90",u:LINKS.fc},{l:"Golden Morning GME64128-05",v:"quote",u:LINKS.gm}],
+  k1:"~$5 est.",k1n:5,budget:"no",hqb:"possible",where:"OLED stalls (less common); 微雪 Taobao same-day",zh:"0.96寸 64x128 彩色 OLED SSD1357",links:[{t:"Waveshare",u:"https://www.waveshare.com/0.96inch-rgb-oled-module.htm"}]},
+
+ {id:"pm110",short:"1.1\" PMOLED",name:"1.1\" / 1.12\" colour PMOLED 96×96",cat:"pmoled",size:1.1,res:"96×96",w:19.85,h:19.85,driver:"SEPS114A / SSD1351",iface:"SPI / 8080",
+  look:"Square lamp grid.",pros:["Square format","SSD1351 variant reuses your code"],cons:["SEPS114A version marked not-preferred (EOL risk)","~$6 at 1k"],
+  prices:[{l:"WiseChip UG-9696TDDCG02 (First Components)",v:"€9.70",u:LINKS.fc},{l:"RiTdisplay P27801 (First Components)",v:"€12.40",u:LINKS.fc},{l:"Golden Morning GME9696-01",v:"quote",u:LINKS.gm}],
+  k1:"~$6 est.",k1n:6,budget:"no",hqb:"unlikely",where:"Online / distributors",zh:"1.1寸 96x96 全彩 OLED",links:[{t:"First Components",u:LINKS.fc}]},
+
+ {id:"pm127",short:"1.27\" PMOLED (yours)",name:"1.27\" colour PMOLED 128×96 — the Noblex display",cat:"pmoled",size:1.27,res:"128×96",w:25.708,h:19.28,driver:"SSD1351",iface:"3/4-wire SPI · 30-pin",
+  look:"What you already have: 0.047×0.185 mm subpixels on ~0.2 mm pitch, 262K colours.",
+  pros:["Known quantity; Adafruit SSD1351 library","Stocked at HQB"],cons:["$16 module; glass ~$6–8 at 1k","~13 V boost; 1/96 duty aging"],
+  prices:[{l:"Waveshare 1.27inch RGB OLED Module",v:"$15.97–16.99",u:"https://www.waveshare.com/product/displays/1.27inch-rgb-oled-module.htm"},{l:"RiTdisplay P22202 (First Components)",v:"€13.70",u:LINKS.fc},{l:"WiseChip NL013FN001ML",v:"€22.90",u:LINKS.fc}],
+  k1:"~$6–8 est.",k1n:7,budget:"no",hqb:"likely",where:"OLED-module stalls — SSD1351 128x96; 微雪 Taobao",zh:"1.27寸 全彩 OLED SSD1351 128x96",links:[{t:"Waveshare",u:"https://www.waveshare.com/product/displays/1.27inch-rgb-oled-module.htm"}]},
+
+ {id:"pm145",short:"1.45\" PMOLED",name:"1.45\" / 1.46\" colour PMOLED 160×128 / 128×128",cat:"pmoled",size:1.45,res:"160×128",w:28.78,h:23.02,driver:"SEPS525 / SSD1351",iface:"SPI / 8080",
+  look:"The old Univision-era 160×128; bigger lamps.",pros:["Highest-res PMOLED under 1.5\""],cons:["SEPS525 parts are legacy","€15–47"],
+  prices:[{l:"RiTdisplay P23903 128×128 (First Components)",v:"€15.20",u:LINKS.fc},{l:"WiseChip NL015FN001ML 160×128",v:"€24.40",u:LINKS.fc},{l:"WiseChip UG-6028GDEAF01",v:"€47.00",u:LINKS.fc}],
+  k1:"~$8 est.",k1n:8,budget:"no",hqb:"unlikely",where:"Online",zh:"1.45寸 160x128 全彩 OLED SEPS525",links:[{t:"First Components",u:LINKS.fc}]},
+
+ {id:"pm150",short:"1.5\" PMOLED",name:"1.5\" colour PMOLED 128×128",cat:"pmoled",size:1.5,res:"128×128",w:26.855,h:26.864,driver:"SSD1351",iface:"SPI / parallel · 30-pin ZIF",
+  look:"Biggest common colour PMOLED: 0.07×0.21 mm pitch, 121 ppi, 262K colours.",
+  pros:["Most common size, stalls have it","Same SSD1351 code"],cons:["$20 module; glass ~$6–8 at 1k (Alibaba sample $15)","Hot, blue-limited lifetime"],
+  prices:[{l:"Waveshare 1.5inch RGB OLED Module",v:"$19.97–20.99",u:"https://www.waveshare.com/product/displays/oled/1.5inch-rgb-oled-module.htm"},{l:"Alibaba · Matrix Crystal UG-2828GDEDF11 sample",v:"$15.00",u:"https://www.alibaba.com/product-detail/_1601111387952.html"},{l:"DigiKey Newhaven NHD-1.5-128128UGC3",v:"$31.84 (1) / $24.55 (250)",u:"https://azcus.digikey.com/en/products/detail/newhaven-display-intl/NHD-1-5-128128UGC3/4756378"},{l:"WiseChip NT015FN002ML (First Components)",v:"€21.30",u:LINKS.fc}],
+  k1:"~$6–8 est.",k1n:7,budget:"no",hqb:"likely",where:"OLED-module stalls — ask 1.5寸 全彩 SSD1351",zh:"1.5寸 全彩 OLED SSD1351 128x128",links:[{t:"WiseChip 1.5\" page",u:"https://www.wisechip.com.tw/en/product-379891/1-50%E2%80%9D-Full-Color-Display.html"}]},
+
+ {id:"pm169",short:"1.8\" PMOLED",name:"1.69\" / 1.8\" colour PMOLED 160×128",cat:"pmoled",size:1.8,res:"160×128",w:35.01,h:28.01,driver:"SEPS525 / SSD1353",iface:"SPI / 8080",
+  look:"Big chunky lamps; the largest 160×128 glass.",pros:["Biggest pixels in the family"],cons:["€18–64; niche"],
+  prices:[{l:"RiTdisplay P16803 1.8\" (First Components)",v:"€17.80",u:LINKS.fc},{l:"WiseChip UG-6028GDEBF02 1.69\"",v:"€64.20",u:LINKS.fc},{l:"Golden Morning 1.77\"",v:"quote",u:LINKS.gm}],
+  k1:"~$10 est.",k1n:10,budget:"no",hqb:"unlikely",where:"Online",zh:"1.8寸 160x128 全彩 OLED SSD1353",links:[{t:"First Components",u:LINKS.fc}]},
+
+ {id:"pm191",short:"1.91\" PMOLED",name:"1.91\" colour PMOLED 176×176",cat:"pmoled",size:1.91,res:"176×176",w:34.3,h:34.3,driver:"SSD1333 (RiT SPD1333U5R1)",iface:"SPI / 8080 / I²C",
+  look:"Highest-resolution colour PMOLED sold; 65K colours, 10,000:1 contrast.",
+  pros:["Square 176×176","In stock at DigiKey"],cons:["$21–29; far over budget","16-week factory lead"],
+  prices:[{l:"DigiKey Newhaven NHD-1.91-176176UBC3",v:"$28.69",u:"https://azcus.digikey.com/en/products/detail/newhaven-display-intl/NHD-1-91-176176UBC3/23334244"},{l:"RS Newhaven",v:"€32.16",u:"https://befr.rs-online.com/web/p/oled-displays/0150482"},{l:"RiTdisplay P43401 (First Components)",v:"€21.00",u:LINKS.fc},{l:"RiTdisplay 9OL9943401000 (Unisystem)",v:"quote",u:"https://unisystem.com/product/displays-oled/oled-graphic/9ol9943401000-rit-display-oled-graphic-display-module"}],
+  k1:"~$15 est.",k1n:15,budget:"no",hqb:"unlikely",where:"Online",zh:"1.91寸 176x176 全彩 OLED SSD1333",links:[]},
+
+ {id:"pm071",short:"0.71\" PMOLED (lead)",name:"0.71\" colour PMOLED 84×84 (unverified lead)",cat:"pmoled",size:0.71,res:"84×84",w:12.7,h:12.7,est:true,driver:"?",iface:"?",
+  look:"Square micro colour PMOLED from a B2B listing; could be real, could be a relabel.",pros:["Would be the cheapest colour PMOLED at $3.45–4.25"],cons:["No datasheet seen","Unverified seller"],
+  prices:[{l:"Accio / Alibaba listing",v:"$3.45–4.25",u:LINKS.accio}],
+  k1:"$3.45 listed",k1n:3.45,budget:"edge",hqb:"unlikely",where:"Ask OLED stalls; treat as a lead",zh:"0.71寸 84x84 全彩 OLED",links:[]},
+
+ {id:"pm091",short:"0.91\" PMOLED strip (lead)",name:"0.91\" colour PMOLED 128×32 (unverified lead)",cat:"pmoled",size:0.91,res:"128×32",w:22.38,h:5.58,driver:"?",iface:"?",
+  look:"A full-colour version of the common 128×32 strip, listed by Shenzhen Qintang Shengshi at MOQ 1.",pros:["Super-skinny colour strip, if real"],cons:["Unverified; no datasheet"],
+  prices:[{l:"Accio listing (Qintang Shengshi)",v:"MOQ 1, on inquiry",u:LINKS.accio}],
+  k1:"unknown",k1n:null,budget:"edge",hqb:"possible",where:"OLED stalls — ask 全彩 0.91",zh:"0.91寸 全彩 OLED 128x32",links:[]},
+
+ {id:"mono2",short:"0.96\" two-tone",name:"0.96\" two-tone OLED 128×64 (yellow / blue)",cat:"mono",size:0.96,res:"128×64",w:21.74,h:11.18,driver:"SSD1306 / SSD1315",iface:"I²C / SPI",
+  look:"A fixed yellow band over blue. The cheapest \"colour\" OLED there is.",pros:["~$1.5 at 1k; every stall","Zero integration risk"],cons:["Not real colour","Everyone has seen it"],
+  prices:[{l:"Waveshare 0.96inch OLED",v:"$3.49",u:LINKS.wsOled},{l:"HQB stalls",v:"¥5–8 single"}],
+  k1:"~$1.5",k1n:1.5,budget:"yes",hqb:"likely",where:"Any component stall",zh:"0.96寸 OLED 黄蓝双色 SSD1306",links:[]},
+
+ {id:"transp",short:"0.96\" transparent",name:"0.96\" / 1.51\" transparent OLED (mono)",cat:"mono",size:0.96,res:"128×64 / 128×56",w:21.74,h:11.18,driver:"SSD1312 / SSD1309",iface:"SPI / I²C",
+  look:"See-through light-blue pixels floating on glass.",pros:["Unusual at $7–8","Trivial to drive"],cons:["Mono only; no cheap colour transparent","Low brightness"],
+  prices:[{l:"Waveshare 0.96inch Transparent OLED",v:"$7.31–7.99",u:LINKS.wsOled},{l:"Waveshare 1.51inch Transparent OLED",v:"$18.97–19.99",u:LINKS.wsOled}],
+  k1:"~$3–4 (0.96\") est.",k1n:3.5,budget:"edge",hqb:"possible",where:"OLED stalls (ask 透明 OLED); Taobao",zh:"0.96寸 透明 OLED SSD1312",links:[]},
+
+ {id:"am095",short:"0.95\" AMOLED bar",name:"0.95\" AMOLED 120×240 bar (Mi Band 4 class)",cat:"amoled",size:0.95,res:"120×240",w:10.8,h:21.6,driver:"SH8501 / RM69310",iface:"SPI / QSPI · 15–24-pin FPC",
+  look:"A dense 16.7M-colour strip at ~280 ppi for under $2. Looks like a tiny phone, not a lamp grid.",
+  pros:["$1.89 at ≥300 pcs — cheapest AMOLED anywhere","Bar shape fits a board edge","Real spec sheets (Sungood, Shineworld, Kingtech)"],cons:["Needs ELVDD/ELVSS rails (small PMIC, ~$0.30–0.50)","Vendor-specific init; QSPI","Active matrix: no passive look"],
+  prices:[{l:"Alibaba · Sungood SH8501 15-pin",v:"$2.21 / 2.04 / 1.89 (5 / 50 / 300+)",u:"https://german.alibaba.com/product-detail/0-95-inch-AM-OLED-display-1601270373514.html"},{l:"Alibaba $1.60 listing",v:"$1.60",u:"https://electronics.alibaba.com/product/samsung-lcd-s4-i-9505?page=3"},{l:"Shineworld GLO095-D-M2004 sample",v:"$3.00",u:"https://swicn.com/products/0-95-inch-spi-amoled-display-120x240-custom-touchscreen-oled-for-smart-band-bracelet"},{l:"AliExpress Hicenda HT095",v:"$4.03",u:"https://www.aliexpress.us/item/3256809103182818.html"},{l:"Kingtech PV09500A0120A",v:"$7 / $5 (2k)",u:"https://www.alibaba.com/product-detail/KINGTECH-0-95-Inch-AMOLED-Small_1601040784391.html"}],
+  k1:"$1.60–1.90",k1n:1.75,budget:"yes",hqb:"likely",where:"远望 / 电子世界 手环维修屏 stalls; wearable OEM counters",zh:"0.95寸 AMOLED 120x240 SH8501 裸屏",links:[]},
+
+ {id:"am143",short:"1.43\" round AMOLED",name:"1.43\" round AMOLED 466×466",cat:"amoled",size:1.43,res:"466×466",w:36.3,h:36.3,round:true,driver:"CO5300 / SH8601",iface:"QSPI",
+  look:"Smartwatch disc, 16.7M colours, ~460 ppi.",pros:["Round; watch-repair stalls stock them","Waveshare dev boards + LVGL"],cons:["$5–8 bare at 1k","QSPI, three rails, long init"],
+  prices:[{l:"Waveshare ESP32-S3 1.43 AMOLED board",v:"$32–45",u:"https://www.waveshare.com/product/arduino/displays/amoled.htm"},{l:"Alibaba · Hongjing 1.39\" 454×454",v:"$5.00–5.80 (MOQ 99)",u:"https://electronics.alibaba.com/product/touch-screen-1-4-inch"},{l:"Displaymodule 1.2\" round 390×390",v:"$19.90",u:"https://www.displaymodule.com/pages/xr-1"}],
+  k1:"~$5–6 est.",k1n:5.5,budget:"no",hqb:"likely",where:"远望 watch-repair stalls; 微雪 Taobao",zh:"1.43寸 圆形 AMOLED 466x466 裸屏",links:[]},
+
+ {id:"am164",short:"1.64\" AMOLED",name:"1.64\" AMOLED 280×456 (on-cell touch)",cat:"amoled",size:1.64,res:"280×456",w:21.84,h:35.57,driver:"RM69xxx",iface:"MIPI / SPI",
+  look:"Watch pill with touch; 500 nits.",pros:["Spec sheet; Haresan (Shenzhen) sells at MOQ 1,000"],cons:["3× budget","Pays for touch you won't use"],
+  prices:[{l:"Haresan AHEM1D64-001 (Global Sources)",v:"$9.90 (MOQ 1,000)",u:"https://www.globalsources.com/knowledge/1-64in-amoled-touchscreen/"},{l:"Waveshare ESP32-S3 1.64 board",v:"$33",u:"https://www.waveshare.com/product/arduino/displays/amoled.htm"}],
+  k1:"$9.90",k1n:9.9,budget:"no",hqb:"possible",where:"Watch-repair stalls (as repair parts)",zh:"1.64寸 AMOLED 280x456",links:[]},
+
+ {id:"am147",short:"1.47\" AMOLED",name:"1.47\" AMOLED 194×368 (on-cell touch)",cat:"amoled",size:1.47,res:"194×368",w:17.2,h:32.6,est:true,driver:"?",iface:"SPI",
+  look:"Band-shaped, SPI, touch.",pros:["SPI; datasheet; Shineworld (Dongguan) samples"],cons:["4× budget"],
+  prices:[{l:"Alibaba · Shineworld",v:"$11.90–12.18 (MOQ 1,000)",u:"https://electronics.alibaba.com/product/touch-screen-1-4-inch"}],
+  k1:"$11.90",k1n:11.9,budget:"no",hqb:"possible",where:"Watch-repair stalls",zh:"1.47寸 AMOLED 194x368",links:[]},
+
+ {id:"am110",short:"1.1\" AMOLED",name:"1.1\" AMOLED 126×296 (on-cell touch)",cat:"amoled",size:1.1,res:"126×296",w:10.9,h:25.7,est:true,driver:"?",iface:"SPI",
+  look:"Skinny band screen.",pros:["Skinny bar; touch"],cons:["4× budget"],
+  prices:[{l:"Alibaba · Shineworld",v:"$10.91–11.17 (MOQ 1,000)",u:"https://electronics.alibaba.com/product/oled-display-for-smartwatch"}],
+  k1:"$10.91",k1n:10.91,budget:"no",hqb:"possible",where:"Watch-repair stalls",zh:"1.1寸 AMOLED 126x296",links:[]},
+
+ {id:"am165",short:"1.65\" AMOLED",name:"1.65\" AMOLED 348×442 QSPI",cat:"amoled",size:1.65,res:"348×442",w:25.9,h:32.9,est:true,driver:"CO5300",iface:"QSPI",
+  look:"Watch rectangle, 300 nits.",pros:["CO5300 QSPI — same driver as the Waveshare boards"],cons:["3× budget"],
+  prices:[{l:"Alibaba · Microtech",v:"$8.50–11.90 (MOQ 1)",u:"https://electronics.alibaba.com/product/oled-display-for-smartwatch"}],
+  k1:"~$8.50",k1n:8.5,budget:"no",hqb:"possible",where:"Watch-repair stalls",zh:"1.65寸 AMOLED 348x442 CO5300",links:[]},
+
+ {id:"mb6",short:"Mi Band 6 panel",name:"Mi Band 6 panel 1.56\" 152×486",cat:"amoled",size:1.56,res:"152×486",w:11.84,h:37.9,driver:"unpublished (likely Raydium RM69x)",iface:"custom flex; QSPI inside",
+  look:"Running-track strip, 326 ppi, 450 nits; dense and saturated.",pros:["Xiaomi volume means repair stock everywhere","Skinniest high-res strip you can hold today"],cons:["Sold as glass+touch+custom flex, no datasheet","Pinout and init must be reverse-engineered"],
+  prices:[{l:"AliExpress repair assembly (Band 6)",v:"€15.19",u:"https://www.aliexpress.com/w/wholesale-mi-band-screen.html"},{l:"AliExpress Band 4–10 listing",v:"varies",u:"https://www.aliexpress.com/i/3256806000511770.html?gatewayAdapt=tur2glo4itemAdapt"}],
+  k1:"~$5 assembly (stall guess)",k1n:5,budget:"no",hqb:"likely",where:"远望数码 2–3F / 电子世界 手环维修屏 stalls",zh:"小米手环6 屏幕总成 1.56寸 152x486",links:[{t:"Mi Band 6 specs",u:"https://www.mi.com/global/product/mi-smart-band-6/"}]},
+
+ {id:"mb7",short:"Mi Band 7/8/9 panel",name:"Mi Band 7 / 8 / 9 panel 1.62\" 192×490",cat:"amoled",size:1.62,res:"192×490",w:14.96,h:38.2,driver:"unpublished (likely Raydium RM69x)",iface:"custom flex; QSPI inside",
+  look:"The same glass across three Xiaomi generations (Band 7: 500 nits, 8: 600, 9: 1200).",
+  pros:["$14 retail; probably ~$7 at a stall","atc1441's Band 10 work (RM690B0) shows the bring-up route","Three generations of volume behind it"],cons:["Repair part, not a catalogue panel","Custom flex; on-cell touch you don't need","Not a BOM line until a factory sells the bare glass"],
+  prices:[{l:"AliExpress 3256804182351755 (NFC / no NFC)",v:"$13.99",u:"https://www.aliexpress.us/item/3256804182351755.html?gatewayAdapt=deu2usa4itemAdapt"},{l:"eBay 204294855815",v:"$19.36",u:"https://www.ebay.com/itm/204294855815"},{l:"eBay 375095001942",v:"$22.33",u:"https://www.ebay.com/itm/375095001942"}],
+  k1:"~$5–7 assembly (stall guess)",k1n:6,budget:"no",hqb:"likely",where:"远望数码 2–3F / 电子世界 watch-band repair stalls",zh:"小米手环7 屏幕总成 1.62寸 AMOLED 192x490",links:[{t:"Band 7 specs",u:"https://www.mi.com/global/product/xiaomi-smart-band-7/specs/"},{t:"atc1441 Band 10 hacking",u:"https://github.com/atc1441/MiBand10-BES2700iMP-BEST1503-Hacking/wiki"}]},
+
+ {id:"am138",short:"1.38\" AMOLED bar",name:"1.38\" bar AMOLED 128×400",cat:"amoled",size:1.38,res:"128×400",w:10.7,h:33.4,est:true,driver:"?",iface:"MIPI / QSPI",
+  look:"Pencil-thin strip.",pros:["Skinniest colour bar listed"],cons:["No price found","MIPI/QSPI"],
+  prices:[{l:"Topwin product page",v:"quote",u:"https://www.topwin-cn.com/AMOLED-xianshiping.html"}],
+  k1:"unknown",k1n:null,budget:"no",hqb:"unlikely",where:"Topwin office",zh:"1.38寸 长条形 AMOLED 128x400",links:[]},
+
+ {id:"micro",short:"0.23\" micro-OLED",name:"0.23\" micro-OLED 640×400 (Sony ECX336)",cat:"micro",size:0.23,res:"640×400",w:8.143,h:6.146,driver:"on-silicon",iface:"24-bit RGB / MIPI · 51-pin",
+  look:"3,280 ppi jewel; needs a loupe or prism. Up to 2,400 nits.",pros:["Full colour at 640×400 in 8 mm"],cons:["$139+ bare; needs a bridge board","Not a BOM part"],
+  prices:[{l:"DisplayModule 0.23\" OLEDoS",v:"$139",u:"https://www.displaymodule.com/products/0-23-inch-micro-oled-display-640x400"},{l:"yxmicrodisplay ECX336B HDMI kit",v:"$175–184",u:"https://www.yxmicrodisplay.com/products/0-23-inch-sony-micro-oled-640x400-ecx336b-near-eye-display"},{l:"Tindie kits",v:"$215–397",u:"https://www.tindie.com/products/oled-module/micro-oled-display-023-inch-640x400-3000cdm2/"}],
+  k1:"$100+",k1n:100,budget:"no",hqb:"possible",where:"AR-glasses stalls / 电子科技大厦 1F showroom; teardown bins",zh:"0.23寸 硅基 OLED 640x400 ECX336",links:[]},
+
+ {id:"jdi",short:"JDI 8-colour MIP",name:"JDI 1.28\" 8-colour reflective memory LCD 176×176",cat:"mip",size:1.28,res:"176×176",w:23.02,h:23.02,driver:"in-pixel SRAM",iface:"3-wire SPI · 10-pin 0.5 mm",
+  look:"Pastel 8-colour paper. 2 µW static, 90 µW at 10 fps, 194 ppi.",pros:["Looks like nothing else; sunlight-readable","Trivial SPI; mbed/Arduino libraries"],cons:["$19; no backlight, so dark = invisible","Eight colours only"],
+  prices:[{l:"YouriTech LPM013M126A",v:"$18.87",u:"https://youritech-online.com/products/lpm013m126a-1-28-inch-176x176-tft-lcd-8-color-spi-interface-lcd-screen-for-smart-wear"},{l:"Switch Science JDI-LPM013M126A",v:"¥3,960",u:"https://www.switch-science.com/catalog/2858/"},{l:"LPM013M126C with backlight (EOL)",v:"¥5,280",u:"https://www.switch-science.com/catalog/5394/"}],
+  k1:"~$12 est.",k1n:12,budget:"no",hqb:"unlikely",where:"Online (YouriTech is in Shenzhen)",zh:"JDI 1.28寸 反射式 记忆液晶 LPM013M126A 八色",links:[{t:"mbed library",u:"https://os.mbed.com/components/JDI-Color-Memory-LCD/"}]},
+
+ {id:"sharp",short:"Sharp colour MIP",name:"Sharp 1.33\" 8-colour / 2.13\" 64-colour memory LCD",cat:"mip",size:1.33,res:"128×128 / 320×240",w:23.9,h:23.9,est:true,driver:"in-pixel memory",iface:"SPI",
+  look:"The Pebble Time screen. Always-on at microwatts.",pros:["2.13\" QVGA 64-colour part exists (LS021B7DD02)"],cons:["Price on application; 1.33\" wants 5 V","9:1 contrast"],
+  prices:[{l:"Sharp LS013B7DH06 (DisplayModule write-up)",v:"on application",u:"https://displaymodule.com/blogs/knowledge/36576449-sharp-color-memory-lcd-is-on"},{l:"Sharp LS021B7DD02 2.13\"",v:"on application",u:"https://www.businesswire.com/news/home/20221013005073/en/"}],
+  k1:"~$15 est.",k1n:15,budget:"no",hqb:"unlikely",where:"Online",zh:"夏普 记忆液晶 LS013B7DH06 八色",links:[]},
+
+ {id:"ep154",short:"1.54\" Spectra 6",name:"1.54\" Spectra 6 colour e-paper 240×240",cat:"epaper",size:1.54,res:"240×240",w:27.6,h:27.6,est:true,driver:"E6 panel driver",iface:"SPI",
+  look:"Six-primary pointillist print; dithered colour.",pros:["$7.49–12.49","Zero power when static"],cons:["10–30 s colour refresh, no partial","Wrong for live data"],
+  prices:[{l:"Waveshare 1.54inch e-Paper (E)",v:"$7.49–12.49",u:"https://www.waveshare.com/product/ai/displays/e-paper.htm"}],
+  k1:"~$4 est.",k1n:4,budget:"no",hqb:"possible",where:"ESL 电子价签 stalls",zh:"1.54寸 六色 墨水屏 E6",links:[]},
+
+ {id:"ep4",short:"4\" Spectra 6",name:"4\" / 7.3\" Spectra 6 e-paper 600×400 / 800×480",cat:"epaper",size:4,res:"600×400",w:84.5,h:56.4,est:true,driver:"E6 panel driver",iface:"SPI",
+  look:"Poster-like six-colour print.",pros:["Vivid for e-paper"],cons:["Slow; expensive; big"],
+  prices:[{l:"Waveshare 4inch (E)",v:"$37.99–46.99",u:"https://www.waveshare.com/4inch-e-paper-hat-plus-e.htm"},{l:"Waveshare 7.3inch (E)",v:"$59.99–79.99",u:"https://www.waveshare.com/7.3inch-e-paper-hat-e.htm"}],
+  k1:"$25+",k1n:25,budget:"no",hqb:"possible",where:"ESL stalls / Taobao",zh:"4寸 Spectra6 六色 墨水屏",links:[]},
+
+ {id:"ep213",short:"2.13\" 4-colour e-paper",name:"2.13\" 4-colour e-paper 250×122 (G series)",cat:"epaper",size:2.13,res:"250×122",w:48.55,h:23.70,driver:"ESL panel driver",iface:"SPI",
+  look:"Black / white / red / yellow shelf label; flat print look.",pros:["$9 raw; ESL volume","Many shapes: 1.54\", 1.64\" square, 2.36\", 3\" bar 400×168"],cons:["Seconds-long refresh","Reflective, needs light"],
+  prices:[{l:"RobotShop · Waveshare 2.13inch (G) raw",v:"$9.22",u:"https://www.robotshop.com/products/waveshare-213-e-paper-g-raw-display-250x122-red-yellow-black-white"},{l:"Waveshare 2.13inch HAT (G)",v:"$13.29–14.99",u:"https://www.waveshare.com/product/displays/e-paper/epaper-3.htm?mode=list"},{l:"Waveshare (G) family list",v:"see list",u:"https://www.waveshare.com/product/displays/e-paper/epaper-3.htm?mode=list"}],
+  k1:"~$3–4 est.",k1n:3.5,budget:"edge",hqb:"likely",where:"ESL 电子价签 stalls (电子世界 upper floors / 赛格)",zh:"2.13寸 四色 墨水屏 黑白红黄",links:[]},
+
+ {id:"tft096",short:"0.96\" IPS TFT",name:"0.96\" IPS TFT 80×160",cat:"tft",size:0.96,res:"80×160",w:10.8,h:21.7,driver:"ST7735S",iface:"SPI",
+  look:"Plain, bright, tiny.",pros:["Cheapest colour display there is (~¥7 at 1k)","Backlight is the only extra"],cons:["Looks like everything else"],
+  prices:[{l:"BuyDisplay CN ER-TFT0.96-4",v:"¥11.02 / ¥9.86 (100)",u:"https://www.buydisplay.com/chinese/0-96-inch-mini-color-tft-lcd-display-module-80x160-ips-tft-st7735"},{l:"Universal-Solder module",v:"C$2.49",u:"https://www.universal-solder.ca/product-tag/graphic/"}],
+  k1:"~$1",k1n:1,budget:"yes",hqb:"likely",where:"Any LCD stall",zh:"0.96寸 IPS 80x160 ST7735S",links:[]},
+
+ {id:"tft128",short:"1.28\" round TFT",name:"1.28\" round IPS TFT 240×240",cat:"tft",size:1.28,res:"240×240",w:32.4,h:32.4,round:true,driver:"GC9A01",iface:"SPI",
+  look:"Round is its only trick.",pros:["~$2.5–3 at 1k","Huge library support"],cons:["Backlit TFT look"],
+  prices:[{l:"Universal-Solder",v:"C$4.79",u:"https://www.universal-solder.ca/product-tag/graphic/"},{l:"Electrokit",v:"99 SEK",u:"https://www.electrokit.com/en/display-colour-tft-lcd/oled/"},{l:"eBay 2-pack",v:"€9.60",u:"https://www.ebay.de/itm/286248613992"}],
+  k1:"~$2.5–3",k1n:2.75,budget:"yes",hqb:"likely",where:"Any LCD stall; watch-repair stalls",zh:"1.28寸 圆屏 GC9A01 240x240",links:[]},
+
+ {id:"tft147",short:"1.47\" TFT bar",name:"1.47\" IPS TFT 172×320 rounded-rect",cat:"tft",size:1.47,res:"172×320",w:17.7,h:32.9,driver:"ST7789V",iface:"4-wire SPI · FPC",
+  look:"The vape-screen bar: rounded corners, 1500:1, 600 nits. Most designed-looking thing in budget.",
+  pros:["$2.50–3.20 at MOQ 5 (Kingway)","SPI; framebuffer in the driver","Stalls and Taobao both have it"],cons:["Still a TFT"],
+  prices:[{l:"Alibaba · Kingway (Jinhua)",v:"$2.50–3.20",u:"https://electronics.alibaba.com/product/touch-screen-1-4-inch"},{l:"BuyDisplay ER-TFT1.47A1-1",v:"$3.49 / $3.12 (100)",u:"https://www.buydisplay.com/1-54-inch-tft-lcd-display-ips-panel-screen-240x240-for-smart-watch"},{l:"eBay bare ST7789P3",v:"€4.57",u:"https://www.ebay.de/itm/157034057574"}],
+  k1:"~$2–2.5",k1n:2.25,budget:"yes",hqb:"likely",where:"LCD stalls; vape / watch parts counters",zh:"1.47寸 IPS 172x320 ST7789 圆角",links:[]},
+
+ {id:"tft154",short:"1.54\" TFT",name:"1.54\" IPS TFT 240×240",cat:"tft",size:1.54,res:"240×240",w:27.7,h:27.7,driver:"ST7789V",iface:"SPI · 12-pin",
+  look:"Smartwatch-clone square.",pros:["$1.70 → $1.36 at 3k, 1688-direct","Everywhere"],cons:["Generic"],
+  prices:[{l:"1688 via ship4wd (Xinhao)",v:"$1.70 / $1.36 (3k)",u:"https://sourcing.ship4wd.com/product/154-inch-ips-lcd-spi-interface-240240-resolution-st7789-driver-tft-color-screen"},{l:"Alibaba module with touch",v:"$2–5",u:"https://electronics.alibaba.com/product/touch-screen-1-4-inch"},{l:"BuyDisplay CN ER-TFTM1.54-1",v:"¥32.44",u:"https://www.buydisplay.com/chinese/ips-1-54-inch-tft-lcd-display-module-240x240-spi-for-arduino-raspberry-pi"}],
+  k1:"$1.36–1.70",k1n:1.5,budget:"yes",hqb:"likely",where:"Any LCD stall",zh:"1.54寸 IPS 240x240 ST7789",links:[]},
+
+ {id:"tft19",short:"1.9\" TFT bar",name:"1.9\" IPS TFT 170×320 bar",cat:"tft",size:1.9,res:"170×320",w:22.7,h:42.7,est:true,driver:"ST7789",iface:"SPI / 8080",
+  look:"2:1 bar; the only strip inside budget.",pros:["~$2.5 at 1k","SPI"],cons:["Not very skinny"],
+  prices:[{l:"BuyDisplay CN ER-TFT019-1",v:"¥43.45",u:"https://www.buydisplay.com/chinese/1-54-inch-ips-tft-lcd-display-240x240-st7789-connector-type-fpc"}],
+  k1:"~$2.5 est.",k1n:2.5,budget:"yes",hqb:"likely",where:"LCD stalls",zh:"1.9寸 IPS 170x320 ST7789",links:[]},
+
+ {id:"tft371",short:"3.71\" bar TFT",name:"3.71\" bar IPS TFT 240×960",cat:"tft",size:3.71,res:"240×960",w:22.96,h:91.44,driver:"ST7701S",iface:"3-SPI init + 18/24-bit RGB · 40-pin",
+  look:"A 1:4 strip, 800 nits, transflective. Spectacular, and a real integration job.",
+  pros:["The only true colour strip; $5–6 at 1k if pushed","Several factories (R-LCD, Zhanhui, YouriTech)"],cons:["RGB interface: PIO+DMA, ~20 GPIO, 460 kB framebuffer","$8.50 at 1k list"],
+  prices:[{l:"Alibaba · R-LCD",v:"$8.80 / 8.60 / 8.50 (2 / 100 / 1k)",u:"https://www.alibaba.com/product-detail/ST7701-IPS-SPI-RGB-3-71_11000006436196.html"},{l:"Alibaba · Zhanhui",v:"$11.40 → $9.90 (2k)",u:"https://www.alibaba.com/product-detail/Bar-type-Icd-display-3-71_1600732672541.html"},{l:"Alibaba factory listing",v:"$5.20–6.16",u:"https://www.alibaba.com/showroom/bar-type-tft-lcd-display.html"},{l:"BuyDisplay ER-TFT3.71-1",v:"$15.50",u:"https://www.buydisplay.com/bar-type-3-71-inch-240x960-ips-tft-lcd-display-spi-rgb-interface"}],
+  k1:"$5–8.50",k1n:6.5,budget:"no",hqb:"possible",where:"LCD-module stalls (ask 条形屏); 微雪 / Taobao",zh:"3.71寸 条形屏 240x960 ST7701S",links:[{t:"YouriTech bar displays",u:"https://www.youritech.com/products/2-7-inch-bar-style-displays/"}]},
+
+ {id:"tft34",short:"3.4\" bar TFT",name:"3.4\" bar 172×640 / 3.9\" 480×128 (YouriTech)",cat:"tft",size:3.4,res:"172×640",w:22.4,h:83.4,est:true,driver:"?",iface:"MIPI / CPU / RGB / SPI options",
+  look:"Skinny strips with MCU-friendly interface options.",pros:["172×640 with an SPI/CPU option = the MCU-friendly strip"],cons:["No price published; expect ~$5"],
+  prices:[{l:"YouriTech ET034BA01",v:"quote",u:"https://www.youritech.com/products/2-7-inch-bar-style-displays/"}],
+  k1:"~$5 est.",k1n:5,budget:"no",hqb:"unlikely",where:"Online (YouriTech is in Shenzhen)",zh:"3.4寸 条形屏 172x640",links:[]},
+
+ {id:"nokia",short:"Nokia 6100 CSTN",name:"Nokia 6100 CSTN 132×132 — passive-matrix colour LCD",cat:"other",size:1.3,res:"132×132",w:28,h:28,est:true,driver:"PCF8833 / S1D15G10",iface:"3-wire serial",
+  look:"2003 flip-phone: chalky pastel passive colour with ghosting. The LCD cousin of your PMOLED.",pros:["Few yuan on 闲鱼","12-bit colour, MRA drive"],cons:["Dead tech: surplus only, no continuity","Slow, 10–20:1 contrast"],
+  prices:[{l:"SparkFun (historic)",v:"$19.95",u:"https://sparkfun.com/tutorials/64"},{l:"Kamami KAmodTFT2",v:"module",u:"https://wiki.kamamilabs.com/index.php/KAmodTFT2"},{l:"闲鱼 / Taobao surplus",v:"¥ few"}],
+  k1:"n/a",k1n:null,budget:"no",hqb:"unlikely",where:"Surplus bins only",zh:"诺基亚 6100 彩屏 PCF8833 132x132",links:[]},
+
+ {id:"custom",short:"custom segment strip",name:"Custom segment LCD strip + RGB LEDs (~3\")",cat:"other",size:3,res:"your glyphs",w:76,h:20,est:true,driver:"HT1621 / PCF8562 or MCU",iface:"I²C / GPIO",
+  look:"Your own icons (net names, rails, a bar graph) lit any colour from addressable LEDs behind a negative VA cell.",
+  pros:["$1.5–2.5 at 1k; nobody else has it","Matches the LED-under-breadboard idea"],cons:["$1–2k NRE, 8–12 week tooling","Not pixels"],
+  prices:[{l:"晶耀 Genyu (Bao'an) segment LCD",v:"quote + NRE",u:"https://www.szgenyu.com/product/184.html"},{l:"睿显熙 RXX Display",v:"quote + NRE",u:"http://www.rxxdisplay.com/"}],
+  k1:"$1.5–2.5 + NRE",k1n:2,budget:"yes",hqb:"unlikely",where:"Factory front desks (Shenzhen / Jiangxi), not stalls",zh:"定制 段码屏 VA 负显 条形 COG",links:[]}
+];
+
+const CATS = {pmoled:"colour PMOLED",amoled:"AMOLED",tft:"TFT",epaper:"e-paper",mip:"memory LCD",micro:"micro-OLED",mono:"mono OLED",other:"other"};
+const HQB = {likely:"Likely at a stall",possible:"Possible / ask",unlikely:"Online or factory"};
+const BUD = {yes:"Fits",edge:"Close ($3–4)",no:"Over"};
+const SIZES = {xs:"≤ 1\"",m:"1–1.5\"",l:"1.5–2\"",xl:"> 2\"",bar:"Bar / strip (≥2:1)"};
+
+const LOCS = [
+ {n:"华强电子世界 Huaqiang Electronics World",a:"深南中路 × 华强北路, Futian · Metro Huaqiang Rd (L1) Exit A",items:["Floors 1–3: components, including LCD/OLED module stalls (look for 液晶屏 / LCM / OLED显示屏 signs)","Colour PMOLED 0.95\" SSD1331 and 1.5\" SSD1351, two-tone and mono OLEDs, 0.96\"/1.54\" TFTs, GC9A01 rounds","Upper floors: computer, audio and camera gear"],u:LINKS.zhihu},
+ {n:"赛格电子市场 SEG Electronics Market (SEG Plaza)",a:"华强北路 1002号 · floors 1–10 of the podium",items:["1–2F: components and dev boards (Arduino/ESP stalls carry Waveshare-type OLED and TFT modules)","One guide places display modules, sensors and dev boards on 6–7F; skip the ground floor","ESL / e-paper stalls appear among the component floors"],u:LINKS.hqbGuide},
+ {n:"远望数码商城 Yuanwang Digital Mall",a:"two blocks north along 华强北路 · 2–3F are the wholesale floors",items:["Phone and wearable repair parts: Mi Band 6/7/8/9 screen assemblies, smartwatch round AMOLEDs, 1.47\" vape/watch TFTs","Ask by model: 小米手环7 屏幕总成","Also 龙胜 A/B blocks for accessories and parts"],u:LINKS.zhihu},
+ {n:"电子科技大厦 1F showroom",a:"Huaqiangbei, curated showroom",items:["AI/AR glasses and wearables on display — the place to find who sells the 0.23\" micro-OLED kits","Not a parts counter; get a WeChat"],u:"https://www.trip.com/guide/shopping/huaqiangbei-electronics-market.html"},
+ {n:"Topwin 拓微兴业 sales office",a:"泰然工业区雪松大厦 B座 10层, Futian · 0755-83849411 · a few km from HQB",items:["Catalogue PMOLED incl. 0.6\" SSD1357 and 1.69\" 160×128; 1.38\" 128×400 AMOLED bar; transparent OLEDs","Call before going; samples next day"],u:"https://www.topwin-cn.com/AMOLED-xianshiping.html"},
+ {n:"Hemold 海墨 (Longhua)",a:"龙华区大浪街道浪花路8号1308室 · 0755-28033830",items:["0.95\" 7-pin SSD1331 colour PMOLED module in stock","PMOLED/AMOLED/TFT trader; WeChat them first"],u:"https://www.hemoled.com/zh/pmoled/"}
+];
+
+/* ---------- state ---------- */
+const state = {cat:new Set(),hqb:new Set(),budget:new Set(),size:new Set(),q:"",sort:"k1"};
+try{ const s=JSON.parse(localStorage.getItem("hqb-finder")||"null"); if(s){ for(const k of ["cat","hqb","budget","size"]) state[k]=new Set(s[k]||[]); state.q=s.q||""; state.sort=s.sort||"k1"; } }catch(e){}
+function save(){ try{ localStorage.setItem("hqb-finder",JSON.stringify({cat:[...state.cat],hqb:[...state.hqb],budget:[...state.budget],size:[...state.size],q:state.q,sort:state.sort})); }catch(e){} }
+
+function sizeBand(d){ const r=Math.max(d.w,d.h)/Math.min(d.w,d.h); const b=[]; if(d.size<=1)b.push("xs"); else if(d.size<=1.5)b.push("m"); else if(d.size<=2)b.push("l"); else b.push("xl"); if(r>=2)b.push("bar"); return b; }
+
+function chips(id,map,key,cls){
+  const box=document.getElementById(id); box.innerHTML="";
+  for(const [v,label] of Object.entries(map)){
+    const b=document.createElement("button"); b.className="chip"+(cls?" "+cls:""); b.type="button"; b.textContent=label; b.dataset.v=v;
+    b.setAttribute("aria-pressed",state[key].has(v)?"true":"false");
+    b.addEventListener("click",()=>{ state[key].has(v)?state[key].delete(v):state[key].add(v); b.setAttribute("aria-pressed",state[key].has(v)?"true":"false"); save(); render(); });
+    box.appendChild(b);
+  }
+}
+chips("f-cat",CATS,"cat"); chips("f-hqb",HQB,"hqb","hq"); chips("f-budget",BUD,"budget"); chips("f-size",SIZES,"size");
+const qEl=document.getElementById("q"); qEl.value=state.q; qEl.addEventListener("input",()=>{state.q=qEl.value;save();render();});
+const sortEl=document.getElementById("sort"); sortEl.value=state.sort; sortEl.addEventListener("change",()=>{state.sort=sortEl.value;save();render();});
+document.getElementById("clear").addEventListener("click",()=>{ for(const k of ["cat","hqb","budget","size"]) state[k].clear(); state.q=""; qEl.value=""; save(); chips("f-cat",CATS,"cat"); chips("f-hqb",HQB,"hqb","hq"); chips("f-budget",BUD,"budget"); chips("f-size",SIZES,"size"); render(); });
+
+/* ---------- drawing ---------- */
+function fillFor(d){
+  switch(d.cat){
+    case "pmoled": return "url(#pat-pmoled)";
+    case "amoled": case "micro": return d.cat==="micro"?"url(#g-micro)":"url(#pat-amoled)";
+    case "tft": return "url(#g-tft)";
+    case "epaper": return d.id==="ep213"?"url(#pat-ep4)":"url(#pat-epaper)";
+    case "mip": return "url(#pat-mip)";
+    case "mono": return d.id==="transp"?"url(#g-transp)":"url(#pat-mono2)";
+    default: return d.id==="custom"?"url(#pat-seg)":"url(#pat-cstn)";
+  }
+}
+function panelSvg(d,s,maxW,maxH){
+  const glass=1.6, tab=3;
+  let W=(d.w+glass*2)*s, H=(d.h+glass*2+tab)*s, scale=1;
+  if(W>maxW||H>maxH){ scale=Math.min(maxW/W,maxH/H); }
+  const k=s*scale;
+  const gw=(d.w+glass*2)*k, gh=(d.h+glass*2)*k, tw=Math.max(8,d.w*0.4*k), th=tab*k;
+  const vbW=gw, vbH=gh+th;
+  let body;
+  if(d.round){
+    const r=d.w/2*k, cx=gw/2, cy=gh/2;
+    body=`<circle cx="${cx}" cy="${cy}" r="${r+glass*k}" fill="var(--glass)"/><circle cx="${cx}" cy="${cy}" r="${r}" fill="${fillFor(d)}"/>`;
+  }else{
+    const rx=(d.cat==="tft"&&d.id==="tft147")?3*k:(d.cat==="amoled"&&(d.id==="mb6"||d.id==="mb7"))?d.w/2*k:0.6*k;
+    body=`<rect x="0" y="0" width="${gw}" height="${gh}" rx="${rx+glass*k*0.6}" fill="${d.id==="transp"?"rgba(120,160,200,.18)":"var(--glass)"}"/>`+
+         `<rect x="${glass*k}" y="${glass*k}" width="${d.w*k}" height="${d.h*k}" rx="${rx}" fill="${fillFor(d)}"/>`;
+  }
+  const tabSvg=`<rect x="${(gw-tw)/2}" y="${gh}" width="${tw}" height="${th}" fill="var(--line)"/>`;
+  return {svg:`<svg viewBox="0 0 ${vbW} ${vbH}" width="${vbW}" height="${vbH}" aria-hidden="true">${body}${tabSvg}</svg>`,scale};
+}
+
+/* ---------- render ---------- */
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function filtered(){
+  const q=state.q.trim().toLowerCase();
+  let out=D.filter(d=>{
+    if(state.cat.size&&!state.cat.has(d.cat)) return false;
+    if(state.hqb.size&&!state.hqb.has(d.hqb)) return false;
+    if(state.budget.size&&!state.budget.has(d.budget)) return false;
+    if(state.size.size){ const b=sizeBand(d); if(![...state.size].some(x=>b.includes(x))) return false; }
+    if(q){ const hay=[d.name,d.res,d.driver,d.iface,d.look,d.zh,d.where,CATS[d.cat],...(d.pros||[]),...(d.cons||[])].join(" ").toLowerCase(); if(!hay.includes(q)) return false; }
+    return true;
+  });
+  const by={k1:(a,b)=>(a.k1n??1e9)-(b.k1n??1e9),size:(a,b)=>a.size-b.size,sizedesc:(a,b)=>b.size-a.size,name:(a,b)=>a.name.localeCompare(b.name)};
+  return out.sort(by[state.sort]||by.k1);
+}
+function render(){
+  const list=filtered();
+  document.getElementById("count").textContent=`${list.length} of ${D.length}`;
+  const grid=document.getElementById("grid");
+  grid.innerHTML=list.length?list.map(card).join(""):`<p class="empty">Nothing matches. Loosen a filter.</p>`;
+  grid.querySelectorAll(".copy").forEach(b=>b.addEventListener("click",async()=>{
+    const code=b.previousElementSibling, t=code.textContent;
+    try{ await navigator.clipboard.writeText(t); b.textContent="Copied"; }
+    catch(e){ const r=document.createRange(); r.selectNodeContents(code); const sel=getSelection(); sel.removeAllRanges(); sel.addRange(r); b.textContent="Selected"; }
+    setTimeout(()=>b.textContent="Copy",1200);
+  }));
+  lineup(list);
+}
+function card(d){
+  const {svg,scale}=panelSvg(d,2.6,300,130);
+  const bud={yes:["ok","fits $1–3 @1k"],edge:["warn","close: $3–4 @1k"],no:["bad","over budget"]}[d.budget];
+  const hq={likely:"HQB: likely",possible:"HQB: ask",unlikely:"HQB: no"}[d.hqb];
+  return `<article class="card hqb-${d.hqb}">
+    <div class="fig">${svg}${scale<1?`<span class="scalenote">shown at 1:${(1/scale).toFixed(1)}</span>`:""}</div>
+    <div class="body">
+      <div class="head">
+        <div class="tags"><span class="tag cat">${esc(CATS[d.cat])}</span><span class="tag ${bud[0]}">${bud[1]}</span><span class="tag ${d.hqb==="likely"?"hq":""}">${hq}</span></div>
+        <h3>${esc(d.name)}</h3>
+      </div>
+      <dl class="specs">
+        <dt>size</dt><dd>${d.size}" · ${d.est?"~":""}${d.w}×${d.h} mm${d.round?" ⌀":""}</dd>
+        <dt>res</dt><dd>${esc(d.res)}</dd>
+        <dt>driver</dt><dd>${esc(d.driver)}</dd>
+        <dt>iface</dt><dd>${esc(d.iface)}</dd>
+      </dl>
+      <p class="look">${esc(d.look)}</p>
+      <div class="pc">
+        <div class="p"><h4>For</h4><ul>${d.pros.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
+        <div class="c"><h4>Against</h4><ul>${d.cons.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
+      </div>
+      <ul class="prices">${d.prices.map(p=>`<li><span>${p.u?`<a href="${esc(p.u)}" target="_blank" rel="noopener">${esc(p.l)}</a>`:esc(p.l)}</span><span>${esc(p.v)}</span></li>`).join("")}</ul>
+      <div class="k1"><span>Est. @ 1,000 pcs</span><b>${esc(d.k1)}</b></div>
+      <div class="where"><span class="lbl">Where to ask</span><span>${esc(d.where)}</span></div>
+      <div class="zh"><code>${esc(d.zh)}</code><button class="copy" type="button">Copy</button></div>
+      ${d.links.length?`<div class="links">${d.links.map(l=>`<a href="${esc(l.u)}" target="_blank" rel="noopener">${esc(l.t)}</a>`).join("")}</div>`:""}
+    </div>
+  </article>`;
+}
+function lineup(list){
+  const s=1.5, gap=18, pad=12, labelH=30;
+  const items=list.slice().sort((a,b)=>a.size-b.size);
+  const maxH=Math.max(10,...items.map(d=>d.h))*s;
+  let x=pad, parts=[];
+  for(const d of items){
+    const gw=d.w*s, gh=d.h*s, y=pad+(maxH-gh);
+    let shape;
+    if(d.round) shape=`<circle cx="${x+gw/2}" cy="${y+gh/2}" r="${gw/2}" fill="${fillFor(d)}" stroke="var(--glass)" stroke-width="2"/>`;
+    else shape=`<rect x="${x}" y="${y}" width="${gw}" height="${gh}" rx="${(d.id==="mb6"||d.id==="mb7")?gw/2:1.5}" fill="${fillFor(d)}" stroke="var(--glass)" stroke-width="2"/>`;
+    const lbl=`<text x="${x+gw/2}" y="${pad+maxH+14}" text-anchor="middle" font-size="10" font-family="IBM Plex Mono, monospace" fill="var(--muted)">${esc(d.short)}</text>`;
+    parts.push(shape+lbl); x+=Math.max(gw,34)+gap;
+  }
+  const bar=`<line x1="${pad}" y1="${pad+maxH+26}" x2="${pad+10*s}" y2="${pad+maxH+26}" stroke="var(--fg)" stroke-width="2"/><text x="${pad+10*s+6}" y="${pad+maxH+29}" font-size="10" font-family="IBM Plex Mono, monospace" fill="var(--muted)">10 mm</text>`;
+  const W=Math.max(x+pad,320), H=pad+maxH+labelH+10;
+  const svg=document.getElementById("lineup");
+  svg.setAttribute("viewBox",`0 0 ${W} ${H}`); svg.setAttribute("width",W); svg.setAttribute("height",H);
+  svg.innerHTML=parts.join("")+bar;
+}
+document.getElementById("map").innerHTML=LOCS.map(l=>`<div class="loc"><h3>${esc(l.n)}</h3><div class="addr">${esc(l.a)}</div><ul>${l.items.map(i=>`<li>${esc(i)}</li>`).join("")}</ul><a href="${esc(l.u)}" target="_blank" rel="noopener">source</a></div>`).join("");
+render();
+</script>
+
+</body></html>
