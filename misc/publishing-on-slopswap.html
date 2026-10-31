@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Publishing on slopswap</title>
+<link rel="stylesheet" href="../styles/jumperless.css">
+</head>
+<body>
+<main class="page">
+<p class="eyebrow"><a href="../">slopswap</a> / misc</p>
+<img class="logo" src="../styles/jumperless-logo.svg" alt="Jumperless">
+<h1>Publishing on slopswap</h1>
+<p>slopswap.org is a plain static site for documents Claude makes for Kevin, hosted where claude.ai is blocked. Every file on it is public. There is no build step to remember: drop an HTML file in a project folder, push, and it is live at <code>slopswap.org/&lt;project&gt;/&lt;file&gt;.html</code> about a minute later.</p>
+
+<h2>Where things go</h2>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Folder</th><th>What lives there</th><th>Theme</th></tr></thead>
+<tbody>
+<tr><td><code>misc/</code></td><td>One-off documents that belong to no project</td><td>Jumperless</td></tr>
+<tr><td><code>del-mar-plate-freezer/</code></td><td>Del Mar Seafoods vertical plate freezer project</td><td>Del Mar</td></tr>
+<tr><td><code>&lt;new-project&gt;/</code></td><td>Any new folder becomes a project and gets its own index page</td><td>Jumperless unless the page says otherwise</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>Add a document</h2>
+<ol>
+<li>Save the page as <code>&lt;project&gt;/&lt;name&gt;.html</code>. Pages always live exactly one folder deep.</li>
+<li>Link a theme near the top of the file with a relative path:
+<pre><code>&lt;link rel="stylesheet" href="../styles/jumperless.css"&gt;
+&lt;link rel="stylesheet" href="../styles/delmar.css"&gt;</code></pre></li>
+<li>Commit and push. The <code>pages</code> workflow rebuilds the index pages and deploys.</li>
+</ol>
+<div class="callout"><span class="label">Moving things</span>Folders are the only organisation. Move a file between folders in Finder, push, and its URL and its listing follow. The page keeps whichever theme it links.</div>
+
+<h2>What a theme gives a page</h2>
+<p>Both stylesheets define the same tokens, so a page's own styles work under either one: <code>--bg</code>, <code>--surface</code>, <code>--fg</code>, <code>--muted</code>, <code>--line</code>, <code>--accent</code>, <code>--accent-2</code>, <code>--font-display</code>, <code>--font-body</code>, <code>--font-mono</code>. Headings, tables, code, <code>.callout</code>, <code>.pill</code>, <code>.eyebrow</code> and <code>dl.meta</code> are styled. Jumperless adds the ten wordmark colors as <code>--r1</code> to <code>--r10</code> and a <code>--rainbow</code> gradient; sibling <span class="pill">h2</span> markers walk the rainbow in order, like the docs sidebar.</p>
+
+<h2>Rules that keep pages loading in China</h2>
+<ul>
+<li>No Google Fonts. Lato, Roboto Slab, Unica One and Overpass are self-hosted in <code>styles/fonts/</code>.</li>
+<li>No CDN scripts or stylesheets. cdnjs usually gets through, nothing else does; inline the page's own JS.</li>
+<li>Images sit next to the page in its folder.</li>
+<li>Chinese text uses the reader's system CJK font. Nothing to ship, and it matches what they see everywhere else.</li>
+</ul>
+
+<h2>Preview locally</h2>
+<pre><code>python3 build.py &amp;&amp; python3 -m http.server -d _site 8000</code></pre>
+<p>Double-clicking a page in Finder also works, since every link is relative.</p>
+
+<h2>Hosting</h2>
+<p>The repo is <code>~/Documents/GitHub/slopswap</code>. GitHub Pages serves the <code>_site/</code> folder the workflow builds. Cloudflare holds the DNS with the proxy on and SSL set to Full, which hides GitHub's addresses behind Cloudflare's, the more reliably reachable of the two from China.</p>
+<hr>
+<p class="muted">Built 31 October 2026.</p>
+</main>
+</body>
+</html>

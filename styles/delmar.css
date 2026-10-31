@@ -1,0 +1,104 @@
+/* slopswap · Del Mar Seafoods theme (plate freezer project documents)
+   Link from a doc one folder deep:  <link rel="stylesheet" href="../styles/delmar.css">
+   Token names are shared with jumperless.css. One light, print-friendly look on purpose:
+   these documents go to a manufacturer and a permit office. Fonts self-hosted (China). */
+@font-face{font-family:"Unica One";font-weight:400;font-display:swap;src:url(fonts/UnicaOne-400.woff2) format("woff2")}
+@font-face{font-family:Overpass;font-weight:100 900;font-display:swap;src:url(fonts/Overpass-var.woff2) format("woff2")}
+
+:root{
+  color-scheme:light;
+  --navy:#174380; --gold:#f0af38; --paper:#f1ede7; --sea:#3c7ed8;
+  --bg:#ffffff; --surface:var(--paper); --fg:#1c2638; --muted:#5d6f8a; --line:#d8dde5;
+  --accent:var(--navy); --accent-2:var(--gold);
+  --font-display:"Unica One",Oswald,"Arial Narrow","PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+  --font-body:Overpass,"Helvetica Neue",Arial,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+  --font-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 var(--font-body);counter-reset:sec;
+  padding-block:1.5rem 3rem;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.page{max-width:52rem;margin:0 auto;min-width:0}
+
+h1,h2{font-family:var(--font-display);font-weight:400;text-transform:uppercase;line-height:1.1;text-wrap:balance;color:var(--navy)}
+h1{font-size:clamp(2.2rem,6vw,3.25rem);margin:.5rem 0 1rem}
+/* numbered sections, as in the project brief: big navy numeral, then the title */
+h2{font-size:1.75rem;margin:2.5em 0 .7em;padding-top:1.2em;border-top:1px solid var(--line);
+  display:grid;grid-template-columns:2.75rem 1fr;column-gap:.5rem;align-items:baseline}
+h2::before{counter-increment:sec;content:counter(sec);font-size:1.5rem}
+h2.plain{display:block}h2.plain::before{content:none}
+h3{font-size:1.1rem;font-weight:700;margin:1.8em 0 .5em;color:var(--fg)}
+h4{font-size:.75rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:1.5em 0 .4em}
+
+p,ul,ol,dl,table,pre,blockquote,figure{margin:0 0 1.1em}
+li{margin:.3em 0}
+a{color:var(--sea);text-decoration-thickness:1px;text-underline-offset:2px}
+a:hover{color:var(--navy)}
+small,.muted{color:var(--muted)}
+.eyebrow{font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem}
+.eyebrow a{color:inherit;text-decoration:none}
+.label{display:block;font-size:.7rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.rule{width:4.5rem;height:4px;background:var(--gold);border:0;margin:1.5rem 0}
+hr{border:0;border-top:1px solid var(--line);margin:2.5rem 0}
+
+/* running head and foot: project · doc id · status */
+.doc-head,.doc-foot{display:flex;justify-content:space-between;gap:.5rem 1.5rem;flex-wrap:wrap;
+  font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.doc-head{border-bottom:1px solid var(--line);padding-bottom:.6rem;margin-bottom:1.5rem}
+.doc-foot{border-top:1px solid var(--line);padding-top:.6rem;margin-top:3rem}
+
+/* navy cover block */
+.cover .logo{display:block;height:8.5rem;width:auto;margin:0 0 2.5rem}
+.cover{background:var(--navy);color:#fff;padding:3rem clamp(1.25rem,5vw,3rem) 2.5rem;margin:0 0 2.5rem}
+.cover h1,.cover h2,.cover h3{color:#fff}
+.cover .eyebrow,.cover .label{color:var(--gold)}
+.cover .eyebrow{color:var(--gold)}
+.cover p{color:#dbe3f0;max-width:60ch}
+.cover a{color:#fff}
+
+dl.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));gap:1.25rem;margin:2.5rem 0 0}
+dl.meta dt{font-size:.68rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+dl.meta dd{margin:0;font-weight:600}
+.cover dl.meta dt{color:#a6b2c5}.cover dl.meta dd{color:#fff}
+
+.callout{background:var(--paper);border-left:4px solid var(--gold);padding:1rem 1.25rem;border-radius:0 6px 6px 0;margin:1.2em 0 1.6em}
+.callout .label{margin-bottom:.4rem}
+.callout>:last-child{margin-bottom:0}
+
+.table-wrap{overflow-x:auto;margin-bottom:1.1em}
+table{border-collapse:collapse;width:100%;font-size:.95rem;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:.75em .85em;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--paper);font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+td .sub{display:block;color:var(--muted);font-size:.9em}
+
+/* requirement status pills */
+.pill{display:inline-block;font-size:.66rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  padding:.3em .9em;border-radius:999px;border:1.5px solid transparent;vertical-align:middle;white-space:nowrap}
+.pill.confirmed{background:var(--gold);color:#1c2638}
+.pill.wolfking{background:#cfe3f8;color:var(--navy)}
+.pill.apcco{border-color:var(--navy);color:var(--navy)}
+.pill.open{border-style:dashed;border-color:var(--gold);color:#9a6a0e}
+.key{display:flex;flex-wrap:wrap;gap:.7rem 1.75rem;align-items:center;font-size:.9rem;color:var(--muted);margin:0 0 1.4em}
+.key span{display:inline-flex;align-items:center;gap:.5rem}
+
+code,kbd,pre{font-family:var(--font-mono);font-size:.9em}
+code,kbd{background:var(--paper);padding:.1em .4em;border-radius:3px}
+pre{background:var(--paper);padding:1rem;overflow-x:auto;border-radius:4px;line-height:1.5}
+pre code{background:none;padding:0;font-size:1em}
+blockquote{border-left:4px solid var(--line);margin-left:0;padding:.1em 1em;color:var(--muted)}
+img,svg,video{max-width:100%;height:auto}
+figcaption{font-size:.85rem;color:var(--muted)}
+
+ul.docs{list-style:none;padding:0}
+ul.docs li{padding:.6em 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+ul.docs small{color:var(--muted);text-transform:uppercase;font-size:.68rem;letter-spacing:.14em}
+
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+@media print{
+  @page{margin:16mm}
+  body{padding:0;font-size:11pt}
+  .cover,.pill,th,.callout{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  a{color:inherit;text-decoration:none}
+}
