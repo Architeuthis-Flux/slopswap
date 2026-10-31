@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>V6 ChonkBus: bus ends, interlock, row isolation, BOM</title>
+<link rel="stylesheet" href="../styles/jumperless.css">
+<style>table{font-size:.85rem} td,th{padding:.4em .55em} .table-wrap{margin:0 -1px 1.1em} h2{margin-top:2.2em} h3{margin-top:1.6em} img.sheet{border:1px solid var(--line);border-radius:4px;background:#fff}</style>
+</head>
+<body>
+<main class="page">
+<p class="eyebrow"><a href="../">slopswap</a> / <a href="./">V6</a></p>
+<h1>V6 ChonkBus: bus ends, interlock, row isolation, BOM</h1>
+<p><em>2026-10-29. Decision record for the row-switch system now drawn as block B29 (<code>b29_chonkbus</code>) and installed in <code>JumperlessV6/MainBoard/MainBoard.kicad_sch</code> (first install backup <code>MainBoard-backups/pre-v6_MainBoard_2026-10-29_033249.zip</code>; ROW-ISO fitted in a second install the same day, backup <code>pre-v6_MainBoard_2026-10-29_091257.zip</code>; undo with <code>python3 v6gen/install_v6.py --revert</code>). Later the same day: current sense, always-on voltage sense, expansion port and cost cuts are in <a href="expansion-port-and-current-sense.html">V6_expansion_port_and_current_sense</a>. Spec: <code>v6gen/BUILD_SPEC.md</code> section 8; write-up for the sheet: <code>docs/V6_SCHEMATIC.md</code> "2026-10-29". Prices: <code>docs/V6_BOM.md</code> (1000 boards).</em></p>
+<h2>0. Bottom line</h2>
+<ul>
+<li><strong>Two identical buses, same option list each.</strong> That is the mental model: "there are two 0.1 Ω ChonkBuses; any row can be on either; each bus can be TOP_RAIL, BOTTOM_RAIL, GND, DAC 0 or DAC 1 (one of these), plus the extension port, plus a shunt ammeter to the other bus." Making one bus GND-only would have saved nothing (the decoder makes exclusivity free) and cost the two-positive-supplies case.</li>
+<li><strong>Hardware interlocks only where no override could ever be wanted; firmware everywhere else.</strong> A 74HC238 per bus turns 3 latch bits + 1 enable into at most one voltage source, so no latch content, bit-order bug or half-shifted chain can put two sources on one bus. Two single gates stop the shunt from closing while both buses carry a source. Everything else (bus = rail <em>and</em> extension port, a row on both buses, shunt with one sourced bus) is a plain latch bit, policed by a low-level firmware "bus manager" with an override flag.</li>
+<li><strong>Break-before-make is inherent but not guaranteed:</strong> with the decoder the old switch opens (tOFF 5 µs typ) before the new one closes (tON 15 µs typ); the datasheet gives no maxima, so the firmware sequence is <em>enable low → latch → new code + enable high → latch</em> (two chain updates, ~20 µs apart).</li>
+<li><strong>Row isolation: FITTED</strong> (your call later on 2026-10-29; the first install had it as footprints with 0R bridges). It costs <strong>+$4.47 in parts at 1k</strong> (30 × ET7460H $3.60, 8 × 74HC595 $0.49, 38 × 100 nF $0.38) plus ~16 net placements, i.e. about <strong>+6 % of parts, +3.5 % of unit cost</strong>; the 60 × 0R are now the option (<code>OPTION ROW-BRIDGE</code>, dnp) for going back. Decide on the two bench tests (§4); the case for it is better than "–13/+18 V on idle rows" alone.</li>
+<li><strong>BOM as it stands (1000 boards, parts only, from the schematic, ROW-ISO fitted):</strong> main board <strong>$60.64</strong>, wig <strong>$18.62</strong>, total <strong>$79.26</strong> (+ ~$2 of unpriced small parts; the display is in at its $8.49 <em>sample</em> AMOLED price — the TFT decision takes ~$5 off). Rough unit cost ex-works with assembly, mechanics, PCBs and packaging: <strong>~$128 at 1k (SLS shell), ~$116 at 3k (moulded)</strong>. §5 has the breakdown (pre-ISO numbers) and the caveats; the interactive version is the <a href="cost-explorer.html">Cost Explorer</a>.</li>
+</ul>
+<h2>1. What each bus can connect to (sheet <code>b29_busends</code>)</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Connection</th>
+<th>Per bus</th>
+<th>Mechanism</th>
+<th>Control</th>
+<th>Hardware-exclusive?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TOP_RAIL</td>
+<td>yes</td>
+<td>ET7460H switch, decoder code 1</td>
+<td><code>SRC_x_S0..2</code> + <code>SRC_x_EN</code></td>
+<td>yes, one of the five</td>
+</tr>
+<tr>
+<td>BOTTOM_RAIL</td>
+<td>yes</td>
+<td>code 2</td>
+<td>〃</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>GND</td>
+<td>yes</td>
+<td>code 3</td>
+<td>〃</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>DAC 0</td>
+<td>yes</td>
+<td>code 4; tapped at <strong><code>R_SENSE+</code></strong>, the L272D U10 output <em>ahead of</em> the 2 Ω R57, so the bus path has no series resistance (the crossbar node <code>DAC_0</code> keeps R57 and its INA219 U4)</td>
+<td>〃</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>DAC 1</td>
+<td>yes</td>
+<td>code 5 (<code>DAC_1</code>)</td>
+<td>〃</td>
+<td>yes</td>
+</tr>
+<tr>
+<td>nothing</td>
+<td>—</td>
+<td>code 0, codes 6–7, or enable low</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Extension connector</td>
+<td>yes</td>
+<td>ET7460H, <code>BUS_x</code> ↔ <code>BUS_x_EXT</code> (B33 pins 25–28, two pads each)</td>
+<td><code>EXT_A</code> / <code>EXT_B</code></td>
+<td>no — free bit</td>
+</tr>
+<tr>
+<td>Shunt ammeter to the other bus</td>
+<td>shared</td>
+<td><code>BUS_A</code> →SW→ 0R1 →SW→ <code>BUS_B</code>, INA219 across the 0R1</td>
+<td><code>SHUNT</code> (gated)</td>
+<td>blocked while both buses are sourced</td>
+</tr>
+<tr>
+<td>Crossbar node</td>
+<td>—</td>
+<td><strong>dropped</strong>: a bus is reachable through any of its member rows (their CH446Q Y pins), so a dedicated K/L X-port switch would only duplicate that and spend a scarce port</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>+5 V</td>
+<td>—</td>
+<td>not offered (your 2026-10-02 rule: no fixed user supply); decoder codes 6/7 are free if that changes</td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<p>Parts: 2 × 74HC238PW (U29098/99), 6 × ET7460H sources (U29091..96, three per bus: TOP/BOTTOM, GND/DAC0, DAC1/EXT), 1 × ET7460H shunt (U29097, both halves), 0R1 1 % 1206 (R29063), INA219 U29102 at <strong>0x44</strong> (A1 = VS, A0 = GND; U3 is 0x41, U4 0x40) with 10 Ω + 10 Ω + 100 nF, 74LVC1G00 + 74LVC1G08 interlock (U29100/101). Totals for the whole block: 67 ET7460H fitted (+3 vs the old option B), 17 × 74HC595, same CH32 pins (PF0/1/5/11/14) and the same chain length (136 bits).</p>
+<p><strong>Shunt numbers:</strong> INA219 LSB 10 µV → 100 µA per LSB on 0.1 Ω, ±3.2 A full scale at PGA /8, ~0.3 Ω in the path (two switches + shunt). Current A→B reads positive; the INA219 bus-voltage register gives V(BUS_B). Uses: row on A + row on B + shunt = a 0.3 Ω ammeter in series with anything; BUS_A = TOP_RAIL, the circuit's supply rows on BUS_B, shunt closed = supply current with a software fuse (open <code>A_n</code>/<code>B_n</code> on overcurrent, 5 µs). Limit: the INA219 inputs take −0.3…+26 V, so the shunt may only be closed while both buses are at or above 0 V (GND, TOP_RAIL or a DAC set ≥ 0) — the same limit V5's ISENSE has. With both shunt switches open the INA219 floats on its own nodes (internal ~830 kΩ to GND), so a negative bus never reaches it. The limit goes away with a $0.15 INA181-footprint amplifier (3PEAK TP181 / Gainsil GS199 / TI INA199) run with −9V as its ground and REF at +1.65 V (window −9.3…+27 V absolute; INA296A1 at $1.69 reaches −14 V), or with a ground-referenced ST TSC2011 ($1.33, −20…+70 V); output through the 8:1 housekeeping mux into one CH32 ADC channel, with two dividers for an always-on bus voltage read — <a href="expansion-port-and-current-sense.html">V6_expansion_port_and_current_sense</a> §1.5–1.6 (2026-10-30); not drawn yet.</p>
+<p><strong>Latch bit map</strong> (chip 1 = nearest <code>SW_SER</code>): chips 1–15 <code>A_1 B_1 … A_60 B_60</code>; chip 16 <code>SRC_A_S0 S1 S2 EN SRC_B_S0 S1 S2 EN</code>; chip 17 (aux) <code>XB2_SEL0..2 EXT_A EXT_B SHUNT</code> + 2 test points; chips 18–25 (ROW-ISO, fitted) <code>ISO_1..ISO_60</code> + 4 spare: 200 bits. <code>SW_SER_EXT</code> to the extension board comes through solder jumper JP29001: A (bridged) = U29127 QH′ (chain end), B = aux QH′ (for the ROW-BRIDGE option, 136 bits). 100 kΩ pull-downs on every logic input the chain feeds (decoder address/enable, SHUNT, XB2_SEL0..2) so nothing floats while the latch outputs are Hi-Z at reset: every source off, shunt open, every switch open.</p>
+<h2>2. Hardware vs firmware: the interlock decision</h2>
+<p>What goes wrong without any interlock: two sources on one bus (TOP_RAIL and GND, say) is the L272D short-circuit current through 0.2 Ω; the TPS65131 delivers ~0.6–0.8 A at ±9 V before it folds, so the <em>crossbar rails sag</em>, every CH446Q may lose its routing, and the ET7460H (0.8 A continuous) cycles on thermal shutdown. On V5 the equivalent fault runs through 130 Ω of crosspoints and is benign; here it is not. A firmware-only rule would stop the normal case but not a crashed CH32, a corrupted SPI transfer into the chain, or a bit-order mistake while the firmware is young.</p>
+<p>So the split is:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>In hardware (no override possible)</th>
+<th>In firmware (bus manager, override flag)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>≤ 1 voltage source per bus (74HC238; code 0 = none; enable = second lock and the break-before-make lever)</td>
+<td>bus = source <strong>and</strong> extension port (your case: an extension board powered from the rail)</td>
+</tr>
+<tr>
+<td>shunt cannot close while both buses are sourced (NAND + AND, $0.11)</td>
+<td>extension port alone (external supply onto the bus, with the member rows isolated if it exceeds the crossbar range)</td>
+</tr>
+<tr>
+<td>reset state = everything open (595 outputs Hi-Z + ET7460H 600 kΩ pull-downs + 100 kΩ pull-downs)</td>
+<td>a row closed on both buses (bridges them through 0.2 Ω; never by default)</td>
+</tr>
+<tr>
+<td></td>
+<td>shunt with one sourced bus, both buses ≥ 0 V (INA219 limit)</td>
+</tr>
+<tr>
+<td></td>
+<td>source change sequence: <code>SRC_x_EN</code> low, latch, new code + EN high, latch</td>
+</tr>
+<tr>
+<td></td>
+<td>ISO_n closed for every row the matrix routes or senses (option fitted)</td>
+</tr>
+</tbody>
+</table></div>
+<p>The decoder costs $0.40 per board for two and <em>saves</em> two latch bits against five direct source bits per bus; the gates cost $0.11. The rejected alternatives: a fully firmware chain (cheapest, one brown-out away from a bad day), and asymmetric buses (one GND-only) which block two-positive-rail circuits (3V3 logic + 5 V peripheral) for no saving.</p>
+<h2>3. Row isolation: what the $4.47 buys</h2>
+<p>Sheet <code>b29_isolation</code>, fitted: one ET7460H switch per row between the breadboard row <code>n</code> and the crossbar side <code>MX_ROW_n</code> (CH446Q Y pin, lane-layer X port, BAT54S clamp), one package per two rows, 60 control bits. To go back (<code>OPTION ROW-BRIDGE</code>): fit the 60 × 0R 0402, leave the 30 switches, 8 latches and 38 capacitors out, move JP29001 to B (136-bit chain). Because the clamps and the lane layer sit on <code>MX_ROW_n</code>, the crossbar side was renamed on your sheet (60 labels at the CH446Q Y pins) so that the option is a pure fit/no-fit choice with no rewiring.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>Without (bridges)</th>
+<th>With ROW-ISO</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Idle row</td>
+<td>CH446Q Y port + BAT54S clamp: anything beyond the crossbar rails (±9.3 V, or +14.3/−4.3 V in the other range) is clamped; a stiff 12 V supply burns the 200 mA BAT54S, then the CH446Q (no series R in the row path, by decision)</td>
+<td>three open ET7460H, nothing else: <strong>−13/+18 V recommended, −15/+20 V abs max</strong>, no clamp current at all</td>
+</tr>
+<tr>
+<td>Row in use</td>
+<td>as V5</td>
+<td>as V5 (ISO closed; clamp active)</td>
+</tr>
+<tr>
+<td>Bus from the extension port at a voltage the CH446Q cannot take (12 V, −12 V)</td>
+<td>not possible (member rows expose the matrix)</td>
+<td>possible with the member rows isolated: V6 can distribute an external supply to the breadboard</td>
+</tr>
+<tr>
+<td>Jumperless unpowered, circuit externally powered</td>
+<td>rows clamped at ±0.3 V into dead rails: breadboard unusable</td>
+<td>works as a plain breadboard <strong>if</strong> the ET7460H blocks with VCC = 0 (bench test; the datasheet is silent, the AW35331 states it)</td>
+</tr>
+<tr>
+<td>Reset / "rows completely passive" rule</td>
+<td>row always on its Y port</td>
+<td>row attached to nothing until the firmware closes ISO_n — the rule holds by construction</td>
+</tr>
+<tr>
+<td>Per row path</td>
+<td>—</td>
+<td>+0.1 Ω, +~40 pF, +≤0.35 µA leakage (85 °C max; nA typical), one more control bit; the lane layer cannot look at an isolated row (by design)</td>
+</tr>
+<tr>
+<td>Cost</td>
+<td>—</td>
+<td>+$4.47 parts (30 × $0.12 + 8 × $0.061 + 38 × $0.01; the 0R are $0 at Elecrow), ~16 net placements (~$0.25), 30 more WLCSP-12 to route, +5 mA quiescent, chain 136 → 200 bits (20 µs at 10 MHz)</td>
+</tr>
+</tbody>
+</table></div>
+<p>It is fitted; run the two tests that decide whether it stays — (1) S/D blocking with VCC = 0 at −5/+8 V and at −12/+12 V, (2) off-capacitance and leakage of a row with three open switches — and keep it if (1) passes. If (1) fails, the feature shrinks to "idle rows take 18 V while the Jumperless is on" plus the external-supply bus; I would still keep it, but that is the point where the $4.47 is a judgement call rather than obvious.</p>
+<h2>4. Open items and bench list</h2>
+<ul>
+<li>ET7460H: Ron outside ±VCC (spec only inside), VCC = 0 blocking, off capacitance (60 open switches on a bus; 3 on an isolated row), charge injection, thermal-shutdown cycling into a short, EN tied to VCC on all packages (OPTION ROWSW-EN from the old note still applies if you want one-pin shutdown).</li>
+<li>DAC 0 / DAC 1 as sources and DAC 0 taken at <code>R_SENSE+</code>: a proposal; you have not confirmed either. U4 (INA219 on R57) becomes redundant once the bus shunt exists (−$0.47).</li>
+<li>INA219 common-mode limit (−0.3 V): replace it with a floated TP181-class amplifier (see the later note, §1.5); the 470 Ω trick from V5 does not transfer to a 0.1 Ω shunt.</li>
+<li>Part numbers from LCSC search (not re-read datasheets): 74HC238PW,118 C60434 ($0.20@500/$0.18@2.5k), 74LVC1G00GW C12508 ($0.079@500), 74LVC1G08GW C12512 (~$0.03); the 1G00/1G08 pinout is the stock KiCad symbol (JEDEC single-gate). 0R1 1206 shunt: no part chosen ($0.03 estimate).</li>
+<li>100 kΩ pull-downs: value not from a source (74HC input leakage 1 µA → 0.1 V); the old 10 kΩ on XB2_SEL0..2 became 100 kΩ.</li>
+<li>Extension connector pins 25–28 are now <code>BUS_A_EXT</code>/<code>BUS_B_EXT</code> (behind the EXT switches); pad current rating still unknown (B33). The ExtensionBoard project follows (its cells are on those nets).</li>
+<li>Firmware: <code>MatrixState</code>/router must treat bus membership as a net attribute and (with ROW-ISO) close ISO_n on every routed or sensed row; the chain gains the source codes (3 bits + EN per bus) in place of the four per-source bits.</li>
+</ul>
+<h2>5. BOM</h2>
+<h3>Parts, from the schematic (<code>python3 v6gen/bom.py 1000</code>, 1000 boards)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Board</th>
+<th>Priced</th>
+<th>Unpriced pieces (my estimate)</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Main</td>
+<td><strong>$56.18</strong> (was $54.12 on 10-18)</td>
+<td>27 pieces ≈ $1.6 (TCA9534, 2 × CH217S, crystal, 1.27 mm 2×35 header, 0805 caps, pads)</td>
+<td>+$2.06 for the bus ends: 2 × 74HC238 $0.40, INA219 $0.47, gates $0.11, 3 more ET7460H $0.36, 74HC238 of B34/B30 now priced $0.60, passives</td>
+</tr>
+<tr>
+<td>Wig</td>
+<td><strong>$18.62</strong></td>
+<td>8 pieces ≈ $0.4</td>
+<td>unchanged: 480 LEDs $9.02, 9 × TMAG5273 $4.43, 80 clips $4.79</td>
+</tr>
+<tr>
+<td><strong>Both</strong></td>
+<td><strong>$74.80</strong></td>
+<td>≈ $2.0</td>
+<td>≈ <strong>$77</strong></td>
+</tr>
+<tr>
+<td>ROW-ISO (now fitted: main $60.64)</td>
+<td>+$4.47</td>
+<td></td>
+<td>30 × ET7460H, 8 × 74HC595, 38 × 100 nF; 60 × 0R out</td>
+</tr>
+</tbody>
+</table></div>
+<p>Biggest lines: 480 LEDs $9.02 · 12 × CH446Q (yours) $10.80 · 67 × ET7460H $8.04 · display $8.00 (sample price; the 1.47″ TFT at ~$3 would take ~$5 off) · 80 clips $4.79 · 5 × CH446Q lane layer $4.50 · 9 × TMAG5273 $4.43 · CH32H417 $3.30 (estimate) · nav stick $2.34 · 2 × L272D $2.28 · TPS65131 $2.17 · PSRAM $1.42 · MCP4728 $1.38 · encoder $1.30 · 60 × BAT54S $1.04 · 17 × 74HC595 $1.03.</p>
+<h3>Unit cost, rough (constants from <code>V6pile/bom/bom_model.py</code>, placement count from the schematic)</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th></th>
+<th>1k, SLS shell, clip block outsourced</th>
+<th>3k, moulded</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Parts (above, incl. clips and display socket)</td>
+<td>76.8</td>
+<td>73.0 (−5 %)</td>
+</tr>
+<tr>
+<td>SMT assembly, ~1400 placements at $0.0127 (V5 rate; 480 are one LED)</td>
+<td>17.9</td>
+<td>16.5</td>
+</tr>
+<tr>
+<td>Clip-block marriage (vs $14 hand labour the V5 way)</td>
+<td>2.5</td>
+<td>2.5</td>
+</tr>
+<tr>
+<td>Clip tooling amortised</td>
+<td>2.7</td>
+<td>0.9</td>
+</tr>
+<tr>
+<td>Shell</td>
+<td>5.7 (SLS)</td>
+<td>2.5 (mould + part)</td>
+</tr>
+<tr>
+<td>Probe + cap</td>
+<td>6.5 (SLS)</td>
+<td>6.1</td>
+</tr>
+<tr>
+<td>PCBs (main 4L ~5.5, wig ~2.5, probe ~1)</td>
+<td>9.0</td>
+<td>8.5</td>
+</tr>
+<tr>
+<td>Cable, box, flash/test</td>
+<td>2.3</td>
+<td>2.3</td>
+</tr>
+<tr>
+<td><strong>Ex-works</strong></td>
+<td><strong>≈ $123</strong></td>
+<td><strong>≈ $112</strong></td>
+</tr>
+<tr>
+<td>+ ROW-ISO</td>
+<td>+4.7</td>
+<td>+4.5</td>
+</tr>
+<tr>
+<td>Landed (×1.25 tariff + $1)</td>
+<td>≈ $155</td>
+<td>≈ $141</td>
+</tr>
+</tbody>
+</table></div>
+<p>Caveats: the component total is the solid part (every line sourced; see <code>docs/V6_BOM.md</code> for basis and dates); assembly, PCBs and mechanics are scaled from the V5 quotes, not quoted. This is well above the $77 "V6 lean" scenario in <code>README_v6BOM.md</code> because that model predates the display, the lane layer, the magnetometers, the ChonkBus and the CH32: those are ~$35 of the parts. At $339 via Crowd Supply the 1k figure gives ~38 % margin, ~51 % sold direct; the $220 target needs the lean board, not this one. The ROW-ISO decision moves that by under 2 points either way — it is not what decides the price.</p>
+<h2>6. Names</h2>
+<p>ChonkBus, PowerBussy (yours); ChonkRail, FatBus, Beefy Bus, HardBus, Power Lane, HeavyLine. "ChonkBus" is the one that is both descriptive (chunky, bus) and says what it is in the UI ("put row 7 on ChonkBus A"); the latch/net names in the schematic stay <code>BUS_A</code>/<code>BUS_B</code> so nothing depends on the final pick.</p>
+<h2>7. Files</h2>
+<ul>
+<li><code>v6gen/blocks/b29_chonkbus.py</code> (new; replaces <code>b29_rowswitch</code> in <code>merge_v6.MODULES</code>), <code>prep_base.py</code> (60 label touches), <code>b30_lane_afe.py</code>, <code>b32_power.py</code>, <code>b33_ext.py</code>, <code>ext_board.py</code>, <code>opt_misc.py</code>, <code>bom.py</code>, <code>prices.csv</code>, <code>kc.py</code>; <code>BUILD_SPEC.md</code> §8; <code>docs/V6_SCHEMATIC.md</code>, <code>docs/V6_HANDOFF.md</code>, <code>docs/V6_BOM.md/.csv</code>.</li>
+<li>Sheets: <code>v6gen/out/blocks/b29_{rowcells,isolation,busends,latches}.kicad_sch</code> + <code>.png</code>; staged project <code>v6gen/out/merged/MainBoard/</code>; installed into <code>MainBoard/</code>.</li>
+<li>Proof: base pins renamed 0 beyond the 79 intended (19 earlier + 60 rows), merged netlist = base + blocks, 1,426 parts added (191 of yours kept), ERC 2418 / 46 errors (the same 46 as before), KiCad re-save identical.</li>
+</ul>
+<hr>
+<p class="muted">Jumperless V6 design notes, written with Claude; published 31 October 2026. Prices are LCSC unit prices on the date each section states. Nothing here is a datasheet; follow the links for those.</p>
+</main>
+</body>
+</html>

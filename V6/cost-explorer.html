@@ -1,0 +1,444 @@
+<title>Jumperless V6 Cost Explorer</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="../styles/jumperless.css">
+<style>
+/* Layout: a control rail on the left, a results column on the right; both stack on phones. */
+:root {
+  --bg: #f3f1ec; --panel: #ffffff; --ink: #1f2328; --muted: #5d6670; --line: #d9d4ca;
+  --copper: #b2602a; --copper-soft: #f1dccb; --good: #2f7d4f; --warn: #b7791f; --bad: #b3362b;
+  --bar1: #b2602a; --bar2: #d59a6c; --bar3: #6b7f99; --bar4: #9fb0c4; --bar5: #c9c2b4; --bar6: #7a8a66;
+  --sans: var(--font-body, Lato, "Helvetica Neue", Arial, sans-serif); --mono: var(--font-mono, ui-monospace, Menlo, monospace);
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #15181c; --panel: #1e2328; --ink: #e8e4dc; --muted: #9aa3ad; --line: #343b43;
+  --copper: #d9834a; --copper-soft: #3a2a1f; --good: #5fbf85; --warn: #e0a640; --bad: #e0675a;
+  --bar1: #d9834a; --bar2: #a86a44; --bar3: #7f93ad; --bar4: #55657a; --bar5: #4a5058; --bar6: #8aa07a; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #15181c; --panel: #1e2328; --ink: #e8e4dc; --muted: #9aa3ad; --line: #343b43;
+  --copper: #d9834a; --copper-soft: #3a2a1f; --good: #5fbf85; --warn: #e0a640; --bad: #e0675a;
+  --bar1: #d9834a; --bar2: #a86a44; --bar3: #7f93ad; --bar4: #55657a; --bar5: #4a5058; --bar6: #8aa07a; color-scheme: dark }
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 14px; line-height: 1.45;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 20px 40px }
+h1 { font-size: 22px; font-weight: 600; margin: 0 0 4px; text-wrap: balance }
+h2 { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px }
+h3 { font-size: 14px; font-weight: 600; margin: 0 0 6px }
+p { margin: 0 0 8px; max-width: 70ch }
+.sub { color: var(--muted); margin-bottom: 18px }
+.wrap { display: grid; grid-template-columns: minmax(280px, 380px) minmax(0, 1fr); gap: 20px; max-width: 1200px; margin: 0 auto }
+@media (max-width: 820px) { .wrap { grid-template-columns: 1fr } }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 14px 16px; min-width: 0 }
+.rail { display: flex; flex-direction: column; gap: 14px }
+.group { border-top: 1px solid var(--line); padding-top: 10px; margin-top: 4px }
+.group:first-of-type { border-top: 0; padding-top: 0; margin-top: 0 }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 4px 0; flex-wrap: wrap }
+.row label { flex: 1 1 160px; min-width: 0 }
+.row small { display: block; color: var(--muted); font-size: 12px }
+select, input[type=number] { font: inherit; font-family: var(--mono); font-size: 13px; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 4px 6px; max-width: 100% }
+input[type=number] { width: 86px; text-align: right }
+select { max-width: 190px }
+input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--copper) }
+.seg { display: flex; gap: 4px; flex-wrap: wrap }
+.seg button { font: inherit; font-size: 13px; padding: 4px 10px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 4px; cursor: pointer }
+.seg button[aria-pressed="true"] { background: var(--copper); border-color: var(--copper); color: #fff }
+.seg button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--copper); outline-offset: 1px }
+.est { font-size: 11px; color: var(--copper); border: 1px solid var(--copper); border-radius: 3px; padding: 0 4px; margin-left: 4px; vertical-align: middle }
+.results { display: flex; flex-direction: column; gap: 14px }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px }
+.tile { background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px }
+.tile .v { font-family: var(--mono); font-size: 22px; font-weight: 500; font-variant-numeric: tabular-nums }
+.tile .k { font-size: 12px; color: var(--muted) }
+.tile .d { font-size: 12px; font-family: var(--mono); color: var(--muted) }
+.stack { display: flex; height: 26px; border-radius: 4px; overflow: hidden; border: 1px solid var(--line) }
+.stack div { height: 100%; min-width: 0 }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; margin-top: 8px }
+.legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; margin-right: 5px; border-radius: 2px; background: var(--c); vertical-align: -1px }
+table { border-collapse: collapse; width: 100%; font-size: 13px }
+th, td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--line); vertical-align: top }
+td.n, th.n { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap }
+tr.total td { font-weight: 600; border-top: 2px solid var(--line) }
+.tablewrap { overflow-x: auto }
+.margins td.good { color: var(--good) } .margins td.warn { color: var(--warn) } .margins td.bad { color: var(--bad) }
+.meter { height: 14px; background: var(--bg); border: 1px solid var(--line); border-radius: 4px; position: relative; overflow: hidden }
+.meter .fill { position: absolute; inset: 0 auto 0 0; background: var(--copper) }
+.meter .mark { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--bad) }
+.note { font-size: 12px; color: var(--muted) }
+.hint { font-size: 12px; color: var(--muted); margin-top: 6px }
+.chips { display: flex; flex-wrap: wrap; gap: 6px }
+.chip { font-size: 12px; border: 1px solid var(--line); border-radius: 12px; padding: 2px 9px; background: var(--bg) }
+.chip b { font-family: var(--mono); font-weight: 500 }
+a { color: var(--copper) }
+/* slopswap: the site theme is linked for its fonts and the rainbow stripe; undo its document styling inside this app */
+h1 { font-family: var(--font-display, var(--sans)); margin-top: .75rem }
+h2 { border-left: 0; padding-left: 0; font-family: var(--sans); text-wrap: initial }
+th { text-transform: none; letter-spacing: 0; background: none; font-size: 13px; color: inherit }
+p, ul, table { margin-bottom: 8px }
+hr { height: 1px; background: var(--line); margin: 1rem 0 }
+.eyebrow { font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); margin: 0 0 .5rem } .eyebrow a { color: inherit; text-decoration: none }
+@media (prefers-reduced-motion: no-preference) { .stack div, .meter .fill { transition: width .25s ease } }
+</style>
+
+<p class="eyebrow"><a href="../">slopswap</a> / V6</p>
+<h1>Jumperless V6 Cost Explorer</h1>
+<p class="sub">Parts from the staged schematic BOM of 2026-10-29 (1000 boards; <code>docs/V6_BOM.md</code>), the rest scaled from the V5 Elecrow quotes. Choose the open options; everything marked <span class="est">est</span> is an assumption you can edit.</p>
+
+<div class="wrap">
+<div class="rail">
+  <div class="panel">
+    <h2>Build</h2>
+    <div class="row"><label>Your selections are kept in this browser<small>defaults = the 2026-10-31 baseline: TFT + touch, ROW-ISO fitted, floated TP181 sense on the housekeeping mux, M.2 port with one isolated port chip, 18 × MMC5603NJ, 80 clips</small></label><button type="button" id="reset" class="chip">Reset to baseline</button></div>
+    <div class="row"><label>Volume<small>parts −5 % at 3k; tooling amortised over the run</small></label>
+      <div class="seg" id="vol"><button aria-pressed="true" data-v="1000">1k</button><button data-v="3000">3k</button><button data-v="5000">5k</button></div></div>
+    <div class="row"><label>Shell and probe housing</label>
+      <div class="seg" id="shell"><button aria-pressed="true" data-v="sls">SLS</button><button data-v="mould">Moulded</button></div></div>
+    <div class="row"><label>Clip-into-shell assembly<small>outsourced block ($2.50) or Elecrow hand labour ($14)</small></label>
+      <div class="seg" id="labour"><button aria-pressed="true" data-v="block">Outsourced</button><button data-v="hand">Hand</button></div></div>
+    <div class="row"><label>Sell price (USD)</label><select id="price"><option>339</option><option>299</option><option>279</option><option>249</option><option>220</option></select></div>
+    <div class="row"><label>Tariff on landed cost<span class="est">est</span></label><input type="number" id="tariff" value="25" min="0" max="100" step="1"> %</div>
+  </div>
+
+  <div class="panel">
+    <h2>Display</h2>
+    <div class="row"><label>Panel</label>
+      <div class="seg" id="disp"><button data-v="amoled">1.47″ AMOLED</button><button aria-pressed="true" data-v="tft">1.47″ TFT</button><button data-v="none">None</button></div></div>
+    <div class="row"><label>AMOLED GLO147 + OK-118 socket<small>sample price in the BOM</small></label><input type="number" id="p_amoled" value="8.49" step="0.1"> $</div>
+    <div class="row"><label>TFT QHS147TP module, no touch<span class="est">est</span><small>your budget was $1–3; 172×320 ST7789P3</small></label><input type="number" id="p_tft" value="2.60" step="0.1"> $</div>
+    <div class="row"><label><input type="checkbox" id="ctp" checked> Capacitive touch (CST816D)<span class="est">est</span><small>adder on the module; nav stick can then go</small></label><input type="number" id="p_ctp" value="1.00" step="0.1"> $</div>
+    <div class="row"><label><input type="checkbox" id="glass"> Custom chamfered cover glass<span class="est">est</span><small>per piece + one-off tooling</small></label><input type="number" id="p_glass" value="0.60" step="0.1"> $</div>
+    <div class="row"><label>Cover-glass tooling (one-off)<span class="est">est</span></label><input type="number" id="t_glass" value="400" step="50"> $</div>
+  </div>
+
+  <div class="panel">
+    <h2>ChonkBus and sensing</h2>
+    <div class="row"><label>Row isolation<small>30 × ET7460H + 8 × 74HC595 + 38 × 100n; bridges otherwise</small></label>
+      <div class="seg" id="iso"><button aria-pressed="true" data-v="fit">Fitted</button><button data-v="bridge">0R bridges</button></div></div>
+    <div class="row"><label>Shunt amplifier<small>INA219 as drawn; the alternatives take negative common mode</small></label>
+      <select id="sense">
+        <option value="ina219">INA219 as drawn (I²C, 0 ADC pins; CM ≥ −0.3 V only)</option>
+        <option value="negina" selected>TP181 / GS199 / INA199-class (SC-70-6) floated on the −9 V rail: CM −9.3…+27 V abs., Vos 100 µV, 1 ADC pin ($0.07–0.23)</option>
+        <option value="ina296">INA296A1 floated on the −9 V rail: CM −14…+101 V abs., Vos 20 µV, 1.1 MHz, 1 ADC pin ($1.69)</option>
+        <option value="tsc">ST TSC2011 on a normal 3.3 V supply: CM −20…+70 V, G = 60 fixed, 1 ADC pin ($1.33)</option>
+        <option value="max">MAX9918 / 9920 (−20…+75 V, gain settable; $2.18 stocked / $0.70 unstocked), 1 ADC pin</option>
+        <option value="amc">AMC3302 isolated amplifier: any CM, Vos 50 µV, 27 mA, SOIC-16W, 1 ADC pin ($2.27)</option>
+        <option value="hall">Hall sensor (ACS712 $0.72 / CC6920 $0.87): isolated, ±20–110 mA zero error, 1 ADC pin</option>
+        <option value="diff">INA592 difference amp at G = ½ on ±9 V (CM −27…+27 V) + ×30 stage, 1 ADC pin ($2.44 + $0.20)</option>
+        <option value="both">INA219 + a second INA219 low-side in the GND source path (0 ADC pins)</option>
+      </select></div>
+    <div class="row"><label>Amplifier / sensor price<small>auto-filled from the LCSC ladder nearest 1k (2026-10-30); edit freely. "Floated" = the amplifier's GND pin on the −9 V rail, REF at +1.65 V, so its −0.3…+26 V window slides down by 9 V</small></label><input type="number" id="p_sense" value="0.16" step="0.05"> $</div>
+    <div class="row"><label><input type="checkbox" id="vsense" checked> Always-on BUS_A / BUS_B voltage sense<small>2 × 3-resistor dividers, ≈$0.04; 2 ADC pins unless muxed</small></label></div>
+    <div class="row"><label>Where the slow analog signals go<small>the pin budget has every CH32 ADC_IN spoken for</small></label>
+      <div class="seg" id="adcroute"><button aria-pressed="true" data-v="mux">8:1 housekeeping mux on one 12-bit pin</button><button data-v="direct">One CH32 pin each</button><button data-v="rp">RP2350 ADC pins</button></div></div>
+    <div class="row"><span class="note" id="adc_txt"></span></div>
+  </div>
+
+  <div class="panel">
+    <h2>Expansion port</h2>
+    <div class="row"><label>Connector</label>
+      <select id="port"><option value="pads">Edge pads (B33, $0)</option><option value="m2" selected>M.2 Key M socket, 67 pads (Lotes APCI0079 $0.23, XKB $0.40)</option><option value="m2g">M.2 Key G socket, 67 pads (custom key: no SSD fits; Lotes $0.96)</option><option value="mpcie">mini PCIe socket, 52 pads (SOFNG $0.32)</option><option value="sodimm">DDR4 SO-DIMM socket, 260 pads (Lotes ADDR0205 $0.56)</option><option value="pcie1">PCIe x1 slot, 36 pads, vertical (UMAX $0.37)</option></select></div>
+    <div class="row"><label>Connector price<small>LCSC ladder nearest 1k, 2026-10-29</small></label><input type="number" id="p_port" value="0.23" step="0.05"> $</div>
+    <div class="row"><label>Port crossbar chips (CH446Q, 16 routable pins each)<small>B38 sheet draws one: S1 on the lane layer</small></label><select id="portchips"><option>0</option><option selected>1</option><option>2</option></select></div>
+    <div class="row"><label><input type="checkbox" id="portiso" checked> Per-pin isolation on the port<small>8 × ET7460H + 2 × 74HC595 + 16 × BAT54S per chip ≈ $1.45</small></label></div>
+  </div>
+
+  <div class="panel">
+    <h2>Wig: magnetometers and spring clips</h2>
+    <div class="row"><label>Magnetometer array<small>MEMSIC MMC5603NJ (AMR, 0x30) instead of 9 × TMAG5273; one 74LVC138 SCL-decoder per 8</small></label>
+      <select id="nmag"><option>9</option><option selected>18</option><option>32</option></select></div>
+    <div class="row"><label>MMC5603NJ price<small>LCSC C404328, $0.15 @1k on 2026-10-18</small></label><input type="number" id="p_mag" value="0.15" step="0.01"> $</div>
+    <div class="row"><label>Spring clips per unit<small>Fulimei Spring Clip6, phosphor bronze</small></label><input type="number" id="nclip" value="80" step="1" min="0"></div>
+    <div class="row"><label>Spring clip price<small>$0.0599 each — Fulimei proforma invoice 2026-06-17 (10k at the 100k-run price); tooling $2,686 paid, amortised in Mechanics</small></label><input type="number" id="p_clip" value="0.0599" step="0.001"> $</div>
+  </div>
+
+  <div class="panel">
+    <h2>Cost cuts (toggle to apply)</h2>
+    <div class="row"><label><input type="checkbox" id="c_l272"> L272D → TCA0372 (2 ×)<small>−$1.08, pinout check</small></label></div>
+    <div class="row"><label><input type="checkbox" id="c_u4" checked> Drop U4 (INA219 on R57)<small>−$0.47; the bus shunt covers it</small></label></div>
+    <div class="row"><label><input type="checkbox" id="c_nav"> Drop the nav stick<small>−$2.34; touch display instead</small></label></div>
+    <div class="row"><label><input type="checkbox" id="c_led"> LEDs factory-direct<small>−$3.00<span class="est">est</span> (CNY 0.08–0.11 each)</small></label></div>
+    <div class="row"><label><input type="checkbox" id="c_ch446"> CH446Q direct from WCH<small>−$0.25 each × 17<span class="est">est</span></small></label></div>
+    <div class="row"><label><input type="checkbox" id="c_psram"> Drop the PSRAM<small>−$1.42; only if firmware does not need it</small></label></div>
+    <div class="row"><label><input type="checkbox" id="c_cable" checked> Generic cable instead of pink<small>−$2.08</small></label></div>
+    <div class="row"><label><input type="checkbox" id="c_hasl"> HASL where no exposed pads<small>−$0.40<span class="est">est</span></small></label></div>
+  </div>
+</div>
+
+<div class="results">
+  <div class="panel">
+    <div class="tiles">
+      <div class="tile"><div class="k">Parts, both boards</div><div class="v" id="t_parts">—</div><div class="d" id="t_parts_d"></div></div>
+      <div class="tile"><div class="k">Ex-works unit cost</div><div class="v" id="t_exw">—</div><div class="d" id="t_exw_d"></div></div>
+      <div class="tile"><div class="k">Landed</div><div class="v" id="t_landed">—</div><div class="d">× (1 + tariff) + $1 freight</div></div>
+      <div class="tile"><div class="k">Margin, sold direct</div><div class="v" id="t_mdir">—</div><div class="d" id="t_mdir_d"></div></div>
+      <div class="tile"><div class="k">Margin via Crowd Supply</div><div class="v" id="t_mcs">—</div><div class="d">12 % + 2.9 % + $5</div></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Where the unit cost goes</h2>
+    <div class="stack" id="stack"></div>
+    <div class="legend" id="legend"></div>
+    <div class="tablewrap"><table id="cost"><thead><tr><th>Item</th><th class="n">USD / unit</th><th>Basis</th></tr></thead><tbody></tbody></table></div>
+  </div>
+
+  <div class="panel">
+    <h2>Parts by block (main board + wig)</h2>
+    <div class="tablewrap"><table id="blocks"><thead><tr><th>Block</th><th class="n">USD</th><th>What moves it</th></tr></thead><tbody></tbody></table></div>
+    <p class="hint">Baseline lines from <code>docs/V6_BOM.md</code> at 1000 boards; unpriced small parts (27 main, 8 wig) are added as a $2.00 estimate. The CH32H417 ($3.30) and the LEDs ($0.0188 each) are the two largest single assumptions in the schematic BOM itself.</p>
+  </div>
+
+  <div class="panel">
+    <h2>Will it fit on one main board?</h2>
+    <p>Courtyard area of the fitted main-board parts against the V5 outline (170.5 × 82.6 mm, 4 layers), counting both sides. Dense boards with WLCSP/0.35 mm QFN get crowded past about 45 % of the two-sided area; a sandwich (second PCB) is the alternative.</p>
+    <div class="meter"><div class="fill" id="area_fill" style="width:0%"></div><div class="mark" style="left:45%"></div></div>
+    <div class="row"><span class="note" id="area_txt"></span></div>
+    <div class="chips" id="area_chips"></div>
+    <p class="hint">Measured by <code>v6gen/area.py</code> from the footprint courtyards (<code>docs/V6_area.json</code>). The wig carries the 480 LEDs, the breadboard pattern and the magnetometers (7,440 mm² of courtyard on its own 83 × 54 mm face) and is not in this bar.</p>
+  </div>
+
+  <div class="panel">
+    <h2>Margin by price</h2>
+    <div class="tablewrap"><table class="margins" id="mtable"><thead><tr><th>Price</th><th class="n">Direct</th><th class="n">Crowd Supply</th><th class="n">Ex-works ceiling for 45 % via CS</th></tr></thead><tbody></tbody></table></div>
+  </div>
+
+  <div class="panel">
+    <h2>Datasheets for every part named on this page</h2>
+    <div class="tablewrap"><table id="dstable"><thead><tr><th>Part</th><th>Where it is used</th><th>Datasheet</th><th>Buy / price</th></tr></thead><tbody></tbody></table></div>
+    <p class="hint">Vendor PDFs where one exists; the LCSC product page otherwise (it carries the manufacturer drawing). Display modules are sample parts without public datasheets.</p>
+  </div>
+</div>
+</div>
+
+<script>
+(function () {
+  // ---- baseline from docs/V6_BOM.md (1000 boards, parts only) -------------------------------------------
+  const BASE = {
+    main: { B21: 3.62, B22: 0.01, B23: 1.44, B24: 8.07, B25: 3.73, B27: 0.01, B28: 0.00, B29: 15.44, B30: 5.14, B32: 4.08,
+            B33: 0.00, B34: 0.44, B35: 0.23, V5: 17.93, extra: 0.49 },
+    wig:  { B26: 0.09, B27: 9.30, B28: 0.00, mags: 0, clips: 0 },
+    unpriced: 2.00,
+  };
+  const WHAT = { B21: 'CH32H417 core (CH32 $3.30 est.)', B22: 'USB', B23: 'RP2350 link, PSRAM $1.42', B24: 'display + socket (sample price)',
+    B25: 'controls: nav stick $2.34, encoder $1.30', B27: 'LED drive (main) / 480 LEDs (wig)', B28: 'wig interface', B29: 'ChonkBus: 97 × ET7460H $11.64, 25 × 74HC595 $1.52, 74HC238 ×2, shunt amplifier as selected, gates, bus dividers, housekeeping mux',
+    B30: 'lane layer: 5 × CH446Q $4.50', B32: 'power: TPS65131 $2.17, 60 × BAT54S $1.04', B33: 'expansion port: socket + port CH446Q + per-pin isolation as selected', B34: 'handover: 74HC238 ×2, TCA9534', B35: 'ADC taps',
+    V5: 'your V5 parts: 12 × CH446Q $10.80, 2 × L272D $2.28, MCP4728, RP2350B, 2 × INA219', B26: 'magnetometer board passives', mags: 'MMC5603NJ array + 74LVC138 decoders + 2.2 µF (was 9 × TMAG5273 $4.43)', clips: 'Fulimei Spring Clip6, $0.0599 each (PI 2026-06-17)', extra: 'AMOLED socket' };
+  const ISO_PARTS = 4.47, ISO_PLACEMENTS = 16;          // bom.py REPLACES['ROW-BRIDGE']
+  const AREA = { main_components_mm2: 9134, iso_mm2: 511, board_mm2: 170.5 * 82.6, sides: 2,
+    chips: { 'CH446Q ×17': 3053, '74HC595 ×25': 1059, 'BAT54S ×60': 787, 'ET7460H ×97': 356, 'CH32H417': 177, 'encoder': 159, 'L272D ×2': 154, 'LM324 ×2': 136, 'RP2350B': 121 } };
+  // LCSC 2026-10-29: Lotes APCI0079-P002A C841651 0.233 @1200; Lotes APCI0093-P009A (Key G) C841660 0.959 @900;
+  // SOFNG PCIE-52P52H C444927 0.321 @1300; Lotes ADDR0205-P001A C962124 0.563 @800; UMAX 3183-10110P1T C404109 0.367 @980.
+  // area = socket body + standoff / latches (mm²): M.2 21.9 × 8.7 + standoff; mini PCIe 31.5 × 6 + latches; SO-DIMM 73 × 23.5; PCIe x1 25 × 8.8
+  const PORT = { pads: { price: 0.00, area: 0 }, m2: { price: 0.23, area: 230 }, m2g: { price: 0.96, area: 230 }, mpcie: { price: 0.32, area: 260 }, sodimm: { price: 0.56, area: 1715 }, pcie1: { price: 0.37, area: 220 } };
+  // shunt amplifier options: price = LCSC ladder nearest 1k (2026-10-30), extra = resistors / shunt change, pins = CH32 ADC pins if wired directly
+  // extra = what comes with it: shunt change, REF divider, input clamps (2 × BAT54S + 2 × 100R), ADC-pin clamp, ×30 stage for the diff amp
+  const SENSE = { ina219: { price: 0.47, extra: 0, pins: 0 }, negina: { price: 0.16, extra: 0.09, pins: 1 }, ina296: { price: 1.69, extra: 0.09, pins: 1 },
+    tsc: { price: 1.33, extra: 0.05, pins: 1 }, max: { price: 2.18, extra: 0.07, pins: 1 }, amc: { price: 2.27, extra: 0.10, pins: 1 },
+    hall: { price: 0.72, extra: 0.04, pins: 1 }, diff: { price: 2.44, extra: 0.20, pins: 1 }, both: { price: 0.47, extra: 0.03, pins: 0 } };
+  const PLACE_RATE = 0.0127;                             // $/placement, the V5 rate (8.50 for 670)
+  const PLACEMENTS = { main: 808, wig: 617 };            // bought pieces + PCB features, ISO fitted
+  const MECH = { sls: { shell: 5.67, probe: 6.50, tool: 0 }, mould: { shell: 0.50, probe: 4.80, tool: 10000 } };
+  const CLIP_TOOL = 2686, PCBS = 9.00, BOX = 1.00, TEST = 0.50, CABLE_PINK = 2.88, CABLE_GENERIC = 0.80, FREIGHT = 1.00;
+
+  const $ = id => document.getElementById(id);
+  const state = { vol: 1000, shell: 'sls', labour: 'block', disp: 'tft', iso: 'fit', adcroute: 'mux' };
+  document.querySelectorAll('.seg').forEach(seg => seg.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    seg.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+    state[seg.id] = isNaN(+b.dataset.v) ? b.dataset.v : +b.dataset.v; render();
+  }));
+  document.querySelectorAll('input, select').forEach(el => el.addEventListener('input', render));
+  // remember the selections per browser (best effort: storage may be unavailable)
+  const KEY = 'v6ce.v4';
+  const snapshot = () => {
+    const o = { state: { ...state }, v: {} };
+    document.querySelectorAll('input, select').forEach(el => { if (el.id) o.v[el.id] = el.type === 'checkbox' ? el.checked : el.value; });
+    return o;
+  };
+  const restore = () => {
+    try {
+      const o = JSON.parse(localStorage.getItem(KEY) || 'null'); if (!o) return;
+      Object.assign(state, o.state || {});
+      document.querySelectorAll('.seg').forEach(seg => seg.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v) === String(state[seg.id]) ? 'true' : 'false')));
+      for (const [id, val] of Object.entries(o.v || {})) { const el = $(id); if (!el) continue; if (el.type === 'checkbox') el.checked = !!val; else el.value = val; }
+    } catch (e) { /* private mode, blocked storage: run with the defaults */ }
+  };
+  const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(snapshot())); } catch (e) { /* ignore */ } };
+  $('reset').addEventListener('click', () => { try { localStorage.removeItem(KEY); } catch (e) { /* ignore */ } location.reload(); });
+  $('port').addEventListener('change', () => { $('p_port').value = PORT[$('port').value].price.toFixed(2); render(); });
+  $('sense').addEventListener('change', () => { $('p_sense').value = SENSE[$('sense').value].price.toFixed(2); render(); });
+  $('disp').addEventListener('click', () => { if (state.disp !== 'tft') { $('ctp').checked = false; $('glass').checked = false; } render(); });
+
+  const num = id => parseFloat($('' + id).value) || 0;
+  const money = v => '$' + v.toFixed(2);
+  const pct = v => (v * 100).toFixed(0) + ' %';
+
+  function compute() {
+    const vol = state.vol, scale = vol >= 5000 ? 0.92 : vol >= 3000 ? 0.95 : 1.0;
+    const main = { ...BASE.main }, wig = { ...BASE.wig };
+    const notes = [];
+    // display
+    main.B24 = 0.07; main.extra = 0;                      // keep the display block's passives; socket goes with the AMOLED
+    if (state.disp === 'amoled') { main.B24 += num('p_amoled'); notes.push('AMOLED at the sample price'); }
+    else if (state.disp === 'tft') { main.B24 += num('p_tft') + ($('ctp').checked ? num('p_ctp') : 0) + ($('glass').checked ? num('p_glass') + num('t_glass') / vol : 0); }
+    // ChonkBus isolation
+    if (state.iso === 'bridge') main.B29 -= ISO_PARTS;
+    // current sense
+    const sense = $('sense').value;
+    if (sense === 'both') main.B29 += num('p_sense') + 0.03;          // the INA219 stays, a second one + shunt in the GND source path
+    else if (sense !== 'ina219') main.B29 += num('p_sense') + SENSE[sense].extra - 0.47;   // replaces the INA219 and its 10R / 100n
+    if ($('vsense').checked) main.B29 += 0.04;            // 2 × (866k / 316k / 243k) dividers
+    const route = state.adcroute;
+    let adcPins = SENSE[sense].pins + ($('vsense').checked ? 2 : 0);
+    if (route === 'mux') { main.B29 += adcPins ? 0.10 : 0; adcPins = adcPins ? 1 : 0; }   // 74HC4051 + 2 caps; selects from the latch chain's 4 spare bits
+    notes.push('adc:' + adcPins + ':' + route);
+    // expansion port
+    const chips = +$('portchips').value;
+    main.B33 += num('p_port') + chips * 0.90 + chips * 0.05 + ($('portiso').checked ? chips * 1.45 : 0);
+    // cuts
+    if ($('c_l272').checked) main.V5 -= 1.08;
+    if ($('c_u4').checked) main.V5 -= 0.47;
+    if ($('c_nav').checked) main.B25 -= 2.34;
+    if ($('c_led').checked) wig.B27 -= 3.00;
+    if ($('c_ch446').checked) { main.V5 -= 12 * 0.25; main.B30 -= 5 * 0.25; }
+    // wig: magnetometers and clips
+    const nmag = +$('nmag').value, nclip = num('nclip');
+    wig.mags = nmag * num('p_mag') + Math.ceil(nmag / 8) * 0.11 + nmag * 0.012;   // sensor + 74LVC138 per 8 + 2.2 µF each
+    wig.clips = nclip * num('p_clip');
+    if ($('c_psram').checked) main.B23 -= 1.42;
+    const sum = o => Object.values(o).reduce((a, b) => a + b, 0);
+    const partsMain = (sum(main) + 1.6) * scale, partsWig = (sum(wig) + 0.4) * scale;
+    const parts = partsMain + partsWig;
+    // assembly
+    let placements = PLACEMENTS.main + PLACEMENTS.wig + (nmag - 9) + Math.ceil(nmag / 8) + (state.iso === 'bridge' ? -ISO_PLACEMENTS : 0) + chips * 3 + ($('portiso').checked ? chips * 24 : 0);
+    const smt = placements * PLACE_RATE * (vol >= 3000 ? 0.92 : 1);
+    const labour = state.labour === 'block' ? 2.50 : 14.00;
+    const mech = MECH[state.shell];
+    const mechanics = mech.shell + mech.probe + mech.tool / vol + CLIP_TOOL / vol;
+    const pcbs = PCBS * (vol >= 3000 ? 0.94 : 1) - ($('c_hasl').checked ? 0.40 : 0);
+    const cable = $('c_cable').checked ? CABLE_GENERIC : CABLE_PINK;
+    const other = cable + BOX + TEST;
+    const exw = parts + smt + labour + mechanics + pcbs + other;
+    const tariff = num('tariff') / 100;
+    const landed = exw * (1 + tariff) + FREIGHT;
+    const price = +$('price').value;
+    const feeDir = p => p * 0.029 + 0.30, feeCS = p => p * (0.12 + 0.029) + 5;
+    const mDir = (price - landed - feeDir(price)) / price, mCS = (price - landed - feeCS(price)) / price;
+    // area
+    let area = AREA.main_components_mm2 - (state.iso === 'bridge' ? AREA.iso_mm2 : 0) + PORT[$('port').value].area + chips * 180 + ($('portiso').checked ? chips * 325 : 0);   // 8 × ET7460H 30 + 2 × TSSOP-16 85 + 16 × SOT-23 210
+    if (state.disp === 'amoled') area += 60; if ($('c_nav').checked) area -= 60;
+    const util = area / (AREA.board_mm2 * AREA.sides);
+    return { main, wig, partsMain, partsWig, parts, smt, labour, mechanics, pcbs, other, exw, landed, price, mDir, mCS, placements, vol, tariff, area, util, feeDir, feeCS, tool: mech.tool, scale, notes };
+  }
+
+  function render() {
+    const r = compute();
+    persist();
+    $('t_parts').textContent = money(r.parts);
+    $('t_parts_d').textContent = 'main ' + money(r.partsMain) + ' · wig ' + money(r.partsWig) + (r.scale < 1 ? ' · ×' + r.scale : '');
+    $('t_exw').textContent = money(r.exw);
+    $('t_exw_d').textContent = r.placements + ' placements · ' + (state.shell === 'mould' ? 'moulded' : 'SLS') + ' · ' + r.vol + ' units';
+    $('t_landed').textContent = money(r.landed);
+    const cls = m => m >= 0.5 ? 'good' : m >= 0.4 ? 'warn' : 'bad';
+    $('t_mdir').textContent = pct(r.mDir); $('t_mdir').style.color = 'var(--' + cls(r.mDir) + ')';
+    $('t_mdir_d').textContent = 'at $' + r.price + ', fees 2.9 % + $0.30';
+    $('t_mcs').textContent = pct(r.mCS); $('t_mcs').style.color = 'var(--' + cls(r.mCS) + ')';
+    // stacked bar
+    const items = [['Parts', r.parts, 'var(--bar1)', 'schematic BOM incl. spring clips and magnetometers + $2 unpriced'], ['SMT assembly', r.smt, 'var(--bar2)', r.placements + ' placements × $0.0127 (V5 rate)'],
+      ['Clip / shell labour', r.labour, 'var(--bar3)', state.labour === 'block' ? 'block marriage, clips inserted by the supplier' : 'Elecrow hand assembly as V5'],
+      ['Mechanics', r.mechanics, 'var(--bar4)', (state.shell === 'mould' ? 'moulded shell + probe + $' + r.tool + ' tooling / ' + r.vol : 'SLS shell $5.67, probe + cap $6.50') + ' + clip tooling $2686 / ' + r.vol],
+      ['PCBs', r.pcbs, 'var(--bar5)', 'main 4L, wig, probe boards (scaled from V5)'], ['Cable, box, test', r.other, 'var(--bar6)', '']];
+    $('stack').innerHTML = items.map(i => `<div style="width:${(100 * i[1] / r.exw).toFixed(2)}%;background:${i[2]}" title="${i[0]} ${money(i[1])}"></div>`).join('');
+    $('legend').innerHTML = items.map(i => `<span style="--c:${i[2]}">${i[0]} <b>${money(i[1])}</b></span>`).join('');
+    const tb = $('cost').tBodies[0];
+    tb.innerHTML = items.map(i => `<tr><td>${i[0]}</td><td class="n">${money(i[1])}</td><td>${i[3]}</td></tr>`).join('') +
+      `<tr class="total"><td>Ex-works</td><td class="n">${money(r.exw)}</td><td></td></tr>` +
+      `<tr><td>Tariff ${(r.tariff * 100).toFixed(0)} % + freight</td><td class="n">${money(r.landed - r.exw)}</td><td></td></tr>` +
+      `<tr class="total"><td>Landed</td><td class="n">${money(r.landed)}</td><td></td></tr>`;
+    // blocks
+    const bb = $('blocks').tBodies[0];
+    const rows = [];
+    for (const [k, v] of Object.entries(r.main)) if (Math.abs(v) > 0.004) rows.push(['main ' + k, v * r.scale, WHAT[k] || '']);
+    for (const [k, v] of Object.entries(r.wig)) if (Math.abs(v) > 0.004) rows.push(['wig ' + k, v * r.scale, WHAT[k] || '']);
+    rows.sort((a, b) => b[1] - a[1]);
+    bb.innerHTML = rows.map(x => `<tr><td>${x[0]}</td><td class="n">${money(x[1])}</td><td>${x[2]}</td></tr>`).join('') +
+      `<tr><td>unpriced small parts</td><td class="n">${money(2.0 * r.scale)}</td><td>estimate</td></tr>` +
+      `<tr class="total"><td>Parts total</td><td class="n">${money(r.parts)}</td><td></td></tr>`;
+    // area
+    $('area_fill').style.width = Math.min(100, r.util * 100).toFixed(1) + '%';
+    $('area_fill').style.background = r.util > 0.45 ? 'var(--bad)' : r.util > 0.38 ? 'var(--warn)' : 'var(--copper)';
+    $('area_txt').textContent = Math.round(r.area).toLocaleString() + ' mm² of courtyard on a ' + Math.round(AREA.board_mm2).toLocaleString() + ' mm² board, both sides: ' + pct(r.util) + ' of the two-sided area' + (r.util > 0.45 ? ' — plan a sandwich or a bigger board' : r.util > 0.38 ? ' — tight; expect a 6-layer board for the WLCSP escapes' : ' — fits on one 4–6 layer board with both sides populated');
+    $('area_chips').innerHTML = Object.entries(AREA.chips).map(([k, v]) => `<span class="chip">${k} <b>${v.toLocaleString()} mm²</b></span>`).join('');
+    const adc = r.notes.find(n => n.startsWith('adc:')).split(':');
+    const ROUTE = { mux: 'one 12-bit CH32 pin through an 8:1 mux (74HC4051, $0.10; current, both bus voltages, rails, spare channels; selects from the latch chain\'s 4 spare bits)',
+      direct: 'one CH32 12-bit pin per signal — the 2026-10-27 pin plan has all 16 ADC_IN assigned, so each one displaces a lane tap',
+      rp: 'RP2350 ADC pins — V5 uses all eight (4 routable ±8 V, 5 V channel, probe ±8 V, probe sense, supply sense); free only as those move to the CH32' };
+    $('adc_txt').textContent = 'ADC pins for sensing: ' + adc[1] + ' — ' + ROUTE[adc[2]];
+    // margin table
+    const mt = $('mtable').tBodies[0];
+    mt.innerHTML = [339, 299, 279, 249, 220].map(p => {
+      const d = (p - r.landed - r.feeDir(p)) / p, c = (p - r.landed - r.feeCS(p)) / p;
+      const ceiling = (p * 0.55 - r.feeCS(p) - FREIGHT) / (1 + r.tariff);
+      return `<tr><td>$${p}</td><td class="n ${cls(d)}">${pct(d)}</td><td class="n ${cls(c)}">${pct(c)}</td><td class="n">${money(ceiling)}</td></tr>`;
+    }).join('');
+  }
+  // ---- datasheets / product pages for every part named on this page ---------------------------------------
+  const L = c => 'https://www.lcsc.com/product-detail/' + c + '.html';
+  const DS = [
+    ['CH32H417QEU6', 'B21 core MCU (2 × 12-bit ADC, 16 ext. channels, 5 Msps; 10-bit HSADC × 7; 3 OPA with PGA)', 'https://atta.szlcsc.com/upload/public/pdf/source/20260518/A332D0233125C0DE3BEB32D7A2C6A50E.pdf', L('C49363240'), '$3.30 est'],
+    ['RP2350B', 'V5 core (kept)', 'https://datasheets.raspberrypi.com/rp2350/rp2350-datasheet.pdf', 'https://www.raspberrypi.com/products/rp2350/', '$1.10'],
+    ['APS6404L-3SQR-SN (PSRAM)', 'B23 link', L('C5333729'), L('C5333729'), '$1.42'],
+    ['CH446Q', 'crossbar, 12 (V5) + 5 lane layer (+1 port chip)', L('C109471'), L('C109471'), '$0.90'],
+    ['ET7460H (ETEK)', 'ChonkBus row / isolation / source switches, 97 ×', 'project file ET7460H_datasheet.pdf (ETEK quote; not on LCSC)', 'https://www.lcsc.com/search?q=ET7460H', '$0.12 @20k quote'],
+    ['DIO1327HWL12 (Dioo)', 'ET7460H pin-identical second source', 'no public datasheet found', 'https://www.lcsc.com/search?q=DIO1327', 'no price found'],
+    ['74HC595PW,118', 'control latches, 25 ×', 'https://assets.nexperia.com/documents/data-sheet/74HC_HCT595.pdf', L('C5948'), '$0.061'],
+    ['74HC238PW,118', 'source decoders, 2 × (+ B30 / B34)', 'https://assets.nexperia.com/documents/data-sheet/74HC_HCT238.pdf', L('C60434'), '$0.18'],
+    ['74LVC1G00 / 74LVC1G08', 'shunt interlock gates', 'https://assets.nexperia.com/documents/data-sheet/74LVC1G00.pdf', L('C12508'), '$0.08 + $0.03'],
+    ['INA219AIDR', 'shunt monitor as drawn (U29102), V5 U3 / U4', 'https://www.ti.com/lit/ds/symlink/ina219.pdf', L('C138706'), '$0.47'],
+    ['3PEAK TP181A1', 'shunt amplifier, floated on −9 V (cheapest route); SC-70-6, 2.7–30 V supply, CM −0.3…+36 V rel.', 'https://datasheet.lcsc.com/datasheet/pdf/46eaa834d745f364863406138f4ea7ca.pdf', L('C2902349'), '$0.151 @3k, 28k stock'],
+    ['Gainsil GS199B', 'same footprint, 2.7–30 V, CM −0.3…+30 V rel., Vos 200 µV', 'https://datasheet.lcsc.com/datasheet/pdf/145a972fcea784a9b7022c64a292d174.pdf', L('C52211845'), '$0.074 @3k'],
+    ['TI INA199A1IDCKR', 'same footprint, name brand, 2.7–26 V, CM −0.3…+26 V rel., Vos 150 µV', 'https://www.ti.com/lit/ds/symlink/ina199.pdf', L('C59135'), '$0.226, 81k stock'],
+    ['TI INA296A1 (SOT-23-8)', 'floated on −9 V: CM −5…+110 V rel. → −14…+101 V abs.; 2.7–20 V, Vos 20 µV, 1.1 MHz', 'https://www.ti.com/lit/ds/symlink/ina296a.pdf', L('C7472493'), '$1.69, 1,708 stock (A3 C19712055 $1.75)'],
+    ['TSC2011IDT (ST)', 'ground-referenced wide-CM option, −20…+70 V, G = 60', 'https://www.st.com/resource/en/datasheet/tsc2011.pdf', L('C1857476'), '$1.33, 2,027 in stock'],
+    ['TSC2010IST (ST)', 'same family, G = 20', 'https://www.st.com/resource/en/datasheet/tsc2010.pdf', L('C4371046'), '$1.81, no stock'],
+    ['MAX9918ASA+T / MAX9920ASA+T', '−20…+75 V, gain by resistors (min 30 / 7.5)', 'https://www.analog.com/media/en/technical-documentation/data-sheets/MAX9918-MAX9920.pdf', L('C2057750'), '$2.18 (90 stock) / $0.70 (0 stock)'],
+    ['TI AMC3302DWER', 'isolated shunt amplifier (own DC/DC), ±50 mV input', 'https://www.ti.com/lit/ds/symlink/amc3302.pdf', L('C4990160'), '$2.27, 461 stock'],
+    ['TI INA592IDR', 'difference amplifier, G = ½ or 2, CM ±27 V on ±9 V', 'https://www.ti.com/lit/ds/symlink/ina592.pdf', L('C4370836'), '$2.44, 950 stock'],
+    ['TI INA270 / INA271', 'checked and rejected: −16…+80 V but unidirectional (INA19x front end)', 'https://www.ti.com/lit/ds/symlink/ina270.pdf', L('C2155711'), '$1.80'],
+    ['Allegro ACS712ELCTR-05B-T', 'Hall sensor, 185 mV/A, 5 V', 'https://www.allegromicro.com/-/media/files/datasheets/acs712-datasheet.pdf', L('C44471'), '$0.72, 50k stock'],
+    ['Cross Chip CC6920SO-5A', 'Hall sensor, 400 mV/A, ±45 mV offset', 'https://datasheet.lcsc.com/datasheet/pdf/6efc9035028bd754ead53aa4b178dc49.pdf', L('C2760487'), '$0.87'],
+    ['Allegro ACS70331EOLCTR-2P5B3', 'GMR sensor, 8 µA/√Hz — the only mA-class Hall part; pre-EOL', 'https://www.allegromicro.com/-/media/files/datasheets/acs70331-datasheet.pdf', L('C459300'), '$2.19, 476 stock'],
+    ['TI TMCS1100A4', 'Hall sensor with VREF pin, 400 mV/A', 'https://www.ti.com/lit/ds/symlink/tmcs1100.pdf', L('C2841849'), '$2.52'],
+    ['74HC4051 (8:1 analog mux)', 'housekeeping mux: one 12-bit pin for current, bus voltages, rails', 'https://assets.nexperia.com/documents/data-sheet/74HC_HCT4051.pdf', 'https://www.lcsc.com/search?q=74HC4051PW', '≈$0.08'],
+    ['OPA2171AIDR', 'op amp for a ×30 stage behind a difference amp', 'https://www.ti.com/lit/ds/symlink/opa171.pdf', L('C40904'), '$0.17'],
+    ['TC0250B1002TCC (0.1 % 0402)', 'precision resistors (diff-amp route, REF dividers)', L('C517449'), L('C517449'), '$0.018'],
+    ['TPS65131RGER', 'B32 ±rails', 'https://www.ti.com/lit/ds/symlink/tps65131.pdf', L('C87663'), '$2.17'],
+    ['BAT54S', 'row clamps 60 × (+16 port clamps)', 'https://assets.nexperia.com/documents/data-sheet/BAT54_SER.pdf', L('C47546'), '$0.0175'],
+    ['MEMSIC MMC5603NJ', 'wig magnetometers (18 or 32 ×), AMR, I²C 0x30', L('C404328'), L('C404328'), '$0.15'],
+    ['74LVC138APW', 'SCL decoder, one per 8 magnetometers', 'https://assets.nexperia.com/documents/data-sheet/74LVC138A.pdf', 'https://www.lcsc.com/search?q=74LVC138APW', '≈$0.11'],
+    ['Fulimei Spring Clip6', 'breadboard contacts, 80 × (phosphor bronze, 6 holes, one tab)', 'Fulimei proforma invoice 2026-06-17 and measurement report (your mail)', '', '$0.0599 + $2,686 tooling (paid)'],
+    ['TMAG5273B1QDBVR', 'previous magnetometer (replaced by the MMC5603NJ)', 'https://www.ti.com/lit/ds/symlink/tmag5273.pdf', L('C7500517'), '$0.49'],
+    ['XL-1010RGBC-2812B-S', 'wig LEDs, 480 ×', L('C51900942'), L('C51900942'), '$0.0188'],
+    ['L272D013TR', 'V5 rail buffers U10 / U1807', 'https://www.st.com/resource/en/datasheet/l272.pdf', L('C443843'), '$1.14'],
+    ['TCA0372DWR2G', 'L272D swap option', 'https://www.onsemi.com/pdf/datasheet/tca0372-d.pdf', L('C362060'), '$0.60'],
+    ['MCP4728', 'V5 quad DAC', 'https://ww1.microchip.com/downloads/en/DeviceDoc/22187E.pdf', L('C108207'), '$1.38'],
+    ['LM324DT', 'V5 ADC buffers U7 / U11', 'https://www.ti.com/lit/ds/symlink/lm324.pdf', L('C71035'), '$0.07'],
+    ['TCA9534', 'B34 handover expander', 'https://www.ti.com/lit/ds/symlink/tca9534.pdf', 'https://www.lcsc.com/search?q=TCA9534', 'unpriced'],
+    ['RKJXM1015004 (ALPS)', 'nav stick', L('C97432'), L('C97432'), '$2.34'],
+    ['Rotary encoder with switch', 'B25', L('C29780879'), L('C29780879'), '$1.30'],
+    ['GLO147-D-M2002', '1.47″ AMOLED (sample)', 'no public datasheet (vendor sample)', '', '$8.00 sample'],
+    ['OK-118RF024/2-35 (OCN)', 'AMOLED FPC socket', 'vendor drawing only', '', '$0.49'],
+    ['QHS147TP / ST7789P3 / CST816D', '1.47″ TFT module (sample), its controller (link) and touch IC', 'https://files.waveshare.com/wiki/common/ST7789P3.pdf', '', '$2.60 + $1.00 est'],
+    ['Lotes APCI0079-P002A', 'M.2 Key M socket, H3.2', L('C841651'), L('C841651'), '$0.233 @1200'],
+    ['XKB X1302WVS-67CM-LPV01', 'M.2 Key M socket, H4.2', L('C30167366'), L('C30167366'), '$0.40'],
+    ['Lotes APCI0093-P009A', 'M.2 Key G socket (custom key)', L('C841660'), L('C841660'), '$0.96'],
+    ['SOFNG PCIE-52P52H', 'mini PCIe socket', L('C444927'), L('C444927'), '$0.32'],
+    ['Lotes ADDR0205-P001A', 'DDR4 SO-DIMM socket, 4.0 mm', 'https://datasheet.lcsc.com/datasheet/pdf/93c1f83a833ca3d92b72d0545149276e.pdf?productCode=C962124', L('C962124'), '$0.56'],
+    ['UMAX 3183-10110P1T', 'PCIe x1 slot (TH)', L('C404109'), L('C404109'), '$0.37'],
+    ['TE 2199230-4', 'M.2 Key M socket (the stock KiCad footprint)', 'https://www.te.com/en/product-2199230-4.html', '', 'not priced'],
+  ];
+  const link = (u, t) => /^https?:/.test(u) ? `<a href="${u}" target="_blank" rel="noopener">${t}</a>` : (u || '—');
+  $('dstable').tBodies[0].innerHTML = DS.map(d => `<tr><td><b>${d[0]}</b></td><td>${d[1]}</td><td>${link(d[2], /lcsc\.com\/product/.test(d[2]) ? 'LCSC page (PDF there)' : 'datasheet')}</td><td>${link(d[3], d[4] || 'LCSC')}${d[3] && d[4] ? '' : (d[4] ? ' ' + d[4] : '')}</td></tr>`).join('');
+
+  restore();
+  render();
+})();
+</script>
