@@ -13,6 +13,9 @@
    its own token names at the --jl-* aliases (localize_fonts.py --theme writes that block). Never define an
    alias in terms of a plain token: that is a cycle, and a cycle makes every colour invalid.
    body.app  = dense tool layout: no document decorations, no column width.
+   Phones: a control panel (filters, toolbars) keeps at most 40% of the screen and scrolls inside
+   itself; a row of chips or buttons scrolls sideways instead of wrapping into a wall. Use .capped on
+   the panel and .scroll-x on each row; the converter applies the same to common artifact patterns.
    .page     = reading column;  .page.wide = 72rem.
    Fonts are self-hosted in fonts/ (Google Fonts is blocked in China). */
 
@@ -125,6 +128,14 @@ ul.docs small{font-family:var(--font-pixel);font-size:.5rem;color:var(--muted)}
 .splash-list{display:none;list-style:none;padding:0;margin:0 0 1.5rem;font-family:var(--font-pixel);font-size:.6rem;line-height:2.2}
 .splash-list a{text-decoration:none}
 @media (max-width:700px){.splash-list{display:block}}
+
+/* phones: bounded control panels, sideways-scrolling rows */
+@media (max-width:700px){
+  .capped{max-height:40vh;max-height:40svh;overflow-y:auto;overscroll-behavior:contain}
+  .scroll-x{display:flex;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+  .scroll-x::-webkit-scrollbar{display:none}
+  .scroll-x>*{flex:0 0 auto}
+}
 
 /* dense tool pages: the artifact brings its own layout, the theme brings fonts, colors and the stripe */
 body.app{font-size:14px;padding-block:1.25rem 2.5rem}

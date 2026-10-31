@@ -109,8 +109,13 @@ def themed(html: str, up: str, folder: str) -> str:
     rules = "".join(f"{k}:var({v},{FALLBACK[v]});" for k, v in THEME_MAP.items() if k in declared)
     override = ('<style>\n/* slopswap: the artifact\'s own tokens now point at the Jumperless theme */\n'
                 f':root,:root:not([data-theme="light"]),:root[data-theme="dark"]{{{rules}}}\n'
-                '/* a sticky page header taller than a phone screen hides the page: let it scroll on phones */\n'
-                '@media (max-width:700px){header,.topbar{position:static}}\n</style>\n')
+                '/* phones: a control panel keeps at most 40% of the screen and scrolls inside itself; rows of chips scroll sideways */\n'
+                '@media (max-width:700px){\n'
+                'header,.topbar,.filters,aside.side{max-height:40vh;max-height:40svh;overflow-y:auto;overscroll-behavior:contain}\n'
+                '.frow,.seg,.chips,.tabs,.toc,.lang{display:flex;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}\n'
+                '.frow::-webkit-scrollbar,.seg::-webkit-scrollbar,.chips::-webkit-scrollbar,.tabs::-webkit-scrollbar,.toc::-webkit-scrollbar{display:none}\n'
+                '.frow>*,.seg>*,.chips>*,.tabs>*,.toc>*{flex:0 0 auto}\n'
+                '}\n</style>\n')
     html = re.sub(r"<body(\s[^>]*)?>", lambda m: f'<body class="app"{m.group(1) or ""}>\n'
                   f'<link rel="stylesheet" href="{up}styles/jumperless.css">\n'
                   f'<p class="eyebrow"><a href="{up}">slopswap</a> / <a href="./">{folder}</a></p>', html, count=1)

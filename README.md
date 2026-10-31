@@ -20,6 +20,7 @@ Start a new page from `styles/template.html`. Give it a `<title>` and, if the ti
 
 - Document pages: `<main class="page">` (reading column) or `class="page wide"`.
 - Tool pages (dense UI with their own layout): `<body class="app">` turns off the document decorations.
+- Style guide: links and single highlights are pink (the J); a row of siblings cycles the rainbow (`.cycle`); backgrounds are layered greys, never black; on phones a control panel is capped at 40% of the screen and scrolls inside itself (`.capped`) and rows of chips or buttons scroll sideways (`.scroll-x`). The converter applies the phone rules to the usual `header`, `.filters`, `.frow`, `.seg`, `.chips`, `.tabs` and `.toc` patterns.
 
 ## Splash
 
