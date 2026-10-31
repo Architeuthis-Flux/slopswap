@@ -134,7 +134,8 @@ ul.docs small{font-family:var(--font-pixel);font-size:.5rem;color:var(--muted)}
   .capped{max-height:40vh;max-height:40svh;overflow-y:auto;overscroll-behavior:contain}
   .scroll-x{display:flex;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
   .scroll-x::-webkit-scrollbar{display:none}
-  .scroll-x>*{flex:0 0 auto}
+  .scroll-x>*{flex:0 0 auto;width:auto;max-width:none}
+  .scroll-x>input,.scroll-x>select{width:11rem}
 }
 
 /* dense tool pages: the artifact brings its own layout, the theme brings fonts, colors and the stripe */

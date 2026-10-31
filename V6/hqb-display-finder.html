@@ -618,7 +618,8 @@ render();
 header,.topbar,.filters,aside.side{max-height:40vh;max-height:40svh;overflow-y:auto;overscroll-behavior:contain}
 .frow,.seg,.chips,.tabs,.toc,.lang{display:flex;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
 .frow::-webkit-scrollbar,.seg::-webkit-scrollbar,.chips::-webkit-scrollbar,.tabs::-webkit-scrollbar,.toc::-webkit-scrollbar{display:none}
-.frow>*,.seg>*,.chips>*,.tabs>*,.toc>*{flex:0 0 auto}
+.frow>*,.seg>*,.chips>*,.tabs>*,.toc>*{flex:0 0 auto;width:auto;max-width:none}
+.frow>input,.frow>select{width:11rem}
 }
 </style>
 <style>

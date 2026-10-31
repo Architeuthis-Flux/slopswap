@@ -114,7 +114,8 @@ def themed(html: str, up: str, folder: str) -> str:
                 'header,.topbar,.filters,aside.side{max-height:40vh;max-height:40svh;overflow-y:auto;overscroll-behavior:contain}\n'
                 '.frow,.seg,.chips,.tabs,.toc,.lang{display:flex;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}\n'
                 '.frow::-webkit-scrollbar,.seg::-webkit-scrollbar,.chips::-webkit-scrollbar,.tabs::-webkit-scrollbar,.toc::-webkit-scrollbar{display:none}\n'
-                '.frow>*,.seg>*,.chips>*,.tabs>*,.toc>*{flex:0 0 auto}\n'
+                '.frow>*,.seg>*,.chips>*,.tabs>*,.toc>*{flex:0 0 auto;width:auto;max-width:none}\n'
+                '.frow>input,.frow>select{width:11rem}\n'
                 '}\n</style>\n')
     html = re.sub(r"<body(\s[^>]*)?>", lambda m: f'<body class="app"{m.group(1) or ""}>\n'
                   f'<link rel="stylesheet" href="{up}styles/jumperless.css">\n'
