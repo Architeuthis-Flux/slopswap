@@ -400,6 +400,8 @@ new MutationObserver(()=>{buildToggles();render();}).observe(document.documentEl
 
 <style>
 /* slopswap: the artifact's own tokens now point at the Jumperless theme */
-:root,:root:not([data-theme="light"]),:root[data-theme="dark"]{--bg:var(--jl-bg);--surface:var(--jl-surface);--fg:var(--jl-fg);--muted:var(--jl-muted);--fg-2:var(--jl-muted);--ring:var(--jl-line);--grid:var(--jl-line);--axis:var(--jl-line);--accent:var(--jl-accent);--accent-ink:var(--jl-bg);--font:var(--jl-font-body);--mono:var(--jl-font-mono);--s1:var(--jl-r1);--s2:var(--jl-r3);--s3:var(--jl-r4);--s4:var(--jl-r6);--s5:var(--jl-r7);--s6:var(--jl-r9);--s7:var(--jl-r10);--s8:var(--jl-r12);}
+:root,:root:not([data-theme="light"]),:root[data-theme="dark"]{--bg:var(--jl-bg,#27272b);--surface:var(--jl-surface,#323238);--fg:var(--jl-fg,#f3f3f5);--muted:var(--jl-muted,#aaaab5);--fg-2:var(--jl-muted,#aaaab5);--ring:var(--jl-line,#4b4b54);--grid:var(--jl-line,#4b4b54);--axis:var(--jl-line,#4b4b54);--accent:var(--jl-accent,#f03060);--accent-ink:var(--jl-bg,#27272b);--font:var(--jl-font-body,Lato,'Helvetica Neue',Arial,sans-serif);--mono:var(--jl-font-mono,ui-monospace,Menlo,Consolas,monospace);--s1:var(--jl-r1,#f03060);--s2:var(--jl-r3,#c728f8);--s3:var(--jl-r4,#7647f2);--s4:var(--jl-r6,#50beeb);--s5:var(--jl-r7,#68f4d7);--s6:var(--jl-r9,#7af85c);--s7:var(--jl-r10,#c0f848);--s8:var(--jl-r12,#e86828);}
+/* a sticky page header taller than a phone screen hides the page: let it scroll on phones */
+@media (max-width:700px){header,.topbar{position:static}}
 </style>
 </body></html>

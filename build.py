@@ -69,7 +69,7 @@ def page(title: str, theme: str, css_prefix: str, body: str) -> str:
         '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n'
         '<meta name="viewport" content="width=device-width, initial-scale=1">\n'
         f"<title>{html.escape(title)}</title>\n"
-        f'<link rel="stylesheet" href="{css_prefix}styles/{theme}.css">\n'
+        f'<link rel="stylesheet" href="{css_prefix}styles/{theme}.css?v={version()}">\n'
         f'</head>\n<body>\n<main class="page">\n{body}\n</main>\n</body>\n</html>\n'
     )
 
@@ -84,6 +84,22 @@ def listing(folder: Path, href_prefix: str) -> str:
         else:
             items.append(f'<li><a href="{href_prefix}{p.name}">{html.escape(p.name)}</a><small>{p.suffix[1:]}</small></li>')
     return "<ul class=\"docs\">\n" + "\n".join(items) + "\n</ul>" if items else "<p class=\"muted\">Nothing here yet.</p>"
+
+
+def version() -> str:
+    try:
+        return subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=ROOT, capture_output=True, text=True, check=True).stdout.strip()
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return datetime.datetime.now().strftime("%Y%m%d%H%M")
+
+
+def bust(folder: Path, v: str) -> None:
+    """Append ?v=<commit> to styles/*.css and styles/*.js references in the built HTML (Cloudflare caches them for hours)."""
+    for p in folder.rglob("*.html"):
+        s = p.read_text(errors="replace")
+        s2 = re.sub(r'((?:href|src)="(?:\.\./)*styles/[\w-]+\.(?:css|js))"', rf'\1?v={v}"', s)
+        if s2 != s:
+            p.write_text(s2)
 
 
 def main() -> None:
@@ -110,6 +126,7 @@ def main() -> None:
         files = "" if (d / "index.html").exists() else "\n" + listing(d, d.name + "/")
         sections.append(f'<h2><a href="{d.name}/">{html.escape(name)}</a></h2>{files}')
 
+    bust(OUT, version())
     (OUT / "index.html").write_text(page("slopswap", DEFAULT_THEME, "",
         '<img class="logo" src="styles/jumperless-wordmark.png" alt="Jumperless">\n<h1>slopswap</h1>\n' + "\n".join(sections)))
     print(f"built {len(projects)} project folders into {OUT.relative_to(ROOT)}/")

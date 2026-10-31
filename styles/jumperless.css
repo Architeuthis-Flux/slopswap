@@ -1,7 +1,7 @@
 /* slopswap · Jumperless theme — the site default and the base every artifact links.
    <link rel="stylesheet" href="../styles/jumperless.css">   (pages live exactly one folder deep)
 
-   Dark only, on purpose: it follows shop.jumperless.org (charcoal, hot pink, cyan, Michroma headings)
+   Dark only, on purpose: it follows shop.jumperless.org (dark greys, never black; pink, cyan, Michroma headings)
    and carries the rainbow from docs.jumperless.org. There is no OS-preference switch; add
    data-theme="light" on <html> for the light look.
 
@@ -22,7 +22,7 @@
 
 :root{
   color-scheme:dark;
-  --bg:#1f1f21; --surface:#2a2a2f; --surface-2:#35353c; --fg:#f3f3f5; --muted:#a8a8b4; --line:#3e3e47;
+  --bg:#27272b; --surface:#323238; --surface-2:#3d3d44; --fg:#f3f3f5; --muted:#aaaab5; --line:#4b4b54;
   --accent:#f03060; --accent-2:#00fced; --accent-3:#fc0289;
   --r1:#f03060;--r2:#f12fbf;--r3:#c728f8;--r4:#7647f2;
   --r5:#5174ed;--r6:#50beeb;--r7:#68f4d7;--r8:#70f899;

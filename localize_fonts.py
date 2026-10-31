@@ -22,6 +22,14 @@ ROOT = Path(__file__).resolve().parent
 FONTS = ROOT / "styles" / "fonts"
 UA = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36"}
 CJK = ("Noto Sans SC", "Noto Sans TC", "Noto Sans JP", "Noto Serif SC", "Noto Sans KR")
+FALLBACK = {  # the theme's own values, inlined after each alias so a stale or missing stylesheet still gives a sane page
+    "--jl-bg": "#27272b", "--jl-surface": "#323238", "--jl-surface-2": "#3d3d44", "--jl-fg": "#f3f3f5", "--jl-muted": "#aaaab5", "--jl-line": "#4b4b54",
+    "--jl-accent": "#f03060", "--jl-accent-2": "#00fced", "--jl-accent-3": "#fc0289",
+    "--jl-font-display": "Michroma,'Avenir Next','Helvetica Neue',Arial,sans-serif", "--jl-font-body": "Lato,'Helvetica Neue',Arial,sans-serif",
+    "--jl-font-mono": "ui-monospace,Menlo,Consolas,monospace", "--jl-font-pixel": "'Press Start 2P',monospace",
+    "--jl-r1": "#f03060", "--jl-r2": "#f12fbf", "--jl-r3": "#c728f8", "--jl-r4": "#7647f2", "--jl-r5": "#5174ed", "--jl-r6": "#50beeb",
+    "--jl-r7": "#68f4d7", "--jl-r8": "#70f899", "--jl-r9": "#7af85c", "--jl-r10": "#c0f848", "--jl-r11": "#e8cb40", "--jl-r12": "#e86828",
+}
 THEME_MAP = {  # artifact token → theme alias (only tokens the artifact actually declares are remapped)
     "--bg": "--jl-bg",
     "--surface": "--jl-surface", "--panel": "--jl-surface", "--card": "--jl-surface",
@@ -98,9 +106,11 @@ def font_faces(css_url: str, rel: str) -> str:
 def themed(html: str, up: str, folder: str) -> str:
     """Link the Jumperless theme, mark the page as an app, add a breadcrumb, remap the artifact's tokens."""
     declared = set(re.findall(r"(--[\w-]+)\s*:", html))
-    rules = "".join(f"{k}:var({v});" for k, v in THEME_MAP.items() if k in declared)
+    rules = "".join(f"{k}:var({v},{FALLBACK[v]});" for k, v in THEME_MAP.items() if k in declared)
     override = ('<style>\n/* slopswap: the artifact\'s own tokens now point at the Jumperless theme */\n'
-                f':root,:root:not([data-theme="light"]),:root[data-theme="dark"]{{{rules}}}\n</style>\n')
+                f':root,:root:not([data-theme="light"]),:root[data-theme="dark"]{{{rules}}}\n'
+                '/* a sticky page header taller than a phone screen hides the page: let it scroll on phones */\n'
+                '@media (max-width:700px){header,.topbar{position:static}}\n</style>\n')
     html = re.sub(r"<body(\s[^>]*)?>", lambda m: f'<body class="app"{m.group(1) or ""}>\n'
                   f'<link rel="stylesheet" href="{up}styles/jumperless.css">\n'
                   f'<p class="eyebrow"><a href="{up}">slopswap</a> / <a href="./">{folder}</a></p>', html, count=1)
