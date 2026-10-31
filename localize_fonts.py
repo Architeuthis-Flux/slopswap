@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
-"""Make a claude.ai artifact China-safe: swap its Google Fonts <link> for self-hosted @font-face rules.
+"""Publish a claude.ai artifact on slopswap: China-safe fonts, and (with --theme) the Jumperless look.
 
-    python3 localize_fonts.py <artifact.html> <project>/<name>.html
+    python3 localize_fonts.py [--theme] <artifact.html> <project>/<name>.html
 
-Downloads each family's latin woff2 into styles/fonts/ (once), writes the page with
-`../styles/fonts/...` @font-face rules in place of the googleapis/gstatic links.
-CJK families (Noto Sans SC etc.) are dropped: readers' system fonts cover them.
+Always: downloads each Google Fonts family the page links as latin woff2 into styles/fonts/ (once)
+and swaps the <link> for `../styles/fonts/...` @font-face rules. CJK families are dropped
+(readers' system fonts cover them).
+
+--theme: links ../styles/jumperless.css first, adds class="app" to <body> and a breadcrumb, and
+appends an override block that points the artifact's own colour and font tokens (the common
+names in THEME_MAP) at the theme's --jl-* aliases, using the artifact's own :root selectors so
+its dark-mode blocks cannot win. Tokens the map does not know keep their values; tune by hand.
 """
 import re
 import sys
@@ -17,10 +22,44 @@ ROOT = Path(__file__).resolve().parent
 FONTS = ROOT / "styles" / "fonts"
 UA = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36"}
 CJK = ("Noto Sans SC", "Noto Sans TC", "Noto Sans JP", "Noto Serif SC", "Noto Sans KR")
+THEME_MAP = {  # artifact token → theme alias (only tokens the artifact actually declares are remapped)
+    "--bg": "--jl-bg",
+    "--surface": "--jl-surface", "--panel": "--jl-surface", "--card": "--jl-surface",
+    "--surface-2": "--jl-surface-2", "--bg2": "--jl-surface-2", "--copper-soft": "--jl-surface-2", "--phone": "--jl-surface-2",
+    "--fg": "--jl-fg", "--ink": "--jl-fg", "--text": "--jl-fg",
+    "--muted": "--jl-muted", "--fg-2": "--jl-muted", "--mute": "--jl-muted",
+    "--line": "--jl-line", "--ring": "--jl-line", "--grid": "--jl-line", "--axis": "--jl-line", "--phone-line": "--jl-line",
+    "--accent": "--jl-accent-2", "--accent-ink": "--jl-bg", "--copper": "--jl-accent",
+    "--font": "--jl-font-body", "--sans": "--jl-font-body", "--body": "--jl-font-body", "--font-body": "--jl-font-body",
+    "--mono": "--jl-font-mono", "--font-mono": "--jl-font-mono",
+    "--display": "--jl-font-display", "--font-display": "--jl-font-display",
+    "--s1": "--jl-r1", "--s2": "--jl-r10", "--s3": "--jl-r6", "--s4": "--jl-r8", "--s5": "--jl-r2", "--s6": "--jl-r7", "--s7": "--jl-r3", "--s8": "--jl-r9",
+    "--bar1": "--jl-r1", "--bar2": "--jl-r9", "--bar3": "--jl-r4", "--bar4": "--jl-r5", "--bar5": "--jl-r3", "--bar6": "--jl-r6",
+}
 
 
 def fetch(url: str) -> bytes:
     return urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=30).read()
+
+
+def offline_faces(fams: list, rel: str) -> str | None:
+    """@font-face rules from files already in styles/fonts/ (Family-400.woff2 or Family-var.woff2); None if any is missing."""
+    rules = []
+    for f in fams:
+        name, _, spec = f.partition(":")
+        fam = name.replace("+", " ")
+        base = fam.replace(" ", "")
+        weights = re.findall(r"\d{3}", spec) or ["400"]
+        var = FONTS / f"{base}-var.woff2"
+        if var.exists():
+            rules.append(f'@font-face{{font-family:"{fam}";font-style:normal;font-weight:100 900;font-display:swap;src:url({rel}{var.name}) format("woff2")}}')
+            continue
+        for w in weights:
+            file = FONTS / f"{base}-{w}.woff2"
+            if not file.exists():
+                return None
+            rules.append(f'@font-face{{font-family:"{fam}";font-style:normal;font-weight:{w};font-display:swap;src:url({rel}{file.name}) format("woff2")}}')
+    return "\n".join(rules)
 
 
 def font_faces(css_url: str, rel: str) -> str:
@@ -29,6 +68,9 @@ def font_faces(css_url: str, rel: str) -> str:
     fams = [f for f in urllib.parse.parse_qs(q).get("family", []) if not f.split(":")[0].replace("+", " ") in CJK]
     if not fams:
         return ""
+    offline = offline_faces(fams, rel)      # fonts already in styles/fonts/: no network needed
+    if offline is not None:
+        return offline
     url = "https://fonts.googleapis.com/css2?" + "&".join("family=" + f.replace(" ", "+") for f in fams) + "&display=swap"
     css = fetch(url).decode()
     rules, seen = [], {}
@@ -53,7 +95,19 @@ def font_faces(css_url: str, rel: str) -> str:
     return "\n".join(rules)
 
 
-def localize(src: Path, dst: Path) -> None:
+def themed(html: str, up: str, folder: str) -> str:
+    """Link the Jumperless theme, mark the page as an app, add a breadcrumb, remap the artifact's tokens."""
+    declared = set(re.findall(r"(--[\w-]+)\s*:", html))
+    rules = "".join(f"{k}:var({v});" for k, v in THEME_MAP.items() if k in declared)
+    override = ('<style>\n/* slopswap: the artifact\'s own tokens now point at the Jumperless theme */\n'
+                f':root,:root:not([data-theme="light"]),:root[data-theme="dark"]{{{rules}}}\n</style>\n')
+    html = re.sub(r"<body(\s[^>]*)?>", lambda m: f'<body class="app"{m.group(1) or ""}>\n'
+                  f'<link rel="stylesheet" href="{up}styles/jumperless.css">\n'
+                  f'<p class="eyebrow"><a href="{up}">slopswap</a> / <a href="./">{folder}</a></p>', html, count=1)
+    return html.replace("</body>", override + "</body>", 1) if "</body>" in html else html + override
+
+
+def localize(src: Path, dst: Path, theme: bool = False) -> None:
     html = src.read_text()
     depth = len(dst.relative_to(ROOT).parts) - 1
     rel = "../" * depth + "styles/fonts/"
@@ -63,9 +117,12 @@ def localize(src: Path, dst: Path) -> None:
         rules = font_faces(href.replace("&amp;", "&"), rel)
         html = re.sub(r'<link[^>]+href="' + re.escape(href) + r'"[^>]*>', f"<style>\n/* self-hosted fonts: Google Fonts is blocked in China */\n{rules}\n</style>", html, count=1)
     bad = [u for u in re.findall(r'https?://[^"\' )>]+', html) if re.search(r"googleapis|gstatic|unpkg|jsdelivr|esm\.sh|tailwindcss\.com", u)]
+    if theme:
+        html = themed(html, "../" * depth, dst.parent.name)
     dst.write_text(html)
     print(f"wrote {dst.relative_to(ROOT)} ({len(html)//1024} KB)" + (f"; STILL EXTERNAL: {bad}" if bad else ""))
 
 
 if __name__ == "__main__":
-    localize(Path(sys.argv[1]), Path(sys.argv[2]).resolve())
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    localize(Path(args[0]), Path(args[1]).resolve(), theme="--theme" in sys.argv)

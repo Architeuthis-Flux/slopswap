@@ -1,6 +1,7 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body class="app">
+<link rel="stylesheet" href="../styles/jumperless.css">
+<p class="eyebrow"><a href="../">slopswap</a> / <a href="./">V6</a></p>
 <title>MMC5603 Array Plan</title>
-<meta name="short-title" content="MMC5603 Array">
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
 /* self-hosted fonts: Google Fonts is blocked in China */
@@ -369,4 +370,8 @@ new MutationObserver(render).observe(document.documentElement,{attributes:true,a
 })();
 </script>
 
+<style>
+/* slopswap: the artifact's own tokens now point at the Jumperless theme */
+:root,:root:not([data-theme="light"]),:root[data-theme="dark"]{--bg:var(--jl-bg);--surface:var(--jl-surface);--fg:var(--jl-fg);--muted:var(--jl-muted);--fg-2:var(--jl-muted);--ring:var(--jl-line);--grid:var(--jl-line);--axis:var(--jl-line);--accent:var(--jl-accent-2);--font:var(--jl-font-body);--mono:var(--jl-font-mono);--s1:var(--jl-r1);--s2:var(--jl-r10);--s3:var(--jl-r6);--s4:var(--jl-r8);--s5:var(--jl-r2);--s6:var(--jl-r7);--s7:var(--jl-r3);--s8:var(--jl-r9);}
+</style>
 </body></html>

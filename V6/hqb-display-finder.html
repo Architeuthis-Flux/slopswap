@@ -1,6 +1,7 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body class="app">
+<link rel="stylesheet" href="../styles/jumperless.css">
+<p class="eyebrow"><a href="../">slopswap</a> / <a href="./">V6</a></p>
 <title>HQB Display Finder</title>
-<meta name="short-title" content="HQB Displays">
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
 /* self-hosted fonts: Google Fonts is blocked in China */
@@ -609,4 +610,8 @@ document.getElementById("map").innerHTML=LOCS.map(l=>`<div class="loc"><h3>${esc
 render();
 </script>
 
+<style>
+/* slopswap: the artifact's own tokens now point at the Jumperless theme */
+:root,:root:not([data-theme="light"]),:root[data-theme="dark"]{--bg:var(--jl-bg);--surface:var(--jl-surface);--surface-2:var(--jl-surface-2);--fg:var(--jl-fg);--muted:var(--jl-muted);--line:var(--jl-line);--accent:var(--jl-accent-2);--accent-ink:var(--jl-bg);--body:var(--jl-font-body);--mono:var(--jl-font-mono);--display:var(--jl-font-display);}
+</style>
 </body></html>
