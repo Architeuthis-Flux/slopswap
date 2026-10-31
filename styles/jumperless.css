@@ -9,8 +9,9 @@
             --r1…--r12 (the pixel wordmark's letters, resampled at even hue steps)  --rainbow
    Links and single highlights are pink; a row of siblings cycles the rainbow (.cycle sets --c per child).
             --font-display --font-body --font-mono --font-pixel
-   The same values are exposed as --jl-* so a converted artifact can point its own token names at
-   them (localize_fonts.py --theme writes that block).
+   The palette is defined as --jl-* literals and the plain tokens reference them; a converted artifact points
+   its own token names at the --jl-* aliases (localize_fonts.py --theme writes that block). Never define an
+   alias in terms of a plain token: that is a cycle, and a cycle makes every colour invalid.
    body.app  = dense tool layout: no document decorations, no column width.
    .page     = reading column;  .page.wide = 72rem.
    Fonts are self-hosted in fonts/ (Google Fonts is blocked in China). */
@@ -22,27 +23,27 @@
 
 :root{
   color-scheme:dark;
-  --bg:#27272b; --surface:#323238; --surface-2:#3d3d44; --fg:#f3f3f5; --muted:#aaaab5; --line:#4b4b54;
-  --accent:#f03060; --accent-2:#00fced; --accent-3:#fc0289;
-  --r1:#f03060;--r2:#f12fbf;--r3:#c728f8;--r4:#7647f2;
-  --r5:#5174ed;--r6:#50beeb;--r7:#68f4d7;--r8:#70f899;
-  --r9:#7af85c;--r10:#c0f848;--r11:#e8cb40;--r12:#e86828;
+  /* the palette lives in the --jl-* literals; the plain tokens point at them. A converted artifact may
+     redefine the plain tokens as var(--jl-*), which is why the aliases must never reference the plain ones. */
+  --jl-bg:#27272b; --jl-surface:#323238; --jl-surface-2:#3d3d44; --jl-fg:#f3f3f5; --jl-muted:#aaaab5; --jl-line:#4b4b54;
+  --jl-accent:#f03060; --jl-accent-2:#00fced; --jl-accent-3:#fc0289;
+  --jl-r1:#f03060;--jl-r2:#f12fbf;--jl-r3:#c728f8;--jl-r4:#7647f2;--jl-r5:#5174ed;--jl-r6:#50beeb;
+  --jl-r7:#68f4d7;--jl-r8:#70f899;--jl-r9:#7af85c;--jl-r10:#c0f848;--jl-r11:#e8cb40;--jl-r12:#e86828;
+  --jl-font-display:Michroma,"Avenir Next","Helvetica Neue",Arial,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+  --jl-font-body:Lato,"Helvetica Neue",Arial,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+  --jl-font-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  --jl-font-pixel:"Press Start 2P","Courier New",monospace;
+  --bg:var(--jl-bg); --surface:var(--jl-surface); --surface-2:var(--jl-surface-2); --fg:var(--jl-fg); --muted:var(--jl-muted); --line:var(--jl-line);
+  --accent:var(--jl-accent); --accent-2:var(--jl-accent-2); --accent-3:var(--jl-accent-3);
+  --r1:var(--jl-r1);--r2:var(--jl-r2);--r3:var(--jl-r3);--r4:var(--jl-r4);--r5:var(--jl-r5);--r6:var(--jl-r6);
+  --r7:var(--jl-r7);--r8:var(--jl-r8);--r9:var(--jl-r9);--r10:var(--jl-r10);--r11:var(--jl-r11);--r12:var(--jl-r12);
   --rainbow:linear-gradient(90deg,var(--r1),var(--r2),var(--r3),var(--r4),var(--r5),var(--r6),var(--r7),var(--r8),var(--r9),var(--r10),var(--r11),var(--r12));
-  --font-display:Michroma,"Avenir Next","Helvetica Neue",Arial,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
-  --font-body:Lato,"Helvetica Neue",Arial,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
-  --font-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
-  --font-pixel:"Press Start 2P","Courier New",monospace;
-  /* aliases for converted artifacts */
-  --jl-bg:var(--bg);--jl-surface:var(--surface);--jl-surface-2:var(--surface-2);--jl-fg:var(--fg);--jl-muted:var(--muted);
-  --jl-line:var(--line);--jl-accent:var(--accent);--jl-accent-2:var(--accent-2);--jl-accent-3:var(--accent-3);
-  --jl-font-display:var(--font-display);--jl-font-body:var(--font-body);--jl-font-mono:var(--font-mono);--jl-font-pixel:var(--font-pixel);
-  --jl-r1:var(--r1);--jl-r2:var(--r2);--jl-r3:var(--r3);--jl-r4:var(--r4);--jl-r5:var(--r5);--jl-r6:var(--r6);
-  --jl-r7:var(--r7);--jl-r8:var(--r8);--jl-r9:var(--r9);--jl-r10:var(--r10);--jl-r11:var(--r11);--jl-r12:var(--r12);
+  --font-display:var(--jl-font-display); --font-body:var(--jl-font-body); --font-mono:var(--jl-font-mono); --font-pixel:var(--jl-font-pixel);
 }
 :root[data-theme=light]{
   color-scheme:light;
-  --bg:#ffffff; --surface:#f5f3f6; --surface-2:#ebe8ec; --fg:#1a1414; --muted:#6a606a; --line:#e3dde2;
-  --accent:#d8204e; --accent-2:#0099a8; --accent-3:#d6007a;
+  --jl-bg:#ffffff; --jl-surface:#f5f3f6; --jl-surface-2:#ebe8ec; --jl-fg:#1a1414; --jl-muted:#6a606a; --jl-line:#e3dde2;
+  --jl-accent:#d8204e; --jl-accent-2:#0099a8; --jl-accent-3:#d6007a;
 }
 
 *,*::before,*::after{box-sizing:border-box}
