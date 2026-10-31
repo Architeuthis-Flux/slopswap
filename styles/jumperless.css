@@ -5,8 +5,9 @@
    and carries the rainbow from docs.jumperless.org. There is no OS-preference switch; add
    data-theme="light" on <html> for the light look.
 
-   Tokens:  --bg --surface --surface-2 --fg --muted --line --accent --accent-2 --accent-3
-            --r1…--r10 (the ten letters of the pixel wordmark, in order)  --rainbow
+   Tokens:  --bg --surface --surface-2 --fg --muted --line --accent (pink, the J) --accent-2 (cyan) --accent-3
+            --r1…--r12 (the pixel wordmark's letters, resampled at even hue steps)  --rainbow
+   Links and single highlights are pink; a row of siblings cycles the rainbow (.cycle sets --c per child).
             --font-display --font-body --font-mono --font-pixel
    The same values are exposed as --jl-* so a converted artifact can point its own token names at
    them (localize_fonts.py --theme writes that block).
@@ -22,10 +23,11 @@
 :root{
   color-scheme:dark;
   --bg:#1f1f21; --surface:#2a2a2f; --surface-2:#35353c; --fg:#f3f3f5; --muted:#a8a8b4; --line:#3e3e47;
-  --accent:#fc0289; --accent-2:#00fced; --accent-3:#b230fe;
-  --r1:#f03060;--r2:#f030b0;--r3:#c828f8;--r4:#5858f0;--r5:#48a0e8;
-  --r6:#78f8b8;--r7:#c0f848;--r8:#e0e048;--r9:#f0b038;--r10:#e86828;
-  --rainbow:linear-gradient(90deg,var(--r1),var(--r2),var(--r3),var(--r4),var(--r5),var(--r6),var(--r7),var(--r8),var(--r9),var(--r10));
+  --accent:#f03060; --accent-2:#00fced; --accent-3:#fc0289;
+  --r1:#f03060;--r2:#f12fbf;--r3:#c728f8;--r4:#7647f2;
+  --r5:#5174ed;--r6:#50beeb;--r7:#68f4d7;--r8:#70f899;
+  --r9:#7af85c;--r10:#c0f848;--r11:#e8cb40;--r12:#e86828;
+  --rainbow:linear-gradient(90deg,var(--r1),var(--r2),var(--r3),var(--r4),var(--r5),var(--r6),var(--r7),var(--r8),var(--r9),var(--r10),var(--r11),var(--r12));
   --font-display:Michroma,"Avenir Next","Helvetica Neue",Arial,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
   --font-body:Lato,"Helvetica Neue",Arial,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
   --font-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
@@ -34,13 +36,13 @@
   --jl-bg:var(--bg);--jl-surface:var(--surface);--jl-surface-2:var(--surface-2);--jl-fg:var(--fg);--jl-muted:var(--muted);
   --jl-line:var(--line);--jl-accent:var(--accent);--jl-accent-2:var(--accent-2);--jl-accent-3:var(--accent-3);
   --jl-font-display:var(--font-display);--jl-font-body:var(--font-body);--jl-font-mono:var(--font-mono);--jl-font-pixel:var(--font-pixel);
-  --jl-r1:var(--r1);--jl-r2:var(--r2);--jl-r3:var(--r3);--jl-r4:var(--r4);--jl-r5:var(--r5);
-  --jl-r6:var(--r6);--jl-r7:var(--r7);--jl-r8:var(--r8);--jl-r9:var(--r9);--jl-r10:var(--r10);
+  --jl-r1:var(--r1);--jl-r2:var(--r2);--jl-r3:var(--r3);--jl-r4:var(--r4);--jl-r5:var(--r5);--jl-r6:var(--r6);
+  --jl-r7:var(--r7);--jl-r8:var(--r8);--jl-r9:var(--r9);--jl-r10:var(--r10);--jl-r11:var(--r11);--jl-r12:var(--r12);
 }
 :root[data-theme=light]{
   color-scheme:light;
   --bg:#ffffff; --surface:#f5f3f6; --surface-2:#ebe8ec; --fg:#1a1414; --muted:#6a606a; --line:#e3dde2;
-  --accent:#e0007a; --accent-2:#0099a8; --accent-3:#8a1fd6;
+  --accent:#d8204e; --accent-2:#0099a8; --accent-3:#d6007a;
 }
 
 *,*::before,*::after{box-sizing:border-box}
@@ -58,22 +60,29 @@ h1{font-size:1.85rem;margin-top:.5rem}
 h2{font-size:1.2rem;padding-left:.75rem;border-left:.375rem solid var(--accent)}
 h3{font-size:1rem}
 h4{font-family:var(--font-pixel);font-size:.62rem;font-weight:400;letter-spacing:0;color:var(--muted);margin:2em 0 .6em}
-/* sibling sections walk the wordmark rainbow, like the docs sidebar */
-h2:nth-of-type(10n+1){border-color:var(--r1)} h2:nth-of-type(10n+2){border-color:var(--r2)}
-h2:nth-of-type(10n+3){border-color:var(--r3)} h2:nth-of-type(10n+4){border-color:var(--r4)}
-h2:nth-of-type(10n+5){border-color:var(--r5)} h2:nth-of-type(10n+6){border-color:var(--r6)}
-h2:nth-of-type(10n+7){border-color:var(--r7)} h2:nth-of-type(10n+8){border-color:var(--r8)}
-h2:nth-of-type(10n+9){border-color:var(--r9)} h2:nth-of-type(10n+10){border-color:var(--r10)}
-
+/* sibling sections walk the rainbow, like the docs sidebar */
+h2:nth-of-type(12n+1){border-color:var(--r1)} h2:nth-of-type(12n+2){border-color:var(--r2)}
+h2:nth-of-type(12n+3){border-color:var(--r3)} h2:nth-of-type(12n+4){border-color:var(--r4)}
+h2:nth-of-type(12n+5){border-color:var(--r5)} h2:nth-of-type(12n+6){border-color:var(--r6)}
+h2:nth-of-type(12n+7){border-color:var(--r7)} h2:nth-of-type(12n+8){border-color:var(--r8)}
+h2:nth-of-type(12n+9){border-color:var(--r9)} h2:nth-of-type(12n+10){border-color:var(--r10)}
+h2:nth-of-type(12n+11){border-color:var(--r11)} h2:nth-of-type(12n+12){border-color:var(--r12)}
 p,ul,ol,dl,table,pre,blockquote,figure{margin:0 0 1.1em}
 li{margin:.25em 0}
-a{color:var(--accent-2);text-decoration-thickness:1px;text-underline-offset:2px}
-a:hover{color:var(--accent)}
+a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:2px}
+a:hover{color:var(--r2)}
+/* .cycle: each child gets the next rainbow colour as --c, for rows of buttons, chips, cards */
+.cycle>:nth-child(12n+1){--c:var(--r1)} .cycle>:nth-child(12n+2){--c:var(--r2)}
+.cycle>:nth-child(12n+3){--c:var(--r3)} .cycle>:nth-child(12n+4){--c:var(--r4)}
+.cycle>:nth-child(12n+5){--c:var(--r5)} .cycle>:nth-child(12n+6){--c:var(--r6)}
+.cycle>:nth-child(12n+7){--c:var(--r7)} .cycle>:nth-child(12n+8){--c:var(--r8)}
+.cycle>:nth-child(12n+9){--c:var(--r9)} .cycle>:nth-child(12n+10){--c:var(--r10)}
+.cycle>:nth-child(12n+11){--c:var(--r11)} .cycle>:nth-child(12n+12){--c:var(--r12)}
 strong{font-weight:700}
 small,.muted{color:var(--muted)}
 .eyebrow{font-family:var(--font-pixel);font-size:.6rem;line-height:1.8;color:var(--muted);margin:0 0 .75rem}
 .eyebrow a{color:inherit;text-decoration:none}
-.eyebrow a:hover{color:var(--accent-2)}
+.eyebrow a:hover{color:var(--accent)}
 hr{border:0;height:3px;background:var(--rainbow);margin:2.5rem 0;border-radius:2px}
 .logo{height:2.4rem;width:auto;display:block;margin:0 0 1.25rem}
 

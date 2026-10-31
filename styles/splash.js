@@ -50,9 +50,9 @@
     grad.setAttribute('x1', '0'); grad.setAttribute('y1', '0'); grad.setAttribute('x2', '300'); grad.setAttribute('y2', '0');
     grad.setAttribute('spreadMethod', 'repeat');
     var cs = getComputedStyle(document.documentElement);
-    for (var i = 1; i <= 10; i++) {
+    for (var i = 1; i <= 12; i++) {
       var st = document.createElementNS(NS, 'stop');
-      st.setAttribute('offset', ((i - 1) / 9).toFixed(3));
+      st.setAttribute('offset', ((i - 1) / 11).toFixed(3));
       st.setAttribute('stop-color', cs.getPropertyValue('--r' + i).trim() || '#fff');
       grad.appendChild(st);
     }

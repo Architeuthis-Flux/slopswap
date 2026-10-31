@@ -1,3 +1,4 @@
+<meta charset="utf-8">
 <title>Jumperless V6 Cost Explorer</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="../styles/jumperless.css">
@@ -448,3 +449,13 @@ hr { height: 1px; background: var(--line); margin: 1rem 0 }
   render();
 })();
 </script>
+
+<style>
+/* slopswap: rainbow instead of copper. Links, badges and the meter go pink (the J); a row of segment buttons cycles. */
+:root,:root:not([data-theme="light"]),:root[data-theme="dark"]{--bg:var(--jl-bg);--panel:var(--jl-surface);--ink:var(--jl-fg);--muted:var(--jl-muted);--line:var(--jl-line);--copper:var(--accent);--copper-soft:var(--surface-2);--bar1:var(--r1);--bar2:var(--r3);--bar3:var(--r5);--bar4:var(--r7);--bar5:var(--r9);--bar6:var(--r11)}
+.seg button[aria-pressed="true"]{color:#1f1f21}
+.seg button:nth-child(1)[aria-pressed="true"]{background:var(--r1);border-color:var(--r1)}
+.seg button:nth-child(2)[aria-pressed="true"]{background:var(--r5);border-color:var(--r5)}
+.seg button:nth-child(3)[aria-pressed="true"]{background:var(--r9);border-color:var(--r9)}
+.seg button:nth-child(4)[aria-pressed="true"]{background:var(--r11);border-color:var(--r11)}
+</style>

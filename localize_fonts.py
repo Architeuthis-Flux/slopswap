@@ -29,12 +29,12 @@ THEME_MAP = {  # artifact token → theme alias (only tokens the artifact actual
     "--fg": "--jl-fg", "--ink": "--jl-fg", "--text": "--jl-fg",
     "--muted": "--jl-muted", "--fg-2": "--jl-muted", "--mute": "--jl-muted",
     "--line": "--jl-line", "--ring": "--jl-line", "--grid": "--jl-line", "--axis": "--jl-line", "--phone-line": "--jl-line",
-    "--accent": "--jl-accent-2", "--accent-ink": "--jl-bg", "--copper": "--jl-accent",
+    "--accent": "--jl-accent", "--accent-ink": "--jl-bg", "--copper": "--jl-accent", "--hqb": "--jl-r12",
     "--font": "--jl-font-body", "--sans": "--jl-font-body", "--body": "--jl-font-body", "--font-body": "--jl-font-body",
     "--mono": "--jl-font-mono", "--font-mono": "--jl-font-mono",
     "--display": "--jl-font-display", "--font-display": "--jl-font-display",
-    "--s1": "--jl-r1", "--s2": "--jl-r10", "--s3": "--jl-r6", "--s4": "--jl-r8", "--s5": "--jl-r2", "--s6": "--jl-r7", "--s7": "--jl-r3", "--s8": "--jl-r9",
-    "--bar1": "--jl-r1", "--bar2": "--jl-r9", "--bar3": "--jl-r4", "--bar4": "--jl-r5", "--bar5": "--jl-r3", "--bar6": "--jl-r6",
+    "--s1": "--jl-r1", "--s2": "--jl-r3", "--s3": "--jl-r4", "--s4": "--jl-r6", "--s5": "--jl-r7", "--s6": "--jl-r9", "--s7": "--jl-r10", "--s8": "--jl-r12",
+    "--bar1": "--jl-r1", "--bar2": "--jl-r3", "--bar3": "--jl-r5", "--bar4": "--jl-r7", "--bar5": "--jl-r9", "--bar6": "--jl-r11",
 }
 
 
