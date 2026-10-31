@@ -37,7 +37,7 @@ THEME_MAP = {  # artifact token → theme alias (only tokens the artifact actual
     "--fg": "--jl-fg", "--ink": "--jl-fg", "--text": "--jl-fg",
     "--muted": "--jl-muted", "--fg-2": "--jl-muted", "--mute": "--jl-muted",
     "--line": "--jl-line", "--ring": "--jl-line", "--grid": "--jl-line", "--axis": "--jl-line", "--phone-line": "--jl-line",
-    "--accent": "--jl-accent", "--accent-ink": "--jl-bg", "--copper": "--jl-accent", "--hqb": "--jl-r12",
+    "--accent": "--jl-accent", "--accent-ink": "--jl-bg", "--copper": "--jl-accent", "--hqb": "--jl-accent-3", "--hqb-bg": "--jl-surface-2",
     "--font": "--jl-font-body", "--sans": "--jl-font-body", "--body": "--jl-font-body", "--font-body": "--jl-font-body",
     "--mono": "--jl-font-mono", "--font-mono": "--jl-font-mono",
     "--display": "--jl-font-display", "--font-display": "--jl-font-display",
