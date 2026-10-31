@@ -28,7 +28,18 @@
       svg.setAttribute('role', 'img'); svg.setAttribute('aria-label', 'Jumperless: the newest pages');
       host.replaceChild(svg, img);
       label(svg, res[1]);
+      newestList(host, res[1]);
     }).catch(function (e) { console.warn('splash: leaving the static image', e); });
+  }
+
+  function newestList(host, pages) {
+    var ol = document.createElement('ol');
+    ol.className = 'splash-list';
+    pages.slice(0, FIGURES.length).forEach(function (p) {
+      var li = document.createElement('li'), a = document.createElement('a');
+      a.href = p.href; a.textContent = p.title; li.appendChild(a); ol.appendChild(li);
+    });
+    host.insertAdjacentElement('afterend', ol);
   }
 
   function label(svg, pages) {
@@ -84,7 +95,7 @@
       var title = document.createElementNS(NS, 'title'); title.textContent = page.title; a.appendChild(title);
 
       function fit() {
-        var pad = 6, maxW = w * 1.45, size = Math.min(h * 0.6, 15), label = page.short || page.title;
+        var pad = 6, maxW = w * 1.45, size = Math.min(h * 0.7, 17), label = page.short || page.title;
         t.textContent = label; t.setAttribute('font-size', size);
         var len = t.getComputedTextLength();
         while (len > maxW - 2 * pad && size > 9) { size -= 0.5; t.setAttribute('font-size', size); len = t.getComputedTextLength(); }

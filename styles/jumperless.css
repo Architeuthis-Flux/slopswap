@@ -111,6 +111,10 @@ ul.docs small{font-family:var(--font-pixel);font-size:.5rem;color:var(--muted)}
 .splash a.splash-hot{cursor:pointer;outline:none}
 .splash a.splash-hot>g{transition:transform .25s ease,filter .25s ease;transform-box:fill-box;transform-origin:center}
 .splash a.splash-hot:hover>g,.splash a.splash-hot:focus-visible>g{transform:scale(1.06);filter:drop-shadow(0 4px 18px rgba(0,0,0,.6))}
+/* on phones the eye boxes are too small to read: the same newest pages as a list */
+.splash-list{display:none;list-style:none;padding:0;margin:0 0 1.5rem;font-family:var(--font-pixel);font-size:.6rem;line-height:2.2}
+.splash-list a{text-decoration:none}
+@media (max-width:700px){.splash-list{display:block}}
 
 /* dense tool pages: the artifact brings its own layout, the theme brings fonts, colors and the stripe */
 body.app{font-size:14px;padding-block:1.25rem 2.5rem}
