@@ -73,7 +73,12 @@ a{color:var(--accent)}
 .kpi span{display:block;margin-top:6px;font-size:13px;color:var(--muted);line-height:1.35}
 .ask{margin-top:12px;padding:12px 14px;background:var(--surface-2);border-left:4px solid var(--gold);border-radius:0 6px 6px 0}
 .ask p{margin:0}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:12px}
+.notice{margin:14px 0 6px;padding:10px 14px;border:1px dashed var(--line);border-radius:6px;font-size:14px;line-height:1.5;color:var(--muted);max-width:72ch}
+.byline{margin-top:28px;padding-top:14px;border-top:1px solid var(--line);font-size:14px;color:var(--muted);max-width:72ch}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:12px}
+.col{display:grid;gap:10px;align-content:start;min-width:0}
+.col h4{margin:0 0 -2px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700}
+[lang="zh-CN"] .col h4{letter-spacing:.08em;text-transform:none}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:12px 14px;min-width:0}
 .card .who{font-weight:700}
 .card .role{color:var(--muted);font-size:14px}
@@ -147,6 +152,7 @@ body.print li,body.print .kpi,body.print .card,body.print .ask{break-inside:avoi
 
 <main class="wrap gutter">
 <p class="part">English</p>
+<div class="notice">A note on these notes: they were put together with AI from the meeting transcripts and the email chains, and I don't have the refrigeration or regulatory expertise to check every line. If anything here conflicts with what Wolfking or APCCO know, they're right and this is wrong.</div>
 
 <section class="sec">
   <h2>Who's doing what</h2>
@@ -326,11 +332,18 @@ body.print li,body.print .kpi,body.print .card,body.print .ask{break-inside:avoi
 <section class="sec">
   <h2>Contacts</h2>
   <div class="cards">
-    <div class="card"><div class="who">Joe Cappuccio</div><div class="role">Del Mar Seafoods, President</div><div class="contact">joe@delmarseafoods.com<br>+1 831-760-3005</div></div>
-    <div class="card"><div class="who">Alex Robinson</div><div class="role">APCCO, Construction</div><div class="contact">arobinson@apcco.net<br>+1 559-875-7720 ext. 411</div></div>
-    <div class="card"><div class="who">Patrick Cocagne, P.E.</div><div class="role">APCCO, Engineering</div><div class="contact">pcocagne@apcco.net<br>+1 559-875-7720 ext. 402</div></div>
-    <div class="card"><div class="who">Sean Zhu</div><div class="role">Wolfking</div><div class="contact">sean@wolfkingtech.com</div></div>
-    <div class="card"><div class="who">David Ye</div><div class="role">Wolfking</div><div class="contact">david@wolfkingtech.com</div></div>
+    <div class="col"><h4>Del Mar Seafoods</h4>
+      <div class="card"><div class="who">Joe Cappuccio</div><div class="role">President</div><div class="contact">joe@delmarseafoods.com<br>+1 831-760-3005</div></div>
+      <div class="card"><div class="who">Kevin Cappuccio</div><div class="contact">KevinC@ppucc.io</div></div>
+    </div>
+    <div class="col"><h4>APCCO</h4>
+      <div class="card"><div class="who">Patrick Cocagne, P.E.</div><div class="role">Vice President of Engineering</div><div class="contact">pcocagne@apcco.net<br>+1 559-875-7720 ext. 402</div></div>
+      <div class="card"><div class="who">Alex Robinson</div><div class="role">Division Manager, Construction</div><div class="contact">arobinson@apcco.net<br>+1 559-875-7720 ext. 411</div></div>
+    </div>
+    <div class="col"><h4>Wolfking</h4>
+      <div class="card"><div class="who">Sean Zhu</div><div class="role">Managing Director</div><div class="contact">sean@wolfkingtech.com</div></div>
+      <div class="card"><div class="who">David Ye</div><div class="contact">david@wolfkingtech.com</div></div>
+    </div>
   </div>
 </section>
 </main>
@@ -353,6 +366,7 @@ body.print li,body.print .kpi,body.print .card,body.print .ask{break-inside:avoi
 
 <main class="wrap gutter">
 <p class="part">中文</p>
+<div class="notice">关于这份备忘：它是用 AI 根据会谈录音转写和邮件往来整理的，我没有制冷和法规方面的专业能力来逐条核实。如果这里有什么和狼王或 APCCO 的专业判断不一致，以他们为准，是这里写错了。</div>
 
 <section class="sec">
   <h2>谁负责什么</h2>
@@ -532,11 +546,18 @@ body.print li,body.print .kpi,body.print .card,body.print .ask{break-inside:avoi
 <section class="sec">
   <h2>联系人</h2>
   <div class="cards">
-    <div class="card"><div class="who">Joe Cappuccio</div><div class="role">Del Mar Seafoods，总裁</div><div class="contact">joe@delmarseafoods.com<br>+1 831-760-3005</div></div>
-    <div class="card"><div class="who">Alex Robinson</div><div class="role">APCCO，施工</div><div class="contact">arobinson@apcco.net<br>+1 559-875-7720 分机 411</div></div>
-    <div class="card"><div class="who">Patrick Cocagne, P.E.</div><div class="role">APCCO，工程</div><div class="contact">pcocagne@apcco.net<br>+1 559-875-7720 分机 402</div></div>
-    <div class="card"><div class="who">Sean Zhu</div><div class="role">狼王</div><div class="contact">sean@wolfkingtech.com</div></div>
-    <div class="card"><div class="who">David Ye</div><div class="role">狼王</div><div class="contact">david@wolfkingtech.com</div></div>
+    <div class="col"><h4>Del Mar Seafoods</h4>
+      <div class="card"><div class="who">Joe Cappuccio</div><div class="role">总裁</div><div class="contact">joe@delmarseafoods.com<br>+1 831-760-3005</div></div>
+      <div class="card"><div class="who">Kevin Cappuccio</div><div class="contact">KevinC@ppucc.io</div></div>
+    </div>
+    <div class="col"><h4>APCCO</h4>
+      <div class="card"><div class="who">Patrick Cocagne, P.E.</div><div class="role">工程副总裁</div><div class="contact">pcocagne@apcco.net<br>+1 559-875-7720 分机 402</div></div>
+      <div class="card"><div class="who">Alex Robinson</div><div class="role">施工部门经理</div><div class="contact">arobinson@apcco.net<br>+1 559-875-7720 分机 411</div></div>
+    </div>
+    <div class="col"><h4>狼王科技 Wolfking</h4>
+      <div class="card"><div class="who">Sean Zhu</div><div class="role">总经理</div><div class="contact">sean@wolfkingtech.com</div></div>
+      <div class="card"><div class="who">David Ye</div><div class="contact">david@wolfkingtech.com</div></div>
+    </div>
   </div>
 </section>
 </main>
