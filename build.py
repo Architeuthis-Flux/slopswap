@@ -76,7 +76,9 @@ def main() -> None:
             crumb = f'<p class="eyebrow"><a href="../">slopswap</a> / {html.escape(d.name)}</p>'
             (OUT / d.name / "index.html").write_text(
                 page(name, theme_of(d), "../", f"{crumb}\n<h1>{html.escape(name)}</h1>\n{listing(d, '')}"))
-        sections.append(f'<h2><a href="{d.name}/">{html.escape(name)}</a></h2>\n{listing(d, d.name + "/")}')
+        # a folder with its own index curates itself: the root links it without listing its files
+        files = "" if (d / "index.html").exists() else "\n" + listing(d, d.name + "/")
+        sections.append(f'<h2><a href="{d.name}/">{html.escape(name)}</a></h2>{files}')
 
     (OUT / "index.html").write_text(page("slopswap", DEFAULT_THEME, "", "<h1>slopswap</h1>\n" + "\n".join(sections)))
     print(f"built {len(projects)} project folders into {OUT.relative_to(ROOT)}/")
