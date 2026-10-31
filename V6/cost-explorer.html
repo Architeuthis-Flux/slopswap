@@ -86,7 +86,7 @@ hr { height: 1px; background: var(--line); margin: 1rem 0 }
 <div class="rail">
   <div class="panel">
     <h2>Build</h2>
-    <div class="row"><label>Your selections are kept in this browser<small>defaults = the 2026-10-31 baseline: TFT + touch, ROW-ISO fitted, floated TP181 sense on the housekeeping mux, M.2 port with one isolated port chip, 18 × MMC5603NJ, 80 clips</small></label><button type="button" id="reset" class="chip">Reset to baseline</button></div>
+    <div class="row"><label>Your selections are kept in this browser<small>defaults = the 2026-10-31 baseline: TFT + touch, ROW-ISO fitted, buses unsplit (0R links), floated TP181 sense on the housekeeping mux, M.2 port with one isolated port chip, 18 × MMC5603NJ, 80 clips</small></label><button type="button" id="reset" class="chip">Reset to baseline</button></div>
     <div class="row"><label>Volume<small>parts −5 % at 3k; tooling amortised over the run</small></label>
       <div class="seg" id="vol"><button aria-pressed="true" data-v="1000">1k</button><button data-v="3000">3k</button><button data-v="5000">5k</button></div></div>
     <div class="row"><label>Shell and probe housing</label>
@@ -112,6 +112,8 @@ hr { height: 1px; background: var(--line); margin: 1rem 0 }
     <h2>ChonkBus and sensing</h2>
     <div class="row"><label>Row isolation<small>30 × ET7460H + 8 × 74HC595 + 38 × 100n; bridges otherwise</small></label>
       <div class="seg" id="iso"><button aria-pressed="true" data-v="fit">Fitted</button><button data-v="bridge">0R bridges</button></div></div>
+    <div class="row"><label>Bus segments<small>each bus drawn as 4 segments (odd/even × top/bottom) joined by 0R; the options put ET7460H links and a source decoder per segment</small></label>
+      <select id="split"><option value="none">One net per bus (0R links, as drawn)</option><option value="parity">OPTION BUS-SPLIT: odd/even → up to 4 nets (+$1.60, 16 bits)</option><option value="side">+ BUS-SPLIT-SIDE: top/bottom too → up to 8 nets (+$4.38, 40 bits)</option></select></div>
     <div class="row"><label>Shunt amplifier<small>INA219 as drawn; the alternatives take negative common mode</small></label>
       <select id="sense">
         <option value="ina219">INA219 as drawn (I²C, 0 ADC pins; CM ≥ −0.3 V only)</option>
@@ -212,13 +214,13 @@ hr { height: 1px; background: var(--line); margin: 1rem 0 }
 (function () {
   // ---- baseline from docs/V6_BOM.md (1000 boards, parts only) -------------------------------------------
   const BASE = {
-    main: { B21: 3.62, B22: 0.01, B23: 1.44, B24: 8.07, B25: 3.73, B27: 0.01, B28: 0.00, B29: 15.44, B30: 5.14, B32: 4.08,
+    main: { B21: 3.62, B22: 0.01, B23: 1.44, B24: 8.07, B25: 3.73, B27: 0.01, B28: 0.00, B29: 15.48, B30: 5.14, B32: 4.08,
             B33: 0.00, B34: 0.44, B35: 0.23, V5: 17.93, extra: 0.49 },
     wig:  { B26: 0.09, B27: 9.30, B28: 0.00, mags: 0, clips: 0 },
     unpriced: 2.00,
   };
   const WHAT = { B21: 'CH32H417 core (CH32 $3.30 est.)', B22: 'USB', B23: 'RP2350 link, PSRAM $1.42', B24: 'display + socket (sample price)',
-    B25: 'controls: nav stick $2.34, encoder $1.30', B27: 'LED drive (main) / 480 LEDs (wig)', B28: 'wig interface', B29: 'ChonkBus: 97 × ET7460H $11.64, 25 × 74HC595 $1.52, 74HC238 ×2, shunt amplifier as selected, gates, bus dividers, housekeeping mux',
+    B25: 'controls: nav stick $2.34, encoder $1.30', B27: 'LED drive (main) / 480 LEDs (wig)', B28: 'wig interface', B29: 'ChonkBus: 97 × ET7460H $11.64, 25 × 74HC595 $1.52, 74HC238 ×2, 8 × 0R segment links, shunt amplifier as selected, gates, bus dividers, housekeeping mux; + segment options as selected',
     B30: 'lane layer: 5 × CH446Q $4.50', B32: 'power: TPS65131 $2.17, 60 × BAT54S $1.04', B33: 'expansion port: socket + port CH446Q + per-pin isolation as selected', B34: 'handover: 74HC238 ×2, TCA9534', B35: 'ADC taps',
     V5: 'your V5 parts: 12 × CH446Q $10.80, 2 × L272D $2.28, MCP4728, RP2350B, 2 × INA219', B26: 'magnetometer board passives', mags: 'MMC5603NJ array + 74LVC138 decoders + 2.2 µF (was 9 × TMAG5273 $4.43)', clips: 'Fulimei Spring Clip6, $0.0599 each (PI 2026-06-17)', extra: 'AMOLED socket' };
   const ISO_PARTS = 4.47, ISO_PLACEMENTS = 16;          // bom.py REPLACES['ROW-BRIDGE']
@@ -279,8 +281,11 @@ hr { height: 1px; background: var(--line); margin: 1rem 0 }
     main.B24 = 0.07; main.extra = 0;                      // keep the display block's passives; socket goes with the AMOLED
     if (state.disp === 'amoled') { main.B24 += num('p_amoled'); notes.push('AMOLED at the sample price'); }
     else if (state.disp === 'tft') { main.B24 += num('p_tft') + ($('ctp').checked ? num('p_ctp') : 0) + ($('glass').checked ? num('p_glass') + num('t_glass') / vol : 0); }
-    // ChonkBus isolation
+    // ChonkBus isolation and bus segments (docs/V6_BOM.md options table, 2026-10-31)
     if (state.iso === 'bridge') main.B29 -= ISO_PARTS;
+    const split = $('split').value;
+    if (split === 'parity') main.B29 += 1.60;
+    if (split === 'side') main.B29 += 1.60 + 2.78;
     // current sense
     const sense = $('sense').value;
     if (sense === 'both') main.B29 += num('p_sense') + 0.03;          // the INA219 stays, a second one + shunt in the GND source path
@@ -308,7 +313,8 @@ hr { height: 1px; background: var(--line); margin: 1rem 0 }
     const partsMain = (sum(main) + 1.6) * scale, partsWig = (sum(wig) + 0.4) * scale;
     const parts = partsMain + partsWig;
     // assembly
-    let placements = PLACEMENTS.main + PLACEMENTS.wig + (nmag - 9) + Math.ceil(nmag / 8) + (state.iso === 'bridge' ? -ISO_PLACEMENTS : 0) + chips * 3 + ($('portiso').checked ? chips * 24 : 0);
+    let placements = PLACEMENTS.main + PLACEMENTS.wig + (nmag - 9) + Math.ceil(nmag / 8) + (state.iso === 'bridge' ? -ISO_PLACEMENTS : 0) + chips * 3 + ($('portiso').checked ? chips * 24 : 0)
+      + (split === 'parity' ? 28 : split === 'side' ? 82 : 0);
     const smt = placements * PLACE_RATE * (vol >= 3000 ? 0.92 : 1);
     const labour = state.labour === 'block' ? 2.50 : 14.00;
     const mech = MECH[state.shell];
@@ -323,7 +329,7 @@ hr { height: 1px; background: var(--line); margin: 1rem 0 }
     const feeDir = p => p * 0.029 + 0.30, feeCS = p => p * (0.12 + 0.029) + 5;
     const mDir = (price - landed - feeDir(price)) / price, mCS = (price - landed - feeCS(price)) / price;
     // area
-    let area = AREA.main_components_mm2 - (state.iso === 'bridge' ? AREA.iso_mm2 : 0) + PORT[$('port').value].area + chips * 180 + ($('portiso').checked ? chips * 325 : 0);   // 8 × ET7460H 30 + 2 × TSSOP-16 85 + 16 × SOT-23 210
+    let area = AREA.main_components_mm2 - (state.iso === 'bridge' ? AREA.iso_mm2 : 0) + (split === 'parity' ? 160 : split === 'side' ? 460 : 0) + PORT[$('port').value].area + chips * 180 + ($('portiso').checked ? chips * 325 : 0);   // 8 × ET7460H 30 + 2 × TSSOP-16 85 + 16 × SOT-23 210
     if (state.disp === 'amoled') area += 60; if ($('c_nav').checked) area -= 60;
     const util = area / (AREA.board_mm2 * AREA.sides);
     return { main, wig, partsMain, partsWig, parts, smt, labour, mechanics, pcbs, other, exw, landed, price, mDir, mCS, placements, vol, tariff, area, util, feeDir, feeCS, tool: mech.tool, scale, notes };

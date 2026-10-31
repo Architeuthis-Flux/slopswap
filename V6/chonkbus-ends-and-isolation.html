@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>V6 ChonkBus: bus ends, interlock, row isolation, BOM</title>
+<title>V6 ChonkBus: bus ends, interlock, row isolation, segments, BOM</title>
 <link rel="stylesheet" href="../styles/jumperless.css">
 <style>table{font-size:.85rem} td,th{padding:.4em .55em} .table-wrap{margin:0 -1px 1.1em} h2{margin-top:2.2em} h3{margin-top:1.6em} img.sheet{border:1px solid var(--line);border-radius:4px;background:#fff}</style>
 </head>
 <body>
 <main class="page">
 <p class="eyebrow"><a href="../">slopswap</a> / <a href="./">V6</a></p>
-<h1>V6 ChonkBus: bus ends, interlock, row isolation, BOM</h1>
-<p><em>2026-10-29. Decision record for the row-switch system now drawn as block B29 (<code>b29_chonkbus</code>) and installed in <code>JumperlessV6/MainBoard/MainBoard.kicad_sch</code> (first install backup <code>MainBoard-backups/pre-v6_MainBoard_2026-10-29_033249.zip</code>; ROW-ISO fitted in a second install the same day, backup <code>pre-v6_MainBoard_2026-10-29_091257.zip</code>; undo with <code>python3 v6gen/install_v6.py --revert</code>). Later the same day: current sense, always-on voltage sense, expansion port and cost cuts are in <a href="expansion-port-and-current-sense.html">V6_expansion_port_and_current_sense</a>. Spec: <code>v6gen/BUILD_SPEC.md</code> section 8; write-up for the sheet: <code>docs/V6_SCHEMATIC.md</code> "2026-10-29". Prices: <code>docs/V6_BOM.md</code> (1000 boards).</em></p>
+<h1>V6 ChonkBus: bus ends, interlock, row isolation, segments, BOM</h1>
+<p><em>2026-10-29 (§6 added 2026-10-31: bus segments). Decision record for the row-switch system now drawn as block B29 (<code>b29_chonkbus</code>) and installed in <code>JumperlessV6/MainBoard/MainBoard.kicad_sch</code> (first install backup <code>MainBoard-backups/pre-v6_MainBoard_2026-10-29_033249.zip</code>; ROW-ISO fitted in a second install the same day, backup <code>pre-v6_MainBoard_2026-10-29_091257.zip</code>; undo with <code>python3 v6gen/install_v6.py --revert</code>). Later the same day: current sense, always-on voltage sense, expansion port and cost cuts are in <a href="expansion-port-and-current-sense.html">V6_expansion_port_and_current_sense</a>. Spec: <code>v6gen/BUILD_SPEC.md</code> section 8; write-up for the sheet: <code>docs/V6_SCHEMATIC.md</code> "2026-10-29". Prices: <code>docs/V6_BOM.md</code> (1000 boards).</em></p>
 <h2>0. Bottom line</h2>
 <ul>
 <li><strong>Two identical buses, same option list each.</strong> That is the mental model: "there are two 0.1 Ω ChonkBuses; any row can be on either; each bus can be TOP_RAIL, BOTTOM_RAIL, GND, DAC 0 or DAC 1 (one of these), plus the extension port, plus a shunt ammeter to the other bus." Making one bus GND-only would have saved nothing (the decoder makes exclusivity free) and cost the two-positive-supplies case.</li>
@@ -311,16 +311,29 @@
 </tbody>
 </table></div>
 <p>Caveats: the component total is the solid part (every line sourced; see <code>docs/V6_BOM.md</code> for basis and dates); assembly, PCBs and mechanics are scaled from the V5 quotes, not quoted. This is well above the $77 "V6 lean" scenario in <code>README_v6BOM.md</code> because that model predates the display, the lane layer, the magnetometers, the ChonkBus and the CH32: those are ~$35 of the parts. At $339 via Crowd Supply the 1k figure gives ~38 % margin, ~51 % sold direct; the $220 target needs the lean board, not this one. The ROW-ISO decision moves that by under 2 points either way — it is not what decides the price.</p>
-<h2>6. Names</h2>
+<h2>6. Bus segments (added 2026-10-31)</h2>
+<p>Kevin's question: split the ChonkBus into sections that can be joined in various ways, for more flexibility and maybe fewer switches. The count argument first: a row that can be on net X, net Y or nothing is a 3-position selector, which is two SPST switches however it is wired, and isolation is a third switch in a spot no other switch occupies, so <strong>3 switches per row (90 packages) is the floor</strong> for "two nets anywhere, every row isolatable, 0.8 A per row". Savings only come from moving the A/B choice to a group of m rows (one switch per row onto a group node P, two per group): m = 2 saves nothing (90), m = 3 → 80, m = 5 → 72, m = 15 → 64; the group shares one 0.8 A switch and one bus choice, the path is 0.2 Ω, and the conflicts land on the commonest patterns (breakout header with VIN and GND on adjacent rows, DIP corner pins). Kept the 90.</p>
+<p>What segmentation buys is <strong>more nets</strong>, and that is now drawn as options (fourth sheet <code>b29_bussplit</code>, installed 2026-10-31):</p>
+<ul>
+<li>Each bus is four pieces of copper, <strong>odd / even rows × top / bottom side</strong> (<code>BUS_x_OT</code>, <code>_ET</code>, <code>_OB</code>, <code>_EB</code>), chosen so that a part can be moved <em>one row</em> to reach the other supply (top/bottom alone would mean moving to the other half of the board). A row's A and B switches land on the segments of its parity and side, so every row still reaches one segment of each bus.</li>
+<li>Four links per bus in a ring: odd/even on each side (<code>LINK_x_T</code>, <code>LINK_x_B</code>) and top/bottom on each parity (<code>LINK_x_O</code>, <code>LINK_x_E</code>). <strong>As fitted, all eight links are 0R 1206 and nothing changes.</strong> The sources, extension switch, shunt and interlock stay on the odd-top segment.</li>
+<li><strong>OPTION BUS-SPLIT</strong> (+$1.60, +28 placements): the odd/even links become ET7460H switches, the even segment of each bus gets its own 74HC238 + three source switches (same five sources, no EXT), two more 74HC595 (16 bits) behind bypass jumper JP29002. Links open = up to <strong>four nets</strong>: e.g. bus A odd = 5V, bus A even = 3V3, bus B both = GND — the three-supply case that today sends one of them through the crossbar. Links closed = two full buses.</li>
+<li><strong>OPTION BUS-SPLIT-SIDE</strong> (+$2.78 on top): the top/bottom links become switches, the two bottom segments of each bus get decoders, three more 74HC595 (24 bits) behind JP29003. Up to <strong>eight nets</strong>.</li>
+<li>Rules: a closed link is one switch (0.8 A, 0.1 Ω; a source feeding a row across a link is 0.3 Ω); one source per segment is hardware (each decoder one-hot), but two segments joined by a closed link with both decoders enabled is a firmware rule, like bus = source + EXT; the shunt measures between the two odd-top segments only; the parity constraint ("5V only on odd rows") is a UI job — the app says "move the chip one row".</li>
+<li>Latch chain: 200 bits as fitted; 216 with BUS-SPLIT, 240 with both; <code>JP29001</code> A now takes <code>B29_CHAIN_OUT</code>, which is the isolation chain's end passed through the two bypass jumpers.</li>
+</ul>
+<p>Costs in the <a href="cost-explorer.html">explorer</a> under "Bus segments"; parts list in <code>docs/V6_BOM.md</code> options table. The 90-package per-row structure is untouched, so this is a pure fit/no-fit decision later.</p>
+<h2>7. Names</h2>
 <p>ChonkBus, PowerBussy (yours); ChonkRail, FatBus, Beefy Bus, HardBus, Power Lane, HeavyLine. "ChonkBus" is the one that is both descriptive (chunky, bus) and says what it is in the UI ("put row 7 on ChonkBus A"); the latch/net names in the schematic stay <code>BUS_A</code>/<code>BUS_B</code> so nothing depends on the final pick.</p>
-<h2>7. Files</h2>
+<h2>8. Files</h2>
 <ul>
 <li><code>v6gen/blocks/b29_chonkbus.py</code> (new; replaces <code>b29_rowswitch</code> in <code>merge_v6.MODULES</code>), <code>prep_base.py</code> (60 label touches), <code>b30_lane_afe.py</code>, <code>b32_power.py</code>, <code>b33_ext.py</code>, <code>ext_board.py</code>, <code>opt_misc.py</code>, <code>bom.py</code>, <code>prices.csv</code>, <code>kc.py</code>; <code>BUILD_SPEC.md</code> §8; <code>docs/V6_SCHEMATIC.md</code>, <code>docs/V6_HANDOFF.md</code>, <code>docs/V6_BOM.md/.csv</code>.</li>
-<li>Sheets: <code>v6gen/out/blocks/b29_{rowcells,isolation,busends,latches}.kicad_sch</code> + <code>.png</code>; staged project <code>v6gen/out/merged/MainBoard/</code>; installed into <code>MainBoard/</code>.</li>
+<li>Sheets: <code>v6gen/out/blocks/b29_{rowcells,isolation,busends,latches,bussplit}.kicad_sch</code> + <code>.png</code>; staged project <code>v6gen/out/merged/MainBoard/</code>; installed into <code>MainBoard/</code> (fourth install 2026-10-31 added the segments).</li>
 <li>Proof: base pins renamed 0 beyond the 79 intended (19 earlier + 60 rows), merged netlist = base + blocks, 1,426 parts added (191 of yours kept), ERC 2418 / 46 errors (the same 46 as before), KiCad re-save identical.</li>
 </ul>
+<figure><a href="b29_bussplit.png"><img class="sheet" src="b29_bussplit.png" alt="B29 bus segments sheet: links, 0R bridges, option decoders, option latches" loading="lazy"></a><figcaption>Sheet <code>b29_bussplit</code> (2026-10-31): the links and 0R bridges, the six option decoder sets, the five option latches with their bypass jumpers. Click for full size.</figcaption></figure>
 <hr>
-<p class="muted">Jumperless V6 design notes, written with Claude; published 31 October 2026. Prices are LCSC unit prices on the date each section states. Nothing here is a datasheet; follow the links for those.</p>
+<p class="muted">Jumperless V6 design notes, written with Claude; updated 31 October 2026. Prices are LCSC unit prices on the date each section states.</p>
 </main>
 </body>
 </html>
