@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Photography</title>
+<link rel="stylesheet" href="../styles/jumperless.css">
+<style>
+  .lede{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:.5rem 2rem;margin:0 0 1.5rem}
+  .lede h1{margin:0}
+  .lede p{margin:0;color:var(--muted);max-width:44ch}
+  .cards{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(17rem,1fr));gap:1rem}
+  .card{position:relative;display:flex;flex-direction:column;gap:.55rem;min-width:0;padding:1.1rem 1.2rem 1rem;border:1px solid var(--line);border-radius:8px;background:var(--surface);border-top:5px solid var(--accent)}
+  .card h2{margin:0;padding:0;border:0;font-size:1rem;line-height:1.3}
+  .card h2 a{color:var(--fg);text-decoration:none}
+  .card h2 a::after{content:"";position:absolute;inset:0}
+  .card:hover{border-color:var(--fg)}
+  .card p{margin:0;font-size:.92rem;color:var(--muted);flex:1}
+  .card .meta{display:flex;justify-content:space-between;gap:.5rem;font-family:var(--font-pixel);font-size:.55rem;color:var(--muted)}
+  .card:nth-child(12n+1){border-top-color:var(--r1)} .card:nth-child(12n+2){border-top-color:var(--r2)}
+  .card:nth-child(12n+3){border-top-color:var(--r3)} .card:nth-child(12n+4){border-top-color:var(--r4)}
+</style>
+</head>
+<body>
+<main class="page wide">
+<p class="eyebrow"><a href="../">slopswap</a> / photography</p>
+
+<div class="splash" data-svg="../styles/ddj-splash.svg" data-recent="recent.json"></div>
+
+<header class="lede">
+  <h1>Photography</h1>
+  <p>Cameras, capture cards and the software that sits between them and my bench. Writeups of small projects, with the dead ends left in.</p>
+</header>
+
+<ul class="cards">
+  <li class="card">
+    <div class="meta"><span>WRITEUP</span><span>1 NOV 2026</span></div>
+    <h2><a href="ms2130-4k.html">Real 4K out of a $20 "4K" capture card</a></h2>
+    <p>The MS2130 stick only does 1080p out of the box, its 1440p mode is an upscale, and its chip can do better. Measuring what it really sends, reading the firmware, flashing a 4K@18 build without bricking it, and the 1920×2160 mode that was real all along.</p>
+  </li>
+  <li class="card">
+    <div class="meta"><span>APP</span><span>1 NOV 2026</span></div>
+    <h2><a href="desklapse.html">DeskLapse</a></h2>
+    <p>A menu bar app that time-lapses the bench through the capture card: motion-adaptive intervals, crash-safe video, shares the card with OBS. What it does and the three things that were harder than they looked.</p>
+  </li>
+</ul>
+<script src="../styles/splash.js"></script>
+</main>
+</body>
+</html>
