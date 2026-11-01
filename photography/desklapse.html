@@ -79,7 +79,7 @@ in between        →  log-log interpolation</code></pre>
 </ul>
 
 <h2>Build it yourself</h2>
-<p>It's about 600 lines of Swift plus a 15 line build script. Edit <code>main.swift</code>, run <code>build.sh</code>, and it compiles, bundles, signs and relaunches. Tune the constants at the top of the file for your camera and bench. The source is on the bench next to me and will go on GitHub once I've used it for a month.</p>
+<p>It's about 600 lines of Swift plus a 15 line build script. Edit <code>main.swift</code>, run <code>build.sh</code>, and it compiles, bundles, signs and relaunches. Tune the constants at the top of the file for your camera and bench. The source isn't on GitHub yet. Ask me and I'll send it.</p>
 
 <pre><code>swiftc -O -swift-version 5 -parse-as-library -target arm64-apple-macos14.0 main.swift -o DeskLapse
 codesign -s "Developer ID Application: …" --force DeskLapse.app</code></pre>

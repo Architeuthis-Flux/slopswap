@@ -206,6 +206,7 @@ pre{font-size:.82rem}
 <p>Once the card was doing 4K I wanted it running all day. OBS has no interval capture and the macOS screenshot sound would have driven me insane, so I built a little menu bar app that grabs a frame every few seconds, speeds up when there's motion on the bench, and writes crash-safe video. That's <a href="desklapse.html">its own page</a>.</p>
 
 <h2>Numbers for the nerds</h2>
+<p><strong>Provenance:</strong> the tables on this page are from the measurement session on 28 September 2026. The photos were re-shot on 1 November because I didn't keep the originals; the same test on those frames gave 39.7 dB for 4K, 44.9 for the 1440p mode and 45.5 for the 1080p control, the same story within a dB.</p>
 <p><strong>Cadence:</strong> <code>ffmpeg -f avfoundation -framerate 60 -video_size 1920x1080 -i "USB3.0 Video" -t 4 -f framemd5 -</code>, then count runs of identical hashes. A 30p source through a 60 fps mode gives runs of exactly two.</p>
 <p><strong>Real detail:</strong> for a frame F at W×H and a candidate lower resolution w×h, compute PSNR(F, up(down(F, w×h), W×H)) with Lanczos both ways, luma only. Compare against the same number for a frame you know is an upscale (the control). Content the lower resolution can't carry shows up as extra loss. Six dB is not subtle.</p>
 <p><strong>HID error rate:</strong> ms-tools with a logging patch on <code>romExchangeReport</code>, reading 8 KB of chip RAM four bytes a report, counting failures.</p>
@@ -217,7 +218,7 @@ pre{font-size:.82rem}
 <a href="https://github.com/damnnfo/ms2130-firmware">damnnfo/ms2130-firmware</a>, the firmware images<br>
 <a href="https://doc.ultrasemi.com/en/tool/usb_video_download.html">UltraSemi USB video firmware tool</a> and <a href="https://doc.ultrasemi.com/en/tool/hd2uvc_edid_config">EDID helper</a><br>
 <a href="https://helpguide.sony.net/ilc/1420/v1/en/contents/TP0000435751.html">Sony ILCE-7S help guide, HDMI 4K Output</a><br>
-<a href="MS2130_datasheet.pdf">MS2130 datasheet</a> (machine translated PDF)</p>
+MS2130 datasheet, the machine translated PDF that floats around; the three tables above are the parts that matter</p>
 </main>
 
 </body>
