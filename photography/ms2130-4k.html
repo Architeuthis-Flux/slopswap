@@ -30,195 +30,205 @@ pre{font-size:.82rem}
 <h1>Real 4K out of a $20 "4K" capture card</h1>
 <p class="muted">1 November 2026 · Kevin Cappuccio · <a href="https://claude.ai/artifact/Wm76A53g1KGb7PcLCTrjWX">live doc on claude.ai</a></p>
 
-<p>Check it out: I got actual 3840×2160 frames out of one of those twenty dollar "4K" HDMI capture sticks. The ones where the box says 4K and the fine print says 4K <em>input</em>, 1080p output. Turns out the chip inside can do it, the firmware just never asks it to. Here's the whole trip, including the part where I nearly bricked it and the part where I found out "1440p" on these things is a lie.</p>
+<p>You know those twenty dollar HDMI capture sticks that say 4K in huge letters on the box, and then somewhere in the listing it says "4K input, 1080p output"? I have one of those pointed at my bench through a Sony A7S, and for about a year I assumed the 2560×1440 option in OBS meant I was getting something better than 1080p out of it. I was not. It was 1080p, scaled up, with frames dropped for the trouble. So I went looking for what the chip inside can actually do, and it turns out the answer is "real 3840×2160", it just needs firmware that asks for it. This is the whole thing: how I figured out what the card was really sending, what the datasheet admits, what's in the firmware, how I flashed it without turning it into a very small paperweight, and the mode that was good the whole time that I'd been ignoring because it looked like a typo.</p>
 
-<p>I did this with Claude Code driving the terminal, which is why there are so many measurements. When I say "we" below, that's who I mean.</p>
-
-<div class="callout"><span class="label">The short version</span>
+<div class="callout"><span class="label">TL;DR</span>
 <ul>
-<li>The card is a MacroSilicon <strong>MS2130</strong>. Stock firmware tops out at 1920×1080 at 60. The 2560×1440 mode it advertises is an upscale of 1080p.</li>
-<li>The chip's HDMI receiver takes real 4K30 and its scaler can pass 2160 lines through. It can't pass more than 1920 pixels of width. That's the actual limit.</li>
-<li>Newer MacroSilicon firmware adds a <strong>3840×2160 at 18 fps</strong> mode. Flash it and you get true 4K frames. The card's own <strong>1920×2160 at 30</strong> mode is also real: full 4K vertical detail squeezed to half width, which you stretch back out in OBS.</li>
-<li>Flashing over USB from a Mac is flaky. Quit OBS, close every other tab or app that talks to the card, use the UltraSemi WebHID tool, and keep a backup.</li>
-<li>Bonus: I wrote a little menu bar app, <a href="desklapse.html">DeskLapse</a>, that uses the card to time-lapse my desk.</li>
+<li>The chip is a MacroSilicon <strong>MS2130</strong>. Stock firmware tops out at 1920×1080 at 60, and the 2560×1440 and 2560×1600 modes it offers are 1080p scaled up.</li>
+<li>The HDMI receiver takes real 4K30 and the scaler will pass all 2160 lines through. What it won't do is pass more than 1920 pixels of width. That's the actual hardware limit.</li>
+<li>MacroSilicon's own 2025 firmware has a <strong>3840×2160 at 18 fps</strong> entry. Flash it and you get true 4K frames out of the stick.</li>
+<li>The <strong>1920×2160 at 30</strong> mode in the stock list is also real: every row of the 4K picture at half width, at a full 30 fps. Stretch it 2× in OBS.</li>
+<li>Flash it with the UltraSemi web tool in Chrome, with OBS closed, after you've read your existing firmware off the chip and saved it.</li>
 </ul>
 </div>
 
-<figure class="hero"><img src="hero_desk_4k.jpg" alt="Overhead view of a workbench with perfboards, a breadboard and a small TFT display, captured through the card"><figcaption>The bench, as the card sees it. Sony A7S on an arm above the desk, HDMI into the capture stick, USB into the Mac.</figcaption></figure>
+<figure class="hero"><img src="hero_desk_4k.jpg" alt="Overhead view of a workbench with perfboards, a breadboard, a yellow jar of flux and tools, captured through the card at 3840 by 2160"><figcaption>The bench as the card sees it now, 3840×2160. The A7S is on an arm above the desk, HDMI into the stick, USB 3 into the Mac.</figcaption></figure>
 
 <h2>The setup</h2>
-<p>An original Sony A7S pointed straight down at my bench, a USB 3 HDMI capture stick that Amazon calls a "4K camera link", and OBS on a Mac. The A7S is from 2014 and will push 4K over HDMI at 30p or 24p if you set <em>4K Output Sel.</em> to <em>HDMI Only</em>. It won't record internally while it does that, which is fine for a desk cam.</p>
+<p>An original A7S (the 2014 one) looking straight down at the bench, a USB 3 capture stick that Amazon lists as a "4K camera link", and OBS on a Mac. The A7S will push 4K over HDMI at 30p or 24p if you put it in movie mode and set <em>4K Output Sel.</em> to <em>HDMI Only</em>. It can't record internally while it does that, which doesn't matter for a desk camera, and it will happily sit there outputting 4K all day.</p>
 
-<p>The question that started this: what resolution is the card actually sending me? OBS showed a list of modes up to 2560×1600 and I'd been using one of the big ones, so I assumed I was getting something better than 1080p. I was not.</p>
+<p>The thing that started all this was a dumb question: what resolution is this card actually giving me? OBS showed me a dropdown with everything from 640×480 up to 2560×1600 and I'd picked one of the big ones and moved on with my life. Here's what the stick looks like to macOS:</p>
 
-<h2>Step 1: what is it actually sending?</h2>
-<p>First thing, find out what the stick is. <code>ioreg</code> says vendor <code>0x345F</code>, product <code>0x2130</code>, "MACROSILICON USB3.0 Video", linked at SuperSpeed. That's an MS2130, the USB 3 big brother of the MS2109 that's in every $10 capture stick. Here's every format it advertised to macOS, stock:</p>
+<figure><img src="shot_terminal_identify.png" alt="Terminal window: system_profiler shows USB3.0 Video from MACROSILICON, product ID 0x2130, up to 5 Gb/s; ffmpeg lists it as an AVFoundation video device"><figcaption>Vendor <code>0x345F</code>, product <code>0x2130</code>, linked at SuperSpeed. That's an MS2130, the USB 3 big brother of the MS2109 that's inside every ten dollar capture stick.</figcaption></figure>
 
-<pre><code>640x480 … 1360x768       yuvs/420v   60 50 30 20 10 fps
-1920x1080                yuvs/420v   60 50 30 20 10
-1920x1200, 1920x2160     yuvs/420v   60 50 30 20 10
-2048x1080, 2048x1152     yuvs/420v   60 50 30 20 10
-2560x1440, 2560x1600     yuvs/420v   50 30 20 10
-                                     (no 3840x2160 anywhere)</code></pre>
+<h2>What is it actually sending?</h2>
+<p>So first I wanted to know what the camera was feeding the stick, and what the stick was doing to it. You can't ask the card what's coming in over HDMI (well, you can, see below, but I didn't know that yet). What you can do is look at the frames it gives you and work backwards.</p>
 
-<p>So what's the camera feeding it? You can't read that from the Mac directly, but you can infer the frame rate. We captured four seconds at 1080p60 and hashed every frame. Every frame showed up exactly twice: a perfect 2-2-2-2 pattern. The card was doubling a 30p source. Then we hashed the 2560×1440 mode: it delivered 32 fps when asked for 50, and it couldn't keep up with 30 distinct frames per second either.</p>
+<p>Frame rate first. If the camera is sending 30p and the card is delivering 60, every frame has to show up twice. So I captured a few seconds at 1080p60 with ffmpeg and hashed every frame:</p>
 
-<p>Was the 1440p mode at least real pixels? The test for that is simple and it's the one we leaned on for the whole project: take a frame, squash it through a lower resolution and back up, and measure how much you lost. If a 1440p frame survives a trip through 1080p nearly unharmed, there was never anything in it that 1080p couldn't hold.</p>
+<figure><img src="shot_terminal_cadence.png" alt="Terminal window: ffmpeg framemd5 output, then a line of run lengths that reads 1 2 2 2 2 2 2 2, every frame hash repeated exactly twice"><figcaption>Every hash appears exactly twice. 2-2-2-2 all the way down. The A7S is sending 30p and the card is doubling it. (The odd 1 and 3 at the ends are the capture starting and stopping mid-pair.)</figcaption></figure>
+
+<p>Then the 2560×1440 mode. Asked for 50 fps it delivered 32, and even those weren't 32 distinct frames. And here's the test I ended up leaning on for the rest of this project, because it's the one that actually tells you whether pixels are real: take a frame, squash it down through a lower resolution and back up to where it was, and measure how much changed. If a "1440p" frame goes through 1080p and comes back nearly identical, there was never anything in it that 1080p couldn't hold. The number is PSNR, higher means less was lost.</p>
 
 <div class="table-wrap">
 <table>
 <thead><tr><th>Frame</th><th>Loss through 1080p</th><th>Loss through 1440p</th></tr></thead>
 <tbody>
-<tr><td>Card's 2560×1440 mode</td><td>43.3 dB</td><td>49.9 dB</td></tr>
-<tr><td>Card's 1080p, upscaled to 1440 as a control</td><td>44.2 dB</td><td>—</td></tr>
+<tr><td>The card's 2560×1440 mode</td><td>43.3 dB</td><td>49.9 dB</td></tr>
+<tr><td>The card's 1080p, upscaled to 1440 myself, as a control</td><td>44.2 dB</td><td>—</td></tr>
 </tbody>
 </table>
 </div>
-<p class="muted">PSNR, higher means less was lost. The 1440p frame is within one dB of the upscaled control. It is the upscaled control.</p>
+<p class="muted">The 1440p frame is within a dB of a frame I upscaled myself. It is an upscale.</p>
 
-<p>That's with the camera already in 4K mode. The card was taking a 4K signal, scaling it to 1080p internally, then scaling it back up to 1440p for me. Thanks.</p>
+<p>And this is with the camera already in 4K mode. The card was taking a 4K signal, scaling it to 1080p somewhere inside, and then scaling it back up to 1440p so I could feel good about the dropdown. Thanks.</p>
 
-<p>Side quest: I was convinced the camera was dropping to 1080p because of EDID negotiation, the thing where an HDMI source only sends what the sink claims it can take. So we dumped the card's flash over its HID interface (more on that below) and decoded the EDID out of it. It advertises 2160p30, 2160p25 and 4096×2160 in the HDMI vendor block. We also read the chip's HDMI receiver registers, which the <a href="https://github.com/BertoldVdb/ms-tools">ms-tools</a> project had already mapped: width 3840, height 2160, live. The 4K was arriving. The card was throwing it away.</p>
-<p>What we learned: the limit was inside the chip, not in the cable or the camera.</p>
+<p>Naturally my next theory was EDID. That's the thing where an HDMI source reads a little table from the sink describing what it can accept, and only sends that. Maybe the stick was telling the camera "1080p please" and the camera was obliging. So I dumped the card's flash (more on how below) and decoded the EDID out of it. Nope: it advertises 2160p30, 2160p25, and even 4096×2160 in the HDMI vendor block. Then I found out the chip keeps its measured HDMI input size in a couple of RAM locations, and read those directly:</p>
 
-<h2>Step 2: read the datasheet</h2>
-<p>Someone leaked the MS2130 datasheet (machine translated, bless them). Three things in it mattered.</p>
+<figure><img src="shot_terminal_mstools.png" alt="Terminal window: ms-tools lists the device as 345f:2130 MACROSILICON USB3.0 Video, then reads RAM 0xe184 as 00 0f and 0xe18c as 70 08, then dumps the flash header starting 3c c3"><figcaption><code>0x0f00</code> and <code>0x0870</code>, little-endian: 3840 by 2160. The 4K was arriving. The card was throwing it away on purpose. (The last line is the firmware header, which comes up again below.)</figcaption></figure>
 
-<figure><img src="ds_features.png" alt="Datasheet feature list: maximum input resolution 4K at 30 Hz, default maximum output resolution 1920 by 1080 at 60 Hz"><figcaption>Page 2. Maximum input 4K@30Hz. "Default maximum" output 1920×1080@60. Default is doing a lot of work in that sentence.</figcaption></figure>
+<p>What I learned: the limit was inside the chip, not in the camera, the cable, or the EDID.</p>
 
-<figure><img src="ds_output_table.png" alt="Datasheet table 6.2 of default USB output resolutions, with a line saying users can customize the output resolution, supports up to 4K at 15 Hz"><figcaption>Page 8. The output resolution list is "software configuration" and the chip "supports up to 4K@15Hz". So it's a table in the firmware, not a hardware wall.</figcaption></figure>
+<h2>RTFM</h2>
+<p>There's no English datasheet for the MS2130, but there is a Chinese one, which I found and translated. It's the kind of document where every page says Confidential at the top, so I'm only going to show the three bits that matter.</p>
 
-<figure><img src="ds_edid_table.png" alt="Datasheet table 6.1, the default EDID the card presents to the HDMI source, listing 3840 by 2160 modes"><figcaption>Page 7. The default EDID it shows the camera. All the 4K modes are there, which matches what we read out of the flash.</figcaption></figure>
+<figure><img src="ds_features.png" alt="Datasheet feature list: maximum input resolution 4K at 30 Hz, default maximum output resolution 1920 by 1080 at 60 Hz"><figcaption>Page 2. Maximum input 4K@30Hz. <em>Default</em> maximum output 1920×1080@60. That word "default" is doing a lot of work.</figcaption></figure>
 
-<p>What we learned: the output list is data. Change the data, change the card.</p>
+<figure><img src="ds_output_table.png" alt="Datasheet table 6.2 of default USB output resolutions, with a line saying users can customize the output resolution by modifying the software configuration, supports up to 4K at 15 Hz"><figcaption>Page 8. "Users can customize the output resolution by modifying the software configuration. (Supports up to 4K@15Hz)." So the output list is a table in the firmware, not a wall in the silicon.</figcaption></figure>
 
-<h2>Step 3: inside the firmware</h2>
-<p>The MS2130 has an 8051 core that boots from a 64 KB SPI flash on the stick. It also exposes a vendor HID interface, and Bertold Van den Bergh's <a href="https://github.com/BertoldVdb/ms-tools">ms-tools</a> can read and write the flash through it. We dumped ours twice and the dumps matched byte for byte, so that became the backup.</p>
+<figure><img src="ds_edid_table.png" alt="Datasheet table 6.1, the default EDID the card presents to the HDMI source, listing 3840 by 2160 modes"><figcaption>Page 7. The default EDID it presents to the camera, 4K modes and all. Matches what I read out of the flash.</figcaption></figure>
 
-<p>Inside the dump, right where the datasheet said it would be, are four USB video descriptor tables: USB 2 MJPEG, USB 2 uncompressed, USB 3 uncompressed, USB 3 MJPEG. Each one is the list of resolutions and frame intervals you see in OBS. Ours had no 4K entry. The firmware also keeps a live copy of that table in RAM, so we tried the cheap trick first: patch the RAM copy to say 3840×2160 and reset the USB device. The write verified, the chip re-enumerated, and the table came straight back from flash. Only a flash write would do it.</p>
+<p>What I learned: the output resolutions are data, and the chip is rated for 4K out, just slowly.</p>
 
-<p>Then we found <a href="https://github.com/damnnfo/ms2130-firmware">damnnfo/ms2130-firmware</a>, a small repo of firmware images people have pulled off their sticks. Two of them are MacroSilicon's own 2025 library builds, and both carry this entry in the USB 3 tables:</p>
+<h2>Inside the firmware</h2>
+<p>The MS2130 has an 8051 core in it that boots from a 64 KB SPI flash on the stick, and it exposes a vendor HID interface over USB that the manufacturer's own tools use to read and write that flash. Bertold Van den Bergh reverse engineered that protocol for the whole MS21xx family and published <a href="https://github.com/BertoldVdb/ms-tools">ms-tools</a>, which is a Go library and command line tool that can read chip RAM, read and write the flash, and run code on the 8051. The register reads in the screenshot above are his work; the addresses for the input width and height come from his notes. I read the flash twice, the dumps matched byte for byte, and that became my backup.</p>
 
-<pre><code>3840x2160  uncompressed  18 fps   frame buffer 16,588,800 bytes
-3840x2160  MJPEG         18 fps</code></pre>
+<p>Inside the dump, exactly where you'd hope, are four USB video descriptor tables: USB 2 MJPEG, USB 2 uncompressed, USB 3 uncompressed, USB 3 MJPEG. Each one is the list of resolutions and frame rates you see in the OBS dropdown, as raw UVC frame descriptors. Mine had no 4K entry in any of them. The firmware also keeps a live copy of those tables in RAM, so the cheap experiment was obvious: patch the RAM copy to say 3840×2160 and reset the USB device. The write took, the chip re-enumerated, and the table came right back from flash. Fine. Flash it is.</p>
 
-<p>Eighteen frames per second of 4K YUY2 is about 300 MB/s, which is the practical ceiling of USB 3 bulk transfers. That's why 18 and not 30. The repo also has a folder called "4k not tested" with two hand-edited images. One of them fails its own checksum. We did not flash that one.</p>
+<p>This is where I got lucky, because somebody had already done the hard part. <a href="https://github.com/damnnfo/ms2130-firmware">damnnfo's ms2130-firmware repo</a> is a collection of firmware images pulled off real MS2130 sticks, along with the MacroSilicon Windows tool they used and notes on which version shows what. Here's the repo:</p>
 
-<p>We took the newer library build (V2.0.26, February 2025), transplanted our stick's product strings into its header so OBS would still see "USB3.0 Video", fixed the two checksums, and trimmed it to the length its header declares. That was the candidate.</p>
-<p>What we learned: the 4K mode already exists in MacroSilicon's own firmware. Nobody ships it because it's 18 fps.</p>
+<figure><img src="shot_github_repo.png" alt="GitHub page for damnnfo/ms2130-firmware showing OCap_20250218.bin, the ms2130_lib_V2.0.26 USB3 image, a sample 2023 image, a folder named 4k not tested, and a README with a screenshot of the MacroSilicon USBVideoDownloadTool"><figcaption>damnnfo collected the images, worked out the official tool, and figured out where the version number lives in the header (the red box in their screenshot). Without this repo I'd have been patching descriptor tables by hand and hoping. 24 stars is not enough.</figcaption></figure>
 
-<h2>Step 4: flashing it without bricking it</h2>
-<p>This is where it got spicy. The flash write protocol is: erase the whole chip, then stream it back 6 bytes per HID report, about 11,000 reports. If a single report is lost or duplicated, every byte after it lands in the wrong place. And on a Mac, HID feature reports to this chip fail now and then.</p>
+<p>Two of those files are MacroSilicon's own library builds from early 2025, and both of them carry this in their USB 3 tables:</p>
 
-<p>How often? We measured it with read-only traffic, 2,048 reports per run:</p>
+<pre><code>3840x2160  uncompressed   18 fps   frame buffer 16,588,800 bytes
+3840x2160  MJPEG          18 fps</code></pre>
+
+<p>Why 18 and not 30? Eighteen frames a second of 4K YUY2 is about 300 MB/s, which is roughly what USB 3 bulk transfers will actually sustain. So the datasheet's "4K@15Hz" was conservative and the real firmware pushes it to 18. The repo also has a folder literally called "4k not tested" with a couple of hand-edited images, one of which fails its own checksum. I didn't flash that one.</p>
+
+<p>I took the newer library build (V2.0.26, February 2025), copied my own stick's product strings into its header so OBS would keep seeing "USB3.0 Video" and not lose my sources, fixed the two checksums (a 16-bit sum of the header and a 16-bit sum of the code, both at the end of the image), and trimmed it to the length its header declares. That was the candidate.</p>
+
+<p>What I learned: the 4K mode already exists in MacroSilicon's firmware. Nobody ships it because 18 fps looks bad on a box.</p>
+
+<h2>Flashing it</h2>
+<p>The write protocol is: erase the entire chip, then stream the image back in 6 bytes at a time over HID feature reports, about eleven thousand of them. The firmware fills a page buffer and commits it every 256 bytes. If a single report gets lost, every byte after it lands six positions early and the rest of the chip is garbage. And on a Mac, HID feature reports to this chip do get lost now and then. I measured it with read-only traffic, 2,048 reports a run:</p>
 
 <div class="table-wrap">
 <table>
 <thead><tr><th>Condition</th><th>Failed reports</th></tr></thead>
 <tbody>
-<tr><td>OBS streaming from the card</td><td>15 of 2,048</td></tr>
+<tr><td>OBS streaming from the card at the same time</td><td>15 of 2,048</td></tr>
 <tr><td>OBS closed, card idle</td><td>4 of 2,048</td></tr>
-<tr><td>A Chrome tab also holding the card's HID interface</td><td>73 of 2,048</td></tr>
 </tbody>
 </table>
 </div>
 
-<p>The first write with ms-tools "completed" and failed verification. Reading it back showed the candidate image with a six byte shift starting a few pages in: one dropped report, and the rest of the chip was garbage. The card kept working because the MS2130 runs from RAM once booted, but if it had lost power right then it would have been a dead stick. Do not unplug a card with unverified flash.</p>
+<p>So my first attempt with ms-tools "completed" and then failed verification. Reading the chip back showed my image with a six byte shift starting a few pages in, exactly one dropped report, and nothing but noise after it. The stick kept working, because the MS2130 copies the firmware to RAM at boot and runs from there, but if it had lost power at that moment it would have been dead. Do not unplug a card with unverified flash.</p>
 
-<p>Second try was the <a href="https://doc.ultrasemi.com/en/tool/usb_video_download.html">UltraSemi WebHID flasher</a>, which is built for this chip family and runs in Chrome. It failed verification too, and that's when we noticed that Chrome's tab from the previous attempt still had the device open. Two HID clients on one device is what was crossing the reports. Closed the tab, quit OBS, flashed again with the trimmed image. Verified. Read it back with ms-tools independently, byte for byte identical to the candidate.</p>
+<p>What worked was the <a href="https://doc.ultrasemi.com/en/tool/usb_video_download.html">UltraSemi web flasher</a>, which is an unofficial reimplementation of MacroSilicon's tool that runs in Chrome over WebHID. It knows the image formats for the whole family, validates the checksums before it will write, and reads the chip back afterwards. With OBS closed it wrote, verified, and I read it back independently with ms-tools: byte for byte identical to the candidate. Here's the tool:</p>
+
+<figure><img src="shot_ultrasemi_flasher.png" alt="UltraSemi USB video firmware download web page: chip type selector, code length and checksum fields, a drop zone for the firmware file, connect, read and download buttons, and a hex view"><figcaption>Connect, drop the .bin, read or write. It refused my first image because the file was padded to 64 KB; it wants exactly the length the header declares. Trim it and it's happy.</figcaption></figure>
 
 <div class="callout warn"><span class="label">Before you flash</span>
-<p>This can brick the stick. The flash is a separate SOIC-8 chip on the board, so a clip programmer gets you out if the USB path dies, but only if you saved a backup first. Read the flash before you write it, keep the file, and don't unplug until the tool says the write verified.</p>
+<p>This can brick the stick. The flash is a separate SOIC-8 chip on the board, so a clip programmer gets you out of a dead USB path, but only if you saved a copy of your original firmware first. Read before you write, keep the file, close OBS, and don't unplug until the tool says it verified.</p>
 </div>
 
-<p>What we learned: the flashing problem was never the chip. It was two things talking to it at once.</p>
+<p>What I learned: the chip isn't fragile. The USB path on a Mac is, so give it nothing else to do while you write.</p>
 
-<h2>Step 5: did it work?</h2>
-<p>Replugged the stick. OBS grew a new entry in the resolution list: 3840×2160, 18 fps. Then the real test, the same squash-and-measure trick from step 1, on frames from the new mode:</p>
+<h2>Did it work?</h2>
+<p>Replugged the stick and asked macOS for the format list again:</p>
+
+<figure><img src="shot_terminal_formats.png" alt="Terminal window listing every AVCaptureDevice format for USB3.0 Video, ending with 3840x2160 yuvs 18 fps and 3840x2160 420v 18 fps"><figcaption>Same list as before plus two new lines at the bottom. OBS grew a 3840×2160 entry in its dropdown too.</figcaption></figure>
+
+<p>Then the real test, the same squash-and-measure trick from earlier, on frames from the new mode:</p>
 
 <div class="table-wrap">
 <table>
 <thead><tr><th>Frame</th><th>Loss through 1080p</th><th>Loss through 1440p</th></tr></thead>
 <tbody>
-<tr><td>Card's new 3840×2160 mode</td><td>38.3 dB</td><td>41.8 dB</td></tr>
-<tr><td>Card's 1080p, upscaled to 4K as a control</td><td>44.2 dB</td><td>—</td></tr>
-<tr><td>Card's 1440p, upscaled to 4K as a control</td><td>43.3 dB</td><td>49.9 dB</td></tr>
+<tr><td>The new 3840×2160 mode</td><td>38.3 dB</td><td>41.8 dB</td></tr>
+<tr><td>The card's 1080p, upscaled to 4K, as a control</td><td>44.2 dB</td><td>—</td></tr>
+<tr><td>The card's 1440p, upscaled to 4K, as a control</td><td>43.3 dB</td><td>49.9 dB</td></tr>
 </tbody>
 </table>
 </div>
-<p class="muted">Six dB more loss than the control means six dB of real detail that 1080p can't hold. Eight dB past 1440p. That is 4K.</p>
+<p class="muted">Six dB more loss than the control means six dB of real detail that 1080p can't carry. Eight dB past 1440p. That's 4K.</p>
 
-<figure><img src="compare_modes.jpg" alt="The same patch of a perfboard captured in three modes, stacked: the 3840x2160 mode shows readable pin numbers, the 2560x1440 and 1920x1080 modes are soft"><figcaption>The same 480 pixel wide patch of a perfboard in each mode, scaled to the same size. Top is the new 3840×2160 mode: the pin numbers read. Middle is the 2560×1440 mode, which should be sharper than the bottom 1080p row and isn't, because it's the same 1080p picture scaled up.</figcaption></figure>
+<p>Here's what that looks like on an actual perfboard:</p>
 
-<p>All 68 frames in a four second 4K capture were unique, so it really is 18 distinct frames a second out of the camera's 30, with a slightly uneven cadence because 18 doesn't divide 30.</p>
+<figure><img src="compare_modes.jpg" alt="The same patch of a perfboard captured in three modes, stacked: the 3840x2160 mode shows readable pin numbers, the 2560x1440 and 1920x1080 modes are soft"><figcaption>The same 480 pixel wide patch in each mode, scaled to the same size. Top is the new 3840×2160 mode and you can read the pin numbers. Middle is the 2560×1440 mode, which should be sharper than the 1080p at the bottom and isn't, because it's the same 1080p picture scaled up.</figcaption></figure>
+
+<p>All 68 frames in a four second 4K capture were unique, so it's a genuine 18 distinct frames a second out of the camera's 30, with a slightly uneven cadence because 18 doesn't go into 30.</p>
 
 <h3>The width cap, and the mode that was there all along</h3>
-<p>Then I asked for 2K at 30, because 18 fps is sad, and we went looking at the leftover modes. The 2560 wide ones were still upscales even with the new firmware. But the odd <strong>1920×2160 at 30</strong> mode, which looks like a typo in the list, turned out to be the real thing: every one of the 2160 lines, at half width, at a full 30 fps.</p>
+<p>Eighteen frames a second is fine for a desk cam and sad for anything that moves, so I went poking at the leftover modes hoping for 2K at 30. The 2560 wide ones are still upscales even on the new firmware. But that weird <strong>1920×2160 at 30</strong> entry, the one that looks like someone fat-fingered 1080, turned out to be the real deal: all 2160 lines of the 4K picture, at half width, at a full 30 fps.</p>
 
 <div class="table-wrap">
 <table>
 <thead><tr><th>Frame</th><th>Loss through 1920×1080</th></tr></thead>
 <tbody>
-<tr><td>Card's 1920×2160 mode</td><td>41.2 dB</td></tr>
-<tr><td>Real 4K frame, downscaled to 1920×2160 as a reference</td><td>41.6 dB</td></tr>
-<tr><td>Card's 1080p, upscaled to 1920×2160 as a control</td><td>47.2 dB</td></tr>
+<tr><td>The card's 1920×2160 mode</td><td>41.2 dB</td></tr>
+<tr><td>A real 4K frame downscaled to 1920×2160 myself, as the reference</td><td>41.6 dB</td></tr>
+<tr><td>The card's 1080p upscaled to 1920×2160, as the control</td><td>47.2 dB</td></tr>
 </tbody>
 </table>
 </div>
 
-<p>Within half a dB of real 4K vertically. The scaler in this chip caps output <em>width</em> at 1920 pixels and nothing else. Every mode wider than that is an upscale, every mode taller than 1080 is real. Which means:</p>
+<p>Within half a dB of a real 4K frame. So what the scaler in this chip actually can't do is output more than 1920 pixels of width. That's the whole limit. Every mode wider than 1920 is an upscale, every mode taller than 1080 is real, which gives you this:</p>
 
 <div class="table-wrap">
 <table class="modes">
 <thead><tr><th>Mode</th><th>What you actually get</th><th>Verdict</th></tr></thead>
 <tbody>
-<tr><td>3840×2160 @18 (new firmware)</td><td>True 4K, 18 distinct frames/s</td><td class="yes">real</td></tr>
-<tr><td>1920×2160 @30</td><td>Full 4K vertical detail, half width, true 30 fps. Stretch 2× in OBS.</td><td class="yes">real</td></tr>
-<tr><td>1920×1080 @60</td><td>Real 1080p, and sharper when the camera sends 4K</td><td class="yes">real</td></tr>
+<tr><td>3840×2160 @18 (new firmware)</td><td>True 4K, 18 distinct frames a second</td><td class="yes">real</td></tr>
+<tr><td>1920×2160 @30</td><td>Full 4K vertical detail at half width, true 30 fps. Stretch it 2× in OBS.</td><td class="yes">real</td></tr>
+<tr><td>1920×1080 @60</td><td>Real 1080p, and noticeably sharper when the camera is sending 4K</td><td class="yes">real</td></tr>
 <tr><td>2560×1440, 2560×1600 @50</td><td>1080p scaled up, and it drops frames doing it</td><td class="no">fake</td></tr>
-<tr><td>2048×1080, 2048×1152 @60</td><td>1080p with extra columns</td><td class="no">fake</td></tr>
+<tr><td>2048×1080, 2048×1152 @60</td><td>1080p with some extra columns</td><td class="no">fake</td></tr>
 </tbody>
 </table>
 </div>
 
-<figure><img src="squeezed_1920x2160.jpg" alt="The 1920 by 2160 frame as the card sends it, everything squeezed to half width"><figcaption>What the 1920×2160 mode looks like before OBS stretches it. Every row of pixels is a real row of the 4K picture.</figcaption></figure>
+<p>Here's what the 1920×2160 mode looks like before OBS stretches it back out:</p>
 
-<p>What we learned: the most useful mode on this card was in the stock firmware the whole time. I just needed to know to stretch it.</p>
+<figure><img src="squeezed_1920x2160.jpg" alt="The 1920 by 2160 frame as the card sends it, everything squeezed to half width"><figcaption>Every row of pixels in this is a real row of the 4K picture. Anamorphic, basically. Right-click the source in OBS, Transform, Stretch to screen, and it's 16:9 again.</figcaption></figure>
+
+<p>What I learned: the most useful mode on this card was in the stock firmware the whole time. I just needed to know to stretch it.</p>
 
 <h2>Do it yourself</h2>
 <ol>
-<li><strong>Check the chip.</strong> On a Mac, <code>system_profiler SPUSBDataType</code>; on Linux, <code>lsusb</code>. You want vendor <code>345f</code> product <code>2130</code>. An MS2109 is a different chip (USB 2, 1080p30) and none of this applies.</li>
-<li><strong>See what you have now.</strong> <code>ffmpeg -f avfoundation -list_devices true -i ""</code> on a Mac, or just open the resolution dropdown in OBS. If 3840×2160 is already there, skip to step 6.</li>
-<li><strong>Back up the flash.</strong> Quit OBS and anything else using the card. Open <a href="https://doc.ultrasemi.com/en/tool/usb_video_download.html">the UltraSemi flasher</a> in Chrome or Edge, connect the device, click read, and save the file somewhere safe. This is your way back.</li>
-<li><strong>Get a firmware with the 4K entry.</strong> From <a href="https://github.com/damnnfo/ms2130-firmware">damnnfo/ms2130-firmware</a>, take <code>ms2130_lib_V2.0.26…USB3_20250226.bin</code> or <code>OCap_20250218.bin</code>. Both have 3840×2160@18 in their USB 3 tables. Skip the "4k not tested" folder. If the flasher complains about the length, the file needs trimming to <code>0x30 + the big-endian length at bytes 2–3 + 4</code>; the one I used was 53,219 bytes. Optional: copy your own product strings from bytes <code>0x10</code> to <code>0x2F</code> of your backup into the same place in the new image, then let the flasher fix the checksums, so OBS keeps your source name.</li>
-<li><strong>Flash it.</strong> Same tool, same rules: OBS quit, nothing else holding the card, one browser tab. Click write. Wait for "verified". If it fails, don't unplug, close every other tab and try again. If it fails twice, write your backup and reconsider on a Windows or Linux box, where the HID path is steadier.</li>
-<li><strong>Replug and check.</strong> The resolution list should now include 3840×2160 at 18. Set the camera to its 4K HDMI output mode (on the A7S: Movie mode, 4K Output Sel. = HDMI Only 30p). Pick 3840×2160@18 for detail, or 1920×2160@30 and stretch it for motion.</li>
+<li><strong>Check the chip.</strong> <code>system_profiler SPUSBDataType</code> on a Mac, <code>lsusb</code> on Linux. You want vendor <code>345f</code>, product <code>2130</code>. An MS2109 is a different chip (USB 2, 1080p30) and none of this applies to it.</li>
+<li><strong>See what you have now.</strong> Open the resolution dropdown in OBS, or <code>ffmpeg -f avfoundation -list_devices true -i ""</code>. If 3840×2160 is already there, skip to step 6.</li>
+<li><strong>Back up your flash.</strong> Quit OBS and anything else using the card. Open <a href="https://doc.ultrasemi.com/en/tool/usb_video_download.html">the UltraSemi flasher</a> in Chrome or Edge, connect the device, click Read, save the file somewhere you'll find it. This is your way back.</li>
+<li><strong>Get a firmware with the 4K entry.</strong> From <a href="https://github.com/damnnfo/ms2130-firmware">damnnfo/ms2130-firmware</a>, take <code>ms2130_lib_V2.0.26…USB3_20250226.bin</code> or <code>OCap_20250218.bin</code>. Both have 3840×2160@18 in their USB 3 tables. Skip the "4k not tested" folder. If the flasher complains about the length, the file wants to be exactly <code>0x30 + (the big-endian length at bytes 2 and 3) + 4</code> bytes; mine was 53,219. If you care about OBS keeping your source names, copy bytes <code>0x10</code> to <code>0x2F</code> of your backup (the product strings) into the same spot in the new image and let the flasher fix the checksums.</li>
+<li><strong>Flash it.</strong> Same tool, OBS still closed. Click Download firmware. Wait for it to say verified. If it fails, don't unplug, just try again. If it fails twice, write your backup back and try from a Windows or Linux machine, where the HID path is steadier.</li>
+<li><strong>Replug and check.</strong> The dropdown should now have 3840×2160 at 18. Put the camera in its 4K HDMI output mode (on the A7S: movie mode, 4K Output Sel. = HDMI Only 30p). Pick 3840×2160@18 for detail, or 1920×2160@30 and stretch it for motion.</li>
 </ol>
 
 <h2>OBS settings that make it worth it</h2>
 <ul>
-<li><strong>Source:</strong> 3840×2160 at 18, or 1920×2160 at 30. Input format YUY2. Video range Limited, colour space 709. For the squeezed mode, right-click the source, Transform, Stretch to screen, and set the scale filter to Lanczos.</li>
-<li><strong>Canvas:</strong> 3840×2160 (or 2560×1440 if you want 2K files). Integer FPS 18 for the 4K mode so no frames get doubled; 30 for the squeezed one.</li>
-<li><strong>Recording:</strong> the default OBS profile I had was encoding 4K at 2.1 Mbps, which is streaming-preset territory and turned all that detail into mush. Use Apple VT HEVC at CRF around 65–70, or ProRes 422 on a P216 canvas if you'll grade it, which keeps the card's 4:2:2 chroma. Plain MOV, not fragmented, for Premiere.</li>
+<li><strong>Source:</strong> 3840×2160 at 18, or 1920×2160 at 30. Input format YUY2, video range Limited, colour space 709. For the squeezed mode: right-click the source, Transform, Stretch to screen, and set the scale filter to Lanczos.</li>
+<li><strong>Canvas:</strong> 3840×2160, or 2560×1440 if you want 2K files. Integer FPS 18 for the 4K mode so nothing gets doubled, 30 for the squeezed one.</li>
+<li><strong>Recording:</strong> the profile I'd been using was encoding 4K at 2.1 Mbps, which is a streaming preset, and it turned all that detail into mush. Use Apple VT HEVC at CRF around 65 to 70, or ProRes 422 on a P216 canvas if you're going to grade it, which keeps the card's 4:2:2 chroma. Plain MOV, not fragmented, if Premiere is involved.</li>
 </ul>
 
-<h2>Bonus: DeskLapse</h2>
-<p>Once the card was doing 4K I wanted it running all day. OBS has no interval capture and the macOS screenshot sound would have driven me insane, so I built a little menu bar app that grabs a frame every few seconds, speeds up when there's motion on the bench, and writes crash-safe video. That's <a href="desklapse.html">its own page</a>.</p>
-
 <h2>Numbers for the nerds</h2>
-<p><strong>Provenance:</strong> the tables on this page are from the measurement session on 28 September 2026. The photos were re-shot on 1 November because I didn't keep the originals; the same test on those frames gave 39.7 dB for 4K, 44.9 for the 1440p mode and 45.5 for the 1080p control, the same story within a dB.</p>
 <p><strong>Cadence:</strong> <code>ffmpeg -f avfoundation -framerate 60 -video_size 1920x1080 -i "USB3.0 Video" -t 4 -f framemd5 -</code>, then count runs of identical hashes. A 30p source through a 60 fps mode gives runs of exactly two.</p>
-<p><strong>Real detail:</strong> for a frame F at W×H and a candidate lower resolution w×h, compute PSNR(F, up(down(F, w×h), W×H)) with Lanczos both ways, luma only. Compare against the same number for a frame you know is an upscale (the control). Content the lower resolution can't carry shows up as extra loss. Six dB is not subtle.</p>
-<p><strong>HID error rate:</strong> ms-tools with a logging patch on <code>romExchangeReport</code>, reading 8 KB of chip RAM four bytes a report, counting failures.</p>
-<p><strong>Chip facts:</strong> MS2130, 8051 core, 64 KB external SPI flash, descriptor tables at <code>0xC49E</code> (USB 2 MJPEG), <code>0xC759</code> (USB 2 UNC), <code>0xCA9A</code> (USB 3 UNC), <code>0xCD37</code> (USB 3 MJPEG) in the stock 2019 image; EDID at <code>0xC1B5</code>; live input width and height at <code>0xE184</code> and <code>0xE18C</code> in XDATA.</p>
+<p><strong>Real detail:</strong> for a frame F at W×H and a candidate lower resolution w×h, take PSNR(F, up(down(F, w×h), W×H)), Lanczos both directions, luma only. Then do the same to a frame you know is an upscale and compare. Content the lower resolution can't carry shows up as extra loss. Six dB is not subtle.</p>
+<p><strong>Provenance:</strong> the tables on this page are from the measurement session on 28 September 2026. The photos were re-shot on 1 November because I didn't keep the originals; the same test on those frames gave 39.7 dB for 4K, 44.9 for the 1440p mode and 45.5 for the 1080p control. Same story within a dB.</p>
+<p><strong>HID error rate:</strong> ms-tools with a line of logging added to <code>romExchangeReport</code>, reading 8 KB of chip RAM four bytes a report and counting the failures.</p>
+<p><strong>Chip facts:</strong> MS2130, 8051 core, 64 KB external SPI flash. In the stock 2019 image the descriptor tables start at <code>0xC49E</code> (USB 2 MJPEG), <code>0xC759</code> (USB 2 uncompressed), <code>0xCA9A</code> (USB 3 uncompressed) and <code>0xCD37</code> (USB 3 MJPEG); the EDID is at <code>0xC1B5</code>; the measured HDMI input width and height sit at <code>0xE184</code> and <code>0xE18C</code> in XDATA.</p>
+
+<h2>Oh, and the time-lapse thing</h2>
+<p>Once the card was doing 4K I wanted it running all day, every day, without OBS open and without the macOS screenshot sound going off every few seconds. So I ended up with a little menu bar app that grabs a frame from the stick on an interval that speeds up when there's motion on the bench, and writes video that survives the laptop being shut. That got long enough to be <a href="desklapse.html">its own page</a>.</p>
 
 <hr>
-<p class="muted">Tools and sources:<br>
-<a href="https://github.com/BertoldVdb/ms-tools">BertoldVdb/ms-tools</a>, the HID library and CLI for MS21xx chips<br>
-<a href="https://github.com/damnnfo/ms2130-firmware">damnnfo/ms2130-firmware</a>, the firmware images<br>
-<a href="https://doc.ultrasemi.com/en/tool/usb_video_download.html">UltraSemi USB video firmware tool</a> and <a href="https://doc.ultrasemi.com/en/tool/hd2uvc_edid_config">EDID helper</a><br>
-<a href="https://helpguide.sony.net/ilc/1420/v1/en/contents/TP0000435751.html">Sony ILCE-7S help guide, HDMI 4K Output</a><br>
-MS2130 datasheet, the machine translated PDF that floats around; the three tables above are the parts that matter</p>
+<p class="muted">People and tools this leaned on:<br>
+<a href="https://github.com/damnnfo/ms2130-firmware">damnnfo</a> collected the MS2130 firmware images, including the 2025 builds with the 4K mode, and documented the official tool<br>
+<a href="https://github.com/BertoldVdb/ms-tools">Bertold Van den Bergh</a> reverse engineered the MS21xx HID protocol and wrote ms-tools, which is how I read the flash and the chip's registers<br>
+<a href="https://doc.ultrasemi.com/en/tool/usb_video_download.html">UltraSemi</a> built the web flasher (and an <a href="https://doc.ultrasemi.com/en/tool/hd2uvc_edid_config">EDID editor</a> for the same chips)<br>
+<a href="https://helpguide.sony.net/ilc/1420/v1/en/contents/TP0000435751.html">Sony ILCE-7S help guide</a>, HDMI 4K Output<br>
+The MS2130 datasheet, Chinese, translated by me; the three cropped tables above are the parts that matter</p>
 </main>
 
 </body>

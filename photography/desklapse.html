@@ -28,58 +28,59 @@ pre{font-size:.82rem}
 <main class="page">
 <p class="eyebrow"><a href="../">slopswap</a> / <a href="./">photography</a></p>
 <h1>DeskLapse</h1>
-<p class="muted">1 November 2026 · Kevin Cappuccio · <a href="https://claude.ai/artifact/KMYQWKGWWHYQUrDpsJTeEV">live doc on claude.ai</a> · companion to <a href="ms2130-4k.html">the 4K capture card writeup</a></p>
+<p class="muted">1 November 2026 · Kevin Cappuccio · <a href="https://claude.ai/artifact/KMYQWKGWWHYQUrDpsJTeEV">live doc on claude.ai</a> · spun off from <a href="ms2130-4k.html">the 4K capture card thing</a></p>
 
-<p>I wanted a time-lapse of my bench that just runs. All day, every day, no shutter sound, no remembering to press record, and nothing that dies when I shut the laptop. The capture card from <a href="ms2130-4k.html">the other writeup</a> was already pointed at the desk, so I had Claude Code write a tiny menu bar app that eats frames from it. This is what it does and the handful of things that were harder than they looked.</p>
+<p>I wanted a time-lapse of my bench that just runs. All day, every day, no shutter sound, no remembering to hit record, and nothing that dies and takes the day with it when I close the laptop. The capture card from <a href="ms2130-4k.html">the other writeup</a> was already pointed at the desk and doing 4K, so the obvious move was a tiny menu bar app that eats frames from it. It turned out to be about 600 lines of Swift and three problems that were harder than they looked, so here's all of that.</p>
 
-<div class="callout"><span class="label">What it is</span>
+<div class="callout"><span class="label">TL;DR</span>
 <ul>
-<li>A macOS menu bar app, one Swift file, no Xcode. Opens at login, grabs 4K frames from the capture card, saves them as a video (or JPEGs) into a dated folder.</li>
-<li>The interval adapts to how much is moving on the bench. Three sliders: the shortest interval when it's busy, the longest when it's idle, and what "normal" should be. Or set a fixed interval, anywhere from one frame per hour down to 24 a second.</li>
-<li>The video is crash-safe. Close the lid, kill the app, pull the plug: you lose at most one frame.</li>
-<li>It shares the card with OBS. When OBS launches, DeskLapse hands over the card and keeps recording on whatever OBS picked.</li>
+<li>A macOS menu bar app, one Swift file, no Xcode. Opens at login, grabs 4K frames from the capture card, writes them as video (or JPEGs) into a folder per day.</li>
+<li>The interval follows how much is moving on the bench. Three sliders: the shortest interval when it's busy, the longest when it's dead, and what "normal" should be. Or a fixed interval, anywhere from one frame an hour down to 24 a second.</li>
+<li>The video is crash-safe. Close the lid, kill the app, yank the plug: you lose one frame.</li>
+<li>It shares the card with OBS. When OBS launches, DeskLapse hands over the card and keeps recording on whatever mode OBS picked.</li>
 </ul>
 </div>
 
-<figure><img src="desklapse_panel.png" alt="The DeskLapse menu bar panel: a preview of the latest capture, status line, timing sliders, output options"><figcaption>The panel. Latest capture on top with a scrubber to go back through the day, status, the three timing sliders, and the output switches.</figcaption></figure>
+<p>Here's the whole UI:</p>
+<figure><img src="desklapse_panel.png" alt="The DeskLapse menu bar panel: a preview of the latest capture, status line, timing sliders, output options"><figcaption>Latest capture on top with a scrubber to go back through the day, then status, the three timing sliders, and the output switches. The 180° is because the camera is mounted backwards and I'm not moving it.</figcaption></figure>
 
-<h2>Why not OBS?</h2>
-<p>OBS has no interval capture, the macOS screenshot tool plays a shutter sound every time, and I wanted the thing to notice when I'm actually doing something. Watching the frames yourself is the only way to do that, so it's its own AVFoundation session. It turns out two apps can read the same USB camera on macOS. Only the first one to open it gets to pick the format, which is why there's an OBS handoff.</p>
+<h2>Why not just use OBS?</h2>
+<p>OBS has no interval capture, the macOS screenshot command plays a shutter sound every single time, and I wanted the thing to notice when I'm actually doing something versus when I've wandered off. The only way to do that last part is to look at the frames yourself, so it's its own AVFoundation session on the card. Which raised a question I didn't know the answer to: can two programs read the same USB camera on a Mac? Turns out yes, with a catch. Whoever opens it first gets to pick the format and everyone else rides along on that. So the app watches for OBS launching, lets go of the card, waits a few seconds, and reattaches without trying to change anything. When OBS quits it grabs the card back and sets it to 4K.</p>
 
 <h2>How the auto interval works</h2>
-<p>Every frame, it samples a 240×135 grid of luma values and counts how many moved by more than 12 levels since the last frame. Not the average difference: the A7S is a real sensor and its noise would read as constant activity. A changed-pixel fraction ignores noise and lights up for hands, tools and parts. That fraction is smoothed over five seconds and mapped onto your three sliders:</p>
+<p>Every frame, it samples a 240×135 grid of luma values and counts how many moved by more than 12 levels since the previous frame. Not the average difference, which was my first attempt, because the A7S is a real sensor with real noise and the average difference never goes to zero. A "how many pixels changed a lot" fraction ignores noise and lights up for hands, tools, and parts being moved around. That fraction gets smoothed over five seconds and mapped onto the three sliders like so:</p>
 
 <pre><code>activity ≤ 0.3%   →  max interval   (nobody's here)
 activity = 3%     →  average interval
 activity ≥ 30%    →  min interval   (hands everywhere)
 in between        →  log-log interpolation</code></pre>
 
-<p>So the "average" slider is literally the interval you get during normal desk work, and busy or idle stretches slide toward the other two. The thresholds are constants in the source; if your camera is further from the action they're the first thing to tune.</p>
+<p>So the "average" slider is literally the interval you get during normal desk work, and busy or dead stretches slide toward the other two. Those three thresholds are constants at the top of the file, and if your camera is further from the action than mine they're the first thing to tune.</p>
 
 <h2>The crash-safe video trick</h2>
-<p>JPEGs are trivially crash-safe: each file is its own thing. A video file isn't. A normal MOV is unreadable until the writer finalizes it, so a crash at 4 pm loses the whole day. The fix is QuickTime movie fragments: tell <code>AVAssetWriter</code> to write a fragment after every frame, and the file on disk is always valid up to the last fragment.</p>
+<p>JPEGs are trivially crash-safe, each file is its own thing, lose power and you lose the one being written. A video file is not. A normal MOV is unreadable until the writer finalizes it, so a crash at 4 pm loses the whole day. The fix is QuickTime movie fragments: tell <code>AVAssetWriter</code> to write a fragment after every frame and the file on disk is always playable up to the last fragment, with a repair step that turns the leftovers into a normal file next time the app launches.</p>
 
-<p>Three things bit us on the way there:</p>
+<p>Three things bit me on the way there, and all three are the kind of thing you only find out by killing the process and looking at what's on disk:</p>
 <ul>
-<li>The fragment interval is in <em>movie</em> time, not wall time. A time-lapse frame is 1/30 s of movie, so "every 10 seconds" meant every 300 captured frames, about fifteen minutes of nothing on disk. One frame per fragment it is.</li>
-<li>HEVC with frame reordering holds frames back until it has seen the future. Turn reordering off and the encoder emits each frame as it comes.</li>
-<li>Even then the writer sits on the newest frame until the next one arrives, no matter how you feed it. So a hard crash loses exactly one frame. A normal quit or shutdown loses nothing.</li>
+<li>The fragment interval is in <em>movie</em> time, not wall time. A time-lapse frame is 1/30 of a second of movie, so "a fragment every 10 seconds" meant a fragment every 300 captured frames, which at my intervals is about fifteen minutes of absolutely nothing on disk. One frame per fragment it is.</li>
+<li>HEVC with frame reordering holds frames back until it has seen the future. Turn reordering off and the encoder spits each frame out as it arrives.</li>
+<li>Even then the writer sits on the newest frame until the next one shows up, no matter how you feed it. So a hard crash loses exactly one frame. A normal quit or a shutdown loses nothing.</li>
 </ul>
 
-<p>Fragmented movies are also a thing Premiere handles badly, and it turns out <code>finishWriting</code> leaves the fragments in. So every segment gets losslessly remuxed into a flat MOV when it closes, and anything a crash left behind gets the same treatment on the next launch. Segments roll over every hour or 2 GB so that remux never needs much free disk.</p>
+<p>One more: fragmented movies are a thing Premiere handles badly, and it turns out <code>finishWriting</code> leaves the fragments in even on a clean close. So every segment gets losslessly remuxed into a flat MOV when it closes, and anything a crash left behind gets the same treatment on the next launch. Segments roll over every hour or 2 GB so that remux never needs much free disk.</p>
 
 <h2>Odds and ends</h2>
 <ul>
 <li><strong>The squeezed mode.</strong> If OBS has the card in its 1920×2160 mode, frames arrive at half width. The app stretches them back to 3840×2160 on the way out, so everything it saves is 16:9.</li>
-<li><strong>Rotation.</strong> JPEGs get rotated pixels. Video gets a rotation matrix in the track header, same as an iPhone, which Premiere and QuickTime honour and costs nothing.</li>
+<li><strong>Rotation.</strong> JPEGs get rotated pixels. Video gets a rotation matrix in the track header, same as an iPhone does, which Premiere and QuickTime honour and which costs nothing.</li>
 <li><strong>Preview.</strong> The panel keeps the last 600 captures as thumbnails. It opens on the newest and you can scrub back through the day.</li>
 <li><strong>Disk guard.</strong> It stops saving at 3 GB free instead of filling the boot drive. ProRes 422 at 4K is about 2.3 MB a frame, so at a 10 second cadence that's 20 GB a day. HEVC is a fraction of that.</li>
-<li><strong>Open at login</strong> is one call to <code>SMAppService</code>. The catch is signing: an ad-hoc signed app gets a fresh identity every build, so macOS asks for camera permission every time you rebuild. Signing with a real Developer ID certificate makes the permission stick.</li>
-<li><strong>No Xcode.</strong> It builds with <code>swiftc</code> from the command line tools. One gotcha: <code>@State</code> is a macro in the current SDK and the command line toolchain can't load it, so the UI state lives in the engine as <code>@Published</code> properties instead.</li>
+<li><strong>Open at login</strong> is one call to <code>SMAppService</code>. The catch is code signing: an ad-hoc signed app gets a fresh identity every build, so macOS asks for camera permission every time you rebuild. Signing with a real Developer ID certificate makes it stick.</li>
+<li><strong>No Xcode.</strong> It builds with <code>swiftc</code> from the command line tools. One gotcha: <code>@State</code> is a macro in the current SDK and the command line toolchain can't load it, so the UI state lives in the engine as <code>@Published</code> properties instead. Slightly ugly, works fine.</li>
 </ul>
 
 <h2>Build it yourself</h2>
-<p>It's about 600 lines of Swift plus a 15 line build script. Edit <code>main.swift</code>, run <code>build.sh</code>, and it compiles, bundles, signs and relaunches. Tune the constants at the top of the file for your camera and bench. The source isn't on GitHub yet. Ask me and I'll send it.</p>
+<p>It's one Swift file plus a 15 line build script. Edit <code>main.swift</code>, run <code>build.sh</code>, and it compiles, bundles, signs, and relaunches. Tune the constants at the top for your camera and your bench. The source isn't on GitHub yet; ask me and I'll send it.</p>
 
 <pre><code>swiftc -O -swift-version 5 -parse-as-library -target arm64-apple-macos14.0 main.swift -o DeskLapse
 codesign -s "Developer ID Application: …" --force DeskLapse.app</code></pre>
@@ -87,7 +88,7 @@ codesign -s "Developer ID Application: …" --force DeskLapse.app</code></pre>
 <p>To turn a day of JPEGs into a movie: <code>ffmpeg -framerate 30 -pattern_type glob -i '*.jpg' -c:v prores_videotoolbox out.mov</code>. In video mode you don't need to do anything, the segments are already movies.</p>
 
 <hr>
-<p class="muted">Part of the <a href="ms2130-4k.html">4K capture card</a> project. Built with Claude Code, 3 October 2026.</p>
+<p class="muted">Spun off from the <a href="ms2130-4k.html">4K capture card</a> project, October 2026.</p>
 </main>
 
 </body>
