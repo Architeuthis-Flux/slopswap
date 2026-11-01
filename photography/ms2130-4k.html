@@ -82,11 +82,13 @@ pre{font-size:.82rem}
 <h2>RTFM</h2>
 <p>There's no English datasheet for the MS2130, but there is a Chinese one, which I found and translated. It's the kind of document where every page says Confidential at the top, so I'm only going to show the three bits that matter.</p>
 
-<figure><img src="ds_features.png" alt="Datasheet feature list: maximum input resolution 4K at 30 Hz, default maximum output resolution 1920 by 1080 at 60 Hz"><figcaption>Page 2. Maximum input 4K@30Hz. <em>Default</em> maximum output 1920×1080@60. That word "default" is doing a lot of work.</figcaption></figure>
+<figure><img src="ds_features.png" alt="Datasheet feature list: maximum input resolution 4K at 30 Hz, default maximum output resolution 1920 by 1080 at 60 Hz"><figcaption>Page 2. Maximum input 4K@30Hz on the left, <em>default</em> maximum output 1920×1080@60 on the right. That word "default" is doing a lot of work.</figcaption></figure>
 
-<figure><img src="ds_output_table.png" alt="Datasheet table 6.2 of default USB output resolutions, with a line saying users can customize the output resolution by modifying the software configuration, supports up to 4K at 15 Hz"><figcaption>Page 8. "Users can customize the output resolution by modifying the software configuration. (Supports up to 4K@15Hz)." So the output list is a table in the firmware, not a wall in the silicon.</figcaption></figure>
+<figure><img src="ds_output_text.png" alt="Datasheet section 6.3: users can customize the output resolution by modifying the software configuration, and a highlighted line reading supports up to 4K at 15 Hz"><figcaption>Page 8, the sentence that started all this. "Users can customize the output resolution by modifying the software configuration." And then, in a line so small I missed it the first three times, "(Supports up to 4K@15Hz)." So the output list is a table in the firmware, not a wall in the silicon.</figcaption></figure>
 
-<figure><img src="ds_edid_table.png" alt="Datasheet table 6.1, the default EDID the card presents to the HDMI source, listing 3840 by 2160 modes"><figcaption>Page 7. The default EDID it presents to the camera, 4K modes and all. Matches what I read out of the flash.</figcaption></figure>
+<figure><img src="ds_output_table.png" alt="Datasheet table 6.2, the default USB output resolution list for USB 3.0 and USB 2.0 modes, topping out at 1920 by 1080"><figcaption>Page 8, the "default" output list right under it. 1920×1080 is the biggest thing in it. This table is exactly what the firmware's descriptor tables contain, which is the next section.</figcaption></figure>
+
+<figure><img src="ds_edid_table.png" alt="Datasheet table 6.1, the default EDID the card presents to the HDMI source, listing 3840 by 2160 modes"><figcaption>Page 7. The default EDID it presents to the camera, 4K modes and all, which matches what I read out of the flash. So the camera was never being told to send 1080p.</figcaption></figure>
 
 <p>What I learned: the output resolutions are data, and the chip is rated for 4K out, just slowly.</p>
 
