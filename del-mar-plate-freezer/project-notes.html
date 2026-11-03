@@ -679,6 +679,7 @@ body.print li,body.print .kpi,body.print .card,body.print .ask{break-inside:avoi
   function fromHash(){ var h=(location.hash||'').replace('#',''); return (h==='en'||h==='zh')?h:null; }
   function initial(){
     var h=fromHash(); if(h) return h;
+    var m=document.querySelector('meta[name="default-lang"]'); if(m && (m.content==='en'||m.content==='zh')) return m.content;
     try{ var s=localStorage.getItem(KEY); if(s==='en'||s==='zh') return s; }catch(e){}
     var n=(navigator.language||'').toLowerCase(); return n.indexOf('zh')===0 ? 'zh' : 'en';
   }

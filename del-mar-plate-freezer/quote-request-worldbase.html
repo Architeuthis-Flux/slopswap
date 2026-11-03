@@ -5,6 +5,8 @@
 <meta property="og:title" content="Plate Freezer Quote Request · 平板冻结项目询价">
 <meta property="og:description" content="Del Mar Seafoods: four vertical plate freezers and an ammonia package for Watsonville, California. What we're after, for Worldbase and APCCO. English / 中文.">
 <meta property="og:url" content="https://slopswap.org/del-mar-plate-freezer/quote-request-worldbase.html">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="zh_CN">
 <meta property="og:image" content="https://slopswap.org/del-mar-plate-freezer/qingdao-booth-og.jpg">
 <meta property="og:image:secure_url" content="https://slopswap.org/del-mar-plate-freezer/qingdao-booth-og.jpg">
 <meta property="og:image:width" content="1200">
@@ -696,6 +698,7 @@ body.print li,body.print .kpi,body.print .card,body.print .ask{break-inside:avoi
   function fromHash(){ var h=(location.hash||'').replace('#',''); return (h==='en'||h==='zh')?h:null; }
   function initial(){
     var h=fromHash(); if(h) return h;
+    var m=document.querySelector('meta[name="default-lang"]'); if(m && (m.content==='en'||m.content==='zh')) return m.content;
     try{ var s=localStorage.getItem(KEY); if(s==='en'||s==='zh') return s; }catch(e){}
     var n=(navigator.language||'').toLowerCase(); return n.indexOf('zh')===0 ? 'zh' : 'en';
   }
