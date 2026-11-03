@@ -103,6 +103,11 @@ a{color:var(--accent)}
 .kpi span{display:block;margin-top:6px;font-size:13px;color:var(--muted);line-height:1.35}
 .ask{margin-top:12px;padding:12px 14px;background:var(--surface-2);border-left:4px solid var(--gold);border-radius:0 6px 6px 0}
 .ask p{margin:0}
+.photo{margin:18px 0 0;max-width:72ch}
+.photo img{display:block;width:100%;height:auto;border-radius:6px}
+.photo figcaption{margin-top:6px;font-size:12.5px;color:var(--muted);letter-spacing:.02em}
+body.print .photo{max-width:none;margin:6px 0 0}
+body.print .photo img{max-height:3.1in;object-fit:cover}
 .notice{margin:14px 0 6px;padding:10px 14px;border:1px dashed var(--line);border-radius:6px;font-size:14px;line-height:1.5;color:var(--muted);max-width:72ch}
 .byline{margin-top:28px;padding-top:14px;border-top:1px solid var(--line);font-size:14px;color:var(--muted);max-width:72ch}
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:12px}
@@ -184,6 +189,7 @@ body.print li,body.print .kpi,body.print .card,body.print .ask{break-inside:avoi
 
 <main class="wrap gutter">
 <p class="part">English</p>
+<figure class="photo"><img src="qingdao-booth-wide.jpg" width="1200" height="630" alt="Kevin and Joe Cappuccio with Yang Guang at the Worldbase booth"><figcaption>With Yang Guang at the Worldbase booth, China Fisheries &amp; Seafood Expo, Qingdao, October 2026.</figcaption></figure>
 <div class="notice">A note on these notes: they were put together with AI from our meeting notes and email chains, and I don't have the refrigeration or regulatory expertise to check every line. If anything here conflicts with what Worldbase or APCCO know, they're right and this is wrong.</div>
 
 <section class="sec">
@@ -407,6 +413,7 @@ body.print li,body.print .kpi,body.print .card,body.print .ask{break-inside:avoi
 
 <main class="wrap gutter">
 <p class="part">中文</p>
+<figure class="photo"><img src="qingdao-booth-wide.jpg" width="1200" height="630" alt="Kevin、Joe Cappuccio 与杨光在百源展位"><figcaption>与杨光在百源展位，中国国际渔业博览会，青岛，2026 年 10 月。</figcaption></figure>
 <div class="notice">关于这份询价：它是用 AI 根据我们的会谈记录和邮件往来整理的，我没有制冷和法规方面的专业能力来逐条核实。如果这里有什么和百源或 APCCO 的专业判断不一致，以他们为准，是这里写错了。</div>
 
 <section class="sec">
