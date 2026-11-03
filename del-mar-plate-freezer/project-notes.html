@@ -53,11 +53,11 @@ a{color:var(--accent)}
 .topbar img{height:30px;width:auto;display:block}
 .docid{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--band-muted);font-weight:600;white-space:nowrap}
 .langsw{display:inline-flex;border:1px solid rgba(244,238,234,.35);border-radius:999px;padding:3px;gap:2px;background:rgba(0,0,0,.15)}
-.langsw button{appearance:none;border:0;background:transparent;color:var(--band-fg);font:600 13px/1 var(--body);letter-spacing:.06em;padding:8px 14px;border-radius:999px;cursor:pointer}
+.langsw button{appearance:none;border:0;background:transparent;color:var(--band-fg);font:600 13px/1 var(--body);letter-spacing:.06em;padding:8px 14px;border-radius:999px;cursor:pointer;white-space:nowrap}
 .langsw button[aria-pressed="true"]{background:var(--gold);color:#242424}
 .langsw button:focus-visible{outline:2px solid var(--sky);outline-offset:2px}
 .topbar .right{display:flex;align-items:center;gap:12px}
-@media (max-width:560px){ .docid{display:none} }
+@media (max-width:560px){ .docid{display:none} .topbar img{max-width:38vw;height:auto} .topbar .right{gap:8px} .topbar .dlbtn{padding:8px 9px;font-size:10.5px;letter-spacing:.05em} .langsw button{padding:7px 9px;font-size:12px} }
 
 /* Download controls */
 .dlbtn{appearance:none;border:1px solid rgba(244,238,234,.45);background:transparent;color:var(--band-fg);font:700 12px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;padding:9px 12px;border-radius:999px;cursor:pointer;white-space:nowrap}
