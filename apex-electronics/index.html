@@ -1,0 +1,1162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Apex Electronics Shelf Guide</title>
+<meta name="description" content="22 photos from the Apex Electronics yard with every identifiable item tagged: what it is, what it does and how sure the identification is.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Apex Electronics Shelf Guide">
+<meta property="og:description" content="22 photos from the Apex Electronics yard with every identifiable item tagged: what it is, what it does and how sure the identification is.">
+<meta property="og:url" content="https://slopswap.org/apex-electronics/">
+<meta property="og:image" content="https://slopswap.org/apex-electronics/ticket-terminal.jpg">
+<meta property="og:image:width" content="1600">
+<meta property="og:image:height" content="1200">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+/* self-hosted fonts: Google Fonts is blocked in China */
+@font-face{font-family:"Archivo Narrow";font-style:normal;font-weight:100 900;font-display:swap;src:url(../styles/fonts/ArchivoNarrow-var.woff2) format("woff2")}
+@font-face{font-family:"IBM Plex Sans";font-style:normal;font-weight:100 900;font-display:swap;src:url(../styles/fonts/IBMPlexSans-var.woff2) format("woff2")}
+@font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:400;font-display:swap;src:url(../styles/fonts/IBMPlexMono-400.woff2) format("woff2")}
+@font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:500;font-display:swap;src:url(../styles/fonts/IBMPlexMono-500.woff2) format("woff2")}
+@font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:600;font-display:swap;src:url(../styles/fonts/IBMPlexMono-600.woff2) format("woff2")}
+</style>
+<style>
+/* layout: a data-plate header, a sticky shelf index, then one section per shelf: tagged photos above a grid of item notes */
+:root{
+  --bg:#e8e9e4; --surface:#f5f5f1; --surface-2:#dcddd6; --fg:#161a17; --muted:#535a54; --line:#c2c5bb;
+  --accent:#1b5d88;
+  --plate:#1b1d1c; --plate-fg:#f2f0e7; --plate-line:#4a4f4b; --stencil:#f2c010; --shadow:rgba(0,0,0,.45);
+  --ok:#2b6a3c; --shape:#35586c; --guess:#8a5a00; --unk:#a23522; --care-bg:#f1e4b0; --care-fg:#3a2e00;
+  --font-display:"Archivo Narrow","Arial Narrow","Helvetica Neue",Arial,sans-serif;
+  --font-body:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#161817; --surface:#1f2221; --surface-2:#2a2e2c; --fg:#eceae3; --muted:#a4aaa3; --line:#3a3f3b;
+  --accent:#8cc4ec;
+  --plate:#0e100f; --plate-fg:#f2f0e7; --plate-line:#4a4f4b; --stencil:#f2c010; --shadow:rgba(0,0,0,.6);
+  --ok:#82c692; --shape:#9dbccf; --guess:#e2b24c; --unk:#f0917e; --care-bg:#3a3214; --care-fg:#f3e3a6;
+  color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#161817; --surface:#1f2221; --surface-2:#2a2e2c; --fg:#eceae3; --muted:#a4aaa3; --line:#3a3f3b;
+  --accent:#8cc4ec;
+  --plate:#0e100f; --plate-fg:#f2f0e7; --plate-line:#4a4f4b; --stencil:#f2c010; --shadow:rgba(0,0,0,.6);
+  --ok:#82c692; --shape:#9dbccf; --guess:#e2b24c; --unk:#f0917e; --care-bg:#3a3214; --care-fg:#f3e3a6;
+  color-scheme:dark }
+
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);font:400 1rem/1.55 var(--font-body);-webkit-text-size-adjust:100%}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+a{color:var(--accent);text-underline-offset:.15em}
+a:focus-visible,.item:focus-visible{outline:3px solid var(--stencil);outline-offset:2px}
+.wrap{max-width:68rem;margin-inline:auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+[id]{scroll-margin-top:4.25rem}
+
+/* ---- header: the page's own data plate */
+.top{padding-block:1.5rem 1.25rem}
+.dataplate{background:var(--plate);color:var(--plate-fg);border:1px solid var(--plate-line);border-radius:4px;padding:1.4rem 1.6rem 1.25rem;
+  background-image:radial-gradient(circle at .8rem .8rem,var(--plate-line) 0 .22rem,transparent .25rem),radial-gradient(circle at calc(100% - .8rem) .8rem,var(--plate-line) 0 .22rem,transparent .25rem),
+    radial-gradient(circle at .8rem calc(100% - .8rem),var(--plate-line) 0 .22rem,transparent .25rem),radial-gradient(circle at calc(100% - .8rem) calc(100% - .8rem),var(--plate-line) 0 .22rem,transparent .25rem)}
+.dataplate .over{margin:0 0 .35rem;font:500 .74rem/1.2 var(--font-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--stencil)}
+.dataplate h1{margin:0;font:700 clamp(2rem,6vw,3.4rem)/1 var(--font-display);letter-spacing:.03em;text-transform:uppercase;text-wrap:balance}
+.fields{display:flex;flex-wrap:wrap;gap:.5rem;margin:1.1rem 0 0}
+.fields div{flex:1 1 8.5rem;min-width:0;border:1px solid var(--plate-line);border-radius:2px;padding:.4rem .6rem .45rem}
+.fields dt{font:500 .64rem/1.2 var(--font-mono);letter-spacing:.12em;text-transform:uppercase;opacity:.75}
+.fields dd{margin:.15rem 0 0;font:600 1.45rem/1.1 var(--font-display);font-variant-numeric:tabular-nums}
+.lede{max-width:44rem;margin:1.25rem 0 0;font-size:1.06rem}
+.byline{max-width:44rem;margin:.5rem 0 0;color:var(--muted);font-size:.92rem}
+.key{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,15rem),1fr));gap:.6rem 1.25rem;margin:1.25rem 0 0;padding:0;list-style:none}
+.key li{min-width:0;font-size:.88rem;color:var(--muted)}
+.key .conf{margin-bottom:.25rem}
+
+/* ---- sticky shelf index */
+.toc{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-block:1px solid var(--line)}
+.toc .wrap{display:flex;gap:.35rem;overflow-x:auto;padding-block:.5rem;scrollbar-width:none}
+.toc .wrap::-webkit-scrollbar{display:none}
+.toc a{flex:0 0 auto;padding:.3rem .6rem;border:1px solid var(--line);border-radius:2px;background:var(--surface);color:var(--fg);text-decoration:none;font:500 .74rem/1.2 var(--font-mono);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.toc a:hover{border-color:var(--fg)}
+
+/* ---- sections */
+.area{padding-block:2.5rem 1rem}
+.area h2,.tail h2{margin:0;padding-bottom:.4rem;border-bottom:2px solid var(--fg);font:700 clamp(1.5rem,4vw,2rem)/1.1 var(--font-display);letter-spacing:.04em;text-transform:uppercase;text-wrap:balance}
+.blurb{max-width:44rem;margin:.75rem 0 0;color:var(--muted)}
+.shots{display:grid;gap:2rem;margin-top:1.5rem}
+
+/* ---- photos with tags */
+.shot{margin:0;min-width:0}
+.shot figcaption{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:.25rem 1rem;margin-bottom:.5rem}
+.shot h3{margin:0;font:600 1.15rem/1.2 var(--font-display);letter-spacing:.02em}
+.shot .full{font:500 .74rem/1.2 var(--font-mono);letter-spacing:.04em;text-transform:uppercase}
+.frame{position:relative;max-width:100%;overflow:hidden;border:1px solid var(--line);border-radius:3px;background:var(--surface-2)}
+.frame img{display:block;width:100%;height:100%;object-fit:cover}
+.shot.portrait .frame{max-width:38rem}
+.pin{position:absolute;z-index:1;display:grid;place-items:center;width:1.6rem;height:1.6rem;margin:-.8rem 0 0 -.8rem;border:2px solid var(--stencil);border-radius:50%;
+  background:var(--plate);color:var(--stencil);font:600 .76rem/1 var(--font-mono);text-decoration:none;box-shadow:0 1px 5px var(--shadow)}
+.pin::after{content:"";position:absolute;inset:-.4rem}
+.pin .t{position:absolute;padding:.28rem .45rem .3rem;border:1px solid var(--plate-line);border-radius:2px;background:var(--plate);color:var(--plate-fg);
+  font:500 .72rem/1 var(--font-mono);white-space:nowrap;box-shadow:0 1px 5px var(--shadow)}
+.pin.r .t{left:calc(100% + .35rem);top:50%;transform:translateY(-50%)}
+.pin.l .t{right:calc(100% + .35rem);top:50%;transform:translateY(-50%)}
+.pin.u .t{bottom:calc(100% + .35rem);left:50%;transform:translateX(-50%)}
+.pin.d .t{top:calc(100% + .35rem);left:50%;transform:translateX(-50%)}
+.pin.ur .t{bottom:calc(100% + .35rem);left:-2px}
+.pin.ul .t{bottom:calc(100% + .35rem);right:-2px}
+.pin.dr .t{top:calc(100% + .35rem);left:-2px}
+.pin.dl .t{top:calc(100% + .35rem);right:-2px}
+.pin:hover,.pin:focus-visible,.pin.is-hot{z-index:3;background:var(--stencil);color:var(--plate)}
+.pin:hover .t,.pin:focus-visible .t,.pin.is-hot .t{border-color:var(--stencil)}
+.pin.is-ping{z-index:3;animation:ping .7s ease-out 3}
+@keyframes ping{0%{box-shadow:0 0 0 0 var(--stencil)}100%{box-shadow:0 0 0 1.1rem transparent}}
+.legend{display:flex;flex-wrap:wrap;gap:.3rem .35rem;margin:.6rem 0 0;padding:0;list-style:none}
+.legend a{display:inline-flex;align-items:center;gap:.4rem;padding:.2rem .55rem .2rem .2rem;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--fg);text-decoration:none;font-size:.84rem;line-height:1.2}
+.legend a:hover{border-color:var(--fg)}
+.legend .n{display:grid;place-items:center;flex:0 0 auto;min-width:1.35rem;height:1.35rem;border-radius:50%;background:var(--plate);color:var(--stencil);font:600 .7rem/1 var(--font-mono)}
+
+/* ---- item notes */
+.items{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,24rem),1fr));align-items:start;gap:1rem;margin-top:2rem}
+.item{min-width:0;padding:1rem 1.1rem .9rem;border:1px solid var(--line);border-radius:3px;background:var(--surface);transition:box-shadow .3s}
+.item.is-target{box-shadow:0 0 0 3px var(--stencil)}
+.item header{display:flex;flex-direction:column;align-items:flex-start;gap:.3rem;margin-bottom:.8rem}
+.item h4{margin:0;font:600 1.3rem/1.15 var(--font-display);letter-spacing:.015em;text-wrap:balance}
+.kind{margin:0;color:var(--muted);font:400 .78rem/1.35 var(--font-mono)}
+.conf{display:inline-block;padding:.2rem .5rem;border:1.5px solid;border-radius:2px;font:600 .66rem/1.2 var(--font-mono);letter-spacing:.08em;text-transform:uppercase}
+.conf-plate{background:var(--ok);border-color:var(--ok);color:var(--surface)}
+.conf-shape{border-color:var(--shape);color:var(--shape)}
+.conf-guess{border-style:dashed;border-color:var(--guess);color:var(--guess)}
+.conf-unknown{border-style:dotted;border-color:var(--unk);color:var(--unk)}
+.item dl{margin:0}
+.item dt{margin:0 0 .15rem;color:var(--muted);font:500 .66rem/1.2 var(--font-mono);letter-spacing:.12em;text-transform:uppercase}
+.item dd{margin:0 0 .8rem;font-size:.95rem}
+.care{margin:0 0 .8rem;padding:.5rem .65rem;border-radius:2px;background:var(--care-bg);color:var(--care-fg);font-size:.9rem}
+.care b{display:block;font:600 .66rem/1.3 var(--font-mono);letter-spacing:.12em;text-transform:uppercase}
+.foot{display:flex;flex-wrap:wrap;gap:.15rem .7rem;margin:.35rem 0 0;font-size:.84rem;line-height:1.4}
+.foot span{color:var(--muted);font:500 .66rem/1.9 var(--font-mono);letter-spacing:.12em;text-transform:uppercase}
+.foot a{overflow-wrap:anywhere}
+
+/* ---- closing sections */
+.tail{padding-block:2.5rem 0}
+.tail p,.tail li{max-width:46rem}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,18rem),1fr));gap:.4rem 2rem;margin:1rem 0 0;padding:0;list-style:none}
+.cols li{min-width:0;font-size:.95rem}
+.carelist{margin:1rem 0 0;padding:0;list-style:none;display:grid;gap:.6rem}
+.carelist li{padding:.6rem .8rem;border-radius:2px;background:var(--care-bg);color:var(--care-fg)}
+.carelist b{font-family:var(--font-display);font-size:1.05rem;letter-spacing:.02em}
+.sources{margin:1rem 0 0;padding-left:1.2rem;font-size:.92rem}
+.sources li{margin-bottom:.25rem;overflow-wrap:anywhere}
+.note{color:var(--muted);font-size:.9rem}
+footer{margin-top:3rem;padding-block:1.25rem 2.5rem;border-top:1px solid var(--line);color:var(--muted);font-size:.86rem}
+
+@media (max-width:46rem){
+  .pin{width:1.35rem;height:1.35rem;margin:-.675rem 0 0 -.675rem;font-size:.66rem;border-width:1.5px}
+  .pin .t{display:none}
+  .dataplate{padding:1.1rem 1.1rem 1rem}
+  .area{padding-block:2rem .5rem}
+}
+@media (prefers-reduced-motion:reduce){ html{scroll-behavior:auto} .pin.is-ping{animation:none;background:var(--stencil);color:var(--plate)} .item{transition:none} }
+</style>
+</head>
+<body>
+
+<header class="top"><div class="wrap">
+<div class="dataplate">
+<p class="over">Surplus yard field notes</p>
+<h1>Apex Electronics Shelf Guide</h1>
+<dl class="fields">
+<div><dt>Photos</dt><dd>22</dd></div>
+<div><dt>Tags on photos</dt><dd>148</dd></div>
+<div><dt>Things described</dt><dd>71</dd></div>
+<div><dt>Read off nameplates</dt><dd>30</dd></div>
+<div><dt>Not identified</dt><dd>10</dd></div>
+<div><dt>Photographed</dt><dd>9 Nov 2026</dd></div>
+</dl>
+</div>
+<p class="lede">These notes cover 22 photos taken on the shelves at Apex Electronics. Each numbered tag on a photo links to a short note on what the thing is and what it does. Everything was worked out from the photos alone. Nothing was opened or powered, so treat the notes as a starting point and correct anything that is wrong.</p>
+<p class="byline">Photos by Kevin, a customer. Identification and research with Claude.</p>
+<ul class="key" id="key"><li><span class="conf conf-plate">Read off the nameplate</span><br>The name or type number is legible in the photo.</li><li><span class="conf conf-shape">Recognised by shape</span><br>No readable plate, but the panel layout matches a known type.</li><li><span class="conf conf-guess">Best guess</span><br>Fits the evidence. Check the label before relying on it.</li><li><span class="conf conf-unknown">Not identified</span><br>Described from what is visible. A nameplate photo would settle it.</li></ul>
+</div></header>
+<nav class="toc" aria-label="Shelves"><div class="wrap"><a href="#cameras">Cameras</a><a href="#stage-lights">Stage lights</a><a href="#bench-shelf">Bench shelf</a><a href="#test-bay">Test bay</a><a href="#motion-vacuum">Motion and vacuum</a><a href="#radio">Radio and avionics</a><a href="#medical">Medical</a><a href="#egg-rack">EG&amp;G and high voltage</a><a href="#unidentified">Unidentified</a><a href="#care">Handling</a><a href="#sources">Sources</a></div></nav>
+<main>
+<section class="area" id="cameras">
+<div class="wrap">
+<h2>Broadcast cameras</h2>
+<p class="blurb">The wire shelves with television cameras: one row of 1990s studio heads and four portable cameras from the 1980s. One of the portables carries a Los Angeles station&#x27;s asset tag.</p>
+<div class="shots">
+<figure class="shot" id="bts-shelf">
+<figcaption><h3>BTS heads on the upper shelf</h3><a class="full" href="bts-shelf.jpg" target="_blank" rel="noopener">Open full size</a></figcaption>
+<div class="frame" style="aspect-ratio:1600/1200">
+<img src="bts-shelf.jpg" width="1600" height="1200" loading="lazy" decoding="async" alt="BTS heads on the upper shelf">
+<a class="pin u" href="#ldk9" data-go data-item="ldk9" style="left:46%;top:43%" aria-label="1: BTS LDK 9"><span class="n">1</span><span class="t">BTS LDK 9</span></a>
+<a class="pin d" href="#ldk9" data-go data-item="ldk9" style="left:72%;top:46%" aria-label="2: LDK 9 rear panel"><span class="n">2</span><span class="t">LDK 9 rear panel</span></a>
+<a class="pin r" href="#projectors" data-go data-item="projectors" style="left:40%;top:8%" aria-label="3: Top-shelf housing"><span class="n">3</span><span class="t">Top-shelf housing</span></a>
+</div>
+<ol class="legend">
+<li><a href="#ldk9" data-go data-item="ldk9"><span class="n">1</span>BTS LDK 9</a></li>
+<li><a href="#ldk9" data-go data-item="ldk9"><span class="n">2</span>LDK 9 rear panel</a></li>
+<li><a href="#projectors" data-go data-item="projectors"><span class="n">3</span>Top-shelf housing</a></li>
+</ol>
+</figure>
+<figure class="shot" id="bts-row">
+<figcaption><h3>The row of LDK 9 heads, with two housings above</h3><a class="full" href="bts-row.jpg" target="_blank" rel="noopener">Open full size</a></figcaption>
+<div class="frame" style="aspect-ratio:1600/924">
+<img src="bts-row.jpg" width="1600" height="924" loading="lazy" decoding="async" alt="The row of LDK 9 heads, with two housings above">
+<a class="pin l" href="#projectors" data-go data-item="projectors" style="left:27%;top:35%" aria-label="1: Projector?"><span class="n">1</span><span class="t">Projector?</span></a>
+<a class="pin r" href="#projectors" data-go data-item="projectors" style="left:53%;top:31%" aria-label="2: Projector?"><span class="n">2</span><span class="t">Projector?</span></a>
+<a class="pin d" href="#ldk9" data-go data-item="ldk9" style="left:38%;top:79%" aria-label="3: BTS LDK 9"><span class="n">3</span><span class="t">BTS LDK 9</span></a>
+<a class="pin d" href="#ldk9" data-go data-item="ldk9" style="left:61%;top:79%" aria-label="4: LDK 9"><span class="n">4</span><span class="t">LDK 9</span></a>
+<a class="pin ul" href="#ldk9" data-go data-item="ldk9" style="left:88%;top:66%" aria-label="5: BTS 9 side panel"><span class="n">5</span><span class="t">BTS 9 side panel</span></a>
+</div>
+<ol class="legend">
+<li><a href="#projectors" data-go data-item="projectors"><span class="n">1</span>Projector?</a></li>
+<li><a href="#projectors" data-go data-item="projectors"><span class="n">2</span>Projector?</a></li>
+<li><a href="#ldk9" data-go data-item="ldk9"><span class="n">3</span>BTS LDK 9</a></li>
+<li><a href="#ldk9" data-go data-item="ldk9"><span class="n">4</span>LDK 9</a></li>
+<li><a href="#ldk9" data-go data-item="ldk9"><span class="n">5</span>BTS 9 side panel</a></li>
+</ol>
+</figure>
+<figure class="shot" id="sony-dxc-3000a">
+<figcaption><h3>Sony DXC-3000A</h3><a class="full" href="sony-dxc-3000a.jpg" target="_blank" rel="noopener">Open full size</a></figcaption>
+<div class="frame" style="aspect-ratio:1600/1200">
+<img src="sony-dxc-3000a.jpg" width="1600" height="1200" loading="lazy" decoding="async" alt="Sony DXC-3000A">
+<a class="pin u" href="#dxc3000a" data-go data-item="dxc3000a" style="left:52%;top:48%" aria-label="1: Sony DXC-3000A"><span class="n">1</span><span class="t">Sony DXC-3000A</span></a>
+<a class="pin d" href="#dxc3000a" data-go data-item="dxc3000a" style="left:40%;top:64%" aria-label="2: 12 V DC in"><span class="n">2</span><span class="t">12 V DC in</span></a>
+<a class="pin l" href="#dxc3000a" data-go data-item="dxc3000a" style="left:33%;top:44%" aria-label="3: Mic in"><span class="n">3</span><span class="t">Mic in</span></a>
+</div>
+<ol class="legend">
+<li><a href="#dxc3000a" data-go data-item="dxc3000a"><span class="n">1</span>Sony DXC-3000A</a></li>
+<li><a href="#dxc3000a" data-go data-item="dxc3000a"><span class="n">2</span>12 V DC in</a></li>
+<li><a href="#dxc3000a" data-go data-item="dxc3000a"><span class="n">3</span>Mic in</a></li>
+</ol>
+</figure>
+<figure class="shot" id="sony-body-zoom">
+<figcaption><h3>The second Sony body, zoom lens fitted</h3><a class="full" href="sony-body-zoom.jpg" target="_blank" rel="noopener">Open full size</a></figcaption>
+<div class="frame" style="aspect-ratio:1600/1200">
+<img src="sony-body-zoom.jpg" width="1600" height="1200" loading="lazy" decoding="async" alt="The second Sony body, zoom lens fitted">
+<a class="pin d" href="#sonybody" data-go data-item="sonybody" style="left:52%;top:52%" aria-label="1: Sony 3CCD body"><span class="n">1</span><span class="t">Sony 3CCD body</span></a>
+<a class="pin d" href="#sonybody" data-go data-item="sonybody" style="left:86%;top:56%" aria-label="2: Zoom lens"><span class="n">2</span><span class="t">Zoom lens</span></a>
+<a class="pin l" href="#sonybody" data-go data-item="sonybody" style="left:47%;top:24%" aria-label="3: Threaded rod"><span class="n">3</span><span class="t">Threaded rod</span></a>
+<a class="pin r" href="#ldk9" data-go data-item="ldk9" style="left:62%;top:14%" aria-label="4: LDK 9 heads"><span class="n">4</span><span class="t">LDK 9 heads</span></a>
+</div>
+<ol class="legend">
+<li><a href="#sonybody" data-go data-item="sonybody"><span class="n">1</span>Sony 3CCD body</a></li>
+<li><a href="#sonybody" data-go data-item="sonybody"><span class="n">2</span>Zoom lens</a></li>
+<li><a href="#sonybody" data-go data-item="sonybody"><span class="n">3</span>Threaded rod</a></li>
+<li><a href="#ldk9" data-go data-item="ldk9"><span class="n">4</span>LDK 9 heads</a></li>
+</ol>
+</figure>
+<figure class="shot" id="sony-body-controls">
+<figcaption><h3>The second Sony body, control side</h3><a class="full" href="sony-body-controls.jpg" target="_blank" rel="noopener">Open full size</a></figcaption>
+<div class="frame" style="aspect-ratio:1600/1200">
+<img src="sony-body-controls.jpg" width="1600" height="1200" loading="lazy" decoding="async" alt="The second Sony body, control side">
+<a class="pin u" href="#sonybody" data-go data-item="sonybody" style="left:56%;top:47%" aria-label="1: Filter positions"><span class="n">1</span><span class="t">Filter positions</span></a>
+<a class="pin d" href="#sonybody" data-go data-item="sonybody" style="left:45%;top:73%" aria-label="2: Gain, bars, power"><span class="n">2</span><span class="t">Gain, bars, power</span></a>
+<a class="pin u" href="#sonybody" data-go data-item="sonybody" style="left:15%;top:38%" aria-label="3: Zoom lens"><span class="n">3</span><span class="t">Zoom lens</span></a>
+</div>
+<ol class="legend">
+<li><a href="#sonybody" data-go data-item="sonybody"><span class="n">1</span>Filter positions</a></li>
+<li><a href="#sonybody" data-go data-item="sonybody"><span class="n">2</span>Gain, bars, power</a></li>
+<li><a href="#sonybody" data-go data-item="sonybody"><span class="n">3</span>Zoom lens</a></li>
+</ol>
+</figure>
+<figure class="shot" id="jvc-by-110">
+<figcaption><h3>JVC BY-110</h3><a class="full" href="jvc-by-110.jpg" target="_blank" rel="noopener">Open full size</a></figcaption>
+<div class="frame" style="aspect-ratio:1600/1200">
+<img src="jvc-by-110.jpg" width="1600" height="1200" loading="lazy" decoding="async" alt="JVC BY-110">
+<a class="pin d" href="#by110" data-go data-item="by110" style="left:49%;top:47%" aria-label="1: JVC BY-110"><span class="n">1</span><span class="t">JVC BY-110</span></a>
+<a class="pin u" href="#by110" data-go data-item="by110" style="left:20%;top:38%" aria-label="2: Lens hood"><span class="n">2</span><span class="t">Lens hood</span></a>
+<a class="pin r" href="#by110" data-go data-item="by110" style="left:46%;top:14%" aria-label="3: Viewfinder"><span class="n">3</span><span class="t">Viewfinder</span></a>
+<a class="pin l" href="#by110" data-go data-item="by110" style="left:42%;top:33%" aria-label="4: Tag: July 1984"><span class="n">4</span><span class="t">Tag: July 1984</span></a>
+<a class="pin ul" href="#sonybody" data-go data-item="sonybody" style="left:88%;top:56%" aria-label="5: Sony 3CCD body"><span class="n">5</span><span class="t">Sony 3CCD body</span></a>
+</div>
+<ol class="legend">
+<li><a href="#by110" data-go data-item="by110"><span class="n">1</span>JVC BY-110</a></li>
+<li><a href="#by110" data-go data-item="by110"><span class="n">2</span>Lens hood</a></li>
+<li><a href="#by110" data-go data-item="by110"><span class="n">3</span>Viewfinder</a></li>
+<li><a href="#by110" data-go data-item="by110"><span class="n">4</span>Tag: July 1984</a></li>
+<li><a href="#sonybody" data-go data-item="sonybody"><span class="n">5</span>Sony 3CCD body</a></li>
+</ol>
+</figure>
+<figure class="shot" id="hitachi-ikegami">
+<figcaption><h3>Hitachi Z-31 and the Ikegami</h3><a class="full" href="hitachi-ikegami.jpg" target="_blank" rel="noopener">Open full size</a></figcaption>
+<div class="frame" style="aspect-ratio:1600/1200">
+<img src="hitachi-ikegami.jpg" width="1600" height="1200" loading="lazy" decoding="async" alt="Hitachi Z-31 and the Ikegami">
+<a class="pin r" href="#z31" data-go data-item="z31" style="left:54%;top:50%" aria-label="1: Hitachi Z-31"><span class="n">1</span><span class="t">Hitachi Z-31</span></a>
+<a class="pin u" href="#ikegami" data-go data-item="ikegami" style="left:68%;top:18%" aria-label="2: Ikegami, KCAL-TV tag"><span class="n">2</span><span class="t">Ikegami, KCAL-TV tag</span></a>
+<a class="pin l" href="#ikegami" data-go data-item="ikegami" style="left:44%;top:19%" aria-label="3: Side cover off"><span class="n">3</span><span class="t">Side cover off</span></a>
+<a class="pin u" href="#sonybody" data-go data-item="sonybody" style="left:24%;top:66%" aria-label="4: Sony 3CCD body"><span class="n">4</span><span class="t">Sony 3CCD body</span></a>
+</div>
+<ol class="legend">
+<li><a href="#z31" data-go data-item="z31"><span class="n">1</span>Hitachi Z-31</a></li>
+<li><a href="#ikegami" data-go data-item="ikegami"><span class="n">2</span>Ikegami, KCAL-TV tag</a></li>
+<li><a href="#ikegami" data-go data-item="ikegami"><span class="n">3</span>Side cover off</a></li>
+<li><a href="#sonybody" data-go data-item="sonybody"><span class="n">4</span>Sony 3CCD body</a></li>
+</ol>
+</figure>
+</div>
+<div class="items">
+<article class="item" id="ldk9" tabindex="-1">
+<header><h4>BTS LDK 9 studio camera heads</h4><p class="kind">Broadcast studio camera, 1990–91 · about six on the shelf</p><span class="conf conf-plate">Read off the nameplate</span></header>
+<dl><dt>What it is</dt><dd>Studio camera heads from BTS, the Bosch–Philips broadcast joint venture. The side panel carries the BTS logo and a large 9, and the rear panel is marked LDK 9. The photos show the operator&#x27;s end: lit buttons for the filter wheels and set-up, plus intercom and tally connectors.</dd><dt>What it does</dt><dd>Three CCD sensors behind a colour-splitting prism turn the lens image into broadcast video. A head does not put out a finished picture by itself. Video, power, intercom and control all travel over one triax cable to a base station in the control room, so each head needs its base station to work. BTS billed the LDK 9 as the first frame-transfer CCD studio camera.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#bts-shelf" data-go data-item="ldk9">BTS heads on the upper shelf</a> <a href="#bts-row" data-go data-item="ldk9">The row of LDK 9 heads, with two housings above</a> <a href="#sony-body-zoom" data-go data-item="ldk9">The second Sony body, zoom lens fitted</a></p>
+<p class="foot"><span>Read more</span> <a href="https://www.tvcameramuseum.org/bts/bts_thumb.htm" target="_blank" rel="noopener">Museum of the Broadcast Television Camera, BTS list</a> <a href="https://ifdesign.com/en/winner-ranking/project/ldk-9-ccd-studio-camera/18602" target="_blank" rel="noopener">iF Design, LDK 9 CCD studio camera (1991)</a> <a href="https://www.broadcaststore.com/store/prod_detail.cfm?eq_id=508643" target="_blank" rel="noopener">BroadcastStore, LDK-9 camera chain</a></p>
+</article>
+<article class="item" id="projectors" tabindex="-1">
+<header><h4>Two blue-grey housings on the top shelf</h4><p class="kind">Probably large-venue video projectors</p><span class="conf conf-guess">Best guess</span></header>
+<dl><dt>What it is</dt><dd>Seen from underneath through the wire shelf. Each has a small screen-and-keypad panel on one end and large vent grilles. That layout fits a large-venue video projector better than a camera. The nameplates are out of view.</dd><dt>What it does</dt><dd>If they are projectors, a high-power lamp, three imaging panels and a big interchangeable lens throw video onto the screens at concerts and conferences.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#bts-shelf" data-go data-item="projectors">BTS heads on the upper shelf</a> <a href="#bts-row" data-go data-item="projectors">The row of LDK 9 heads, with two housings above</a></p>
+</article>
+<article class="item" id="dxc3000a" tabindex="-1">
+<header><h4>Sony DXC-3000A</h4><p class="kind">3-chip CCD colour video camera, mid-1980s</p><span class="conf conf-plate">Read off the nameplate</span></header>
+<dl><dt>What it is</dt><dd>Marked DXC-3000A and 3CCD on the side. It was one of the first professional cameras to use three CCD chips in place of pickup tubes. Sony&#x27;s brochure gives three 2/3-inch sensors, 560 TV lines and 58 dB signal-to-noise.</dd><dt>What it does</dt><dd>A field and studio camera head with no recorder built in. Composite video comes out on a BNC connector, the microphone plugs into the XLR socket on the side, and it runs from 12 V DC through the 4-pin XLR socket underneath. The brochure says it starts in about three seconds with no warm-up.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#sony-dxc-3000a" data-go data-item="dxc3000a">Sony DXC-3000A</a></p>
+<p class="foot"><span>Read more</span> <a href="https://www.scribd.com/document/248893994/Sony-Dxc-3000a" target="_blank" rel="noopener">Sony DXC-3000A brochure</a> <a href="https://www.adorama.com/used-ony-dxc-3000a-3ccd-color-video-camera/p/us1981379" target="_blank" rel="noopener">Adorama, used DXC-3000A listing</a></p>
+</article>
+<article class="item" id="sonybody" tabindex="-1">
+<header><h4>Sony 3CCD camera body with zoom lens</h4><p class="kind">Same DXC-3000 family</p><span class="conf conf-plate">Read off the nameplate</span></header>
+<dl><dt>What it is</dt><dd>A second Sony 3-chip body with a broadcast zoom lens still mounted. The top handle is gone and a threaded rod runs through the top cover. The side plate lists the filter wheel positions: 3200 K, 5600 K + 1/8 ND and 5600 K.</dd><dt>What it does</dt><dd>It works the same way as the DXC-3000A. The small panel under the lens mount has the gain, colour bars, white balance and power switches. The VF PREHEAT position on the power switch warms up the viewfinder&#x27;s small picture tube.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#sony-body-zoom" data-go data-item="sonybody">The second Sony body, zoom lens fitted</a> <a href="#sony-body-controls" data-go data-item="sonybody">The second Sony body, control side</a> <a href="#jvc-by-110" data-go data-item="sonybody">JVC BY-110</a> <a href="#hitachi-ikegami" data-go data-item="sonybody">Hitachi Z-31 and the Ikegami</a></p>
+</article>
+<article class="item" id="by110" tabindex="-1">
+<header><h4>JVC BY-110</h4><p class="kind">Three-tube colour camera, tagged July 1984</p><span class="conf conf-plate">Read off the nameplate</span></header>
+<dl><dt>What it is</dt><dd>A complete BY-110 with its own servo zoom lens, lens hood and viewfinder. It uses three 1/2-inch Saticon pickup tubes behind an f/1.4 prism. JVC rated it at 600 lines and 54 dB.</dd><dt>What it does</dt><dd>A news and industrial camera from just before CCDs took over. Each tube scans one colour of the image with an electron beam. An auto-shift switch lines the red and blue pictures up with the green one and stores the result in battery-backed memory. It runs on 12 V at about 1 A, and video leaves on the 14-pin connector that went to the recorder.</dd></dl>
+<p class="care"><b>Handle with care</b> Pickup tubes burn. Keep the lens capped and never leave it aimed at the sun or a bright lamp.</p>
+<p class="foot"><span>In photo</span> <a href="#jvc-by-110" data-go data-item="by110">JVC BY-110</a></p>
+<p class="foot"><span>Read more</span> <a href="https://smecc.org/jvc_video.htm" target="_blank" rel="noopener">SMECC, JVC BY-110U brochure text</a></p>
+</article>
+<article class="item" id="z31" tabindex="-1">
+<header><h4>Hitachi Z-31 Computacam</h4><p class="kind">Three-tube colour camera (FP-Z31), mid-1980s</p><span class="conf conf-plate">Read off the nameplate</span></header>
+<dl><dt>What it is</dt><dd>Marked COMPUTACAM Z31 and HITACHI on the side. The FP-Z31 uses three 2/3-inch Saticon tubes. Hitachi&#x27;s manual gives 750 lines and 58 dB.</dd><dt>What it does</dt><dd>A portable broadcast and industrial camera. The Computacam name refers to its microcomputer, which runs automatic white balance, black balance, centring and set-up so the three tube pictures stay registered without a technician. It runs on 12 V DC at about 20 W and puts out composite video.</dd></dl>
+<p class="care"><b>Handle with care</b> Pickup tubes burn. Keep the lens capped and out of direct sun.</p>
+<p class="foot"><span>In photo</span> <a href="#hitachi-ikegami" data-go data-item="z31">Hitachi Z-31 and the Ikegami</a></p>
+<p class="foot"><span>Read more</span> <a href="https://www.manualslib.com/manual/1117033/Hitachi-Fp-Z31.html" target="_blank" rel="noopener">Hitachi FP-Z31 operation manual</a></p>
+</article>
+<article class="item" id="ikegami" tabindex="-1">
+<header><h4>Ikegami news camera with a KCAL-TV tag</h4><p class="kind">Tube-era ENG camera, HL series</p><span class="conf conf-plate">Read off the nameplate</span></header>
+<dl><dt>What it is</dt><dd>The badge reads Ikegami and the asset tag reads KCAL-TV 05403, so it came out of Los Angeles channel 9. The model number on the badge is too small to read in the photo. The shape is the HL-79 family, the standard news camera of the early 1980s, which used three 2/3-inch Plumbicon tubes.</dd><dt>What it does</dt><dd>A shoulder-mount electronic news gathering camera. One side cover is off, which exposes the circuit boards.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#hitachi-ikegami" data-go data-item="ikegami">Hitachi Z-31 and the Ikegami</a></p>
+<p class="foot"><span>Read more</span> <a href="https://sites.google.com/site/ampexnagra/ikegami-hl79d" target="_blank" rel="noopener">Notes on the Ikegami HL-79D</a></p>
+</article>
+</div>
+</div>
+</section><section class="area" id="stage-lights">
+<div class="wrap">
+<h2>Stage lighting</h2>
+<p class="blurb">Two automated spotlights from a touring or theatre rig, opened up.</p>
+<div class="shots">
+<figure class="shot" id="stage-lights-photo">
+<figcaption><h3>Moving heads with the covers off</h3><a class="full" href="stage-lights.jpg" target="_blank" rel="noopener">Open full size</a></figcaption>
+<div class="frame" style="aspect-ratio:1600/1200">
+<img src="stage-lights.jpg" width="1600" height="1200" loading="lazy" decoding="async" alt="Moving heads with the covers off">
+<a class="pin l" href="#movinghead" data-go data-item="movinghead" style="left:66%;top:70%" aria-label="1: Zoom lens"><span class="n">1</span><span class="t">Zoom lens</span></a>
+<a class="pin u" href="#movinghead" data-go data-item="movinghead" style="left:40%;top:48%" aria-label="2: Motors and wheels"><span class="n">2</span><span class="t">Motors and wheels</span></a>
+<a class="pin ul" href="#movinghead" data-go data-item="movinghead" style="left:86%;top:45%" aria-label="3: Second head"><span class="n">3</span><span class="t">Second head</span></a>
+</div>
+<ol class="legend">
+<li><a href="#movinghead" data-go data-item="movinghead"><span class="n">1</span>Zoom lens</a></li>
+<li><a href="#movinghead" data-go data-item="movinghead"><span class="n">2</span>Motors and wheels</a></li>
+<li><a href="#movinghead" data-go data-item="movinghead"><span class="n">3</span>Second head</a></li>
+</ol>
+</figure>
+</div>
+<div class="items">
+<article class="item" id="movinghead" tabindex="-1">
+<header><h4>Moving-head stage lights</h4><p class="kind">Automated arc-lamp spots, two with covers off</p><span class="conf conf-shape">Recognised by shape</span></header>
+<dl><dt>What it is</dt><dd>Two large moving-head fixtures lying on their sides. The open one shows the optical train: fans, lens carriages on rails, wheels and a driver board. The taped one behind it has the wide flared front lens of a Vari-Lite VL3000-type spot. The maker&#x27;s label will confirm.</dd><dt>What it does</dt><dd>A discharge lamp sits at the back of the head. In front of it, stepper motors turn colour wheels and pattern wheels, slide the zoom and focus lenses and close an iris, all commanded over DMX from the lighting desk. The yoke that holds the head pans and tilts it.</dd></dl>
+<p class="care"><b>Handle with care</b> Leave any arc lamp in its housing. The lamps are under pressure and the igniter makes multi-kilovolt pulses.</p>
+<p class="foot"><span>In photo</span> <a href="#stage-lights-photo" data-go data-item="movinghead">Moving heads with the covers off</a></p>
+</article>
+</div>
+</div>
+</section><section class="area" id="bench-shelf">
+<div class="wrap">
+<h2>Bench and office shelf</h2>
+<p class="blurb">A mixed shelf: precision bench instruments, an autopilot tester, a military telephone, cardiology gear and office machines.</p>
+<div class="shots">
+<figure class="shot" id="bench-shelf-a">
+<figcaption><h3>The shelf, straight on</h3><a class="full" href="bench-shelf-a.jpg" target="_blank" rel="noopener">Open full size</a></figcaption>
+<div class="frame" style="aspect-ratio:1600/1200">
+<img src="bench-shelf-a.jpg" width="1600" height="1200" loading="lazy" decoding="async" alt="The shelf, straight on">
+<a class="pin ur" href="#pd4005" data-go data-item="pd4005" style="left:4%;top:45%" aria-label="1: Power Designs 4005"><span class="n">1</span><span class="t">Power Designs 4005</span></a>
+<a class="pin d" href="#autovon" data-go data-item="autovon" style="left:18%;top:49%" aria-label="2: 16-button phone"><span class="n">2</span><span class="t">16-button phone</span></a>
+<a class="pin u" href="#fluke895a" data-go data-item="fluke895a" style="left:33%;top:45%" aria-label="3: Fluke 895A"><span class="n">3</span><span class="t">Fluke 895A</span></a>
+<a class="pin u" href="#sewing" data-go data-item="sewing" style="left:44%;top:42%" aria-label="4: Sewing head"><span class="n">4</span><span class="t">Sewing head</span></a>
+<a class="pin u" href="#autopilot" data-go data-item="autopilot" style="left:62%;top:40%" aria-label="5: ARC autopilot test set"><span class="n">5</span><span class="t">ARC autopilot test set</span></a>
+<a class="pin u" href="#tandberg" data-go data-item="tandberg" style="left:79%;top:43%" aria-label="6: Tandberg deck"><span class="n">6</span><span class="t">Tandberg deck</span></a>
+<a class="pin ul" href="#ecg" data-go data-item="ecg" style="left:91%;top:47%" aria-label="7: ECG recorder"><span class="n">7</span><span class="t">ECG recorder</span></a>
+<a class="pin r" href="#steelcase" data-go data-item="steelcase" style="left:17%;top:75%" aria-label="8: Unidentified case"><span class="n">8</span><span class="t">Unidentified case</span></a>
+<a class="pin l" href="#ami" data-go data-item="ami" style="left:43%;top:62%" aria-label="9: AMI machine"><span class="n">9</span><span class="t">AMI machine</span></a>
+<a class="pin d" href="#friden" data-go data-item="friden" style="left:46%;top:79%" aria-label="10: Friden calculator"><span class="n">10</span><span class="t">Friden calculator</span></a>
+<a class="pin d" href="#royal" data-go data-item="royal" style="left:59%;top:76%" aria-label="11: Royal"><span class="n">11</span><span class="t">Royal</span></a>
+<a class="pin r" href="#ecg" data-go data-item="ecg" style="left:56%;top:63%" aria-label="12: Cardiofax carton"><span class="n">12</span><span class="t">Cardiofax carton</span></a>
+<a class="pin d" href="#selectric" data-go data-item="selectric" style="left:76%;top:73%" aria-label="13: Selectric type"><span class="n">13</span><span class="t">Selectric type</span></a>
+<a class="pin ul" href="#loran" data-go data-item="loran" style="left:88%;top:69%" aria-label="14: Loran-C"><span class="n">14</span><span class="t">Loran-C</span></a>
+<a class="pin l" href="#scales" data-go data-item="scales" style="left:72%;top:91%" aria-label="15: Scale indicators"><span class="n">15</span><span class="t">Scale indicators</span></a>
+</div>
+<ol class="legend">
+<li><a href="#pd4005" data-go data-item="pd4005"><span class="n">1</span>Power Designs 4005</a></li>
+<li><a href="#autovon" data-go data-item="autovon"><span class="n">2</span>16-button phone</a></li>
+<li><a href="#fluke895a" data-go data-item="fluke895a"><span class="n">3</span>Fluke 895A</a></li>
+<li><a href="#sewing" data-go data-item="sewing"><span class="n">4</span>Sewing head</a></li>
+<li><a href="#autopilot" data-go data-item="autopilot"><span class="n">5</span>ARC autopilot test set</a></li>
+<li><a href="#tandberg" data-go data-item="tandberg"><span class="n">6</span>Tandberg deck</a></li>
+<li><a href="#ecg" data-go data-item="ecg"><span class="n">7</span>ECG recorder</a></li>
+<li><a href="#steelcase" data-go data-item="steelcase"><span class="n">8</span>Unidentified case</a></li>
+<li><a href="#ami" data-go data-item="ami"><span class="n">9</span>AMI machine</a></li>
+<li><a href="#friden" data-go data-item="friden"><span class="n">10</span>Friden calculator</a></li>
+<li><a href="#royal" data-go data-item="royal"><span class="n">11</span>Royal</a></li>
+<li><a href="#ecg" data-go data-item="ecg"><span class="n">12</span>Cardiofax carton</a></li>
+<li><a href="#selectric" data-go data-item="selectric"><span class="n">13</span>Selectric type</a></li>
+<li><a href="#loran" data-go data-item="loran"><span class="n">14</span>Loran-C</a></li>
+<li><a href="#scales" data-go data-item="scales"><span class="n">15</span>Scale indicators</a></li>
+</ol>
+</figure>
+<figure class="shot" id="bench-shelf-b">
+<figcaption><h3>The same shelf from the left</h3><a class="full" href="bench-shelf-b.jpg" target="_blank" rel="noopener">Open full size</a></figcaption>
+<div class="frame" style="aspect-ratio:1600/1200">
+<img src="bench-shelf-b.jpg" width="1600" height="1200" loading="lazy" decoding="async" alt="The same shelf from the left">
+<a class="pin ur" href="#pd4005" data-go data-item="pd4005" style="left:4%;top:39%" aria-label="1: Power Designs 4005"><span class="n">1</span><span class="t">Power Designs 4005</span></a>
+<a class="pin d" href="#autovon" data-go data-item="autovon" style="left:16%;top:43%" aria-label="2: 16-button phone"><span class="n">2</span><span class="t">16-button phone</span></a>
+<a class="pin u" href="#fluke895a" data-go data-item="fluke895a" style="left:31%;top:40%" aria-label="3: Fluke 895A"><span class="n">3</span><span class="t">Fluke 895A</span></a>
+<a class="pin u" href="#sewing" data-go data-item="sewing" style="left:42%;top:36%" aria-label="4: Sewing head"><span class="n">4</span><span class="t">Sewing head</span></a>
+<a class="pin u" href="#autopilot" data-go data-item="autopilot" style="left:59%;top:33%" aria-label="5: ARC autopilot test set"><span class="n">5</span><span class="t">ARC autopilot test set</span></a>
+<a class="pin u" href="#tandberg" data-go data-item="tandberg" style="left:76%;top:37%" aria-label="6: Tandberg deck"><span class="n">6</span><span class="t">Tandberg deck</span></a>
+<a class="pin dl" href="#ecg" data-go data-item="ecg" style="left:87%;top:39%" aria-label="7: ECG recorder"><span class="n">7</span><span class="t">ECG recorder</span></a>
+<a class="pin r" href="#steelcase" data-go data-item="steelcase" style="left:16%;top:69%" aria-label="8: Unidentified case"><span class="n">8</span><span class="t">Unidentified case</span></a>
+<a class="pin l" href="#ami" data-go data-item="ami" style="left:41%;top:55%" aria-label="9: AMI machine"><span class="n">9</span><span class="t">AMI machine</span></a>
+<a class="pin d" href="#friden" data-go data-item="friden" style="left:44%;top:71%" aria-label="10: Friden calculator"><span class="n">10</span><span class="t">Friden calculator</span></a>
+<a class="pin d" href="#royal" data-go data-item="royal" style="left:56%;top:67%" aria-label="11: Royal"><span class="n">11</span><span class="t">Royal</span></a>
+<a class="pin u" href="#selectric" data-go data-item="selectric" style="left:72%;top:64%" aria-label="12: Selectric type"><span class="n">12</span><span class="t">Selectric type</span></a>
+<a class="pin ul" href="#loran" data-go data-item="loran" style="left:84%;top:62%" aria-label="13: Loran-C"><span class="n">13</span><span class="t">Loran-C</span></a>
+<a class="pin r" href="#scales" data-go data-item="scales" style="left:64%;top:81%" aria-label="14: Scale indicators"><span class="n">14</span><span class="t">Scale indicators</span></a>
+</div>
+<ol class="legend">
+<li><a href="#pd4005" data-go data-item="pd4005"><span class="n">1</span>Power Designs 4005</a></li>
+<li><a href="#autovon" data-go data-item="autovon"><span class="n">2</span>16-button phone</a></li>
+<li><a href="#fluke895a" data-go data-item="fluke895a"><span class="n">3</span>Fluke 895A</a></li>
+<li><a href="#sewing" data-go data-item="sewing"><span class="n">4</span>Sewing head</a></li>
+<li><a href="#autopilot" data-go data-item="autopilot"><span class="n">5</span>ARC autopilot test set</a></li>
+<li><a href="#tandberg" data-go data-item="tandberg"><span class="n">6</span>Tandberg deck</a></li>
+<li><a href="#ecg" data-go data-item="ecg"><span class="n">7</span>ECG recorder</a></li>
+<li><a href="#steelcase" data-go data-item="steelcase"><span class="n">8</span>Unidentified case</a></li>
+<li><a href="#ami" data-go data-item="ami"><span class="n">9</span>AMI machine</a></li>
+<li><a href="#friden" data-go data-item="friden"><span class="n">10</span>Friden calculator</a></li>
+<li><a href="#royal" data-go data-item="royal"><span class="n">11</span>Royal</a></li>
+<li><a href="#selectric" data-go data-item="selectric"><span class="n">12</span>Selectric type</a></li>
+<li><a href="#loran" data-go data-item="loran"><span class="n">13</span>Loran-C</a></li>
+<li><a href="#scales" data-go data-item="scales"><span class="n">14</span>Scale indicators</a></li>
+</ol>
+</figure>
+</div>
+<div class="items">
+<article class="item" id="pd4005" tabindex="-1">
+<header><h4>Power Designs Model 4005</h4><p class="kind">Transistorized bench power supply, 1960s</p><span class="conf conf-plate">Read off the nameplate</span></header>
+<dl><dt>What it is</dt><dd>The panel reads TRANSISTORIZED POWER SUPPLY MODEL 4005 under the Power Designs logo.</dd><dt>What it does</dt><dd>A regulated, adjustable DC supply for the electronics bench, from the first generation of all-transistor lab supplies. Coarse and fine VOLTS knobs set the output and the AMPS control limits the current.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#bench-shelf-a" data-go data-item="pd4005">The shelf, straight on</a> <a href="#bench-shelf-b" data-go data-item="pd4005">The same shelf from the left</a></p>
+</article>
+<article class="item" id="autovon" tabindex="-1">
+<header><h4>16-button desk telephone</h4><p class="kind">Looks like an AUTOVON set</p><span class="conf conf-shape">Recognised by shape</span></header>
+<dl><dt>What it is</dt><dd>A grey push-button desk phone whose keypad is four columns wide instead of three.</dd><dt>What it does</dt><dd>AUTOVON was the US military&#x27;s worldwide telephone network, in service from 1966 until the early 1990s. The extra column of keys set a call&#x27;s precedence: Priority, Immediate, Flash and Flash Override. A higher-precedence call could bump a lower one off a busy trunk. If the fourth column is marked FO, F, I and P, that is what this phone is.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#bench-shelf-a" data-go data-item="autovon">The shelf, straight on</a> <a href="#bench-shelf-b" data-go data-item="autovon">The same shelf from the left</a></p>
+<p class="foot"><span>Read more</span> <a href="https://en.wikipedia.org/wiki/Autovon" target="_blank" rel="noopener">Autovon, Wikipedia</a></p>
+</article>
+<article class="item" id="fluke895a" tabindex="-1">
+<header><h4>Fluke 895A</h4><p class="kind">DC differential voltmeter</p><span class="conf conf-plate">Read off the nameplate</span></header>
+<dl><dt>What it is</dt><dd>Labelled 895A DC DIFFERENTIAL VOLTMETER. A row of five readout dials runs across the middle of the panel.</dd><dt>What it does</dt><dd>A precision voltmeter that works by balancing. The five dials set a Kelvin-Varley divider that taps a known fraction of an internal 1100 V reference. You turn them until the meter reads zero, then read the voltage off the dials. It measures 0 to ±1100 V to about 0.0025%, and at null it draws no current from the circuit under test. It also works as a megohmmeter.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#bench-shelf-a" data-go data-item="fluke895a">The shelf, straight on</a> <a href="#bench-shelf-b" data-go data-item="fluke895a">The same shelf from the left</a></p>
+<p class="foot"><span>Read more</span> <a href="https://www.lost-manuals.com/equipment.php?id=17556" target="_blank" rel="noopener">Fluke 895A manual summary</a></p>
+</article>
+<article class="item" id="sewing" tabindex="-1">
+<header><h4>Industrial sewing machine head</h4><p class="kind">Head only, no table or motor</p><span class="conf conf-shape">Recognised by shape</span></header>
+<dl><dt>What it is</dt><dd>A dark cast-iron sewing head sitting between the instruments.</dd><dt>What it does</dt><dd>Stitches heavy material once it is mounted in a table with a clutch motor.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#bench-shelf-a" data-go data-item="sewing">The shelf, straight on</a> <a href="#bench-shelf-b" data-go data-item="sewing">The same shelf from the left</a></p>
+</article>
+<article class="item" id="autopilot" tabindex="-1">
+<header><h4>ARC autopilot test set</h4><p class="kind">Bench tester for the CA-550A and CA-550A/FD</p><span class="conf conf-plate">Read off the nameplate</span></header>
+<dl><dt>What it is</dt><dd>The ARC logo is at top left and the panel is titled AUTOPILOT TEST SET. The orange jack fields are marked TEST POINTS CA550A/FD and CA550A. ARC was Cessna&#x27;s avionics arm, and the CA-550 is the computer-amplifier of its 400B Navomatic autopilot.</dd><dt>What it does</dt><dd>It stands in for the aircraft on the bench. The SIMULATORS knobs feed the autopilot computer made-up attitude, heading and course, altitude and radio-deviation signals. The two DC microammeters show what the computer sends back to the servos, and the jack fields bring every internal test point out to the front.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#bench-shelf-a" data-go data-item="autopilot">The shelf, straight on</a> <a href="#bench-shelf-b" data-go data-item="autopilot">The same shelf from the left</a></p>
+<p class="foot"><span>Read more</span> <a href="https://simhq.com/store/ARC-Cessna-28-volt-CA-550-A-FD-Computer-Amplifier-P-N-42680-007_133683113065.html" target="_blank" rel="noopener">ARC CA-550A/FD computer amplifier listing</a></p>
+</article>
+<article class="item" id="tandberg" tabindex="-1">
+<header><h4>Tandberg open-reel tape deck</h4><p class="kind">Quarter-inch reel-to-reel recorder</p><span class="conf conf-plate">Read off the nameplate</span></header>
+<dl><dt>What it is</dt><dd>Tandberg badge on the head cover. One reel is still mounted and the chassis is out of its case.</dd><dt>What it does</dt><dd>Records and plays audio on quarter-inch tape. Tandberg of Norway built these for homes, schools and language labs.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#bench-shelf-a" data-go data-item="tandberg">The shelf, straight on</a> <a href="#bench-shelf-b" data-go data-item="tandberg">The same shelf from the left</a></p>
+</article>
+<article class="item" id="ecg" tabindex="-1">
+<header><h4>Beige recorder with a MILLISECONDS display</h4><p class="kind">Probably an ECG or pacemaker-check recorder</p><span class="conf conf-guess">Best guess</span></header>
+<dl><dt>What it is</dt><dd>Controls marked Sensitivity and Stylus Position, a paper slot, a numeric window labelled MILLISECONDS and two jacks marked LA and RA.</dd><dt>What it does</dt><dd>LA and RA are the left-arm and right-arm electrodes of an electrocardiograph. A heated stylus draws the heart trace on a paper strip, and the display would show the interval between beats or pacemaker pulses. The carton on the shelf below is for a Cardiofax V, a Nihon Kohden ECG machine, so this corner of the shelf is cardiology gear.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#bench-shelf-a" data-go data-item="ecg">The shelf, straight on</a> <a href="#bench-shelf-b" data-go data-item="ecg">The same shelf from the left</a></p>
+</article>
+<article class="item" id="steelcase" tabindex="-1">
+<header><h4>Steel case with a dial, gauge and two valve levers</h4><p class="kind">Not identified</p><span class="conf conf-unknown">Not identified</span></header>
+<dl><dt>What it is</dt><dd>A stainless cabinet with a counting dial, a small pressure gauge, two lever-handled valves and a scale window. The tag at top left is torn.</dd><dt>What it does</dt><dd>The valves and gauge point to a pneumatic test set or pressure calibrator. A clear photo of the tag would settle it.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#bench-shelf-a" data-go data-item="steelcase">The shelf, straight on</a> <a href="#bench-shelf-b" data-go data-item="steelcase">The same shelf from the left</a></p>
+</article>
+<article class="item" id="ami" tabindex="-1">
+<header><h4>Paper-handling machine, badge AMI or AML</h4><p class="kind">Not identified</p><span class="conf conf-unknown">Not identified</span></header>
+<dl><dt>What it is</dt><dd>A grey office machine with a row of paper guides and feed slots. The oval badge reads AMI or AML.</dd><dt>What it does</dt><dd>It feeds or sorts cards, cheques or forms. The photo does not show which.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#bench-shelf-a" data-go data-item="ami">The shelf, straight on</a> <a href="#bench-shelf-b" data-go data-item="ami">The same shelf from the left</a></p>
+</article>
+<article class="item" id="friden" tabindex="-1">
+<header><h4>Friden rotary calculator</h4><p class="kind">STW type, 1950s</p><span class="conf conf-shape">Recognised by shape</span></header>
+<dl><dt>What it is</dt><dd>A full keyboard of ten columns, a small ten-key pad at the lower left and a sliding carriage of result dials on top. That layout is Friden&#x27;s STW.</dd><dt>What it does</dt><dd>An electromechanical four-function calculator. You set a number on the big keyboard and the multiplier on the small pad, and the machine multiplies or divides by itself while the carriage steps across. Friden built them in San Leandro, California.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#bench-shelf-a" data-go data-item="friden">The shelf, straight on</a> <a href="#bench-shelf-b" data-go data-item="friden">The same shelf from the left</a></p>
+</article>
+<article class="item" id="royal" tabindex="-1">
+<header><h4>Royal standard typewriter</h4><p class="kind">Manual desktop typewriter</p><span class="conf conf-plate">Read off the nameplate</span></header>
+<dl><dt>What it is</dt><dd>ROYAL on the paper table. A heavy black desktop model with both ribbon spools in place.</dd><dt>What it does</dt><dd>A manual office typewriter.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#bench-shelf-a" data-go data-item="royal">The shelf, straight on</a> <a href="#bench-shelf-b" data-go data-item="royal">The same shelf from the left</a></p>
+</article>
+<article class="item" id="selectric" tabindex="-1">
+<header><h4>IBM Selectric-style typewriter</h4><p class="kind">Electric typewriter</p><span class="conf conf-shape">Recognised by shape</span></header>
+<dl><dt>What it is</dt><dd>The low, wide grey-green body and the keyboard match IBM&#x27;s Selectric.</dd><dt>What it does</dt><dd>Types with a spinning, tilting type ball. The ball travels along the line and the paper stays put, so there is no moving carriage.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#bench-shelf-a" data-go data-item="selectric">The shelf, straight on</a> <a href="#bench-shelf-b" data-go data-item="selectric">The same shelf from the left</a></p>
+</article>
+<article class="item" id="loran" tabindex="-1">
+<header><h4>Micrologic ML-5000 Loran-C</h4><p class="kind">Marine navigation receiver with ML-41 battery pack</p><span class="conf conf-plate">Read off the nameplate</span></header>
+<dl><dt>What it is</dt><dd>The front panel reads MICROLOGIC ML-5000 LORAN C. It sits on a unit marked ML-41 BATTERY PACK.</dd><dt>What it does</dt><dd>Loran-C fixed a boat&#x27;s position by timing low-frequency radio pulses from chains of shore stations. The receiver measured the time differences and showed them, or a computed latitude and longitude, on its display. The US chains were switched off in 2010, so it has nothing to receive here now.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#bench-shelf-a" data-go data-item="loran">The shelf, straight on</a> <a href="#bench-shelf-b" data-go data-item="loran">The same shelf from the left</a></p>
+</article>
+<article class="item" id="scales" tabindex="-1">
+<header><h4>Scale indicators and card terminals</h4><p class="kind">Bottom shelf</p><span class="conf conf-shape">Recognised by shape</span></header>
+<dl><dt>What it is</dt><dd>Several weigh-scale readouts with keypads and a few credit-card terminals.</dd><dt>What it does</dt><dd>The readouts connect to a load-cell platform and show weight. The card terminals are point-of-sale units.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#bench-shelf-a" data-go data-item="scales">The shelf, straight on</a> <a href="#bench-shelf-b" data-go data-item="scales">The same shelf from the left</a></p>
+</article>
+</div>
+</div>
+</section><section class="area" id="test-bay">
+<div class="wrap">
+<h2>Test equipment bay</h2>
+<p class="blurb">Bench test gear from the 1950s to the 1990s, mostly Hewlett-Packard and Tektronix.</p>
+<div class="shots">
+<figure class="shot" id="test-bay-photo">
+<figcaption><h3>The test equipment shelves</h3><a class="full" href="test-bay.jpg" target="_blank" rel="noopener">Open full size</a></figcaption>
+<div class="frame" style="aspect-ratio:1600/1200">
+<img src="test-bay.jpg" width="1600" height="1200" loading="lazy" decoding="async" alt="The test equipment shelves">
+<a class="pin u" href="#hpmeters" data-go data-item="hpmeters" style="left:31%;top:22%" aria-label="1: HP meters"><span class="n">1</span><span class="t">HP meters</span></a>
+<a class="pin u" href="#hp608" data-go data-item="hp608" style="left:50%;top:30%" aria-label="2: HP 608"><span class="n">2</span><span class="t">HP 608</span></a>
+<a class="pin d" href="#hp606" data-go data-item="hp606" style="left:60%;top:34%" aria-label="3: HP 606A?"><span class="n">3</span><span class="t">HP 606A?</span></a>
+<a class="pin u" href="#hp608" data-go data-item="hp608" style="left:70%;top:29%" aria-label="4: HP 608"><span class="n">4</span><span class="t">HP 608</span></a>
+<a class="pin l" href="#greencrt" data-go data-item="greencrt" style="left:30%;top:53%" aria-label="5: Green-screen analyzer"><span class="n">5</span><span class="t">Green-screen analyzer</span></a>
+<a class="pin d" href="#scopes" data-go data-item="scopes" style="left:40%;top:52%" aria-label="6: Tek 500 scope"><span class="n">6</span><span class="t">Tek 500 scope</span></a>
+<a class="pin u" href="#scopes" data-go data-item="scopes" style="left:53%;top:48%" aria-label="7: Tek mainframes"><span class="n">7</span><span class="t">Tek mainframes</span></a>
+<a class="pin d" href="#patch" data-go data-item="patch" style="left:62%;top:51%" aria-label="8: Patch bays"><span class="n">8</span><span class="t">Patch bays</span></a>
+<a class="pin u" href="#logic" data-go data-item="logic" style="left:69%;top:48%" aria-label="9: Logic analyzers"><span class="n">9</span><span class="t">Logic analyzers</span></a>
+<a class="pin u" href="#rightgens" data-go data-item="rightgens" style="left:83%;top:30%" aria-label="10: Signal sources"><span class="n">10</span><span class="t">Signal sources</span></a>
+<a class="pin d" href="#polar" data-go data-item="polar" style="left:79%;top:49%" aria-label="11: Polar display"><span class="n">11</span><span class="t">Polar display</span></a>
+<a class="pin d" href="#scopes" data-go data-item="scopes" style="left:87%;top:62%" aria-label="12: More scopes"><span class="n">12</span><span class="t">More scopes</span></a>
+<a class="pin l" href="#scopes" data-go data-item="scopes" style="left:36%;top:70%" aria-label="13: Tek 7000"><span class="n">13</span><span class="t">Tek 7000</span></a>
+<a class="pin d" href="#monitor" data-go data-item="monitor" style="left:57%;top:69%" aria-label="14: Test set"><span class="n">14</span><span class="t">Test set</span></a>
+<a class="pin r" href="#airdata" data-go data-item="airdata" style="left:67%;top:66%" aria-label="15: Air data test set"><span class="n">15</span><span class="t">Air data test set</span></a>
+<a class="pin r" href="#manometer" data-go data-item="manometer" style="left:15%;top:78%" aria-label="16: Unidentified cabinet"><span class="n">16</span><span class="t">Unidentified cabinet</span></a>
+</div>
+<ol class="legend">
+<li><a href="#hpmeters" data-go data-item="hpmeters"><span class="n">1</span>HP meters</a></li>
+<li><a href="#hp608" data-go data-item="hp608"><span class="n">2</span>HP 608</a></li>
+<li><a href="#hp606" data-go data-item="hp606"><span class="n">3</span>HP 606A?</a></li>
+<li><a href="#hp608" data-go data-item="hp608"><span class="n">4</span>HP 608</a></li>
+<li><a href="#greencrt" data-go data-item="greencrt"><span class="n">5</span>Green-screen analyzer</a></li>
+<li><a href="#scopes" data-go data-item="scopes"><span class="n">6</span>Tek 500 scope</a></li>
+<li><a href="#scopes" data-go data-item="scopes"><span class="n">7</span>Tek mainframes</a></li>
+<li><a href="#patch" data-go data-item="patch"><span class="n">8</span>Patch bays</a></li>
+<li><a href="#logic" data-go data-item="logic"><span class="n">9</span>Logic analyzers</a></li>
+<li><a href="#rightgens" data-go data-item="rightgens"><span class="n">10</span>Signal sources</a></li>
+<li><a href="#polar" data-go data-item="polar"><span class="n">11</span>Polar display</a></li>
+<li><a href="#scopes" data-go data-item="scopes"><span class="n">12</span>More scopes</a></li>
+<li><a href="#scopes" data-go data-item="scopes"><span class="n">13</span>Tek 7000</a></li>
+<li><a href="#monitor" data-go data-item="monitor"><span class="n">14</span>Test set</a></li>
+<li><a href="#airdata" data-go data-item="airdata"><span class="n">15</span>Air data test set</a></li>
+<li><a href="#manometer" data-go data-item="manometer"><span class="n">16</span>Unidentified cabinet</a></li>
+</ol>
+</figure>
+</div>
+<div class="items">
+<article class="item" id="hpmeters" tabindex="-1">
+<header><h4>Hewlett-Packard bench meters</h4><p class="kind">Six in the classic HP cabinet</p><span class="conf conf-shape">Recognised by shape</span></header>
+<dl><dt>What it is</dt><dd>Six analog meters from HP&#x27;s 1950s and 60s line. Two have scales marked DIRECT CURRENT and a large probe socket on the front, which matches the HP 428B clip-on DC milliammeter. The others are voltmeters and a decibel meter.</dd><dt>What it does</dt><dd>The 428B measures DC current without cutting the wire. A probe clamps around the conductor and senses its magnetic field. The voltmeters read AC or DC levels on mirrored scales.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#test-bay-photo" data-go data-item="hpmeters">The test equipment shelves</a></p>
+</article>
+<article class="item" id="hp608" tabindex="-1">
+<header><h4>HP 608-series signal generators</h4><p class="kind">VHF signal generators, two</p><span class="conf conf-shape">Recognised by shape</span></header>
+<dl><dt>What it is</dt><dd>Two meters either side of a MEGACYCLES window, above a large tuning knob. That is the HP 608 layout.</dd><dt>What it does</dt><dd>A calibrated radio signal source for aligning and testing VHF receivers, covering roughly 10 to 480 MHz depending on the version. One meter monitors output level and the other modulation.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#test-bay-photo" data-go data-item="hp608">The test equipment shelves</a></p>
+</article>
+<article class="item" id="hp606" tabindex="-1">
+<header><h4>Signal generator between the two 608s</h4><p class="kind">Looks like an HP 606A</p><span class="conf conf-guess">Best guess</span></header>
+<dl><dt>What it is</dt><dd>Two stacked meters at the left and a slide-rule dial.</dd><dt>What it does</dt><dd>The same job as the 608 at lower frequencies, from tens of kilohertz to tens of megahertz.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#test-bay-photo" data-go data-item="hp606">The test equipment shelves</a></p>
+</article>
+<article class="item" id="greencrt" tabindex="-1">
+<header><h4>Analyzer with a round green screen</h4><p class="kind">Not identified</p><span class="conf conf-unknown">Not identified</span></header>
+<dl><dt>What it is</dt><dd>A wide panel with a round green CRT, a meter and rows of knobs.</dd><dt>What it does</dt><dd>Probably a spectrum analyzer or sweep display.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#test-bay-photo" data-go data-item="greencrt">The test equipment shelves</a></p>
+</article>
+<article class="item" id="scopes" tabindex="-1">
+<header><h4>Oscilloscopes</h4><p class="kind">Tektronix and HP, 1950s to 1980s</p><span class="conf conf-shape">Recognised by shape</span></header>
+<dl><dt>What it is</dt><dd>A tube-era Tektronix 500-series scope with a round screen, Tektronix 5000- and 7000-series mainframes with plug-in modules, and several portables.</dd><dt>What it does</dt><dd>They draw voltage against time on the screen. The plug-ins decide what a mainframe can measure, so a mainframe and its plug-ins belong together.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#test-bay-photo" data-go data-item="scopes">The test equipment shelves</a></p>
+</article>
+<article class="item" id="patch" tabindex="-1">
+<header><h4>Patch bays</h4><p class="kind">Rack-mount jack fields</p><span class="conf conf-shape">Recognised by shape</span></header>
+<dl><dt>What it is</dt><dd>Two tall, narrow panels of jacks standing on end.</dd><dt>What it does</dt><dd>They let an operator re-route audio or video signals with short patch cords.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#test-bay-photo" data-go data-item="patch">The test equipment shelves</a></p>
+</article>
+<article class="item" id="logic" tabindex="-1">
+<header><h4>Logic analyzers</h4><p class="kind">HP, two</p><span class="conf conf-shape">Recognised by shape</span></header>
+<dl><dt>What it is</dt><dd>Two wide instruments with a screen at the left and a keypad at the right.</dd><dt>What it does</dt><dd>They capture dozens of digital signals at once and show them as timing diagrams or lists of states, for debugging computer hardware.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#test-bay-photo" data-go data-item="logic">The test equipment shelves</a></p>
+</article>
+<article class="item" id="rightgens" tabindex="-1">
+<header><h4>Synthesizer and pulse generators</h4><p class="kind">Right-hand bay, top shelf</p><span class="conf conf-shape">Recognised by shape</span></header>
+<dl><dt>What it is</dt><dd>A keypad-entry synthesizer or function generator, an older pulse generator and some smaller supplies.</dd><dt>What it does</dt><dd>Signal sources for the test bench.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#test-bay-photo" data-go data-item="rightgens">The test equipment shelves</a></p>
+</article>
+<article class="item" id="polar" tabindex="-1">
+<header><h4>Large display with range rings</h4><p class="kind">Not identified</p><span class="conf conf-unknown">Not identified</span></header>
+<dl><dt>What it is</dt><dd>A big square bezel around a CRT with concentric circles on the graticule.</dd><dt>What it does</dt><dd>A polar display of the kind used for radar, sonar or antenna-pattern work.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#test-bay-photo" data-go data-item="polar">The test equipment shelves</a></p>
+</article>
+<article class="item" id="monitor" tabindex="-1">
+<header><h4>Test set with a screen and meter</h4><p class="kind">Radio or radar service set</p><span class="conf conf-guess">Best guess</span></header>
+<dl><dt>What it is</dt><dd>A panel with handles, a small CRT, a meter and many knobs.</dd><dt>What it does</dt><dd>It looks like a communications or avionics service monitor.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#test-bay-photo" data-go data-item="monitor">The test equipment shelves</a></p>
+</article>
+<article class="item" id="airdata" tabindex="-1">
+<header><h4>Computer Controlled Air Data Test Set</h4><p class="kind">Pitot-static tester</p><span class="conf conf-plate">Read off the nameplate</span></header>
+<dl><dt>What it is</dt><dd>The panel label reads COMPUTER CONTROLLED AIR DATA TEST SET. It has a small screen, a keypad and a yellow knob.</dd><dt>What it does</dt><dd>It generates precise static and pitot pressures to check and calibrate aircraft altimeters, airspeed indicators and air data computers on the ground.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#test-bay-photo" data-go data-item="airdata">The test equipment shelves</a></p>
+</article>
+<article class="item" id="manometer" tabindex="-1">
+<header><h4>Tall brown floor cabinet</h4><p class="kind">Not identified</p><span class="conf conf-unknown">Not identified</span></header>
+<dl><dt>What it is</dt><dd>An old instrument in a brown case with a full-height vertical scale down one side, a round port, a small gauge and a nameplate at the top.</dd><dt>What it does</dt><dd>The long scale suggests a manometer-type pressure or vacuum standard. The nameplate should say.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#test-bay-photo" data-go data-item="manometer">The test equipment shelves</a></p>
+</article>
+</div>
+</div>
+</section><section class="area" id="motion-vacuum">
+<div class="wrap">
+<h2>Motion control and vacuum rack</h2>
+<p class="blurb">Two industrial control consoles and the pump rack from a laboratory instrument.</p>
+<div class="shots">
+<figure class="shot" id="unidex-jeol">
+<figcaption><h3>JEOL rack and the Unidex 16 pair</h3><a class="full" href="unidex-jeol.jpg" target="_blank" rel="noopener">Open full size</a></figcaption>
+<div class="frame" style="aspect-ratio:1600/1200">
+<img src="unidex-jeol.jpg" width="1600" height="1200" loading="lazy" decoding="async" alt="JEOL rack and the Unidex 16 pair">
+<a class="pin r" href="#jeol" data-go data-item="jeol" style="left:15%;top:31%" aria-label="1: Turbo pump and bake-out"><span class="n">1</span><span class="t">Turbo pump and bake-out</span></a>
+<a class="pin r" href="#jeol" data-go data-item="jeol" style="left:16%;top:41%" aria-label="2: Vacuum control unit"><span class="n">2</span><span class="t">Vacuum control unit</span></a>
+<a class="pin r" href="#jeol" data-go data-item="jeol" style="left:19%;top:58%" aria-label="3: Ion pump supplies"><span class="n">3</span><span class="t">Ion pump supplies</span></a>
+<a class="pin d" href="#unidex" data-go data-item="unidex" style="left:37%;top:45%" aria-label="4: Aerotech Unidex 16"><span class="n">4</span><span class="t">Aerotech Unidex 16</span></a>
+<a class="pin d" href="#unidex" data-go data-item="unidex" style="left:70%;top:45%" aria-label="5: Unidex 16"><span class="n">5</span><span class="t">Unidex 16</span></a>
+</div>
+<ol class="legend">
+<li><a href="#jeol" data-go data-item="jeol"><span class="n">1</span>Turbo pump and bake-out</a></li>
+<li><a href="#jeol" data-go data-item="jeol"><span class="n">2</span>Vacuum control unit</a></li>
+<li><a href="#jeol" data-go data-item="jeol"><span class="n">3</span>Ion pump supplies</a></li>
+<li><a href="#unidex" data-go data-item="unidex"><span class="n">4</span>Aerotech Unidex 16</a></li>
+<li><a href="#unidex" data-go data-item="unidex"><span class="n">5</span>Unidex 16</a></li>
+</ol>
+</figure>
+</div>
+<div class="items">
+<article class="item" id="jeol" tabindex="-1">
+<header><h4>JEOL vacuum control rack</h4><p class="kind">Ultra-high-vacuum pump controls</p><span class="conf conf-plate">Read off the nameplate</span></header>
+<dl><dt>What it is</dt><dd>JEOL across the top. The panels are labelled TMP/BAKE UNIT, a Pfeiffer Balzers TCP turbo-pump supply, VACUUM CONTROL UNIT with a mimic diagram, two SIP POWER SUPPLY panels and a titanium sublimation pump controller.</dd><dt>What it does</dt><dd>It runs the pumps of an ultra-high-vacuum instrument. The turbo pump takes the chamber down, timers run the bake-out heaters, and then sputter ion pumps and a titanium sublimation pump hold the vacuum. That pump set is typical of surface-analysis equipment such as Auger or photoelectron spectrometers.</dd></dl>
+<p class="care"><b>Handle with care</b> Ion pump supplies put out several kilovolts.</p>
+<p class="foot"><span>In photo</span> <a href="#unidex-jeol" data-go data-item="jeol">JEOL rack and the Unidex 16 pair</a></p>
+</article>
+<article class="item" id="unidex" tabindex="-1">
+<header><h4>Aerotech Unidex 16</h4><p class="kind">Multi-axis motion controllers, a pair</p><span class="conf conf-plate">Read off the nameplate</span></header>
+<dl><dt>What it is</dt><dd>Two consoles marked UNIDEX 16, each with a CRT, a full keypad, override knobs, a key switch and an emergency stop.</dd><dt>What it does</dt><dd>A CNC-style controller for precision positioning. It runs a motion program and commands the servo amplifiers in the cabinet below, which drive the motors on a set of stages or a machine tool. Aerotech still lists the Unidex 16 manuals.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#unidex-jeol" data-go data-item="unidex">JEOL rack and the Unidex 16 pair</a></p>
+<p class="foot"><span>Read more</span> <a href="https://www.aerotech.com/resources-manuals-help-files/" target="_blank" rel="noopener">Aerotech manuals index (Unidex 16)</a></p>
+</article>
+</div>
+</div>
+</section><section class="area" id="radio">
+<div class="wrap">
+<h2>Military radio and avionics</h2>
+<p class="blurb">Two bays of aircraft and vehicle radio from the 1930s to the 1960s, then three close-ups of the same shelves. Most of it is the remote-mounted kind: a box in the fuselage with a control head in the cockpit.</p>
+<div class="shots">
+<figure class="shot" id="radio-rack-left">
+<figcaption><h3>Radio rack, left bay</h3><a class="full" href="radio-rack-left.jpg" target="_blank" rel="noopener">Open full size</a></figcaption>
+<div class="frame" style="aspect-ratio:1600/1200">
+<img src="radio-rack-left.jpg" width="1600" height="1200" loading="lazy" decoding="async" alt="Radio rack, left bay">
+<a class="pin l" href="#tu" data-go data-item="tu" style="left:72%;top:14%" aria-label="1: TU tuning units"><span class="n">1</span><span class="t">TU tuning units</span></a>
+<a class="pin l" href="#tn2b" data-go data-item="tn2b" style="left:29%;top:37%" aria-label="2: TN-2B/APR-1"><span class="n">2</span><span class="t">TN-2B/APR-1</span></a>
+<a class="pin u" href="#synchro" data-go data-item="synchro" style="left:36%;top:33%" aria-label="3: Synchro test panel"><span class="n">3</span><span class="t">Synchro test panel</span></a>
+<a class="pin d" href="#bc604" data-go data-item="bc604" style="left:33%;top:48%" aria-label="4: BC-604"><span class="n">4</span><span class="t">BC-604</span></a>
+<a class="pin d" href="#bc684" data-go data-item="bc684" style="left:46%;top:48%" aria-label="5: FA set"><span class="n">5</span><span class="t">FA set</span></a>
+<a class="pin ur" href="#tn129" data-go data-item="tn129" style="left:48%;top:35%" aria-label="6: TN-129B/APR-9"><span class="n">6</span><span class="t">TN-129B/APR-9</span></a>
+<a class="pin r" href="#aprunits" data-go data-item="aprunits" style="left:71%;top:42%" aria-label="7: APR tuning units"><span class="n">7</span><span class="t">APR tuning units</span></a>
+<a class="pin l" href="#arn30rx" data-go data-item="arn30rx" style="left:36%;top:59%" aria-label="8: ARC ARN-30"><span class="n">8</span><span class="t">ARC ARN-30</span></a>
+<a class="pin r" href="#bc1033" data-go data-item="bc1033" style="left:47%;top:56%" aria-label="9: BC-1033-A"><span class="n">9</span><span class="t">BC-1033-A</span></a>
+<a class="pin r" href="#command" data-go data-item="command" style="left:68%;top:61%" aria-label="10: Command sets"><span class="n">10</span><span class="t">Command sets</span></a>
+<a class="pin l" href="#multiconn" data-go data-item="multiconn" style="left:31%;top:70%" aria-label="11: Unidentified"><span class="n">11</span><span class="t">Unidentified</span></a>
+<a class="pin dr" href="#rel" data-go data-item="rel" style="left:55%;top:76%" aria-label="12: REL radar receivers"><span class="n">12</span><span class="t">REL radar receivers</span></a>
+</div>
+<ol class="legend">
+<li><a href="#tu" data-go data-item="tu"><span class="n">1</span>TU tuning units</a></li>
+<li><a href="#tn2b" data-go data-item="tn2b"><span class="n">2</span>TN-2B/APR-1</a></li>
+<li><a href="#synchro" data-go data-item="synchro"><span class="n">3</span>Synchro test panel</a></li>
+<li><a href="#bc604" data-go data-item="bc604"><span class="n">4</span>BC-604</a></li>
+<li><a href="#bc684" data-go data-item="bc684"><span class="n">5</span>FA set</a></li>
+<li><a href="#tn129" data-go data-item="tn129"><span class="n">6</span>TN-129B/APR-9</a></li>
+<li><a href="#aprunits" data-go data-item="aprunits"><span class="n">7</span>APR tuning units</a></li>
+<li><a href="#arn30rx" data-go data-item="arn30rx"><span class="n">8</span>ARC ARN-30</a></li>
+<li><a href="#bc1033" data-go data-item="bc1033"><span class="n">9</span>BC-1033-A</a></li>
+<li><a href="#command" data-go data-item="command"><span class="n">10</span>Command sets</a></li>
+<li><a href="#multiconn" data-go data-item="multiconn"><span class="n">11</span>Unidentified</a></li>
+<li><a href="#rel" data-go data-item="rel"><span class="n">12</span>REL radar receivers</a></li>
+</ol>
+</figure>
+<figure class="shot" id="radio-rack-right">
+<figcaption><h3>Radio rack, right bay</h3><a class="full" href="radio-rack-right.jpg" target="_blank" rel="noopener">Open full size</a></figcaption>
+<div class="frame" style="aspect-ratio:1600/1200">
+<img src="radio-rack-right.jpg" width="1600" height="1200" loading="lazy" decoding="async" alt="Radio rack, right bay">
+<a class="pin r" href="#tu" data-go data-item="tu" style="left:14%;top:10%" aria-label="1: TU tuning units"><span class="n">1</span><span class="t">TU tuning units</span></a>
+<a class="pin dr" href="#aprunits" data-go data-item="aprunits" style="left:17%;top:43%" aria-label="2: APR tuning units"><span class="n">2</span><span class="t">APR tuning units</span></a>
+<a class="pin u" href="#bighf" data-go data-item="bighf" style="left:69%;top:43%" aria-label="3: Unidentified HF set"><span class="n">3</span><span class="t">Unidentified HF set</span></a>
+<a class="pin r" href="#command" data-go data-item="command" style="left:40%;top:56%" aria-label="4: Command sets"><span class="n">4</span><span class="t">Command sets</span></a>
+<a class="pin r" href="#floorbox" data-go data-item="floorbox" style="left:59%;top:84%" aria-label="5: Unidentified"><span class="n">5</span><span class="t">Unidentified</span></a>
+</div>
+<ol class="legend">
+<li><a href="#tu" data-go data-item="tu"><span class="n">1</span>TU tuning units</a></li>
+<li><a href="#aprunits" data-go data-item="aprunits"><span class="n">2</span>APR tuning units</a></li>
+<li><a href="#bighf" data-go data-item="bighf"><span class="n">3</span>Unidentified HF set</a></li>
+<li><a href="#command" data-go data-item="command"><span class="n">4</span>Command sets</a></li>
+<li><a href="#floorbox" data-go data-item="floorbox"><span class="n">5</span>Unidentified</a></li>
+</ol>
+</figure>
+<figure class="shot" id="radio-shelf-two">
+<figcaption><h3>Second shelf, close up</h3><a class="full" href="radio-shelf-two.jpg" target="_blank" rel="noopener">Open full size</a></figcaption>
+<div class="frame" style="aspect-ratio:1600/1200">
+<img src="radio-shelf-two.jpg" width="1600" height="1200" loading="lazy" decoding="async" alt="Second shelf, close up">
+<a class="pin r" href="#tn2b" data-go data-item="tn2b" style="left:15%;top:13%" aria-label="1: TN-2B/APR-1"><span class="n">1</span><span class="t">TN-2B/APR-1</span></a>
+<a class="pin r" href="#synchro" data-go data-item="synchro" style="left:38%;top:13%" aria-label="2: Synchro test panel"><span class="n">2</span><span class="t">Synchro test panel</span></a>
+<a class="pin d" href="#bc373" data-go data-item="bc373" style="left:67%;top:12%" aria-label="3: BC-373-A"><span class="n">3</span><span class="t">BC-373-A</span></a>
+<a class="pin d" href="#tn129" data-go data-item="tn129" style="left:84%;top:14%" aria-label="4: TN-129B/APR-9"><span class="n">4</span><span class="t">TN-129B/APR-9</span></a>
+<a class="pin l" href="#bc604" data-go data-item="bc604" style="left:30%;top:42%" aria-label="5: BC-604 transmitter"><span class="n">5</span><span class="t">BC-604 transmitter</span></a>
+<a class="pin u" href="#bc684" data-go data-item="bc684" style="left:72%;top:40%" aria-label="6: FA plate set"><span class="n">6</span><span class="t">FA plate set</span></a>
+<a class="pin ur" href="#xpdr" data-go data-item="xpdr" style="left:4%;top:50%" aria-label="7: Code wheels"><span class="n">7</span><span class="t">Code wheels</span></a>
+<a class="pin u" href="#command" data-go data-item="command" style="left:70%;top:88%" aria-label="8: ARC and command sets"><span class="n">8</span><span class="t">ARC and command sets</span></a>
+</div>
+<ol class="legend">
+<li><a href="#tn2b" data-go data-item="tn2b"><span class="n">1</span>TN-2B/APR-1</a></li>
+<li><a href="#synchro" data-go data-item="synchro"><span class="n">2</span>Synchro test panel</a></li>
+<li><a href="#bc373" data-go data-item="bc373"><span class="n">3</span>BC-373-A</a></li>
+<li><a href="#tn129" data-go data-item="tn129"><span class="n">4</span>TN-129B/APR-9</a></li>
+<li><a href="#bc604" data-go data-item="bc604"><span class="n">5</span>BC-604 transmitter</a></li>
+<li><a href="#bc684" data-go data-item="bc684"><span class="n">6</span>FA plate set</a></li>
+<li><a href="#xpdr" data-go data-item="xpdr"><span class="n">7</span>Code wheels</a></li>
+<li><a href="#command" data-go data-item="command"><span class="n">8</span>ARC and command sets</a></li>
+</ol>
+</figure>
+<figure class="shot" id="arc-shelf">
+<figcaption><h3>Third shelf, the ARC units</h3><a class="full" href="arc-shelf.jpg" target="_blank" rel="noopener">Open full size</a></figcaption>
+<div class="frame" style="aspect-ratio:1600/1200">
+<img src="arc-shelf.jpg" width="1600" height="1200" loading="lazy" decoding="async" alt="Third shelf, the ARC units">
+<a class="pin ur" href="#arn30rx" data-go data-item="arn30rx" style="left:5%;top:36%" aria-label="1: ARN-30D receiver"><span class="n">1</span><span class="t">ARN-30D receiver</span></a>
+<a class="pin dr" href="#arn30conv" data-go data-item="arn30conv" style="left:17%;top:37%" aria-label="2: CV-265A converter"><span class="n">2</span><span class="t">CV-265A converter</span></a>
+<a class="pin dr" href="#racktag" data-go data-item="racktag" style="left:16%;top:50%" aria-label="3: Rack tag 204-"><span class="n">3</span><span class="t">Rack tag 204-</span></a>
+<a class="pin d" href="#tv10" data-go data-item="tv10" style="left:40%;top:43%" aria-label="4: TV-10 transverter"><span class="n">4</span><span class="t">TV-10 transverter</span></a>
+<a class="pin r" href="#bc1033" data-go data-item="bc1033" style="left:56%;top:22%" aria-label="5: BC-1033-A"><span class="n">5</span><span class="t">BC-1033-A</span></a>
+<a class="pin u" href="#command" data-go data-item="command" style="left:72%;top:36%" aria-label="6: Command sets"><span class="n">6</span><span class="t">Command sets</span></a>
+<a class="pin u" href="#multiconn" data-go data-item="multiconn" style="left:30%;top:77%" aria-label="7: Unidentified"><span class="n">7</span><span class="t">Unidentified</span></a>
+<a class="pin r" href="#filter" data-go data-item="filter" style="left:28%;top:92%" aria-label="8: Filter box"><span class="n">8</span><span class="t">Filter box</span></a>
+<a class="pin l" href="#rel" data-go data-item="rel" style="left:78%;top:84%" aria-label="9: REL radar receiver"><span class="n">9</span><span class="t">REL radar receiver</span></a>
+<a class="pin ul" href="#aprif" data-go data-item="aprif" style="left:93%;top:82%" aria-label="10: Search receiver unit"><span class="n">10</span><span class="t">Search receiver unit</span></a>
+</div>
+<ol class="legend">
+<li><a href="#arn30rx" data-go data-item="arn30rx"><span class="n">1</span>ARN-30D receiver</a></li>
+<li><a href="#arn30conv" data-go data-item="arn30conv"><span class="n">2</span>CV-265A converter</a></li>
+<li><a href="#racktag" data-go data-item="racktag"><span class="n">3</span>Rack tag 204-</a></li>
+<li><a href="#tv10" data-go data-item="tv10"><span class="n">4</span>TV-10 transverter</a></li>
+<li><a href="#bc1033" data-go data-item="bc1033"><span class="n">5</span>BC-1033-A</a></li>
+<li><a href="#command" data-go data-item="command"><span class="n">6</span>Command sets</a></li>
+<li><a href="#multiconn" data-go data-item="multiconn"><span class="n">7</span>Unidentified</a></li>
+<li><a href="#filter" data-go data-item="filter"><span class="n">8</span>Filter box</a></li>
+<li><a href="#rel" data-go data-item="rel"><span class="n">9</span>REL radar receiver</a></li>
+<li><a href="#aprif" data-go data-item="aprif"><span class="n">10</span>Search receiver unit</a></li>
+</ol>
+</figure>
+<figure class="shot" id="ticket-terminal">
+<figcaption><h3>The ticketing terminal shelf</h3><a class="full" href="ticket-terminal.jpg" target="_blank" rel="noopener">Open full size</a></figcaption>
+<div class="frame" style="aspect-ratio:1600/1200">
+<img src="ticket-terminal.jpg" width="1600" height="1200" loading="lazy" decoding="async" alt="The ticketing terminal shelf">
+<a class="pin d" href="#seat" data-go data-item="seat" style="left:62%;top:36%" aria-label="1: Seat-reservation terminal"><span class="n">1</span><span class="t">Seat-reservation terminal</span></a>
+<a class="pin r" href="#seat" data-go data-item="seat" style="left:62%;top:21%" aria-label="2: Seats-available lamps"><span class="n">2</span><span class="t">Seats-available lamps</span></a>
+<a class="pin u" href="#tn17" data-go data-item="tn17" style="left:13%;top:40%" aria-label="3: TN-17/APR-4"><span class="n">3</span><span class="t">TN-17/APR-4</span></a>
+<a class="pin d" href="#bc1066" data-go data-item="bc1066" style="left:30%;top:39%" aria-label="4: BC-1066-B"><span class="n">4</span><span class="t">BC-1066-B</span></a>
+<a class="pin l" href="#narco" data-go data-item="narco" style="left:39%;top:90%" aria-label="5: Narco radio"><span class="n">5</span><span class="t">Narco radio</span></a>
+<a class="pin l" href="#navy" data-go data-item="navy" style="left:83%;top:82%" aria-label="6: Navy RT 63 unit"><span class="n">6</span><span class="t">Navy RT 63 unit</span></a>
+</div>
+<ol class="legend">
+<li><a href="#seat" data-go data-item="seat"><span class="n">1</span>Seat-reservation terminal</a></li>
+<li><a href="#seat" data-go data-item="seat"><span class="n">2</span>Seats-available lamps</a></li>
+<li><a href="#tn17" data-go data-item="tn17"><span class="n">3</span>TN-17/APR-4</a></li>
+<li><a href="#bc1066" data-go data-item="bc1066"><span class="n">4</span>BC-1066-B</a></li>
+<li><a href="#narco" data-go data-item="narco"><span class="n">5</span>Narco radio</a></li>
+<li><a href="#navy" data-go data-item="navy"><span class="n">6</span>Navy RT 63 unit</a></li>
+</ol>
+</figure>
+</div>
+<div class="items">
+<article class="item" id="tu" tabindex="-1">
+<header><h4>TU-series transmitter tuning units</h4><p class="kind">For the BC-375 and BC-191, three stacked</p><span class="conf conf-shape">Recognised by shape</span></header>
+<dl><dt>What it is</dt><dd>Three black panels, each with a white calibration chart in the middle and large dials. They match the plug-in tuning units of the BC-375 aircraft transmitter and its ground twin, the BC-191.</dd><dt>What it does</dt><dd>Each unit holds the coils and capacitors for one frequency band and slides into the front of the transmitter. Changing band meant swapping units. The TU-5, for example, covers 1.5 to 3 MHz.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#radio-rack-left" data-go data-item="tu">Radio rack, left bay</a> <a href="#radio-rack-right" data-go data-item="tu">Radio rack, right bay</a></p>
+<p class="foot"><span>Read more</span> <a href="https://www.radiomuseum.org/r/military_tuning_unit_tu_5.html" target="_blank" rel="noopener">Radiomuseum, Tuning Unit TU-5</a></p>
+</article>
+<article class="item" id="tn2b" tabindex="-1">
+<header><h4>TN-2B/APR-1</h4><p class="kind">Radar search receiver tuning unit, WWII</p><span class="conf conf-plate">Read off the nameplate</span></header>
+<dl><dt>What it is</dt><dd>Nameplate TN-2B/APR-1. A hinged cover over a MEGACYCLES dial, a SPEED knob and a MANUAL/AUTO switch.</dd><dt>What it does</dt><dd>A plug-in front end for the AN/APR-1 search receiver, which listened for enemy radar. The TN-2 covers 76 to 300 MHz. In AUTO a motor sweeps it across the band.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#radio-rack-left" data-go data-item="tn2b">Radio rack, left bay</a> <a href="#radio-shelf-two" data-go data-item="tn2b">Second shelf, close up</a></p>
+<p class="foot"><span>Read more</span> <a href="https://www.n6cc.com/?p=19504" target="_blank" rel="noopener">N6CC on the AN/APR-1 and APR-4</a></p>
+</article>
+<article class="item" id="synchro" tabindex="-1">
+<header><h4>Synchro heading test panel</h4><p class="kind">Two-speed synchro simulator</p><span class="conf conf-plate">Read off the nameplate</span></header>
+<dl><dt>What it is</dt><dd>A pale grey panel marked HEADING (DEGREES) and SERVO FUNCTIONS. The jack columns are headed 1X CDX, 36X CDX, 1X CX and 36X CX, with rows S1 to S3 and R1 to R3.</dd><dt>What it does</dt><dd>Synchros send a shaft angle down wires as three AC voltages. This panel generates or breaks out those signals for a compass or heading system so it can be tested on the bench. 1X is the coarse synchro and 36X the fine one. CX is a control transmitter and CDX a differential transmitter.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#radio-rack-left" data-go data-item="synchro">Radio rack, left bay</a> <a href="#radio-shelf-two" data-go data-item="synchro">Second shelf, close up</a></p>
+</article>
+<article class="item" id="bc604" tabindex="-1">
+<header><h4>BC-604 tank transmitter</h4><p class="kind">SCR-508 FM set, WWII</p><span class="conf conf-shape">Recognised by shape</span></header>
+<dl><dt>What it is</dt><dd>Olive drab, with a CHANNEL SELECTOR column of ten push buttons, a TUNE / ANT CUR switch, an antenna current meter and microphone jacks marked CARB and MAGNETIC.</dd><dt>What it does</dt><dd>The transmitter of the SCR-508, the standard US tank radio of the war. It has ten crystal-controlled FM channels between 20 and 27.9 MHz at about 25 W, and sat in the turret beside two BC-603 receivers.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#radio-rack-left" data-go data-item="bc604">Radio rack, left bay</a> <a href="#radio-shelf-two" data-go data-item="bc604">Second shelf, close up</a></p>
+<p class="foot"><span>Read more</span> <a href="https://en.wikipedia.org/wiki/SCR-508" target="_blank" rel="noopener">SCR-508, Wikipedia</a> <a href="https://radiomuseum.org/r/military_bc604.html" target="_blank" rel="noopener">Radiomuseum, Radio Set SCR-508</a></p>
+</article>
+<article class="item" id="bc684" tabindex="-1">
+<header><h4>Second push-button transmitter, FA plate</h4><p class="kind">Probably a BC-684 (SCR-608)</p><span class="conf conf-guess">Best guess</span></header>
+<dl><dt>What it is</dt><dd>The same layout as the BC-604 with most of its paint gone and a small plate stamped FA.</dd><dt>What it does</dt><dd>The artillery used an almost identical set, the SCR-608, whose BC-684 transmitter covers 27 to 38.9 MHz. FA would fit Field Artillery, so this may be the BC-684. The nameplate will say.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#radio-rack-left" data-go data-item="bc684">Radio rack, left bay</a> <a href="#radio-shelf-two" data-go data-item="bc684">Second shelf, close up</a></p>
+<p class="foot"><span>Read more</span> <a href="https://en.wikipedia.org/wiki/SCR-508" target="_blank" rel="noopener">SCR-508, Wikipedia</a></p>
+</article>
+<article class="item" id="tn129" tabindex="-1">
+<header><h4>TN-129B/APR-9</h4><p class="kind">Microwave tuning unit, 1950s</p><span class="conf conf-plate">Read off the nameplate</span></header>
+<dl><dt>What it is</dt><dd>Nameplate TN-129B/APR-9.</dd><dt>What it does</dt><dd>One of the tuning units for the AN/APR-9 radar intercept receiver, which flew in aircraft such as the B-52, EB-66 and P-2.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#radio-rack-left" data-go data-item="tn129">Radio rack, left bay</a> <a href="#radio-shelf-two" data-go data-item="tn129">Second shelf, close up</a></p>
+<p class="foot"><span>Read more</span> <a href="https://designation-systems.net/usmilav/jetds/an-apr2aps.html" target="_blank" rel="noopener">AN/APR designations</a></p>
+</article>
+<article class="item" id="aprunits" tabindex="-1">
+<header><h4>More APR tuning units</h4><p class="kind">Same family, several</p><span class="conf conf-shape">Recognised by shape</span></header>
+<dl><dt>What it is</dt><dd>Black units with a large dial under a hinged cover and a carrying handle. Two are chalked OK.</dd><dt>What it does</dt><dd>More plug-in tuning heads for the APR-1 and APR-4 search receivers, each covering a different band.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#radio-rack-left" data-go data-item="aprunits">Radio rack, left bay</a> <a href="#radio-rack-right" data-go data-item="aprunits">Radio rack, right bay</a></p>
+<p class="foot"><span>Read more</span> <a href="https://www.n6cc.com/?p=19504" target="_blank" rel="noopener">N6CC on the AN/APR-1 and APR-4</a></p>
+</article>
+<article class="item" id="arn30rx" tabindex="-1">
+<header><h4>ARC navigation receiver, AN/ARN-30D</h4><p class="kind">VOR and localizer receiver, 28 V</p><span class="conf conf-plate">Read off the nameplate</span></header>
+<dl><dt>What it is</dt><dd>The plate reads RECEIVER, RADIO …/ARN-30D, Aircraft Radio Corp. The type number looks like R-1021, but the photo is soft.</dd><dt>What it does</dt><dd>Receives VHF omnirange (VOR) and runway localizer signals, the standard airways and approach aids. ARC sold the same design to civil owners as its Type 15.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#radio-rack-left" data-go data-item="arn30rx">Radio rack, left bay</a> <a href="#arc-shelf" data-go data-item="arn30rx">Third shelf, the ARC units</a></p>
+</article>
+<article class="item" id="bc1033" tabindex="-1">
+<header><h4>BC-1033-A marker beacon receiver</h4><p class="kind">Air Communications Inc., 28 V</p><span class="conf conf-plate">Read off the nameplate</span></header>
+<dl><dt>What it is</dt><dd>Signal Corps plate: RADIO RECEIVER BC-1033-A, made by Air Communications, Inc. Sockets marked RELAY, DET. and ANT.</dd><dt>What it does</dt><dd>A fixed-tuned 75 MHz receiver with three tubes. When the aircraft passes over a marker beacon on the approach path, it closes a relay and lights a lamp on the instrument panel.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#radio-rack-left" data-go data-item="bc1033">Radio rack, left bay</a> <a href="#arc-shelf" data-go data-item="bc1033">Third shelf, the ARC units</a></p>
+<p class="foot"><span>Read more</span> <a href="https://en.wikipedia.org/wiki/AN/MRN-3" target="_blank" rel="noopener">AN/MRN-3, Wikipedia (BC-1033)</a> <a href="https://radiomuseum.org/r/military_marker_beacon_receiver_markierungsfunkempfaenger.html" target="_blank" rel="noopener">Radiomuseum, BC-1033-B</a></p>
+</article>
+<article class="item" id="command" tabindex="-1">
+<header><h4>Command-set receivers and transmitters</h4><p class="kind">SCR-274-N, AN/ARC-5 and ARC Type 12 family</p><span class="conf conf-shape">Recognised by shape</span></header>
+<dl><dt>What it is</dt><dd>Rows of small aluminium boxes. The receivers have a crank-tuned dial marked MC. The transmitters have ANT INDUCTANCE and ANT COUPLING controls.</dd><dt>What it does</dt><dd>Single-band aircraft radios. A plane carried one receiver and one transmitter for each band it needed, racked side by side and tuned from the cockpit through flexible shafts. After the war they became the classic surplus ham radio.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#radio-rack-left" data-go data-item="command">Radio rack, left bay</a> <a href="#radio-rack-right" data-go data-item="command">Radio rack, right bay</a> <a href="#radio-shelf-two" data-go data-item="command">Second shelf, close up</a> <a href="#arc-shelf" data-go data-item="command">Third shelf, the ARC units</a></p>
+<p class="foot"><span>Read more</span> <a href="https://www.n6cc.com/?p=28570" target="_blank" rel="noopener">N6CC on the ARC Type 12 and TV-10</a></p>
+</article>
+<article class="item" id="multiconn" tabindex="-1">
+<header><h4>Black units with lettered sockets</h4><p class="kind">Not identified</p><span class="conf conf-unknown">Not identified</span></header>
+<dl><dt>What it is</dt><dd>Three black boxes with a brown data plate and sockets lettered RA, B, D, CB, LF and TA.</dd><dt>What it does</dt><dd>Junction or control units for a larger aircraft radio installation. The data plate will name the set.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#radio-rack-left" data-go data-item="multiconn">Radio rack, left bay</a> <a href="#arc-shelf" data-go data-item="multiconn">Third shelf, the ARC units</a></p>
+</article>
+<article class="item" id="rel" tabindex="-1">
+<header><h4>Radar receivers by Research Enterprises Ltd.</h4><p class="kind">Signal Corps BC-10?2-A, made in Canada</p><span class="conf conf-plate">Read off the nameplate</span></header>
+<dl><dt>What it is</dt><dd>The plate reads SIGNAL CORPS U.S. ARMY, RADIO RECEIVER BC-10?2-A, MADE IN CANADA BY RESEARCH ENTERPRISES LTD. One digit is unclear. Each has a red WARNING HIGH VOLTAGE plate and a socket labelled A SCOPE. Two are stacked here.</dd><dt>What it does</dt><dd>The A SCOPE socket fed an A-scope, the simplest radar display, so this is the receiver of a wartime radar. Research Enterprises was the Canadian government company that built radar and optics in Toronto during the war.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#radio-rack-left" data-go data-item="rel">Radio rack, left bay</a> <a href="#arc-shelf" data-go data-item="rel">Third shelf, the ARC units</a></p>
+</article>
+<article class="item" id="bighf" tabindex="-1">
+<header><h4>Large grey set with a half-moon dial</h4><p class="kind">Not identified</p><span class="conf conf-unknown">Not identified</span></header>
+<dl><dt>What it is</dt><dd>A wide grey panel with a half-moon dial window, three round meters and six large knobs.</dd><dt>What it does</dt><dd>A high-power HF transmitter or receiver. It could not be matched to a type from this photo.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#radio-rack-right" data-go data-item="bighf">Radio rack, right bay</a></p>
+</article>
+<article class="item" id="floorbox" tabindex="-1">
+<header><h4>Black unit on the ground</h4><p class="kind">Not identified</p><span class="conf conf-unknown">Not identified</span></header>
+<dl><dt>What it is</dt><dd>A tall black case with two nameplates on the side and controls on top, next to a second case with two round meters.</dd><dt>What it does</dt><dd>Possibly a transmitter or its power unit. The side plates should be readable up close.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#radio-rack-right" data-go data-item="floorbox">Radio rack, right bay</a></p>
+</article>
+<article class="item" id="bc373" tabindex="-1">
+<header><h4>Radio Compass Unit BC-373-A</h4><p class="kind">Fairchild Aviation, about 1939</p><span class="conf conf-plate">Read off the nameplate</span></header>
+<dl><dt>What it is</dt><dd>Signal Corps plate: RADIO COMPASS UNIT BC-373-A, made by Fairchild Aviation Corporation, Jamaica, N.Y. A second plate gives installation adjustments for loop gain and threshold sensitivity.</dd><dt>What it does</dt><dd>The receiver of the SCR-246-A radio compass, a pre-war Army aircraft homing set. It tunes 195 to 420 kHz and drives a left-right needle that shows which way to turn toward a beacon or broadcast station. It also received radio range and weather broadcasts.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#radio-shelf-two" data-go data-item="bc373">Second shelf, close up</a></p>
+<p class="foot"><span>Read more</span> <a href="https://www.radionerds.com/index.php/SCR-246" target="_blank" rel="noopener">RadioNerds, SCR-246</a></p>
+</article>
+<article class="item" id="xpdr" tabindex="-1">
+<header><h4>Control box with code wheels</h4><p class="kind">Transponder control, dated 1961</p><span class="conf conf-guess">Best guess</span></header>
+<dl><dt>What it is</dt><dd>A small black box with thumbwheels lettered A to D, a 1961 date and part of the word TRANSPONDER.</dd><dt>What it does</dt><dd>Sets the reply code of an aircraft&#x27;s radar transponder.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#radio-shelf-two" data-go data-item="xpdr">Second shelf, close up</a></p>
+</article>
+<article class="item" id="arn30conv" tabindex="-1">
+<header><h4>ARC converter, CV-265A/ARN-30A</h4><p class="kind">Stamped AUG 23 1963</p><span class="conf conf-plate">Read off the nameplate</span></header>
+<dl><dt>What it is</dt><dd>The plate reads CONVERTER …/ARN-30A, with inspection stamps from August and October 1963. Two adjusters on the front are marked LOC FLAG and VOR FLAG.</dd><dt>What it does</dt><dd>Turns the receiver&#x27;s output into needle signals: the course deviation bar, the TO/FROM indication and the warning flags on the pilot&#x27;s indicator.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#arc-shelf" data-go data-item="arn30conv">Third shelf, the ARC units</a></p>
+</article>
+<article class="item" id="racktag" tabindex="-1">
+<header><h4>Rack tagged 204-07?-350-3</h4><p class="kind">Mounting rack for the ARC set</p><span class="conf conf-plate">Read off the nameplate</span></header>
+<dl><dt>What it is</dt><dd>The tag reads “204-07?-350-3 RACK — MODIFIED FOR USE WITH … RMI CONVERTER”.</dd><dt>What it does</dt><dd>A shock-mount tray. Part numbers that start 204- follow Bell&#x27;s Model 204 numbering, the UH-1 Huey, so this ARC set may have come out of a helicopter.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#arc-shelf" data-go data-item="racktag">Third shelf, the ARC units</a></p>
+</article>
+<article class="item" id="tv10" tabindex="-1">
+<header><h4>ARC TV-10 UHF transverter</h4><p class="kind">Military CV-431/AR</p><span class="conf conf-shape">Recognised by shape</span></header>
+<dl><dt>What it is</dt><dd>A blue ARC plate headed TRANSCEIVER TYPE, a 28 VOLTS tag and jacks marked UHF ANT, TO VHF TRANS and TO VHF REC.</dd><dt>What it does</dt><dd>It let a small VHF aircraft radio work on military UHF. On receive it converts 228–258 MHz down to 118–148 MHz so the VHF receiver can tune it. It also transmits about half a watt on up to eight crystal channels. It was part of the AN/ARC-60 in Army light aircraft and helicopters such as the L-19, L-20, H-13 and UH-1.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#arc-shelf" data-go data-item="tv10">Third shelf, the ARC units</a></p>
+<p class="foot"><span>Read more</span> <a href="https://www.n6cc.com/?p=28570" target="_blank" rel="noopener">N6CC on the ARC Type 12 and TV-10</a></p>
+</article>
+<article class="item" id="filter" tabindex="-1">
+<header><h4>Wide-range filter boxes</h4><p class="kind">Power-line filters</p><span class="conf conf-plate">Read off the nameplate</span></header>
+<dl><dt>What it is</dt><dd>Black boxes lettered WIDE RANGE INPUT FILTER and WIDE RANGE OUTPUT FILTER.</dd><dt>What it does</dt><dd>They keep electrical noise from a dynamotor or inverter out of the radio wiring. The set they belong to is not marked on the front.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#arc-shelf" data-go data-item="filter">Third shelf, the ARC units</a></p>
+</article>
+<article class="item" id="aprif" tabindex="-1">
+<header><h4>Search receiver main unit</h4><p class="kind">DIODE CURRENT meter, IF ATTN, PAN and VID outputs</p><span class="conf conf-guess">Best guess</span></header>
+<dl><dt>What it is</dt><dd>A black panel with a DIODE CURRENT meter, an IF attenuator marked in dB and jacks labelled PAN, VID, HET, ANT and PHONE.</dd><dt>What it does</dt><dd>The chassis a tuning unit plugs into. It amplifies the intermediate frequency and hands the signal to headphones, a video output for pulse analysis and a panoramic display. The diode-current meter watches the crystal mixer, which points to one of the microwave APR sets.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#arc-shelf" data-go data-item="aprif">Third shelf, the ARC units</a></p>
+</article>
+<article class="item" id="seat" tabindex="-1">
+<header><h4>Seat-reservation terminal</h4><p class="kind">Computerized box-office console, about 1970</p><span class="conf conf-plate">Read off the nameplate</span></header>
+<dl><dt>What it is</dt><dd>A sloped console of square keys. The columns are headed SEAT TYPE, DATE, PERF and EVENT, with month keys from JAN to DEC. The lamps along the top read SEATS AVAIL and MAY BE AVAIL B.O.</dd><dt>What it does</dt><dd>An agent&#x27;s terminal from an early computerized ticketing network. The clerk keyed in the event, performance, date and seat type. A central computer answered by lighting a lamp, and available seats were printed as tickets on the spot. Ticketron began selling this way in 1967, and a Los Angeles rival, Computicket, folded in 1970. It is the most unusual thing in these photos.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#ticket-terminal" data-go data-item="seat">The ticketing terminal shelf</a></p>
+<p class="foot"><span>Read more</span> <a href="https://en.wikipedia.org/wiki/Ticketron" target="_blank" rel="noopener">Ticketron, Wikipedia</a> <a href="https://content.time.com/time/subscriber/article/0,33009,901324,00.html" target="_blank" rel="noopener">Time, “Computers: Instant Ticketing”</a></p>
+</article>
+<article class="item" id="tn17" tabindex="-1">
+<header><h4>TN-17/APR-4</h4><p class="kind">Radar intercept tuning unit, WWII</p><span class="conf conf-plate">Read off the nameplate</span></header>
+<dl><dt>What it is</dt><dd>Marked TN-17/APR-4.</dd><dt>What it does</dt><dd>The 74 to 320 MHz plug-in for the AN/APR-4 intercept receiver. It uses two type 955 acorn tubes as mixer and oscillator, and a motor drive sweeps between two limits the operator sets.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#ticket-terminal" data-go data-item="tn17">The ticketing terminal shelf</a></p>
+<p class="foot"><span>Read more</span> <a href="https://www.n6cc.com/?p=19504" target="_blank" rel="noopener">N6CC on the AN/APR-1 and APR-4</a></p>
+</article>
+<article class="item" id="bc1066" tabindex="-1">
+<header><h4>BC-1066-B</h4><p class="kind">Philco, WWII</p><span class="conf conf-plate">Read off the nameplate</span></header>
+<dl><dt>What it is</dt><dd>Signal Corps plate BC-1066-B by Philco. Two round dials scaled 0 to 100.</dd><dt>What it does</dt><dd>A small two-band receiver from test equipment IE-46. A museum&#x27;s BC-1066-A has one dial marked G band and the other I band.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#ticket-terminal" data-go data-item="bc1066">The ticketing terminal shelf</a></p>
+<p class="foot"><span>Read more</span> <a href="https://inventory.mrtwv.org/d/1506/Signal_Corps_US_Army-BC-1066-A" target="_blank" rel="noopener">Museum of Radio and Technology, BC-1066-A</a></p>
+</article>
+<article class="item" id="narco" tabindex="-1">
+<header><h4>Narco aircraft radio</h4><p class="kind">1950s light-aircraft nav/com</p><span class="conf conf-guess">Best guess</span></header>
+<dl><dt>What it is</dt><dd>A small panel-mount radio with a maroon face and the Narco name. The tuning dial glass is broken.</dd><dt>What it does</dt><dd>Narco built the VHF radios that put two-way voice and omnirange navigation into private aircraft in the 1950s. The face matches its Omnigator and Superhomer line.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#ticket-terminal" data-go data-item="narco">The ticketing terminal shelf</a></p>
+</article>
+<article class="item" id="navy" tabindex="-1">
+<header><h4>Navy unit stencilled RT 63</h4><p class="kind">Not identified</p><span class="conf conf-unknown">Not identified</span></header>
+<dl><dt>What it is</dt><dd>Black, with a Navy Department Bureau of Ships plate, a yellow RT 63 stencil, a MOTOR DRIVE switch and SPAN and CONTROL sockets.</dd><dt>What it does</dt><dd>A motor-swept receiver or panoramic unit. The plate is too worn to read in the photo.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#ticket-terminal" data-go data-item="navy">The ticketing terminal shelf</a></p>
+</article>
+</div>
+</div>
+</section><section class="area" id="medical">
+<div class="wrap">
+<h2>Medical equipment</h2>
+<p class="blurb">Hospital surplus against the back wall.</p>
+<div class="shots">
+<figure class="shot" id="medical-photo">
+<figcaption><h3>The medical pile</h3><a class="full" href="medical.jpg" target="_blank" rel="noopener">Open full size</a></figcaption>
+<div class="frame" style="aspect-ratio:1600/1200">
+<img src="medical.jpg" width="1600" height="1200" loading="lazy" decoding="async" alt="The medical pile">
+<a class="pin l" href="#zonare" data-go data-item="zonare" style="left:31%;top:43%" aria-label="1: ZONARE cart"><span class="n">1</span><span class="t">ZONARE cart</span></a>
+<a class="pin d" href="#zonare" data-go data-item="zonare" style="left:46%;top:58%" aria-label="2: ZONARE cart"><span class="n">2</span><span class="t">ZONARE cart</span></a>
+<a class="pin ul" href="#surgical" data-go data-item="surgical" style="left:24%;top:37%" aria-label="3: Surgical light"><span class="n">3</span><span class="t">Surgical light</span></a>
+<a class="pin u" href="#anesthesia" data-go data-item="anesthesia" style="left:46%;top:37%" aria-label="4: Anesthesia machine"><span class="n">4</span><span class="t">Anesthesia machine</span></a>
+<a class="pin r" href="#usconsoles" data-go data-item="usconsoles" style="left:56%;top:34%" aria-label="5: Ultrasound console"><span class="n">5</span><span class="t">Ultrasound console</span></a>
+<a class="pin u" href="#xray" data-go data-item="xray" style="left:77%;top:61%" aria-label="6: Mobile X-ray unit"><span class="n">6</span><span class="t">Mobile X-ray unit</span></a>
+</div>
+<ol class="legend">
+<li><a href="#zonare" data-go data-item="zonare"><span class="n">1</span>ZONARE cart</a></li>
+<li><a href="#zonare" data-go data-item="zonare"><span class="n">2</span>ZONARE cart</a></li>
+<li><a href="#surgical" data-go data-item="surgical"><span class="n">3</span>Surgical light</a></li>
+<li><a href="#anesthesia" data-go data-item="anesthesia"><span class="n">4</span>Anesthesia machine</a></li>
+<li><a href="#usconsoles" data-go data-item="usconsoles"><span class="n">5</span>Ultrasound console</a></li>
+<li><a href="#xray" data-go data-item="xray"><span class="n">6</span>Mobile X-ray unit</a></li>
+</ol>
+</figure>
+</div>
+<div class="items">
+<article class="item" id="zonare" tabindex="-1">
+<header><h4>ZONARE ultrasound carts</h4><p class="kind">z.one convertible ultrasound, two</p><span class="conf conf-plate">Read off the nameplate</span></header>
+<dl><dt>What it is</dt><dd>ZONARE is moulded into the base of both carts. Each has a flat monitor, a control panel with a trackball and a keyboard tray.</dd><dt>What it does</dt><dd>Diagnostic ultrasound scanners from the mid-2000s. The electronics are in a small scan engine that docks into the cart and can be lifted out and carried.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#medical-photo" data-go data-item="zonare">The medical pile</a></p>
+</article>
+<article class="item" id="surgical" tabindex="-1">
+<header><h4>Surgical light head</h4><p class="kind">Operating-room lamp</p><span class="conf conf-shape">Recognised by shape</span></header>
+<dl><dt>What it is</dt><dd>A pale blue dish with a central handle, off its ceiling arm.</dd><dt>What it does</dt><dd>Gives shadow-free light over the operating table.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#medical-photo" data-go data-item="surgical">The medical pile</a></p>
+</article>
+<article class="item" id="anesthesia" tabindex="-1">
+<header><h4>Anesthesia machine</h4><p class="kind">Blue cart with flowmeter tubes</p><span class="conf conf-shape">Recognised by shape</span></header>
+<dl><dt>What it is</dt><dd>A blue cart with a shelf on top and a bank of glass flowmeter tubes.</dd><dt>What it does</dt><dd>Mixes oxygen, air and nitrous oxide at set flows, adds anesthetic vapour and feeds the patient&#x27;s breathing circuit.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#medical-photo" data-go data-item="anesthesia">The medical pile</a></p>
+</article>
+<article class="item" id="usconsoles" tabindex="-1">
+<header><h4>Other ultrasound consoles</h4><p class="kind">Cart-based scanners</p><span class="conf conf-shape">Recognised by shape</span></header>
+<dl><dt>What it is</dt><dd>At least two more scanners behind the ZONARE carts, one with a tall flat monitor.</dd><dt>What it does</dt><dd>The same job as the ZONARE units.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#medical-photo" data-go data-item="usconsoles">The medical pile</a></p>
+</article>
+<article class="item" id="xray" tabindex="-1">
+<header><h4>Mobile X-ray unit</h4><p class="kind">Motor-driven radiography cart</p><span class="conf conf-shape">Recognised by shape</span></header>
+<dl><dt>What it is</dt><dd>The large white cabinet on drive wheels with a folded arm on top.</dd><dt>What it does</dt><dd>Takes X-ray films at the bedside. It carries its own batteries, a high-voltage generator and an X-ray tube on the arm.</dd></dl>
+<p class="care"><b>Handle with care</b> Leave the high-voltage tank and the tube sealed.</p>
+<p class="foot"><span>In photo</span> <a href="#medical-photo" data-go data-item="xray">The medical pile</a></p>
+</article>
+</div>
+</div>
+</section><section class="area" id="egg-rack">
+<div class="wrap">
+<h2>EG&amp;G instrument, vacuum hardware and high voltage</h2>
+<p class="blurb">One rack holds stainless vacuum plumbing, high-voltage parts and a long olive instrument lettered EG&amp;G that is not yet pinned down.</p>
+<div class="shots">
+<figure class="shot" id="egg-side">
+<figcaption><h3>The EG&amp;G instrument from the side</h3><a class="full" href="egg-side.jpg" target="_blank" rel="noopener">Open full size</a></figcaption>
+<div class="frame" style="aspect-ratio:1600/1200">
+<img src="egg-side.jpg" width="1600" height="1200" loading="lazy" decoding="async" alt="The EG&amp;G instrument from the side">
+<a class="pin u" href="#egg" data-go data-item="egg" style="left:27%;top:48%" aria-label="1: Lettered can"><span class="n">1</span><span class="t">Lettered can</span></a>
+<a class="pin d" href="#egg" data-go data-item="egg" style="left:41%;top:53%" aria-label="2: Split drum"><span class="n">2</span><span class="t">Split drum</span></a>
+<a class="pin u" href="#egg" data-go data-item="egg" style="left:70%;top:52%" aria-label="3: Fibreglass tube"><span class="n">3</span><span class="t">Fibreglass tube</span></a>
+<a class="pin r" href="#caps" data-go data-item="caps" style="left:35%;top:8%" aria-label="4: Sangamo capacitor"><span class="n">4</span><span class="t">Sangamo capacitor</span></a>
+<a class="pin r" href="#insulators" data-go data-item="insulators" style="left:60%;top:22%" aria-label="5: Insulators"><span class="n">5</span><span class="t">Insulators</span></a>
+<a class="pin r" href="#vacuum" data-go data-item="vacuum" style="left:18%;top:78%" aria-label="6: Vacuum flange"><span class="n">6</span><span class="t">Vacuum flange</span></a>
+</div>
+<ol class="legend">
+<li><a href="#egg" data-go data-item="egg"><span class="n">1</span>Lettered can</a></li>
+<li><a href="#egg" data-go data-item="egg"><span class="n">2</span>Split drum</a></li>
+<li><a href="#egg" data-go data-item="egg"><span class="n">3</span>Fibreglass tube</a></li>
+<li><a href="#caps" data-go data-item="caps"><span class="n">4</span>Sangamo capacitor</a></li>
+<li><a href="#insulators" data-go data-item="insulators"><span class="n">5</span>Insulators</a></li>
+<li><a href="#vacuum" data-go data-item="vacuum"><span class="n">6</span>Vacuum flange</a></li>
+</ol>
+</figure>
+<figure class="shot portrait" id="egg-top">
+<figcaption><h3>The lettering and the drum</h3><a class="full" href="egg-top.jpg" target="_blank" rel="noopener">Open full size</a></figcaption>
+<div class="frame" style="aspect-ratio:1200/1600">
+<img src="egg-top.jpg" width="1200" height="1600" loading="lazy" decoding="async" alt="The lettering and the drum">
+<a class="pin r" href="#egg" data-go data-item="egg" style="left:50%;top:35%" aria-label="1: EG&amp;G lettering"><span class="n">1</span><span class="t">EG&amp;G lettering</span></a>
+<a class="pin l" href="#egg" data-go data-item="egg" style="left:50%;top:60%" aria-label="2: Cross fitting"><span class="n">2</span><span class="t">Cross fitting</span></a>
+<a class="pin r" href="#egg" data-go data-item="egg" style="left:52%;top:68%" aria-label="3: Split drum"><span class="n">3</span><span class="t">Split drum</span></a>
+<a class="pin d" href="#vacuum" data-go data-item="vacuum" style="left:25%;top:22%" aria-label="4: Vacuum hardware"><span class="n">4</span><span class="t">Vacuum hardware</span></a>
+<a class="pin u" href="#insulators" data-go data-item="insulators" style="left:82%;top:50%" aria-label="5: Insulators"><span class="n">5</span><span class="t">Insulators</span></a>
+<a class="pin ul" href="#caps" data-go data-item="caps" style="left:93%;top:35%" aria-label="6: Capacitor"><span class="n">6</span><span class="t">Capacitor</span></a>
+</div>
+<ol class="legend">
+<li><a href="#egg" data-go data-item="egg"><span class="n">1</span>EG&amp;G lettering</a></li>
+<li><a href="#egg" data-go data-item="egg"><span class="n">2</span>Cross fitting</a></li>
+<li><a href="#egg" data-go data-item="egg"><span class="n">3</span>Split drum</a></li>
+<li><a href="#vacuum" data-go data-item="vacuum"><span class="n">4</span>Vacuum hardware</a></li>
+<li><a href="#insulators" data-go data-item="insulators"><span class="n">5</span>Insulators</a></li>
+<li><a href="#caps" data-go data-item="caps"><span class="n">6</span>Capacitor</a></li>
+</ol>
+</figure>
+<figure class="shot portrait" id="egg-length">
+<figcaption><h3>Looking down its length</h3><a class="full" href="egg-length.jpg" target="_blank" rel="noopener">Open full size</a></figcaption>
+<div class="frame" style="aspect-ratio:1396/1600">
+<img src="egg-length.jpg" width="1396" height="1600" loading="lazy" decoding="async" alt="Looking down its length">
+<a class="pin l" href="#egg" data-go data-item="egg" style="left:42%;top:37%" aria-label="1: Lettered can"><span class="n">1</span><span class="t">Lettered can</span></a>
+<a class="pin l" href="#egg" data-go data-item="egg" style="left:46%;top:53%" aria-label="2: Split drum"><span class="n">2</span><span class="t">Split drum</span></a>
+<a class="pin r" href="#egg" data-go data-item="egg" style="left:55%;top:87%" aria-label="3: Fibreglass tube"><span class="n">3</span><span class="t">Fibreglass tube</span></a>
+<a class="pin r" href="#caps" data-go data-item="caps" style="left:65%;top:29%" aria-label="4: Sangamo capacitors"><span class="n">4</span><span class="t">Sangamo capacitors</span></a>
+<a class="pin l" href="#insulators" data-go data-item="insulators" style="left:88%;top:14%" aria-label="5: Bushings"><span class="n">5</span><span class="t">Bushings</span></a>
+<a class="pin d" href="#vacuum" data-go data-item="vacuum" style="left:22%;top:26%" aria-label="6: Vacuum spool"><span class="n">6</span><span class="t">Vacuum spool</span></a>
+</div>
+<ol class="legend">
+<li><a href="#egg" data-go data-item="egg"><span class="n">1</span>Lettered can</a></li>
+<li><a href="#egg" data-go data-item="egg"><span class="n">2</span>Split drum</a></li>
+<li><a href="#egg" data-go data-item="egg"><span class="n">3</span>Fibreglass tube</a></li>
+<li><a href="#caps" data-go data-item="caps"><span class="n">4</span>Sangamo capacitors</a></li>
+<li><a href="#insulators" data-go data-item="insulators"><span class="n">5</span>Bushings</a></li>
+<li><a href="#vacuum" data-go data-item="vacuum"><span class="n">6</span>Vacuum spool</a></li>
+</ol>
+</figure>
+<figure class="shot portrait" id="egg-front">
+<figcaption><h3>The front window</h3><a class="full" href="egg-front.jpg" target="_blank" rel="noopener">Open full size</a></figcaption>
+<div class="frame" style="aspect-ratio:1200/1600">
+<img src="egg-front.jpg" width="1200" height="1600" loading="lazy" decoding="async" alt="The front window">
+<a class="pin r" href="#egg" data-go data-item="egg" style="left:55%;top:58%" aria-label="1: Front window"><span class="n">1</span><span class="t">Front window</span></a>
+<a class="pin ur" href="#vacuum" data-go data-item="vacuum" style="left:10%;top:35%" aria-label="2: Vacuum chamber"><span class="n">2</span><span class="t">Vacuum chamber</span></a>
+<a class="pin ul" href="#insulators" data-go data-item="insulators" style="left:85%;top:85%" aria-label="3: Insulators"><span class="n">3</span><span class="t">Insulators</span></a>
+</div>
+<ol class="legend">
+<li><a href="#egg" data-go data-item="egg"><span class="n">1</span>Front window</a></li>
+<li><a href="#vacuum" data-go data-item="vacuum"><span class="n">2</span>Vacuum chamber</a></li>
+<li><a href="#insulators" data-go data-item="insulators"><span class="n">3</span>Insulators</a></li>
+</ol>
+</figure>
+</div>
+<div class="items">
+<article class="item" id="egg" tabindex="-1">
+<header><h4>EG&amp;G instrument, serial 44</h4><p class="kind">Not yet identified</p><span class="conf conf-unknown">Not identified</span></header>
+<dl><dt>What it is</dt><dd>Hand-lettered “EG&amp;G INC / C?-3B / SER. NO. 44”. The second character could be a T or an F. The body is a long olive fibreglass tube about the width of a dinner plate, with a black end cap and a recessed round window. A white cable enters a slot near that end. At the other end, in line, are a split aluminium clamp, a cross fitting with open side ports, a drum bolted together in two halves, a second cross fitting, another clamp and a small can with a wire harness.</dd><dt>What it does</dt><dd>Two readings fit. If the lettering is CT-3B, it may be an EG&amp;G Model CT/3 electromagnetic ocean current meter. A NOAA test report from 1975 describes the CT/3 as a self-orienting meter with excitation coils and electrodes, a flux-gate compass and a cassette recorder, and fibreglass suits that job because it is non-magnetic and does not corrode. The other reading is a test-range optical instrument. EG&amp;G photographed and measured US nuclear tests, and a long tube with a front window, a coil and a detector can would fit a telescope with a magnetic shutter or a photomultiplier. To tell them apart, shine a light into the front window and look for a lens, and check whether the side ports are open or hold glass.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#egg-side" data-go data-item="egg">The EG&amp;G instrument from the side</a> <a href="#egg-top" data-go data-item="egg">The lettering and the drum</a> <a href="#egg-length" data-go data-item="egg">Looking down its length</a> <a href="#egg-front" data-go data-item="egg">The front window</a></p>
+<p class="foot"><span>Read more</span> <a href="https://repository.library.noaa.gov/view/noaa/47373/noaa_47373_DS1.pdf" target="_blank" rel="noopener">NOAA instrumentation center progress report, Jan–Jun 1975 (EG&amp;G CT/3)</a> <a href="https://en.wikipedia.org/wiki/Rapatronic_camera" target="_blank" rel="noopener">Rapatronic camera, Wikipedia</a></p>
+</article>
+<article class="item" id="caps" tabindex="-1">
+<header><h4>Sangamo capacitors</h4><p class="kind">High-voltage energy-storage cans</p><span class="conf conf-plate">Read off the nameplate</span></header>
+<dl><dt>What it is</dt><dd>Tall rectangular steel cans with ceramic terminals. The plates carry the Sangamo Electric name.</dd><dt>What it does</dt><dd>They store energy at high voltage and release it in a pulse, for lasers, flash lamps and pulsed-power work.</dd></dl>
+<p class="care"><b>Handle with care</b> Large capacitors can hold or recover a charge, so keep the terminals shorted. Units made before 1979 may contain PCB oil unless the label says otherwise.</p>
+<p class="foot"><span>In photo</span> <a href="#egg-side" data-go data-item="caps">The EG&amp;G instrument from the side</a> <a href="#egg-top" data-go data-item="caps">The lettering and the drum</a> <a href="#egg-length" data-go data-item="caps">Looking down its length</a></p>
+</article>
+<article class="item" id="insulators" tabindex="-1">
+<header><h4>Porcelain insulators and bushings</h4><p class="kind">High-voltage standoffs</p><span class="conf conf-shape">Recognised by shape</span></header>
+<dl><dt>What it is</dt><dd>Ribbed grey and white porcelain posts and bushings.</dd><dt>What it does</dt><dd>They hold a live conductor away from a grounded frame, or carry it through the wall of a tank.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#egg-side" data-go data-item="insulators">The EG&amp;G instrument from the side</a> <a href="#egg-top" data-go data-item="insulators">The lettering and the drum</a> <a href="#egg-length" data-go data-item="insulators">Looking down its length</a> <a href="#egg-front" data-go data-item="insulators">The front window</a></p>
+</article>
+<article class="item" id="vacuum" tabindex="-1">
+<header><h4>Stainless vacuum hardware</h4><p class="kind">Flanged tubes, crosses and bellows</p><span class="conf conf-shape">Recognised by shape</span></header>
+<dl><dt>What it is</dt><dd>Stainless tubes and chambers with bolted flanges, flexible bellows and blank-off plates.</dd><dt>What it does</dt><dd>Plumbing for high-vacuum systems. The sections bolt together with metal gaskets to build a chamber and its pump lines.</dd></dl>
+<p class="foot"><span>In photo</span> <a href="#egg-side" data-go data-item="vacuum">The EG&amp;G instrument from the side</a> <a href="#egg-top" data-go data-item="vacuum">The lettering and the drum</a> <a href="#egg-length" data-go data-item="vacuum">Looking down its length</a> <a href="#egg-front" data-go data-item="vacuum">The front window</a></p>
+</article>
+</div>
+</div>
+</section>
+<section class="tail" id="unidentified"><div class="wrap">
+<h2>Still unidentified</h2>
+<p>These 10 could not be named from the photos. A close photo of the nameplate would settle most of them.</p>
+<ul class="cols"><li><a href="#steelcase" data-go>Steel case with a dial, gauge and two valve levers</a></li><li><a href="#ami" data-go>Paper-handling machine, badge AMI or AML</a></li><li><a href="#greencrt" data-go>Analyzer with a round green screen</a></li><li><a href="#polar" data-go>Large display with range rings</a></li><li><a href="#manometer" data-go>Tall brown floor cabinet</a></li><li><a href="#multiconn" data-go>Black units with lettered sockets</a></li><li><a href="#navy" data-go>Navy unit stencilled RT 63</a></li><li><a href="#bighf" data-go>Large grey set with a half-moon dial</a></li><li><a href="#floorbox" data-go>Black unit on the ground</a></li><li><a href="#egg" data-go>EG&amp;G instrument, serial 44</a></li></ul>
+</div></section>
+<section class="tail" id="care"><div class="wrap">
+<h2>Handle with care</h2>
+<ul class="carelist"><li><b>Luminous dials.</b> Treat glow-in-the-dark markings on WWII-era radios and instruments as radium paint. Leave those dials sealed and do not scrape or sand them.</li><li><b>Oil-filled cans.</b> Capacitors and transformers made before 1979 may contain PCB oil unless the label says otherwise.</li><li><b>Big capacitors.</b> They can hold or recover a charge for years. Keep the terminals shorted with a wire.</li><li><b>Camera tubes.</b> Tube cameras are damaged by bright light even when switched off. Keep lenses capped and out of direct sun.</li><li><b>Arc lamps and X-ray tubes.</b> Leave stage-light lamps in their housings, and leave the X-ray unit&#x27;s tube and high-voltage tank sealed.</li></ul>
+</div></section>
+<section class="tail" id="sources"><div class="wrap">
+<h2>Sources</h2>
+<p>Identifications come from the photos. The descriptions of what each thing does draw on these pages.</p>
+<ul class="sources"><li><a href="https://www.tvcameramuseum.org/bts/bts_thumb.htm" target="_blank" rel="noopener">Museum of the Broadcast Television Camera, BTS list</a></li><li><a href="https://ifdesign.com/en/winner-ranking/project/ldk-9-ccd-studio-camera/18602" target="_blank" rel="noopener">iF Design, LDK 9 CCD studio camera (1991)</a></li><li><a href="https://www.broadcaststore.com/store/prod_detail.cfm?eq_id=508643" target="_blank" rel="noopener">BroadcastStore, LDK-9 camera chain</a></li><li><a href="https://www.scribd.com/document/248893994/Sony-Dxc-3000a" target="_blank" rel="noopener">Sony DXC-3000A brochure</a></li><li><a href="https://www.adorama.com/used-ony-dxc-3000a-3ccd-color-video-camera/p/us1981379" target="_blank" rel="noopener">Adorama, used DXC-3000A listing</a></li><li><a href="https://smecc.org/jvc_video.htm" target="_blank" rel="noopener">SMECC, JVC BY-110U brochure text</a></li><li><a href="https://www.manualslib.com/manual/1117033/Hitachi-Fp-Z31.html" target="_blank" rel="noopener">Hitachi FP-Z31 operation manual</a></li><li><a href="https://sites.google.com/site/ampexnagra/ikegami-hl79d" target="_blank" rel="noopener">Notes on the Ikegami HL-79D</a></li><li><a href="https://en.wikipedia.org/wiki/Autovon" target="_blank" rel="noopener">Autovon, Wikipedia</a></li><li><a href="https://www.lost-manuals.com/equipment.php?id=17556" target="_blank" rel="noopener">Fluke 895A manual summary</a></li><li><a href="https://simhq.com/store/ARC-Cessna-28-volt-CA-550-A-FD-Computer-Amplifier-P-N-42680-007_133683113065.html" target="_blank" rel="noopener">ARC CA-550A/FD computer amplifier listing</a></li><li><a href="https://www.aerotech.com/resources-manuals-help-files/" target="_blank" rel="noopener">Aerotech manuals index (Unidex 16)</a></li><li><a href="https://www.radiomuseum.org/r/military_tuning_unit_tu_5.html" target="_blank" rel="noopener">Radiomuseum, Tuning Unit TU-5</a></li><li><a href="https://www.n6cc.com/?p=19504" target="_blank" rel="noopener">N6CC on the AN/APR-1 and APR-4</a></li><li><a href="https://designation-systems.net/usmilav/jetds/an-apr2aps.html" target="_blank" rel="noopener">AN/APR designations</a></li><li><a href="https://www.radionerds.com/index.php/SCR-246" target="_blank" rel="noopener">RadioNerds, SCR-246</a></li><li><a href="https://en.wikipedia.org/wiki/SCR-508" target="_blank" rel="noopener">SCR-508, Wikipedia</a></li><li><a href="https://radiomuseum.org/r/military_bc604.html" target="_blank" rel="noopener">Radiomuseum, Radio Set SCR-508</a></li><li><a href="https://www.n6cc.com/?p=28570" target="_blank" rel="noopener">N6CC on the ARC Type 12 and TV-10</a></li><li><a href="https://en.wikipedia.org/wiki/AN/MRN-3" target="_blank" rel="noopener">AN/MRN-3, Wikipedia (BC-1033)</a></li><li><a href="https://radiomuseum.org/r/military_marker_beacon_receiver_markierungsfunkempfaenger.html" target="_blank" rel="noopener">Radiomuseum, BC-1033-B</a></li><li><a href="https://inventory.mrtwv.org/d/1506/Signal_Corps_US_Army-BC-1066-A" target="_blank" rel="noopener">Museum of Radio and Technology, BC-1066-A</a></li><li><a href="https://en.wikipedia.org/wiki/Ticketron" target="_blank" rel="noopener">Ticketron, Wikipedia</a></li><li><a href="https://content.time.com/time/subscriber/article/0,33009,901324,00.html" target="_blank" rel="noopener">Time, “Computers: Instant Ticketing”</a></li><li><a href="https://repository.library.noaa.gov/view/noaa/47373/noaa_47373_DS1.pdf" target="_blank" rel="noopener">NOAA instrumentation center progress report, Jan–Jun 1975 (EG&amp;G CT/3)</a></li><li><a href="https://en.wikipedia.org/wiki/Rapatronic_camera" target="_blank" rel="noopener">Rapatronic camera, Wikipedia</a></li></ul>
+<p class="note">From general knowledge, not looked up for this page: the HP, Tektronix, Friden, Power Designs, IBM, Tandberg, Narco and ZONARE descriptions, ARC&#x27;s place as Cessna&#x27;s avionics arm, the BC-375 link for the TU tuning units, the Bell 204 part-number pattern, Research Enterprises&#x27; wartime role, the 2010 Loran-C shutdown and the 1979 PCB cutoff.</p>
+</div></section>
+</main>
+<footer><div class="wrap">Made 9 Nov 2026 from photos. These are identifications, not appraisals, and some will be wrong.</div></footer>
+
+<script>
+(function(){
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function flash(el, cls, ms){ el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); setTimeout(function(){ el.classList.remove(cls); }, ms); }
+  document.addEventListener('click', function(ev){
+    var a = ev.target.closest ? ev.target.closest('a[data-go]') : null;
+    if(!a) return;
+    var target = document.getElementById(a.getAttribute('href').slice(1));
+    if(!target) return;
+    ev.preventDefault();
+    target.scrollIntoView({behavior: reduce ? 'auto' : 'smooth', block: 'start'});
+    var item = a.getAttribute('data-item');
+    if(target.classList.contains('item')){
+      flash(target, 'is-target', 2600);
+      try{ target.focus({preventScroll:true}); }catch(err){}
+    }else if(item){
+      var pins = target.querySelectorAll('.pin[data-item="' + item + '"]');
+      for(var i=0;i<pins.length;i++) flash(pins[i], 'is-ping', 2300);
+    }
+  });
+  function hot(ev, on){
+    var a = ev.target.closest ? ev.target.closest('.legend a') : null;
+    if(!a) return;
+    var fig = a.closest('.shot'); if(!fig) return;
+    var pins = fig.querySelectorAll('.pin[data-item="' + a.getAttribute('data-item') + '"]');
+    for(var i=0;i<pins.length;i++) pins[i].classList.toggle('is-hot', on);
+  }
+  document.addEventListener('mouseover', function(ev){ hot(ev, true); });
+  document.addEventListener('mouseout', function(ev){ hot(ev, false); });
+  document.addEventListener('focusin', function(ev){ hot(ev, true); });
+  document.addEventListener('focusout', function(ev){ hot(ev, false); });
+})();
+</script>
+</body>
+</html>
