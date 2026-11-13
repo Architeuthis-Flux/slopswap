@@ -213,10 +213,10 @@ td code,th code,li code,p code{overflow-wrap:anywhere}
     <div class="seg" role="group" aria-label="Normal listening" data-k="bypass"><button data-v="0" aria-pressed="true">Through the chip</button><button data-v="1" aria-pressed="false">True bypass</button></div>
     <p id="d-bypass"></p></div>
   <div class="opt"><span>Comb mode</span>
-    <div class="seg" role="group" aria-label="Comb mode" data-k="comb"><button data-v="0" aria-pressed="true">Leave out</button><button data-v="1" aria-pressed="false">Include</button></div>
+    <div class="seg" role="group" aria-label="Comb mode" data-k="comb"><button data-v="1" aria-pressed="true">Include</button><button data-v="0" aria-pressed="false">Leave out</button></div>
     <p id="d-comb"></p></div>
   <div class="opt"><span>Knob</span>
-    <div class="seg" role="group" aria-label="Knob" data-k="pot"><button data-v="ptv09" aria-pressed="true">9 mm shaft pot</button><button data-v="t3386" aria-pressed="false">Trimmer</button></div>
+    <div class="seg" role="group" aria-label="Knob" data-k="pot"><button data-v="t3386" aria-pressed="true">Trimmer</button><button data-v="ptv09" aria-pressed="false">9 mm shaft pot</button></div>
     <p id="d-pot"></p></div>
   <div class="opt"><span>On the sheet</span>
     <div class="seg" role="group" aria-label="On the sheet" data-k="badge"><button data-v="0" aria-pressed="true">Additions only</button><button data-v="1" aria-pressed="false">With the badge</button></div>
@@ -283,7 +283,7 @@ td code,th code,li code,p code{overflow-wrap:anywhere}
     <img src="addon-3d.jpg" width="1200" height="982" alt="The back of the badge with a small purple board standing on pins between the two battery holders, carrying two chips, a pot and a slide switch. Its lower edges run parallel to the badge's angled bottom edges, just above the two coils." loading="lazy">
     <img src="addon-back.jpg" width="1000" height="1020" alt="The same, seen straight on from the back of the badge." loading="lazy">
   </div>
-  <figcaption>The add-on is purple. It stands on four pins in the holes that R1 and R2 leave free, in the channel between the battery holders, and its lower edges follow the badge's angled outline, stopping just above the coils. The badge is rendered from its own board file with R1 and R2 removed; its coils show as the LED-shaped stand-ins that file uses. The add-on's pot is a plain block, because KiCad has no model for it. Badge board and artwork: EMF Explorer Badge V2.1, CC BY-NC-SA 4.0.</figcaption>
+  <figcaption>The add-on is purple. It stands on four pins in the holes that R1 and R2 leave free, in the channel between the battery holders, and its lower edges follow the badge's angled outline, stopping just above the coils. The badge is rendered from its own board file with R1 and R2 removed. Its coils are drawn as the Bourns RLB1014 inductors the published parts list names, 8.7 mm across and 12 mm long, bent over so they lie just past the board edge: the size is from the datasheet, the pose is read from the footprint and not from a built badge. The add-on's pot is a plain block, because KiCad has no model for it. Badge board and artwork: EMF Explorer Badge V2.1, CC BY-NC-SA 4.0.</figcaption>
 </figure>
 <p>The measurements come from the badge's published board file.</p>
 <ul>
@@ -300,6 +300,7 @@ td code,th code,li code,p code{overflow-wrap:anywhere}
   <li><a href="https://github.com/drc3p0/emf-explorer-badge">EMF Explorer Badge design files</a>, CC BY-NC-SA 4.0, for the schematic, the board outline, and the positions of the resistors, coils and battery holders</li>
   <li>KiCad 9.0.9 symbol, footprint and 3D model libraries, for the symbols, the pad numbers and positions, and the models</li>
   <li><a href="https://www.bourns.com/data/global/pdfs/PTV09.pdf">Bourns PTV09 datasheet</a>, for the pot's ordering codes and board pattern</li>
+  <li><a href="https://makezine.com/projects/electromagnetic-symphony-explore-the-emf-universe">Electromagnetic Symphony</a>, Make, for the parts list that names the coils, and the <a href="https://www.mouser.com/datasheet/2/54/bourns_rlb-1159243.pdf">Bourns RLB series datasheet</a> for their size</li>
   <li><a href="https://www.lcsc.com/datasheet/C221829.pdf">C&amp;K OS series datasheet</a>, LCSC's copy, for the one-pole switch's connections</li>
   <li>LCSC listings for the <a href="https://www.lcsc.com/product-detail/C221829.html">OS102011MS2QN1</a> and <a href="https://www.lcsc.com/product-detail/C221663.html">JS202011CQN</a> switches, the <a href="https://www.lcsc.com/product-detail/C507177.html">74HC4053</a>, the <a href="https://www.lcsc.com/product-detail/C507186.html">74HC14</a>, the <a href="https://www.lcsc.com/product-detail/C5341721.html">PTV09A pot</a>, the <a href="https://www.lcsc.com/product-detail/C48642122.html">3386P trimmer</a>, and the <a href="https://www.lcsc.com/product-detail/C58595.html">UNI-ROYAL MFR0W4F resistors</a></li>
 </ul></div>
@@ -434,7 +435,8 @@ root.EMFGEN = { Sheet: Sheet, FP: FP, POTS: POTS, PART: PART, PASSIVE: PASSIVE, 
 'use strict';
 var G = root.EMFGEN, FP = G.FP, tw = G.tw;
 function defaults(o) {
-  o = o || {}; var r = { build: o.build === 'tr' ? 'tr' : 'rec', bypass: !!o.bypass, comb: !!o.comb, pot: o.pot === 't3386' ? 't3386' : 'ptv09', badge: !!o.badge };
+  o = o || {};   // defaults: the switch-chip build with comb mode and a trimmer for the knob
+  var r = { build: o.build === 'tr' ? 'tr' : 'rec', bypass: !!o.bypass, comb: o.comb === undefined ? true : !!o.comb, pot: o.pot === 'ptv09' ? 'ptv09' : 't3386', badge: !!o.badge };
   if (r.build === 'tr') { r.bypass = false; r.comb = false; } return r;
 }
 function name(o) { o = defaults(o); return 'emf-badge-chopper-' + (o.build === 'tr' ? 'transistor' : 'chip' + (o.bypass ? '-bypass' : '') + (o.comb ? '-comb' : '')) + (o.pot === 't3386' ? '-trimmer' : '') + (o.badge ? '-with-badge' : ''); }
@@ -589,7 +591,7 @@ G.generate = generate; G.fileName = name; G.defaults = defaults;
 (function () {
   'use strict';
   var LIB = JSON.parse(document.getElementById('lib').textContent), G = window.EMFGEN;
-  var st = { build: 'rec', bypass: false, comb: false, pot: 'ptv09', badge: false };
+  var st = { build: 'rec', bypass: false, comb: true, pot: 't3386', badge: false };
   var $ = function (id) { return document.getElementById(id); };
   var TXT = {
     build: { rec: 'One 74HC4053 and one 74HC14. The recommended build.', tr: 'Two 2N3904 and two BSS138. Cheapest, hissier, and the FETs are surface-mount. For comparing board area.' },

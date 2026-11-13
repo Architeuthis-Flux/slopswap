@@ -362,7 +362,7 @@ footer{margin-top:3.5rem;padding-top:1rem;border-top:1px solid var(--line);font-
 <p><strong>The top of that range is ragged, and that is the bargain.</strong> An earlier draft used 10 kΩ and stopped at 255 kHz. The smaller resistor costs nothing and lets the knob reach on toward 1 MHz, where three things stop being tidy.</p>
 <ul>
   <li><strong>Tuning.</strong> Frequency goes as one over resistance, so the top is crowded. With a linear pot everything above 100 kHz sits in the last quarter of the turn and everything above 350 kHz in the last twentieth. Up there the knob is for sweeping through sources, not for parking on one. A log pot wired backwards spreads the octaves far more evenly; the dial above lets you feel both.</li>
-  <li><strong>The parts.</strong> In simulation the tone holds, 57 to 59 mV all the way to 1 MHz. What grows is an offset at the amplifier's output, about 0.1 V at 1 MHz on fresh cells and 0.17 V on tired ones. The real chip's charge injection is not modelled and will add to it. On tired cells the oscillator itself stops near 0.8 MHz.</li>
+  <li><strong>The parts.</strong> In simulation the tone holds, 57 to 59 mV all the way to 1 MHz. What grows is an offset at the amplifier's output: 60 mV at 40 kHz, 0.16 V at 600 kHz and about 0.24 V at 1 MHz, on fresh cells and tired ones alike. The real chip's charge injection is not modelled and will add to it. On tired cells the oscillator itself stops near 0.8 MHz.</li>
   <li><strong>The coil.</strong> Its ferrite core was never meant for this, and its losses up there are unknown.</li>
 </ul>
 <p>If the top end turns out to be too fiddly, a larger fixed resistor pulls it back in: 4.7 kΩ stops near 500 kHz and 10 kΩ near 250 kHz.</p>
@@ -714,7 +714,8 @@ footer{margin-top:3.5rem;padding-top:1rem;border-top:1px solid var(--line);font-
   <li><strong>No series capacitor.</strong> An earlier draft of this circuit put 10 µF between the switch and R2 to block the op-amp's offset. On the badge's rails it is not needed: without it the tone is unchanged and a 1 mV offset leaves 60 mV of DC at the output, less than the stock badge has.</li>
   <li><strong>One range.</strong> One capacitor and one pot cover 26 kHz to about 1 MHz. A range switch and a second capacitor would make the top easier to tune, for the price of the switch.</li>
   <li><strong>One ear.</strong> Tuning one ear and leaving the other normal saves the oscillator chip (build 2), and may be the nicer instrument. That is a choice to make by listening.</li>
-  <li><strong>No bypass pole.</strong> Holding the switch at pass for normal listening costs 2.5 to 6.5 dB of bass and saves a pole on the mode switch.</li>
+  <li><strong>No bypass switch.</strong> Holding the chip at pass for normal listening costs 2.5 to 6.5 dB of bass and saves a two-pole switch.</li>
+  <li><strong>No 100 Ω resistors.</strong> With the chip in the coil's path, its own resistance can do the job of R1 and R2. In simulation the tuned note, the comb and the hiss do not change: the note goes from 59 to 61 mV. Normal listening through the chip then sits within 0.5 dB of the stock badge when the chip is 120 Ω, in place of 2.5 dB down. The level now follows the chip, though: +0.7 dB at 70 Ω, −2 dB at 200 Ω and −5 dB at 400 Ω, which is where tired cells may put it. The offset at the amplifier's output also grows, most at the top of the dial: 0.34 V in place of 0.20 V at 800 kHz. It does not go with a bypass switch, which would then join the coil straight to the op-amp and lift everything below 300 Hz by 2 to 3 dB. (<a href="badge_noresistor.py">badge_noresistor.py</a>)</li>
   <li><strong>A microcontroller instead of the oscillator.</strong> A part costing about ten cents (not priced here) could be the oscillator and add an automatic sweep. It is surface-mount, needs programming on the line, and is one more thing for the coils to hear. Left out.</li>
 </ul>
 
@@ -723,8 +724,8 @@ footer{margin-top:3.5rem;padding-top:1rem;border-top:1px solid var(--line);font-
   <thead><tr><th>Question</th><th>Simulated answer, recommended build on ±1.5 V</th></tr></thead>
   <tbody>
     <tr><th scope="row">How big is the tone?</th><td>A 40 kHz field chopped at 39 kHz gives a 1 kHz tone of 59 mV at the amplifier output. Today the same field leaves 73 mV of 40 kHz there, which nobody hears.</td></tr>
-    <tr><th scope="row">Does it fall off higher up?</th><td>Not in the model: 59 mV at 200 kHz, 59 mV at 600 kHz and 57 mV at 1 MHz. An offset builds at the amplifier output instead, 24 mV at 400 kHz and 96 mV at 1 MHz.</td></tr>
-    <tr><th scope="row">And on tired cells?</th><td>59 mV at 40 kHz and at 200 kHz on ±1.0 V, with the switch modelled as 400 Ω and 150 ns, and 58 mV at 1 MHz with a 0.17 V offset. The oscillator only reaches about 0.8 MHz there.</td></tr>
+    <tr><th scope="row">Does it fall off higher up?</th><td>Not in the model: 59 mV at 200 kHz, 59 mV at 600 kHz and 57 mV at 1 MHz. An offset builds at the amplifier output instead: 60 mV at 40 kHz, 0.16 V at 600 kHz and 0.24 V at 1 MHz.</td></tr>
+    <tr><th scope="row">And on tired cells?</th><td>59 mV at 40 kHz and at 200 kHz on ±1.0 V, with the switch modelled as 400 Ω and 150 ns, and 60 mV at 1 MHz with a 0.25 V offset. The oscillator only reaches about 0.8 MHz there.</td></tr>
     <tr><th scope="row">Is it hissier than the badge?</th><td>No. The op-amp's own noise at the output is 10 dB lower while tuning than on the stock badge. The tone is also 10 dB down, so a tuned-in source is about as clean as an audible one is today.</td></tr>
     <tr><th scope="row">Does the oscillator leak into the sound?</th><td>Some of it reaches the output, always at the oscillator frequency, so above hearing. It swings ±0.15 V of the amplifier's ±1.2 V.</td></tr>
     <tr><th scope="row">What happens to ordinary sound while tuning?</th><td>It passes at half level, mixed with whatever is in the window.</td></tr>
@@ -744,10 +745,11 @@ footer{margin-top:3.5rem;padding-top:1rem;border-top:1px solid var(--line);font-
     <tr><th scope="row"><a href="badge_pots.py">badge_pots.py</a></th><td>The 74HC14 oscillator with pots from 10 kΩ to 100 kΩ.</td></tr>
     <tr><th scope="row"><a href="badge_filter.py">badge_filter.py</a></th><td>The tone filters and the reversing chopper: note, hum, ripple and hiss.</td></tr>
     <tr><th scope="row"><a href="badge_passband.py">badge_passband.py</a></th><td>What the switch and a series capacitor do to ordinary sound in normal listening.</td></tr>
+    <tr><th scope="row"><a href="badge_noresistor.py">badge_noresistor.py</a></th><td>The same circuit with the 100 Ω input resistor left out: ordinary sound, the tuned note, the comb, the offset and the hiss.</td></tr>
     <tr><th scope="row"><a href="chopper-falstad.txt">chopper-falstad.txt</a>, <a href="comb-falstad.txt">comb-falstad.txt</a></th><td>The two Falstad circuits shown above, as text to import into the simulator.</td></tr>
   </tbody>
 </table></div>
-<p class="small"><a href="emf-badge-sims.zip">All nine files in one zip.</a> Written against ngspice 42. The hiss figures move by a decibel or two from run to run, because the noise source is random.</p>
+<p class="small"><a href="emf-badge-sims.zip">All ten files in one zip.</a> Written against ngspice 42. The hiss figures move by a decibel or two from run to run, because the noise source is random.</p>
 
 <h2>What to check on the bench first</h2>
 <ol>
@@ -764,7 +766,7 @@ footer{margin-top:3.5rem;padding-top:1rem;border-top:1px solid var(--line);font-
 <figure class="lab">
   <div class="lab-title"><b>A proposed add-on</b><span>A 3D rendering, not a photograph</span></div>
   <a href="kicad.html#addon"><img src="addon-3d.jpg" width="1200" height="982" alt="The back of the badge with a small purple board standing on pins between the two battery holders, carrying two chips, a pot and a slide switch. Its lower edges run parallel to the badge's angled bottom edges, just above the two coils." loading="lazy" style="display:block;width:100%;max-width:38rem;height:auto;margin:0 auto;border-radius:4px;background:#f6f5f1"></a>
-  <figcaption>The add-on, in purple, sits between the battery holders. Its lower edges follow the badge's angled outline and stop just above the coils. It still needs three wires for power, and nothing on it is routed yet. Rendered from the badge's own board file with R1 and R2 removed; badge board and artwork are EMF Explorer Badge V2.1, CC BY-NC-SA 4.0. Measurements, a second view and the board file are on <a href="kicad.html#addon">the KiCad page</a>.</figcaption>
+  <figcaption>The add-on, in purple, sits between the battery holders. Its lower edges follow the badge's angled outline and stop just above the coils. It still needs three wires for power, and nothing on it is routed yet. Rendered from the badge's own board file with R1 and R2 removed, and with the coils drawn as the Bourns RLB1014 inductors the published parts list names. Badge board and artwork are EMF Explorer Badge V2.1, CC BY-NC-SA 4.0. Measurements, a second view and the board file are on <a href="kicad.html#addon">the KiCad page</a>.</figcaption>
 </figure>
 
 <h2>More detail</h2>
