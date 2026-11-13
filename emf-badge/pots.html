@@ -39,6 +39,7 @@
   --s1:#e66767; --s2:#3987e5; --s3:#199e70; --s4:#9085e9; --s5:#008300; --s6:#d55181;
 }
 *,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none !important}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--fg);font:400 1.0625rem/1.6 var(--font-body);
   padding-block:2.25rem 4rem;
@@ -181,19 +182,20 @@ footer{margin-top:3.5rem;padding-top:1rem;border-top:1px solid var(--line);font-
 </header>
 <p>The <a href="./#osc">oscillator</a> uses the pot as a plain variable resistor, on two of its three pins, so almost anything whose resistance changes will tune it. That leaves the choice to price and feel, and the prices found run from four cents to four dollars.</p>
 
-<h2>Any value from 10 kΩ to 100 kΩ</h2>
-<p>The cheap parts mostly come in 10 kΩ. The frequency depends on the pot's resistance times the capacitor, so a smaller pot takes a larger capacitor and a smaller fixed resistor, and the range stays where it was.</p>
+<h2>Pot value, and how far up it reaches</h2>
+<p>The recommended build reaches 1 MHz because its fixed resistor is small next to the pot: 2.2 kΩ against 100 kΩ. A smaller pot needs a smaller fixed resistor still to cover the same span, and a logic gate cannot drive much less than a few hundred ohms. So the cheap parts, which mostly come in 10 kΩ, give up some of the top.</p>
 <div class="tw"><table>
   <thead><tr><th>Pot</th><th>Fixed resistor</th><th>Capacitor</th><th>Range, fresh cells</th><th>Range, cells at 2 V</th></tr></thead>
   <tbody>
-    <tr><th scope="row">100 kΩ</th><td class="n">10 kΩ</td><td class="n">330 pF</td><td class="n">24 to 255 kHz</td><td class="n">19 to 203 kHz</td></tr>
-    <tr><th scope="row">50 kΩ</th><td class="n">4.7 kΩ</td><td class="n">680 pF</td><td class="n">24 to 262 kHz</td><td class="n">19 to 208 kHz</td></tr>
-    <tr><th scope="row">20 kΩ</th><td class="n">2 kΩ</td><td class="n">1.5 nF</td><td class="n">27 to 269 kHz</td><td class="n">21 to 214 kHz</td></tr>
-    <tr><th scope="row">10 kΩ</th><td class="n">1 kΩ</td><td class="n">3.3 nF</td><td class="n">24 to 230 kHz</td><td class="n">19 to 183 kHz</td></tr>
-    <tr><th scope="row">10 kΩ, narrower and more even</th><td class="n">2.2 kΩ</td><td class="n">1.5 nF</td><td class="n">48 to 246 kHz</td><td class="n">38 to 196 kHz</td></tr>
+    <tr class="pick"><th scope="row">100 kΩ</th><td class="n">2.2 kΩ</td><td class="n">330 pF</td><td class="n">26 kHz to 1.0 MHz</td><td class="n">21 to 810 kHz</td></tr>
+    <tr><th scope="row">50 kΩ</th><td class="n">1 kΩ</td><td class="n">680 pF</td><td class="n">26 kHz to 1.0 MHz</td><td class="n">20 to 810 kHz</td></tr>
+    <tr><th scope="row">20 kΩ</th><td class="n">470 Ω</td><td class="n">1.5 nF</td><td class="n">29 to 860 kHz</td><td class="n">23 to 700 kHz</td></tr>
+    <tr><th scope="row">10 kΩ</th><td class="n">220 Ω</td><td class="n">3.3 nF</td><td class="n">26 to 675 kHz</td><td class="n">21 to 540 kHz</td></tr>
+    <tr><th scope="row">10 kΩ, easier on the gate</th><td class="n">1 kΩ</td><td class="n">3.3 nF</td><td class="n">24 to 230 kHz</td><td class="n">19 to 183 kHz</td></tr>
+    <tr><th scope="row">10 kΩ, narrower and more even</th><td class="n">2.2 kΩ</td><td class="n">1.5 nF</td><td class="n">48 to 248 kHz</td><td class="n">38 to 196 kHz</td></tr>
   </tbody>
 </table></div>
-<p class="small">Simulated with the same 74HC14 model as the main page (<a href="badge_pots.py">badge_pots.py</a>), which gives the gate 150 Ω of output resistance. That resistance is in series with the fixed resistor, so it starts to count at 1 kΩ: with 400 Ω, which is plausible on tired cells, the top of the 10 kΩ range falls to about 150 kHz. Cheap pots are ±20 to ±30 %, and the bottom of the range moves by as much.</p>
+<p class="small">Simulated with the same 74HC14 model as the main page (<a href="badge_pots.py">badge_pots.py</a>), which gives the gate 150 Ω of output resistance. That resistance is in series with the fixed resistor, so the small values lean on it: with 400 Ω, which is plausible on tired cells, the tops fall to about 740, 680, 510 and 330 kHz for the first four rows. Cheap pots are ±20 to ±30 %, which moves the bottom of the range between 20 and 37 kHz.</p>
 
 <h2>What each kind costs</h2>
 <div class="tw"><table class="wide">
@@ -202,7 +204,7 @@ footer{margin-top:3.5rem;padding-top:1rem;border-top:1px solid var(--line);font-
     <tr><th scope="row">Carbon trimmer, 6 mm</th><td><a href="https://www.lcsc.com/product-detail/C5205024.html">BOCHEN RM065-104</a></td><td class="n">100 kΩ</td><td class="n">$0.043 at 1,000<br>$0.037 at 10,000</td><td>A slotted disc for a fingernail or a screwdriver. Made to be set, not played: see below.</td></tr>
     <tr><th scope="row">Square trimmer, 9.5 mm</th><td><a href="https://www.lcsc.com/product-detail/C48642122.html">BAOTER 3386P-104-LF</a></td><td class="n">100 kΩ</td><td class="n">from $0.10</td><td>A bigger slotted rotor, with the same caveat.</td></tr>
     <tr><th scope="row">Carbon shaft pot, 16 mm</th><td><a href="https://www.lcsc.com/product-detail/C10566.html">HaiHuasheng R16-B103-3P</a></td><td class="n">10 kΩ</td><td class="n">from $0.135</td><td>A full-size panel pot with an 18 mm shaft, large for a badge. Out of stock at LCSC when read. <a href="https://jlcpcb.com/partdetail/11110-R16_B103_3P_18mm/C10566">JLCPCB's listing</a> says it has a switch, which could double as the mode switch; not confirmed.</td></tr>
-    <tr><th scope="row">Slide pot</th><td><a href="https://www.lcsc.com/product-detail/C49230417.html">YTL YSX-DWQ-P097</a></td><td class="n">10 kΩ</td><td class="n">from $0.30</td><td>A proper slider. The travel is not listed. A <a href="https://www.lcsc.com/product-detail/C49230422.html">second version</a> with more stock is from $0.37.</td></tr>
+    <tr><th scope="row">Rotary pot, low-cost</th><td><a href="https://www.lcsc.com/product-detail/C49230417.html">YTL YSX-DWQ-P097</a></td><td class="n">10 kΩ</td><td class="n">from $0.30</td><td>LCSC files it under slide pots, but it is a rotary pot. A <a href="https://www.lcsc.com/product-detail/C49230422.html">second version</a> with more stock is from $0.37.</td></tr>
     <tr><th scope="row">Shaft pot, 9 mm</th><td><a href="https://www.lcsc.com/product-detail/Variable-Resistors-Potentiometers_ALPSALPINE-RK09K1130AP5_C470295.html">Alps RK09K1130AP5</a></td><td class="n">10 kΩ</td><td class="n">$0.32 at 1,000</td><td>The ordinary knob.</td></tr>
     <tr><th scope="row">Rotary position sensor</th><td><a href="https://www.lcsc.com/product-detail/C2687313.html">Alps RDC501018A</a></td><td class="n">not listed</td><td class="n">$0.41 at 1,000</td><td>A flat rotary part with no shaft of its own, so it needs a wheel or shaft added.</td></tr>
     <tr><th scope="row">Thumbwheel pot</th><td><a href="https://www.lcsc.com/product-detail/C470643.html">Alps RK10J11E0034</a></td><td class="n">10 kΩ</td><td class="n">$0.53 at 900</td><td>A brand-name edge wheel.</td></tr>
@@ -216,10 +218,10 @@ footer{margin-top:3.5rem;padding-top:1rem;border-top:1px solid var(--line);font-
 
 <h2>Trimmers: the cheapest end</h2>
 <p>A 100 kΩ carbon trimmer at about four cents is the floor. It drops into the schematic as drawn and takes the recommended build from $0.50 to $0.22. The cost is in use. A trimmer is turned through a slot, and it is built to be set a few times: Bourns rates its 3362 trimmer for 200 cycles of rotation. A badge that is played like an instrument could use that up in a few afternoons. A trimmer makes sense if the knob is closer to a preset than an instrument.</p>
-<p>The cheapest part that is a real knob is the 16 mm carbon shaft pot at about 14 cents, if it can be had and the badge has room for it. After it come the slide pot at 30 cents and the Alps shaft pot at 32 cents.</p>
+<p>The cheapest part that is a real knob is the 16 mm carbon shaft pot at about 14 cents, if it can be had and the badge has room for it. After it come the YTL rotary pot at 30 cents and the Alps shaft pot at 32 cents.</p>
 
 <h2>Position sensors as sliders</h2>
-<p>LCSC files a second family of sliders under <a href="https://www.lcsc.com/category/1270.html">position sensors</a> and not under potentiometers. A resistive linear position sensor is a slide pot made for a mechanism to move instead of a finger: a 10 kΩ track, a short lever and through-hole pins. It tunes this circuit like any other 10 kΩ pot, and it can undercut the brand-name thumbwheels and slide pots in the same catalogue: the Alps RDC1022A05 slider is from $0.76, where a Bourns slide pot is from $1.36 and Bourns thumbwheels start at $1.17, and the Alps rotary sensor at $0.41 is under the Alps thumbwheel at $0.53. The low-cost YTL slide pot is still cheaper than any of them.</p>
+<p>LCSC files a second family of sliders under <a href="https://www.lcsc.com/category/1270.html">position sensors</a> and not under potentiometers. A resistive linear position sensor is a slide pot made for a mechanism to move instead of a finger: a 10 kΩ track, a short lever and through-hole pins. It tunes this circuit like any other 10 kΩ pot, and it can undercut the brand-name thumbwheels and slide pots in the same catalogue: the Alps RDC1022A05 slider is from $0.76, where a Bourns slide pot is from $1.36 and Bourns thumbwheels start at $1.17, and the Alps rotary sensor at $0.41 is under the Alps thumbwheel at $0.53. No cheaper slide pot turned up: the one low-cost part LCSC lists under slide pots is a rotary pot.</p>
 <p>The drawback is feel. These parts slide with very little resistance (Alps rates the RDC10 series at 0.25 N at most), so they are not as pleasant under a thumb as a proper slide pot. In their favour, the same datasheet rates them for 200,000 strokes. They are linear only, so the top of the dial is crowded; the narrower 10 kΩ row in the first table evens that out.</p>
 <div class="tw"><table>
   <thead><tr><th>Position sensor</th><th>Kind</th><th>Price</th></tr></thead>
@@ -240,7 +242,7 @@ footer{margin-top:3.5rem;padding-top:1rem;border-top:1px solid var(--line);font-
   <tbody>
     <tr><th scope="row">Carbon trimmer</th><td class="n">$0.04</td><td class="n">$0.22</td><td class="n">$1.21</td></tr>
     <tr><th scope="row">Carbon shaft pot, 16 mm</th><td class="n">$0.14</td><td class="n">$0.31</td><td class="n">$1.31</td></tr>
-    <tr><th scope="row">Slide pot, YTL</th><td class="n">$0.30</td><td class="n">$0.48</td><td class="n">$1.47</td></tr>
+    <tr><th scope="row">YTL rotary pot</th><td class="n">$0.30</td><td class="n">$0.48</td><td class="n">$1.47</td></tr>
     <tr class="pick"><th scope="row">Alps shaft pot</th><td class="n">$0.32</td><td class="n">$0.50</td><td class="n">$1.49</td></tr>
     <tr><th scope="row">Alps rotary position sensor</th><td class="n">$0.41</td><td class="n">$0.59</td><td class="n">$1.58</td></tr>
     <tr><th scope="row">Alps thumbwheel</th><td class="n">$0.53</td><td class="n">$0.70</td><td class="n">$1.70</td></tr>
@@ -248,7 +250,7 @@ footer{margin-top:3.5rem;padding-top:1rem;border-top:1px solid var(--line);font-
     <tr><th scope="row">Alps slide position sensor</th><td class="n">$0.76</td><td class="n">$0.94</td><td class="n">$1.93</td></tr>
   </tbody>
 </table></div>
-<p class="small">Both chips plus the knob, both ears. The highlighted row is the low-cost figure used on the main page; the brand-name figure there pairs the TI chips with the Bourns pot. A 10 kΩ knob changes one resistor and one capacitor, at no cost.</p>
+<p class="small">Both chips plus the knob, both ears. The highlighted row is the low-cost figure used on the main page; the brand-name figure there pairs the TI chips with the Bourns pot. A 10 kΩ knob changes one resistor and one capacitor at no cost, and reaches about two thirds as high.</p>
 
 
 <h2>Sources</h2>

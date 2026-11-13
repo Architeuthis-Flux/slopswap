@@ -31,15 +31,15 @@ CDL qd 0 {delay/1e3/0.69:g}
 BO oi 0 V = {vcc}*(0.5+0.5*tanh(40*(v(qd)-{vcc/2})))
 RO oi out {rout}
 .model SMT SW(Ron=1 Roff=1G Vt={(vtp+vtn)/2} Vh={(vtp-vtn)/2})"""
-def hc14(vcc, rpot, c='330p', rfix='10k'):
+def hc14(vcc, rpot, c='330p', rfix='2.2k'):
     vtp, vtn = {3.0: (1.66, 0.87), 2.0: (1.18, 0.52)}[vcc]
     return f"VCC vcc 0 {vcc}\n" + schmitt(vcc, vtp, vtn) + f"\nRT out in {{{rfix}+{rpot}}}\nCT in 0 {c}\nCIN in 0 5p\n.ic v(in)=0"
-def t555(vcc, rpot, c='330p', rfix='10k', comb=False, rb='13k'):
+def t555(vcc, rpot, c='330p', rfix='2.2k', comb=False, rb='13k'):
     """CMOS 555 with TRIG and THRES tied to the capacitor ('in'). Tuned: timing R from OUT. Comb: RA from VCC to DIS, RB from DIS to the capacitor."""
     core = f"VCC vcc 0 {vcc}\n" + schmitt(vcc, 2*vcc/3, vcc/3, rout=400, delay=250e-9) + f"\nCT in 0 {c}\nCIN in 0 3p\n.ic v(in)=0"
     if not comb: return core + f"\nRT out in {{{rfix}+{rpot}}}"
     return core + f"\nRA vcc dis {{{rfix}+{rpot}}}\nRB dis in {rb}\nBNQ nq 0 V = {vcc}-v(qd)\nSDIS dis 0 nq 0 SDM\n.model SDM SW(Ron=150 Roff=1G Vt={vcc/2} Vh=0.1)\nRLOAD out 0 1Meg"
-def twoinv(vcc, rpot, c='180p', rfix='10k', rs='47k', comb=False, rd='15k'):
+def twoinv(vcc, rpot, c='180p', rfix='2.2k', rs='47k', comb=False, rd='15k'):
     """two 74HC4053 sections wired as inverters (throws to the rails): the classic two-gate RC oscillator"""
     inv = lambda a, b, n: f"""BI{n} oi{n} 0 V = {vcc}*(0.5-0.5*tanh(60*(v({a}d)-{vcc/2})))
 BB{n} {a}b 0 V = v({a})
@@ -72,7 +72,7 @@ RB2 p b2 {rb}
 RP vcc p {{1+{rpot}}}
 CL out 0 5p
 .ic v(c1)=0.1 v(out)={vcc} v(b1)=0.65 v(b2)=-1"""
-def sweep(label, fn, vccs=(3.0, 2.0), pots=(0, 25e3, 50e3, 100e3), tran='.tran 20n 1.2m 0.6m 20n', th=None, **kw):
+def sweep(label, fn, vccs=(3.0, 2.0), pots=(0, 25e3, 50e3, 100e3), tran='.tran 10n 1.2m 0.6m 10n', th=None, **kw):
     for vcc in vccs:
         row = []
         for rp in pots:
@@ -83,7 +83,8 @@ def sweep(label, fn, vccs=(3.0, 2.0), pots=(0, 25e3, 50e3, 100e3), tran='.tran 2
 if __name__ == '__main__':
     print('pot at:                                      0            25k            50k            100k   (frequency, share of the time the output is high, time low, supply current)')
     print('supply current means something only for the transistor pair; the other three are threshold models with no supply path')
-    sweep('hc14 74HC14 gate, 10k, 330p', hc14)
+    sweep('hc14 74HC14 gate, 2.2k, 330p', hc14)
+    sweep('hc14old same with 10k (the first draft)', hc14, rfix='10k')
     sweep('t555 CMOS 555 tuned, 220p', t555, c='220p')
     sweep('t555c CMOS 555 comb, 220p, RB 18k', t555, c='220p', comb=True, rb='18k')
     sweep('twoinv two 4053 sections, 180p', twoinv)

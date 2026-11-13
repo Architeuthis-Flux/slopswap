@@ -1,7 +1,7 @@
 # Part of the simulation scripts behind https://slopswap.org/emf-badge/
 # Needs Python 3 with numpy, and ngspice on the PATH (written against ngspice 42).
 # Keep the badge_*.py files in one folder; netlists and results go into an ng/ folder beside them.
-# Run:  python3 badge_chop.py [spdt|shunt|comb]   (no argument runs all three; a few minutes)
+# Run:  python3 badge_chop.py [spdt|top|shunt|comb]   (no argument runs all four; several minutes)
 """Chopper options at +/-1.5 V: SPDT section, FET shunt, NPN shunt; tuned and comb."""
 import numpy as np, sys
 from badge_core import *
@@ -28,6 +28,12 @@ if __name__ == '__main__':
         report('spdt_200k_2V', spdt(400, 150e-9), 200e3, 199e3, vs=1.0, step=0.1e-6, tend=30e-3)
         print('--- no C1 (offset 1 mV, then 6 mV worst case) ---')
         report('spdt_40k_noC1', spdt(), 40e3, 39e3, c1=None)
+    if which in ('all', 'top'):
+        print('--- the stretched top of the dial: same section at 0.6, 0.8 and 1 MHz, fresh cells and then +/-1.0 V ---')
+        for f in (600e3, 800e3, 1000e3):
+            st = 0.025e-6 if f < 900e3 else 0.02e-6
+            report('top_%dk' % (f/1e3), spdt(), f, f - 1e3, step=st, tend=16e-3, win=6e-3)
+            report('top_%dk_2V' % (f/1e3), spdt(400, 150e-9), f, f - 1e3, vs=1.0, step=st, tend=16e-3, win=6e-3)
     if which in ('all', 'shunt'):
         print('--- shunt-only, one FET and a capacitor ---')
         report('fet_bss138_40k', shunt_fet('BSS138'), 40e3, 39e3, c1=None)

@@ -43,6 +43,7 @@
   --s1:#e66767; --s2:#3987e5; --s3:#199e70; --s4:#9085e9; --s5:#008300; --s6:#d55181;
 }
 *,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none !important}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--fg);font:400 1.0625rem/1.6 var(--font-body);
   padding-block:2.25rem 4rem;
@@ -179,7 +180,7 @@ footer{margin-top:3.5rem;padding-top:1rem;border-top:1px solid var(--line);font-
 <header>
   <p class="crumb"><a href="../">slopswap</a> / emf badge</p>
   <h1>A tuning knob for the EMF Explorer Badge</h1>
-  <p class="dek">The badge hears fields from 20 Hz to 20 kHz. One analog switch chip, one oscillator and a pot should let it tune in everything from 20 kHz to a few hundred kilohertz, for between 50 cents and two dollars of parts.</p>
+  <p class="dek">The badge hears fields from 20 Hz to 20 kHz. One analog switch chip, one oscillator and a pot should let it tune in everything from 20 kHz up toward 1 MHz, for between 50 cents and two dollars of parts.</p>
   <div class="scale" aria-hidden="true"></div>
   <p class="byline">Design notes · 13 November 2026</p>
   <div class="note"><span class="tag">Where this stands</span>
@@ -194,7 +195,9 @@ footer{margin-top:3.5rem;padding-top:1rem;border-top:1px solid var(--line);font-
   <li><strong>What it costs:</strong> for both ears, about $0.50 a badge with low-cost chips or $1.90 with Texas Instruments chips, at 1,000 pieces and with an ordinary 9 mm pot. The pot is the largest item either way.</li>
   <li><strong>The cheapest version that still sounds right</strong> uses the switch chip as its own oscillator and tunes one ear, for about $0.40.</li>
   <li>A CMOS 555 works and so do two transistors, but neither saves money. Swapping the switch chip for a single transistor saves little and adds 25 dB of hiss.</li>
+  <li>The dial runs from 26 kHz to about 1 MHz on one pot. The top end is ragged on purpose: touchy to tune, and near the limits of the parts.</li>
   <li>Comb mode, which folds every band into hearing at once, is a three-position switch and two more passives.</li>
+  <li>For a nicer tone, a capacitor in series takes most of the hum out while tuning. Reversing the coil instead of grounding it does more: twice the note, no hum and less hiss, for a second switch chip and a change to the coil wiring.</li>
 </ul>
 
 <h2>Try the knob</h2>
@@ -208,16 +211,17 @@ footer{margin-top:3.5rem;padding-top:1rem;border-top:1px solid var(--line);font-
     <div class="seg" role="group" aria-label="Mode">
       <button data-mode="off" aria-pressed="false">Badge today</button><button data-mode="tuned" aria-pressed="true">Tuned</button><button data-mode="comb" aria-pressed="false">Comb</button>
     </div>
-    <label class="field"><span>Knob</span><input type="range" id="pot" min="0" max="1000" step="1" value="148" aria-label="Knob position"><output id="loOut" for="pot"></output></label>
+    <label class="field"><span>Knob</span><input type="range" id="pot" min="0" max="1000" step="1" value="113" aria-label="Knob position"><output id="loOut" for="pot"></output></label>
   </div>
   <div class="controls">
     <label class="lbl">Pot <select id="taper"><option value="log">log, wired backwards</option><option value="lin">linear</option></select></label>
     <button class="btn" id="sweep" aria-pressed="false">Sweep the knob</button>
+    <button class="btn" id="filt" aria-pressed="false">Tone filter: off</button>
     <label class="field" id="pulseField" hidden><span>Comb pulse</span><input type="range" id="pulse" min="1" max="6" step="0.1" value="3" aria-label="Comb pulse width"><output id="pulseOut" for="pulse"></output></label>
   </div>
   <div class="chips" id="chips" role="group" aria-label="Sources"></div>
   <p class="readout" id="dialRead" aria-live="polite"></p>
-  <figcaption>Source frequencies are typical values; real devices vary. The rhythms are invented, to show that rhythm survives. An amber band is a window: anything inside it lands in the headphones, and the fainter the band, the quieter it lands. The knob's range, 24 to 255 kHz, is the recommended oscillator on fresh cells.</figcaption>
+  <figcaption>Source frequencies are typical values; real devices vary. The rhythms are invented, to show that rhythm survives. An amber band is a window: anything inside it lands in the headphones, and the fainter the band, the quieter it lands. The knob's range, 26 kHz to about 1 MHz, is the recommended oscillator on fresh cells. <em>Tone filter</em> fits the 0.22 µF and 390 pF pair described under <a href="#tone">A nicer tone</a>.</figcaption>
 </figure>
 
 <ol class="try">
@@ -263,12 +267,12 @@ footer{margin-top:3.5rem;padding-top:1rem;border-top:1px solid var(--line);font-
 <p>Here is the same thing as a circuit, with the badge's own values: the pickup coil, one section of the 74HC4053 and the amplifier, running in Paul Falstad's circuit simulator.</p>
 <figure class="lab" id="falstad">
   <div class="lab-title"><b>The chopper as a live circuit</b><span>Falstad simulator</span></div>
-  <div class="fs-wrap" id="fsWrap">
-    <iframe id="fsFrame" title="The chopper running in the Falstad circuit simulator" loading="lazy" referrerpolicy="no-referrer" data-cct="%24%201%205e-7%2060%2050%201%2050%205e-11%0Av%2064%20224%2064%20144%200%201%2040000%200.05%200%200%200.5%0Ag%2064%20224%2064%20240%200%200%0Al%2064%20144%20160%20144%200%200.1%200%200%0Ar%20160%20144%20256%20144%200%20250%0A160%20256%20144%20320%20144%200%20120%201e10%0Aw%20320%20128%20352%20128%200%0Ar%20352%20128%20448%20128%200%20100%0Aa%20448%20144%20544%20144%208%201.5%20-1.5%2012000000%200%200%20100000%0Aw%20448%20160%20448%20192%200%0Ag%20448%20192%20448%20208%200%200%0Aw%20448%20128%20448%2064%200%0Ar%20448%2064%20544%2064%200%20100000%0Aw%20544%2064%20544%20144%200%0Aw%20448%2064%20448%2032%200%0Ac%20448%2032%20544%2032%200%201e-10%200%200.001%0Aw%20544%2032%20544%2064%200%0Aw%20544%20144%20592%20144%200%0AO%20592%20144%20640%20144%200%200%0Aw%20320%20160%20320%20192%200%0Ag%20320%20192%20320%20208%200%200%0AR%20288%20128%20288%2064%200%202%2039000%202.5%202.5%200%200.5%0Ax%2088%20116%20168%20119%204%2013%20pickup%5Cscoil%0Ax%2024%20268%20104%20271%204%2013%20field%5Csat%5Cs40%5CskHz%0Ax%20232%2028%20312%2031%204%2013%20oscillator%5Cs%28the%5Csknob%29%0Ax%20232%20240%20312%20243%204%2013%20one%5Cs74HC4053%5Cssection%0Ax%20440%20240%20520%20243%204%2013%20the%5Csbadge%27s%5Csamplifier%0Ao%202%2064%203%204099%200.1%200.000005%200%201%20coil%5Cscurrent%0Ao%206%2064%203%204099%200.1%200.000005%201%201%20current%5Csinto%5Csthe%5Csamplifier%0Ao%2017%2064%200%204099%200.25%200.000005%202%201%20amplifier%5Csoutput%0A38%2020%206%2036000%2044000%20Knob%3A%5Csoscillator%5Csfrequency%0A"></iframe>
-    <button class="fs-shield" id="fsShield" type="button"><span>Click to use the circuit</span></button>
+  <div class="fs-wrap">
+    <iframe class="fs-frame" title="The chopper running in the Falstad circuit simulator" loading="lazy" referrerpolicy="no-referrer" data-cct="%24%201%205e-7%2060%2050%201%2050%205e-11%0Av%2032%20240%2032%20160%200%201%2040000%205%200%200%200.5%0Ar%2032%20160%2096%20160%200%201000%0AT%2096%20160%20176%20240%200%200.00001%20100%200%200%200.04%0Aw%2032%20240%2096%20240%200%0Ag%2032%20240%2032%20256%200%200%0Ag%20176%20240%20176%20256%200%200%0Ar%20176%20160%20256%20160%200%20250%0A160%20256%20160%20320%20160%200%20120%201e10%0Aw%20320%20144%20352%20144%200%0Ar%20352%20144%20448%20144%200%20100%0Aa%20448%20160%20544%20160%208%201.5%20-1.5%2012000000%200%200%20100000%0Aw%20448%20176%20448%20208%200%0Ag%20448%20208%20448%20224%200%200%0Aw%20448%20144%20448%2080%200%0Ar%20448%2080%20544%2080%200%20100000%0Aw%20544%2080%20544%20160%200%0Aw%20448%2080%20448%2048%200%0Ac%20448%2048%20544%2048%200%201e-10%200%200.001%0Aw%20544%2048%20544%2080%200%0Aw%20544%20160%20576%20160%200%0Ar%20576%20160%20640%20160%200%203300%0Ac%20640%20160%20640%20208%200%201e-8%200%200.001%0Ag%20640%20208%20640%20224%200%200%0AO%20640%20160%20688%20160%200%200%0Aw%20320%20176%20320%20208%200%0Ag%20320%20208%20320%20224%200%200%0AR%20288%20144%20288%2080%200%202%2039000%202.5%202.5%200%200.5%0Ax%208%20292%2088%20295%204%2013%20something%5Csswitching%5Csnearby%0Ax%20160%20136%20240%20139%204%2013%20pickup%5Cscoil%0Ax%20200%2044%20280%2047%204%2013%20oscillator%5Cs%28the%5Csknob%29%0Ax%20232%20256%20312%20259%204%2013%20one%5Cs74HC4053%5Cssection%0Ax%20424%20256%20504%20259%204%2013%20the%5Csbadge%27s%5Csamplifier%0Ax%20568%20256%20648%20259%204%2013%20stands%5Csin%5Csfor%5Csthe%5Csear%0Ao%206%2064%203%204099%200.1%200.000005%200%201%20coil%5Cscurrent%0Ao%209%2064%203%204099%200.1%200.000005%201%201%20current%5Csinto%5Csthe%5Csamplifier%0Ao%2023%2064%200%204099%200.25%200.000005%202%201%20what%5Csyou%5Cshear%0A38%200%205%2030000%2050000%20Field%5Csfrequency%0A38%2026%206%2030000%2050000%20Knob%3A%5Csoscillator%5Csfrequency%0A"></iframe>
+    <button class="fs-shield" type="button"><span>Click to use the circuit</span></button>
   </div>
-  <p class="fs-link"><a href="https://www.falstad.com/circuit/circuitjs.html?cct=%24%201%205e-7%2060%2050%201%2050%205e-11%0Av%2064%20224%2064%20144%200%201%2040000%200.05%200%200%200.5%0Ag%2064%20224%2064%20240%200%200%0Al%2064%20144%20160%20144%200%200.1%200%200%0Ar%20160%20144%20256%20144%200%20250%0A160%20256%20144%20320%20144%200%20120%201e10%0Aw%20320%20128%20352%20128%200%0Ar%20352%20128%20448%20128%200%20100%0Aa%20448%20144%20544%20144%208%201.5%20-1.5%2012000000%200%200%20100000%0Aw%20448%20160%20448%20192%200%0Ag%20448%20192%20448%20208%200%200%0Aw%20448%20128%20448%2064%200%0Ar%20448%2064%20544%2064%200%20100000%0Aw%20544%2064%20544%20144%200%0Aw%20448%2064%20448%2032%200%0Ac%20448%2032%20544%2032%200%201e-10%200%200.001%0Aw%20544%2032%20544%2064%200%0Aw%20544%20144%20592%20144%200%0AO%20592%20144%20640%20144%200%200%0Aw%20320%20160%20320%20192%200%0Ag%20320%20192%20320%20208%200%200%0AR%20288%20128%20288%2064%200%202%2039000%202.5%202.5%200%200.5%0Ax%2088%20116%20168%20119%204%2013%20pickup%5Cscoil%0Ax%2024%20268%20104%20271%204%2013%20field%5Csat%5Cs40%5CskHz%0Ax%20232%2028%20312%2031%204%2013%20oscillator%5Cs%28the%5Csknob%29%0Ax%20232%20240%20312%20243%204%2013%20one%5Cs74HC4053%5Cssection%0Ax%20440%20240%20520%20243%204%2013%20the%5Csbadge%27s%5Csamplifier%0Ao%202%2064%203%204099%200.1%200.000005%200%201%20coil%5Cscurrent%0Ao%206%2064%203%204099%200.1%200.000005%201%201%20current%5Csinto%5Csthe%5Csamplifier%0Ao%2017%2064%200%204099%200.25%200.000005%202%201%20amplifier%5Csoutput%0A38%2020%206%2036000%2044000%20Knob%3A%5Csoscillator%5Csfrequency%0A" target="_blank" rel="noopener">Open this circuit full-size at falstad.com</a></p>
-  <figcaption>The left trace is the coil's current, a steady 40 kHz. The middle trace is what the switch lets through to the amplifier; its outline breathes at the difference between the two frequencies. The right trace is the amplifier's output, a 1 kHz tone with fast ripple on top. On a wide screen the frame has a slider marked Knob: move it toward 40 kHz and the tone slows, stops and climbs again. The switch here is a plain 120 Ω one and the op-amp is ideal, and the tone comes out at 61 mV, against 59 mV in the fuller model further down. The frame loads from falstad.com and stays empty if that site cannot be reached.</figcaption>
+  <p class="fs-link"><a href="https://www.falstad.com/circuit/circuitjs.html?cct=%24%201%205e-7%2060%2050%201%2050%205e-11%0Av%2032%20240%2032%20160%200%201%2040000%205%200%200%200.5%0Ar%2032%20160%2096%20160%200%201000%0AT%2096%20160%20176%20240%200%200.00001%20100%200%200%200.04%0Aw%2032%20240%2096%20240%200%0Ag%2032%20240%2032%20256%200%200%0Ag%20176%20240%20176%20256%200%200%0Ar%20176%20160%20256%20160%200%20250%0A160%20256%20160%20320%20160%200%20120%201e10%0Aw%20320%20144%20352%20144%200%0Ar%20352%20144%20448%20144%200%20100%0Aa%20448%20160%20544%20160%208%201.5%20-1.5%2012000000%200%200%20100000%0Aw%20448%20176%20448%20208%200%0Ag%20448%20208%20448%20224%200%200%0Aw%20448%20144%20448%2080%200%0Ar%20448%2080%20544%2080%200%20100000%0Aw%20544%2080%20544%20160%200%0Aw%20448%2080%20448%2048%200%0Ac%20448%2048%20544%2048%200%201e-10%200%200.001%0Aw%20544%2048%20544%2080%200%0Aw%20544%20160%20576%20160%200%0Ar%20576%20160%20640%20160%200%203300%0Ac%20640%20160%20640%20208%200%201e-8%200%200.001%0Ag%20640%20208%20640%20224%200%200%0AO%20640%20160%20688%20160%200%200%0Aw%20320%20176%20320%20208%200%0Ag%20320%20208%20320%20224%200%200%0AR%20288%20144%20288%2080%200%202%2039000%202.5%202.5%200%200.5%0Ax%208%20292%2088%20295%204%2013%20something%5Csswitching%5Csnearby%0Ax%20160%20136%20240%20139%204%2013%20pickup%5Cscoil%0Ax%20200%2044%20280%2047%204%2013%20oscillator%5Cs%28the%5Csknob%29%0Ax%20232%20256%20312%20259%204%2013%20one%5Cs74HC4053%5Cssection%0Ax%20424%20256%20504%20259%204%2013%20the%5Csbadge%27s%5Csamplifier%0Ax%20568%20256%20648%20259%204%2013%20stands%5Csin%5Csfor%5Csthe%5Csear%0Ao%206%2064%203%204099%200.1%200.000005%200%201%20coil%5Cscurrent%0Ao%209%2064%203%204099%200.1%200.000005%201%201%20current%5Csinto%5Csthe%5Csamplifier%0Ao%2023%2064%200%204099%200.25%200.000005%202%201%20what%5Csyou%5Cshear%0A38%200%205%2030000%2050000%20Field%5Csfrequency%0A38%2026%206%2030000%2050000%20Knob%3A%5Csoscillator%5Csfrequency%0A" target="_blank" rel="noopener">Open this circuit full-size at falstad.com</a></p>
+  <figcaption>The left trace is the coil's current, a steady 40 kHz. The middle trace is what the switch lets through to the amplifier; its outline breathes at the difference between the two frequencies. The right trace is the amplifier's output after a small low-pass that stands in for the ear: a 1 kHz note. On a wide screen the frame has two sliders, <em>Field frequency</em> and <em>Knob</em>, each from 30 to 50 kHz. Bring them together and the note slows, stops and climbs again; move the field and the knob can follow it. The source reaches the pickup coil through a loosely coupled pair of coils, so the field keeps the same strength at any frequency. The switch is a plain 120 Ω one and the op-amp is ideal; the note is 61 mV at the amplifier, against 59 mV in the fuller model further down. The frame loads from falstad.com and stays empty if that site cannot be reached.</figcaption>
 </figure>
 
 <h2>Why the badge is already most of the way there</h2>
@@ -277,8 +281,8 @@ footer{margin-top:3.5rem;padding-top:1rem;border-top:1px solid var(--line);font-
 
 <figure class="lab">
   <div class="lab-title"><b>A field of the same strength, at any frequency</b><span>Calculated and simulated</span></div>
-  <div class="cv"><canvas id="respCv" role="img" aria-label="Response of the badge to a field of constant strength from 100 Hz to 1 MHz. Today it is flat from about 1 kHz to 10 kHz and falls away above 16 kHz. With the knob tuned to the source it is flat at minus 10 dB from 24 kHz upward."></canvas><div class="tip" id="respTip" hidden></div></div>
-  <figcaption>Level at the amplifier output for a field of constant strength, relative to the badge's mid-band. The black curve is calculated from the badge's own values: a 100 mH coil with about 250 Ω of winding resistance, 100 Ω in, 100 kΩ with 100 pF in the feedback. It falls on the left because the winding resistance takes over below about 500 Hz, and on the right because of the 100 pF. The amber line is the simulated tone, about 10 dB down and flat. With the 74HC4053 it was simulated to 400 kHz and with an ideal switch to 1 MHz. Not modelled: losses in the coil's ferrite core at high frequency, the likeliest thing to pull the right-hand end down.</figcaption>
+  <div class="cv"><canvas id="respCv" role="img" aria-label="Response of the badge to a field of constant strength from 100 Hz to 1 MHz. Today it is flat from about 1 kHz to 10 kHz and falls away above 16 kHz. With the knob tuned to the source it is flat at minus 10 dB from 26 kHz upward."></canvas><div class="tip" id="respTip" hidden></div></div>
+  <figcaption>Level at the amplifier output for a field of constant strength, relative to the badge's mid-band. The black curve is calculated from the badge's own values: a 100 mH coil with about 250 Ω of winding resistance, 100 Ω in, 100 kΩ with 100 pF in the feedback. It falls on the left because the winding resistance takes over below about 500 Hz, and on the right because of the 100 pF. The amber line is the simulated tone, about 10 dB down and flat. With the 74HC4053 it was simulated to 1 MHz. Not modelled: losses in the coil's ferrite core at high frequency, the likeliest thing to pull the right-hand end down.</figcaption>
 </figure>
 
 <h2>The circuit</h2>
@@ -329,7 +333,7 @@ footer{margin-top:3.5rem;padding-top:1rem;border-top:1px solid var(--line);font-
 <text class="q" x="334" y="428">high: pass. low: to 0 V.</text>
 <text class="b" x="96" y="476">OSCILLATOR: THE DIAL</text>
 <text class="q" x="252" y="476">one 74HC14: gate 1 oscillates, gate 2 drives the switch</text>
-<text class="q" x="290" y="499" text-anchor="middle">10 kΩ</text>
+<text class="q" x="290" y="499" text-anchor="middle">2.2 kΩ</text>
 <text class="b" x="200" y="514" text-anchor="end">pot 100 kΩ</text>
 <text class="q" x="224" y="580">330 pF</text>
 <text class="q" x="224" y="607">−1.5 V</text>
@@ -354,8 +358,14 @@ footer{margin-top:3.5rem;padding-top:1rem;border-top:1px solid var(--line);font-
 <p>The switch's resistance hardly matters while chopping, because the coil behaves as a current source. A 74HC4053 on 3 V is somewhere between 100 and 200 Ω, and more as the cells run down; the datasheet does not pin it down at so low a supply. In simulation 400 Ω and a slower switch, standing in for nearly flat cells, still gave the full tone.</p>
 
 <h3 id="osc">The oscillator</h3>
-<p>One Schmitt inverter with a resistor from its output back to its input and a capacitor from its input to the rail. The capacitor charges until the gate flips, discharges until it flips back, and repeats. With 10 kΩ, a 100 kΩ pot and 330 pF it runs from about 24 kHz to 255 kHz on fresh cells and from 19 kHz to 203 kHz on cells run down to 2 V. A second gate of the same chip squares the edges up and drives the switch. Expect the whole range to sit 30 % higher or lower from one chip to the next; it is a knob, not a calibrated dial.</p>
-<p>The pot's taper matters. Frequency goes as one over resistance, so a linear pot squeezes the top half of the range into the last tenth of the turn. A log pot wired backwards spreads it to within three or four times from one end to the other. The dial above lets you feel both.</p>
+<p>One Schmitt inverter with a resistor from its output back to its input and a capacitor from its input to the rail. The capacitor charges until the gate flips, discharges until it flips back, and repeats. With 2.2 kΩ, a 100 kΩ pot and 330 pF it runs from about 26 kHz to 1 MHz on fresh cells, and from 21 kHz to about 0.8 MHz on cells run down to 2 V. A second gate of the same chip squares the edges up and drives the switch. Expect the whole range to sit 30 % higher or lower from one chip to the next; it is a knob, not a calibrated dial.</p>
+<p><strong>The top of that range is ragged, and that is the bargain.</strong> An earlier draft used 10 kΩ and stopped at 255 kHz. The smaller resistor costs nothing and lets the knob reach on toward 1 MHz, where three things stop being tidy.</p>
+<ul>
+  <li><strong>Tuning.</strong> Frequency goes as one over resistance, so the top is crowded. With a linear pot everything above 100 kHz sits in the last quarter of the turn and everything above 350 kHz in the last twentieth. Up there the knob is for sweeping through sources, not for parking on one. A log pot wired backwards spreads the octaves far more evenly; the dial above lets you feel both.</li>
+  <li><strong>The parts.</strong> In simulation the tone holds, 57 to 59 mV all the way to 1 MHz. What grows is an offset at the amplifier's output, about 0.1 V at 1 MHz on fresh cells and 0.17 V on tired ones. The real chip's charge injection is not modelled and will add to it. On tired cells the oscillator itself stops near 0.8 MHz.</li>
+  <li><strong>The coil.</strong> Its ferrite core was never meant for this, and its losses up there are unknown.</li>
+</ul>
+<p>If the top end turns out to be too fiddly, a larger fixed resistor pulls it back in: 4.7 kΩ stops near 500 kHz and 10 kΩ near 250 kHz.</p>
 
 <h3>Normal listening</h3>
 <p>A mode switch that holds the select pin high leaves the coil connected to the amplifier through the chip. That is not quite the stock badge: the chip's resistance sits in the coil's path and takes about 2.5 dB off everything below 300 Hz on fresh cells, and about 6.5 dB once they are down to 2 V. If that matters, a second pole on the mode switch can join the coil straight to R2.</p>
@@ -369,8 +379,8 @@ footer{margin-top:3.5rem;padding-top:1rem;border-top:1px solid var(--line);font-
   <tbody>
     <tr><th scope="row">Analog switch</th><td>74HC4053, DIP-16</td><td>sections 1 and 2 chop the two coils; section 3 is spare</td></tr>
     <tr><th scope="row">Schmitt inverters</th><td>74HC14, DIP-14</td><td>gate 1 oscillates, gate 2 drives the switches; two more gates make comb mode</td></tr>
-    <tr><th scope="row">Pot</th><td class="n">100 kΩ, log taper</td><td>the knob; a 10 kΩ pot works with 1 kΩ and 3.3 nF</td></tr>
-    <tr><th scope="row">Resistor</th><td class="n">10 kΩ</td><td>sets the top of the range</td></tr>
+    <tr><th scope="row">Pot</th><td class="n">100 kΩ, log taper</td><td>the knob; smaller pots cover less of the range</td></tr>
+    <tr><th scope="row">Resistor</th><td class="n">2.2 kΩ</td><td>sets the top of the range</td></tr>
     <tr><th scope="row">Capacitor</th><td class="n">330 pF</td><td>sets the range</td></tr>
     <tr><th scope="row">Capacitor</th><td class="n">100 nF</td><td>across the rails, beside the chips</td></tr>
     <tr><th scope="row">Mode switch</th><td>two- or three-position slide</td><td>normal, tuned, and comb if fitted</td></tr>
@@ -435,7 +445,7 @@ footer{margin-top:3.5rem;padding-top:1rem;border-top:1px solid var(--line);font-
 <polygon points="170,91 166,83 174,83" fill="var(--lo)"/>
 <circle class="dot osc" cx="270" cy="140" r="3"/>
 <circle class="dot osc" cx="130" cy="140" r="3"/>
-<text class="q" x="230" y="85" text-anchor="middle">10 kΩ</text>
+<text class="q" x="230" y="85" text-anchor="middle">2.2 kΩ</text>
 <text class="q" x="160" y="70" text-anchor="middle">pot 100 kΩ</text>
 <text class="q" x="144" y="176">330 pF</text>
 <text class="q" x="144" y="204">−1.5 V</text>
@@ -454,7 +464,7 @@ footer{margin-top:3.5rem;padding-top:1rem;border-top:1px solid var(--line);font-
 <text class="p" x="615" y="88" text-anchor="middle">4</text>
 <text class="p" x="590" y="156" text-anchor="middle">1</text>
 <text class="q" x="590" y="60" text-anchor="middle">+1.5 V</text>
-<text class="q" x="620" y="216" text-anchor="middle">10 kΩ</text>
+<text class="q" x="620" y="216" text-anchor="middle">2.2 kΩ</text>
 <text class="q" x="548" y="216" text-anchor="middle">pot 100 kΩ</text>
 <text class="q" x="458" y="156" text-anchor="end">220 pF</text>
 <text class="q" x="470" y="190" text-anchor="middle">−1.5 V</text>
@@ -466,7 +476,7 @@ footer{margin-top:3.5rem;padding-top:1rem;border-top:1px solid var(--line);font-
 <circle class="dot osc" cx="232" cy="382" r="3"/>
 <circle class="dot osc" cx="330" cy="382" r="3"/>
 <text class="q" x="124" y="371" text-anchor="middle">47 kΩ</text>
-<text class="q" x="196" y="327" text-anchor="middle">10 kΩ</text>
+<text class="q" x="196" y="327" text-anchor="middle">2.2 kΩ</text>
 <text class="q" x="130" y="312" text-anchor="middle">pot 100 kΩ</text>
 <text class="q" x="190" y="456" text-anchor="middle">180 pF</text>
 <text class="b" x="338" y="372">out</text>
@@ -491,25 +501,73 @@ footer{margin-top:3.5rem;padding-top:1rem;border-top:1px solid var(--line);font-
 <text class="b" x="722" y="406">out</text>
 </svg>
   </div>
-  <figcaption>Every one drives the select pin of the switch chip directly. The pot and the 10 kΩ set the frequency in A, B and C. In D the one pot feeds both base resistors.</figcaption>
+  <figcaption>Every one drives the select pin of the switch chip directly. The pot and the 2.2 kΩ set the frequency in A, B and C. In D the one pot feeds both base resistors.</figcaption>
 </figure>
 <div class="tw"><table>
   <thead><tr><th>Oscillator</th><th>Range on fresh cells</th><th>On cells at 2 V</th><th>Time high</th><th>Verdict</th></tr></thead>
   <tbody>
-    <tr class="pick"><th scope="row">A. One 74HC14 gate</th><td class="n">24 to 255 kHz</td><td class="n">19 to 203 kHz</td><td class="n">42 %</td><td><span class="v yes">Recommended</span> the spare gates give the buffer and comb mode for nothing</td></tr>
-    <tr><th scope="row">B. One CMOS 555</th><td class="n">29 to 250 kHz</td><td>the same</td><td class="n">50 %</td><td><span class="v">Works</span> the steadiest dial, and comb mode is built in; costs more than the 74HC14</td></tr>
-    <tr><th scope="row">C. Two 74HC4053 sections</th><td class="n">23 to 200 kHz</td><td>the same</td><td class="n">50 %</td><td><span class="v">Works</span> no second chip; leaves one section, so it tunes one ear</td></tr>
+    <tr class="pick"><th scope="row">A. One 74HC14 gate</th><td class="n">26 kHz to 1.0 MHz</td><td class="n">21 to 810 kHz</td><td class="n">42 %</td><td><span class="v yes">Recommended</span> the spare gates give the buffer and comb mode for nothing</td></tr>
+    <tr><th scope="row">B. One CMOS 555</th><td class="n">31 to 735 kHz</td><td>the same</td><td class="n">50 %</td><td><span class="v">Works</span> the steadiest dial, and comb mode is built in; costs more than the 74HC14</td></tr>
+    <tr><th scope="row">C. Two 74HC4053 sections</th><td class="n">25 to 555 kHz</td><td>the same</td><td class="n">50 %</td><td><span class="v">Works</span> no second chip; leaves one section, so it tunes one ear</td></tr>
     <tr><th scope="row">D. Two 2N3904</th><td class="n">about 50 to 300 kHz</td><td>the bottom of the range stops following the pot</td><td class="n">40 to 48 %</td><td><span class="v">Works, narrowly</span> a 6 to 1 range, 0.6 to 1.1 mA from the cells, nine parts</td></tr>
     <tr><th scope="row">Bipolar 555 (NE555)</th><td colspan="3">needs 4.5 V</td><td><span class="v no">No</span></td></tr>
     <tr><th scope="row">CD4000-series gates</th><td colspan="3">too slow on 3 V; fine on 5 V, which is what the breadboard build uses</td><td><span class="v no">No</span></td></tr>
   </tbody>
 </table></div>
-<p>The 555 has to be a CMOS one: a TLC555, LMC555 or ICM7555. Wired with its timing resistor from the output pin, it gives an even square wave whose frequency does not move as the cells run down, because its thresholds are fixed fractions of the supply. The 74HC14's thresholds are not, which is why its range sags by a fifth. Its uneven 42 % also opens a faint extra window at twice the oscillator frequency, about a quarter the size of the main one. Neither costs anything you would hear as a fault.</p>
+<p>The 555 has to be a CMOS one: a TLC555, LMC555 or ICM7555. Wired with its timing resistor from the output pin, it gives an even square wave whose frequency does not move as the cells run down, because its thresholds are fixed fractions of the supply. The 74HC14's thresholds are not, which is why its range sags by a fifth. The 555 and the two-section oscillator stop short of 1 MHz with the same 2.2 kΩ, because their own delays are longer. Its uneven 42 % also opens a faint extra window at twice the oscillator frequency, about a quarter the size of the main one. Neither costs anything you would hear as a fault.</p>
 <p>The 555 figures assume a quarter of a microsecond of delay inside the chip. The TLC555 datasheet's graph runs up to half a microsecond at low supply, so the top of its range could sit lower. The transistor pair is the only one of the four simulated with real device models.</p>
 
-<h2>Comb mode</h2>
+<h2 id="comb">Comb mode</h2>
 <p>Tuned, the switch passes for half of each cycle and you hear one window. Give it a short pulse instead and it opens a window at every multiple of the oscillator frequency at once. With the oscillator near 30 kHz the windows overlap, so everything from 15 kHz to about 300 kHz is audible together. The knob stops being a tuning dial and becomes a pitch control.</p>
-<p>What comb mode gives up is loudness. A 3 µs pulse at 30 kHz passes the coil for 9 % of each cycle, and the tone is about 9 % of the wave instead of 32 %. In simulation the same field that gives 59 mV when tuned gives 17 mV at 31 kHz, 17 mV at 61 kHz, 12 mV at 151 kHz, 6 mV at 241 kHz and 2 mV at 301 kHz. Hiss falls further still, to about 26 dB below the stock badge, and ordinary sound drops to 9 % with everything else.</p>
+
+<h3>Why a short pulse hears everything</h3>
+<p>Go back to the strobe and the fan. A strobe that flashes 30 times a second freezes a fan turning 30 times a second. It also freezes one turning 60, 90 or 150 times a second, because each of those is back in the same place at every flash. That only works if the flash is short. A flash that stays on for half the time between flashes still shows the slowest fan, and smears the faster ones into a blur.</p>
+<p>The switch is the strobe. Tuned, it is on half the time, which is the long flash: it catches fields near the oscillator frequency well, fields near three and five times that frequency faintly, and nothing near the even multiples. In comb mode it is on for about 3 µs in every cycle, which is the short flash. A field near any multiple of the oscillator frequency now comes out as a tone. Those multiples are the teeth of the comb.</p>
+<p>Three things set what the comb does.</p>
+<ul>
+  <li><strong>The pulse width sets the reach.</strong> A tooth fades as the pulse becomes a large part of one cycle of the field, and vanishes where the pulse is exactly one cycle long. That is 333 kHz for a 3 µs pulse and 1 MHz for a 1 µs pulse. Past it a second, much fainter set of teeth carries on.</li>
+  <li><strong>The pulse width also sets the loudness.</strong> The switch passes for a small part of each cycle, 9 % for 3 µs at 30 kHz, and every tone is about that fraction of the wave instead of the 32 % that tuning gives. A shorter pulse reaches higher and is quieter everywhere.</li>
+  <li><strong>The oscillator frequency sets the spacing.</strong> Each tooth hears 16 kHz either side of itself. At 30 kHz the teeth are close enough for those windows to overlap, and nothing between 15 kHz and the reach is missed. At 60 kHz there are gaps.</li>
+</ul>
+
+<figure class="lab" id="combsim">
+  <div class="lab-title"><b>The comb's teeth</b><span>Simulation 3</span></div>
+  <div class="cv"><canvas id="combCv" role="img" aria-label="Top: the teeth of the comb from 0 to 1 megahertz, each drawn as tall as the tone it gives, with a field you can move. Bottom: the note that field makes between 0 and 20 kilohertz."></canvas></div>
+  <div class="controls">
+    <div class="seg" role="group" aria-label="How the switch is driven"><button data-cm="comb" aria-pressed="true">Short pulse</button><button data-cm="tuned" aria-pressed="false">Half on, as when tuning</button></div>
+    <label class="field"><span>Oscillator</span><input type="range" id="ck" min="20" max="60" step="0.5" value="30" aria-label="Oscillator frequency"><output id="ckOut" for="ck"></output></label>
+  </div>
+  <div class="controls">
+    <label class="field" id="cpField"><span>Pulse</span><input type="range" id="cp" min="1" max="8" step="0.1" value="3" aria-label="Pulse width"><output id="cpOut" for="cp"></output></label>
+    <label class="field"><span>Field</span><input type="range" id="cs" min="0" max="1000" step="1" value="517" aria-label="Frequency of the field"><output id="csOut" for="cs"></output></label>
+  </div>
+  <p class="readout" id="combRead" aria-live="polite"></p>
+  <figcaption>Each amber stem is one tooth, as tall as the tone it gives for a field of fixed strength; the top of the panel is the level of a source that is tuned in. The dashed curve is the limit the pulse width sets. The blue line is one field: drag it, or use the slider, and watch which tooth catches it and what note comes out. Calculated from the same formula the circuit simulation confirmed to within half a millivolt.</figcaption>
+</figure>
+
+<ol class="try">
+  <li>Drag the field slowly from left to right. A note falls to zero and rises again at every tooth, quieter each time, and all but stops at the reach.</li>
+  <li>Shorten the pulse to 1 µs. The teeth run all the way to 1 MHz, and every one of them is a third as tall.</li>
+  <li>Press <em>Half on, as when tuning</em>. Every second tooth vanishes and the rest fall away quickly: that is why tuning hears one band.</li>
+  <li>Raise the oscillator to 60 kHz. Gaps open between the windows, and a field in a gap is not heard at all.</li>
+</ol>
+
+<h3>What it sounds like</h3>
+<p>Every source in reach plays at once, each at its distance from its nearest tooth. Turn the knob and each note moves at its own speed: a source near tooth 5 moves five times as fast as one near tooth 1, and a source just below a tooth moves the opposite way to one just above it. So in comb mode the knob is for nudging a sound to a comfortable pitch, not for finding it. Comb mode answers what is out there; tuning then picks one thing and gives it three times the level.</p>
+<p>What comb mode gives up is loudness. In simulation the same field that gives 59 mV when tuned gives 17 mV at 31 kHz, 17 mV at 61 kHz, 12 mV at 151 kHz, 6 mV at 241 kHz and 2 mV at 301 kHz. Hiss falls further still, to about 26 dB below the stock badge, and ordinary sound drops to 9 % with everything else. The amplifier's output is then mostly ripple at the oscillator frequency. It is above hearing, and in the frame below a small low-pass standing in for the ear takes it off so that the note shows.</p>
+
+<figure class="lab" id="falstad-comb">
+  <div class="lab-title"><b>Comb mode as a live circuit</b><span>Falstad simulator</span></div>
+  <div class="fs-wrap">
+    <iframe class="fs-frame" title="Comb mode running in the Falstad circuit simulator" loading="lazy" referrerpolicy="no-referrer" data-cct="%24%201%201e-7%20300%2050%201%2050%205e-11%0Av%2032%20240%2032%20160%200%201%20151000%205%200%200%200.5%0Ar%2032%20160%2096%20160%200%201000%0AT%2096%20160%20176%20240%200%200.00001%20100%200%200%200.04%0Aw%2032%20240%2096%20240%200%0Ag%2032%20240%2032%20256%200%200%0Ag%20176%20240%20176%20256%200%200%0Ar%20176%20160%20256%20160%200%20250%0A160%20256%20160%20320%20160%200%20120%201e10%0Aw%20320%20144%20352%20144%200%0Ar%20352%20144%20448%20144%200%20100%0Aa%20448%20160%20544%20160%208%201.5%20-1.5%2012000000%200%200%20100000%0Aw%20448%20176%20448%20208%200%0Ag%20448%20208%20448%20224%200%200%0Aw%20448%20144%20448%2080%200%0Ar%20448%2080%20544%2080%200%20100000%0Aw%20544%2080%20544%20160%200%0Aw%20448%2080%20448%2048%200%0Ac%20448%2048%20544%2048%200%201e-10%200%200.001%0Aw%20544%2048%20544%2080%200%0Aw%20544%20160%20576%20160%200%0Ar%20576%20160%20640%20160%200%203300%0Ac%20640%20160%20640%20208%200%201e-8%200%200.001%0Ag%20640%20208%20640%20224%200%200%0AO%20640%20160%20688%20160%200%200%0Aw%20320%20176%20320%20208%200%0Ag%20320%20208%20320%20224%200%200%0AR%20288%20144%20288%2080%200%202%2030000%202.5%202.5%200%200.09%0Ax%208%20292%2088%20295%204%2013%20something%5Csswitching%5Csnearby%0Ax%20160%20136%20240%20139%204%2013%20pickup%5Cscoil%0Ax%20200%2044%20280%2047%204%2013%20oscillator%3A%5Cs3%5Csus%5Cspulses%0Ax%20232%20256%20312%20259%204%2013%20one%5Cs74HC4053%5Cssection%0Ax%20424%20256%20504%20259%204%2013%20the%5Csbadge%27s%5Csamplifier%0Ax%20568%20256%20648%20259%204%2013%20stands%5Csin%5Csfor%5Csthe%5Csear%0Ao%206%20320%203%204099%200.1%200.000005%200%201%20coil%5Cscurrent%0Ao%209%20320%203%204099%200.1%200.000005%201%201%20current%5Csinto%5Csthe%5Csamplifier%0Ao%2023%20320%200%204099%200.04%200.000005%202%201%20what%5Csyou%5Cshear%0A38%200%205%2031000%20331000%20Field%5Csfrequency%0A38%2026%206%2025000%2035000%20Knob%3A%5Csoscillator%5Csfrequency%0A"></iframe>
+    <button class="fs-shield" type="button"><span>Click to use the circuit</span></button>
+  </div>
+  <p class="fs-link"><a href="https://www.falstad.com/circuit/circuitjs.html?cct=%24%201%201e-7%20300%2050%201%2050%205e-11%0Av%2032%20240%2032%20160%200%201%20151000%205%200%200%200.5%0Ar%2032%20160%2096%20160%200%201000%0AT%2096%20160%20176%20240%200%200.00001%20100%200%200%200.04%0Aw%2032%20240%2096%20240%200%0Ag%2032%20240%2032%20256%200%200%0Ag%20176%20240%20176%20256%200%200%0Ar%20176%20160%20256%20160%200%20250%0A160%20256%20160%20320%20160%200%20120%201e10%0Aw%20320%20144%20352%20144%200%0Ar%20352%20144%20448%20144%200%20100%0Aa%20448%20160%20544%20160%208%201.5%20-1.5%2012000000%200%200%20100000%0Aw%20448%20176%20448%20208%200%0Ag%20448%20208%20448%20224%200%200%0Aw%20448%20144%20448%2080%200%0Ar%20448%2080%20544%2080%200%20100000%0Aw%20544%2080%20544%20160%200%0Aw%20448%2080%20448%2048%200%0Ac%20448%2048%20544%2048%200%201e-10%200%200.001%0Aw%20544%2048%20544%2080%200%0Aw%20544%20160%20576%20160%200%0Ar%20576%20160%20640%20160%200%203300%0Ac%20640%20160%20640%20208%200%201e-8%200%200.001%0Ag%20640%20208%20640%20224%200%200%0AO%20640%20160%20688%20160%200%200%0Aw%20320%20176%20320%20208%200%0Ag%20320%20208%20320%20224%200%200%0AR%20288%20144%20288%2080%200%202%2030000%202.5%202.5%200%200.09%0Ax%208%20292%2088%20295%204%2013%20something%5Csswitching%5Csnearby%0Ax%20160%20136%20240%20139%204%2013%20pickup%5Cscoil%0Ax%20200%2044%20280%2047%204%2013%20oscillator%3A%5Cs3%5Csus%5Cspulses%0Ax%20232%20256%20312%20259%204%2013%20one%5Cs74HC4053%5Cssection%0Ax%20424%20256%20504%20259%204%2013%20the%5Csbadge%27s%5Csamplifier%0Ax%20568%20256%20648%20259%204%2013%20stands%5Csin%5Csfor%5Csthe%5Csear%0Ao%206%20320%203%204099%200.1%200.000005%200%201%20coil%5Cscurrent%0Ao%209%20320%203%204099%200.1%200.000005%201%201%20current%5Csinto%5Csthe%5Csamplifier%0Ao%2023%20320%200%204099%200.04%200.000005%202%201%20what%5Csyou%5Cshear%0A38%200%205%2031000%20331000%20Field%5Csfrequency%0A38%2026%206%2025000%2035000%20Knob%3A%5Csoscillator%5Csfrequency%0A" target="_blank" rel="noopener">Open this circuit full-size at falstad.com</a></p>
+  <figcaption>The oscillator runs at 30 kHz and turns the switch on for 3 µs in each cycle. The field starts at 151 kHz, 1 kHz above tooth 5, and the right-hand trace shows the 1 kHz note: 12.5 mV at the amplifier here, 12.3 mV in ngspice. On a wide screen the <em>Field frequency</em> slider moves in 3 kHz steps from 31 to 331 kHz, so every tenth step lands 1 kHz above a tooth; in between, the note is higher and fainter. The source reaches the pickup coil through a loosely coupled pair of coils, so the field keeps the same strength as its frequency changes.</figcaption>
+</figure>
+
+<h3>Adding it to the build</h3>
+<p>On the recommended build the comb costs a capacitor, a resistor and a third position on the mode switch. The pulse is a fixed 2.8 µs or so, which puts the reach near 350 kHz. Keep the knob in the lower part of its travel: above about 180 kHz the pulses fill more than half of each cycle and it stops being a comb.</p>
 
 <figure class="lab">
   <div class="lab-title"><b>Comb mode on the recommended build</b><span>Two spare gates, two passives, one switch</span></div>
@@ -542,11 +600,81 @@ footer{margin-top:3.5rem;padding-top:1rem;border-top:1px solid var(--line);font-
   <thead><tr><th>Oscillator</th><th>Added for comb mode</th><th>How well</th></tr></thead>
   <tbody>
     <tr class="pick"><th scope="row">A. 74HC14</th><td>330 pF, 6.8 kΩ, two spare gates, a three-position switch</td><td>A fixed pulse of about 2.8 µs (calculated)</td></tr>
-    <tr><th scope="row">B. CMOS 555</th><td>18 kΩ and a two-pole three-position switch that rewires it as the standard 555 circuit</td><td>A steady 3 µs pulse from 41 to 124 kHz (simulated). The neatest of the four</td></tr>
-    <tr><th scope="row">C. Two 74HC4053 sections</th><td>a diode and 15 kΩ across the timing resistor, and a switch</td><td>Works, but the pulse width changes two to one across the dial (simulated)</td></tr>
+    <tr><th scope="row">B. CMOS 555</th><td>18 kΩ and a two-pole three-position switch that rewires it as the standard 555 circuit</td><td>A steady 3 µs pulse from 44 to 139 kHz (simulated). The neatest of the four</td></tr>
+    <tr><th scope="row">C. Two 74HC4053 sections</th><td>a diode and 15 kΩ across the timing resistor, and a switch</td><td>Works at the low end of the dial, but the pulse narrows from 3.6 µs to under 1 µs as the knob goes up (simulated)</td></tr>
     <tr><th scope="row">D. Two 2N3904</th><td>unequal base resistors</td><td>Not worth it: it stalls at one end of the pot</td></tr>
   </tbody>
 </table></div>
+
+<h2 id="tone">A nicer tone</h2>
+<p>Tuned in, the badge plays three things at once: the note you tuned to, the mains hum it always plays, now at half its usual level, and ripple at the oscillator frequency that nobody hears but the amplifier has to carry. Two small filters each take one of those out, and one larger change takes out two. None of them is in the recommended build. All were simulated with a 40 kHz field tuned to a 1 kHz note and 60, 180 and 300 Hz hum induced in the coil alongside it.</p>
+<div class="tw"><table class="wide">
+  <thead><tr><th>While tuning</th><th>1 kHz note</th><th>60 Hz hum</th><th>180 Hz hum</th><th>300 Hz hum</th><th>Oscillator ripple</th><th>Hiss, against the stock badge</th></tr></thead>
+  <tbody>
+    <tr><th scope="row">Recommended build, no filter</th><td class="n">59 mV</td><td class="n">55 mV</td><td class="n">53 mV</td><td class="n">51 mV</td><td class="n">54 mV</td><td class="n">about −10 dB</td></tr>
+    <tr><th scope="row">0.47 µF in series</th><td class="n">64 mV</td><td class="n">17 mV</td><td class="n">43 mV</td><td class="n">54 mV</td><td class="n">51 mV</td><td>not run</td></tr>
+    <tr class="pick"><th scope="row">0.22 µF in series</th><td class="n">72 mV</td><td class="n">8 mV</td><td class="n">25 mV</td><td class="n">41 mV</td><td class="n">51 mV</td><td class="n">about −8 dB</td></tr>
+    <tr><th scope="row">0.1 µF in series</th><td class="n">90 mV</td><td class="n">4 mV</td><td class="n">12 mV</td><td class="n">20 mV</td><td class="n">51 mV</td><td>not run</td></tr>
+    <tr><th scope="row">390 pF more across the feedback</th><td class="n">58 mV</td><td class="n">58 mV</td><td class="n">56 mV</td><td class="n">53 mV</td><td class="n">13 mV</td><td class="n">about −11 dB</td></tr>
+    <tr><th scope="row">0.22 µF and 390 pF</th><td class="n">71 mV</td><td class="n">8 mV</td><td class="n">25 mV</td><td class="n">42 mV</td><td class="n">12 mV</td><td class="n">about −8 dB</td></tr>
+    <tr><th scope="row">Reversing the coil, even square wave</th><td class="n">126 mV</td><td class="n">0 mV</td><td class="n">0 mV</td><td>not run</td><td class="n">0 mV</td><td class="n">about −22 dB</td></tr>
+    <tr><th scope="row">Reversing the coil, 74HC14's 42 %</th><td class="n">123 mV</td><td class="n">11 mV</td><td class="n">11 mV</td><td>not run</td><td class="n">10 mV</td><td>not run</td></tr>
+  </tbody>
+</table></div>
+<p class="small">Levels at the amplifier output, from <a href="badge_filter.py">badge_filter.py</a>. The hum is 0.5 mV of each frequency induced in the coil, which gives about 0.1 V of each on the stock badge. The hiss figures move by a decibel or two from run to run.</p>
+
+<h3>A capacitor against the hum</h3>
+<p>A capacitor between the switch and R2 lets the note through and holds the hum back. With 0.22 µF the 60 Hz hum drops by 16 dB and the 180 Hz by 7 dB. The capacitor also resonates gently with the coil, so notes around 600 Hz to 1 kHz come out about a quarter louder than without it, and notes below 300 Hz fade. A smaller capacitor does more of both: 0.1 µF takes 23 dB off the 60 Hz and makes notes near 1 kHz stand out, 90 mV at 1 kHz against 62 mV at 600 Hz and 71 mV at 2 kHz.</p>
+<p>It cannot stay in the path for normal listening. Held at pass with 0.22 µF in series, the badge loses 28 dB of its 60 Hz and 13 dB of its 300 Hz, and hum is most of what the stock badge plays. So the capacitor needs a bypass that closes for normal listening.</p>
+
+<h3>A capacitor against the shrillness</h3>
+<p>Another 390 pF across each feedback resistor moves the amplifier's corner from 16 kHz down to 3.2 kHz. Notes above that fade, by 4 dB at 4 kHz and 7 dB at 8 kHz, so an off-tune source is a murmur and not a whistle. The oscillator's ripple at the output falls to a quarter, which gives the amplifier its headroom back. It does little for hiss, about 2 dB, because the hiss is already concentrated at low pitches.</p>
+<p>The price is a narrower window, about 3 kHz either side of the oscillator where it was 16 kHz. That makes tuning more selective and the crowded top of the dial harder still to catch. It also has to switch out for normal listening, or the stock badge loses its top end.</p>
+
+<h3>Switching them in and out</h3>
+<figure class="lab">
+  <div class="lab-title"><b>Both filters on one channel</b><span>Half a 74HC4066 per ear</span></div>
+  <div class="scroll">
+<svg class="sch" viewBox="0 -44 700 250" role="img" aria-label="One channel with both filters: a 0.22 microfarad capacitor between the switch chip and R2, with a bypass switch around the chopper and the capacitor that closes for normal listening, and a 390 picofarad capacitor across the feedback through a switch that closes while tuning.">
+<g class="w old"><path d="M60 90a6 7.5 0 0 1 0 15a6 7.5 0 0 1 0 15a6 7.5 0 0 1 0 15a6 7.5 0 0 1 0 15"/><path d="M60 150v10"/><path d="M60 160v6M52 166h16M55 170h10M58 174h4"/><path d="M60 90H150"/><path d="M330 74h5l2.5 -5l5 10l5 -10l5 10l5 -10l5 10l2.5 -5h5"/><path d="M370 74H410"/><polygon points="410,58 410,122 466,90"/><path d="M410 106H396V124"/><path d="M396 124v6M388 130h16M391 134h10M394 138h4"/><path d="M466 90H560"/><path d="M390 74V30H424"/><path d="M424 30h5l2.5 -5l5 10l5 -10l5 10l5 -10l5 10l2.5 -5h5"/><path d="M464 30H510V90"/></g>
+<circle class="dot old" cx="390" cy="74" r="3"/>
+<circle class="dot old" cx="510" cy="90" r="3"/>
+<circle class="dot old" cx="390" cy="30" r="3"/>
+<circle class="dot old" cx="510" cy="30" r="3"/>
+<g class="w"><circle cx="153" cy="90" r="3"/><circle cx="203" cy="74" r="3"/><circle cx="203" cy="106" r="3"/><path d="M156 90L200 75" stroke-width="2"/><path d="M206 106H222V124"/><path d="M222 124v6M214 130h16M217 134h10M220 138h4"/><path d="M206 74H240"/><path d="M240 74H256M256 65v18M264 65v18M264 74H280"/><path d="M280 74H330"/></g>
+<g class="w"><path d="M110 90V34H180"/><circle cx="183" cy="34" r="3"/><circle cx="233" cy="34" r="3"/><path d="M186 34L229 22" stroke-width="2"/><path d="M236 34H304V74"/></g>
+<circle class="dot " cx="110" cy="90" r="3"/>
+<circle class="dot " cx="304" cy="74" r="3"/>
+<g class="w"><path d="M390 30V-14H400"/><path d="M400 -14H416M416 -23v18M424 -23v18M424 -14H440"/><path d="M440 -14H452"/><circle cx="455" cy="-14" r="3"/><circle cx="495" cy="-14" r="3"/><path d="M458 -14L491 -26" stroke-width="2"/><path d="M498 -14H510V30"/></g>
+<text class="q" x="48" y="112" text-anchor="end">pickup</text>
+<text class="q" x="48" y="126" text-anchor="end">coil</text>
+<text class="b" x="178" y="126" text-anchor="middle">74HC4053</text>
+<text class="q" x="178" y="140" text-anchor="middle">section</text>
+<text class="b" x="260" y="58" text-anchor="middle">CS  0.22 µF</text>
+<text class="q" x="350" y="58" text-anchor="middle">R2  100 Ω</text>
+<text class="b" x="118" y="8">bypass</text>
+<text class="q" x="168" y="8">closed for normal listening</text>
+<text class="q" x="444" y="50" text-anchor="middle">100 kΩ ‖ 100 pF</text>
+<text class="b" x="420" y="-30" text-anchor="middle">CX  390 pF</text>
+<text class="q" x="520" y="-18">closed while tuning</text>
+<text class="q" x="428" y="78">−</text>
+<text class="q" x="428" y="110">+</text>
+<text class="q" x="566" y="94">to the jack</text>
+<text class="q" x="60" y="196">Grey parts are on the badge today. The two switches are half of a 74HC4066; the other half does the second ear.</text>
+</svg>
+  </div>
+  <figcaption>The bypass goes round both the switch chip and CS, so normal listening passes through one switch as it does without the filters. A second pole on the mode switch gives the 74HC4066 its control signal, and a spare 74HC14 gate inverts it for the pair that closes while tuning.</figcaption>
+</figure>
+<p>Both filters for both ears come to one 74HC4066, four capacitors and a mode switch with a second pole. The <a href="https://www.lcsc.com/product-detail/C1545953.html">TI SN74HC4066N</a> is from $0.55 at LCSC; a low-cost one was not priced. Fitting only the hum capacitors needs half the chip.</p>
+
+<h3>Or reverse the coil instead of grounding it</h3>
+<p>The recommended switch sends the coil to the amplifier for half of each cycle and to 0 V for the other half. Give the coil's other end a switch section of its own, and the pair can swap the coil's two ends instead: one way round for half the cycle, the other way round for the rest. Nothing is thrown away, and three things change in simulation.</p>
+<ul>
+  <li><strong>The note doubles,</strong> from 59 mV to 126 mV.</li>
+  <li><strong>The hum cancels.</strong> Hum is the same in both halves of the cycle, so reversing it every half-cycle averages it to nothing. With a perfectly even square wave none is left. With the 74HC14's 42 % the hum is down 14 dB; a CMOS 555 or the two-section oscillator gives the even wave.</li>
+  <li><strong>The hiss falls by another 12 dB or so,</strong> to about 22 dB below the stock badge. The reversing switch makes the coil look like a high impedance to the amplifier's own noise.</li>
+</ul>
+<p>It costs a second 74HC4053 for two ears, nine cents at low-cost prices, and a different route for the coils: both ends of each coil go to the chips, where today one end goes to 0 V. Normal listening then passes through two switch sections, not one, so it loses a little more bass unless it is bypassed. This is a bigger change than a filter and it is not in the recommended build, but on a new board it is the one worth trying first. The switches were simulated as ideal, so real charge injection and mismatch will leave some ripple and some hum.</p>
 
 <h2>What each build costs</h2>
 <p>Prices for the parts that differ between builds. "From" means the lowest price break the distributor shows, without the quantity.</p>
@@ -577,13 +705,13 @@ footer{margin-top:3.5rem;padding-top:1rem;border-top:1px solid var(--line);font-
 </table></div>
 <p class="small">Low-cost uses the HGSEMI chips and the $0.32 pot. Brand-name uses the TI chips and the $0.74 pot; the transistors and surface-mount parts are the same LCSC prices in both columns. Not included, because they were not priced: ten to fifteen cents of resistors and capacitors, the mode switch, sockets, and board area. Machine assembly for build 6 is not included either.</p>
 <p>At low-cost prices every build but the 555 one sits within eleven cents of the others, and in each of those the pot costs more than all the silicon. So the choice between them is about sound and ease of assembly, not chip count. At brand-name prices the second chip is the 60 cent question, and build 2 answers it by tuning one ear.</p>
-<p><strong>The knob.</strong> These totals use an ordinary 9 mm shaft pot. Any pot from 10 kΩ to 100 kΩ works, and cheaper ones exist, down to a four-cent trimmer that takes the low-cost build to $0.22. <a href="pots.html">Which pot to buy</a> prices them, including position sensors used as sliders.</p>
+<p><strong>The knob.</strong> These totals use an ordinary 9 mm shaft pot. Pots from 10 kΩ to 100 kΩ work, though only the larger values reach the top of the range, and cheaper ones exist, down to a four-cent trimmer that takes the low-cost build to $0.22. <a href="pots.html">Which pot to buy</a> prices them, including position sensors used as sliders.</p>
 
 <h2>Other ways to cut cost</h2>
 <ul>
   <li><strong>The pot.</strong> It is the largest single cost and the easiest to change. <a href="pots.html">Which pot to buy</a> prices the alternatives, from four-cent trimmers to slide position sensors.</li>
   <li><strong>No series capacitor.</strong> An earlier draft of this circuit put 10 µF between the switch and R2 to block the op-amp's offset. On the badge's rails it is not needed: without it the tone is unchanged and a 1 mV offset leaves 60 mV of DC at the output, less than the stock badge has.</li>
-  <li><strong>One range.</strong> One capacitor covers 24 to 255 kHz, and the fainter windows at three times the frequency reach past 700 kHz. A range switch and extra capacitors buy little.</li>
+  <li><strong>One range.</strong> One capacitor and one pot cover 26 kHz to about 1 MHz. A range switch and a second capacitor would make the top easier to tune, for the price of the switch.</li>
   <li><strong>One ear.</strong> Tuning one ear and leaving the other normal saves the oscillator chip (build 2), and may be the nicer instrument. That is a choice to make by listening.</li>
   <li><strong>No bypass pole.</strong> Holding the switch at pass for normal listening costs 2.5 to 6.5 dB of bass and saves a pole on the mode switch.</li>
   <li><strong>A microcontroller instead of the oscillator.</strong> A part costing about ten cents (not priced here) could be the oscillator and add an automatic sweep. It is surface-mount, needs programming on the line, and is one more thing for the coils to hear. Left out.</li>
@@ -594,8 +722,8 @@ footer{margin-top:3.5rem;padding-top:1rem;border-top:1px solid var(--line);font-
   <thead><tr><th>Question</th><th>Simulated answer, recommended build on ±1.5 V</th></tr></thead>
   <tbody>
     <tr><th scope="row">How big is the tone?</th><td>A 40 kHz field chopped at 39 kHz gives a 1 kHz tone of 59 mV at the amplifier output. Today the same field leaves 73 mV of 40 kHz there, which nobody hears.</td></tr>
-    <tr><th scope="row">Does it fall off higher up?</th><td>No: 59 mV at 200 kHz and at 400 kHz. With an ideal switch, 62 mV at 1 MHz.</td></tr>
-    <tr><th scope="row">And on tired cells?</th><td>59 mV at 40 kHz and at 200 kHz on ±1.0 V, with the switch modelled as 400 Ω and 150 ns.</td></tr>
+    <tr><th scope="row">Does it fall off higher up?</th><td>Not in the model: 59 mV at 200 kHz, 59 mV at 600 kHz and 57 mV at 1 MHz. An offset builds at the amplifier output instead, 24 mV at 400 kHz and 96 mV at 1 MHz.</td></tr>
+    <tr><th scope="row">And on tired cells?</th><td>59 mV at 40 kHz and at 200 kHz on ±1.0 V, with the switch modelled as 400 Ω and 150 ns, and 58 mV at 1 MHz with a 0.17 V offset. The oscillator only reaches about 0.8 MHz there.</td></tr>
     <tr><th scope="row">Is it hissier than the badge?</th><td>No. The op-amp's own noise at the output is 10 dB lower while tuning than on the stock badge. The tone is also 10 dB down, so a tuned-in source is about as clean as an audible one is today.</td></tr>
     <tr><th scope="row">Does the oscillator leak into the sound?</th><td>Some of it reaches the output, always at the oscillator frequency, so above hearing. It swings ±0.15 V of the amplifier's ±1.2 V.</td></tr>
     <tr><th scope="row">What happens to ordinary sound while tuning?</th><td>It passes at half level, mixed with whatever is in the window.</td></tr>
@@ -609,22 +737,23 @@ footer{margin-top:3.5rem;padding-top:1rem;border-top:1px solid var(--line);font-
   <thead><tr><th>File</th><th>What it does</th></tr></thead>
   <tbody>
     <tr><th scope="row"><a href="badge_core.py">badge_core.py</a></th><td>The shared models: coil, amplifier and the switch options. The others import it.</td></tr>
-    <tr><th scope="row"><a href="badge_chop.py">badge_chop.py</a></th><td>Tone, leak and output swing for the 74HC4053 section, the one-transistor shunts and comb mode.</td></tr>
+    <tr><th scope="row"><a href="badge_chop.py">badge_chop.py</a></th><td>Tone, leak and output swing for the 74HC4053 section up to 1 MHz, the one-transistor shunts and comb mode.</td></tr>
     <tr><th scope="row"><a href="badge_hiss.py">badge_hiss.py</a></th><td>Hiss for each way of chopping, against the stock badge.</td></tr>
     <tr><th scope="row"><a href="badge_osc.py">badge_osc.py</a></th><td>Frequency range and duty cycle of the four oscillators.</td></tr>
     <tr><th scope="row"><a href="badge_pots.py">badge_pots.py</a></th><td>The 74HC14 oscillator with pots from 10 kΩ to 100 kΩ.</td></tr>
+    <tr><th scope="row"><a href="badge_filter.py">badge_filter.py</a></th><td>The tone filters and the reversing chopper: note, hum, ripple and hiss.</td></tr>
     <tr><th scope="row"><a href="badge_passband.py">badge_passband.py</a></th><td>What the switch and a series capacitor do to ordinary sound in normal listening.</td></tr>
-    <tr><th scope="row"><a href="chopper-falstad.txt">chopper-falstad.txt</a></th><td>The Falstad circuit shown above, as text to import into the simulator.</td></tr>
+    <tr><th scope="row"><a href="chopper-falstad.txt">chopper-falstad.txt</a>, <a href="comb-falstad.txt">comb-falstad.txt</a></th><td>The two Falstad circuits shown above, as text to import into the simulator.</td></tr>
   </tbody>
 </table></div>
-<p class="small"><a href="emf-badge-sims.zip">All seven files in one zip.</a> Written against ngspice 42. The hiss figures move by a decibel or two from run to run, because the noise source is random.</p>
+<p class="small"><a href="emf-badge-sims.zip">All nine files in one zip.</a> Written against ngspice 42. The hiss figures move by a decibel or two from run to run, because the noise source is random.</p>
 
 <h2>What to check on the bench first</h2>
 <ol>
   <li><strong>Does it sound good?</strong> Build 1 on one ear, near a phone charger and an induction hob. Everything else is secondary.</li>
   <li><strong>The oscillator's leak.</strong> A scope on the op-amp output while tuning. If it swings more than about ±0.3 V, look at the feedback capacitor's value first.</li>
   <li><strong>Tired cells.</strong> Repeat on two cells at about 1.0 V each. The simulation says the tone holds; the 74HC4053's resistance down there is the least certain number on this page.</li>
-  <li><strong>The top of the dial.</strong> Whether the tone holds up above 200 kHz, where the coil's core is the unknown.</li>
+  <li><strong>The top of the dial.</strong> How far up the tone really holds, and how much offset builds at the amplifier output. Above a few hundred kilohertz the coil's core, the switch's speed and its charge injection are all unknowns.</li>
   <li><strong>The pot.</strong> Linear against log, by feel.</li>
   <li><strong>Comb mode</strong>, once tuning works: whether 17 mV where tuning gives 59 mV is loud enough to be worth a switch position.</li>
 </ol>
@@ -678,14 +807,17 @@ var SRC=[
   {id:'dcdc',name:'DC-DC converter',low:'DC-DC converter',short:'DC-DC',f:300e3,lvl:.5,tex:'steady',col:'s6',row:0}
 ];
 SRC.forEach(function(s){s.on=true;});
-var taper='log',mode='tuned',pulse=3e-6,hits=[];
+var taper='log',mode='tuned',pulse=3e-6,hits=[],filt=false;
+/* the optional tone filter: 390 pF more in the feedback (a 3.25 kHz corner) and 0.22 µF in series, which while chopping acts with the coil like 0.9 µF */
+function fcNow(){return filt&&mode!=='off'?3250:FC;}
+function hpNow(f){if(!filt||mode==='off')return 1;var w=2*PI*Math.max(f,20),xl=w*.1,xc=1/(w*.9e-6);return Math.sqrt((470*470+xl*xl)/(470*470+(xl-xc)*(xl-xc)));}
 var pot=$('pot'),dialCv=$('dialCv'),tip=$('dialTip');
-/* the recommended oscillator, simulated on 3 V: 10 kΩ plus a 100 kΩ pot with 330 pF runs from 255 kHz down to 24 kHz. Period = a·R + b. */
-function loFreq(){var x=pot.value/1000,frac=taper==='lin'?1-x:(Math.pow(32,1-x)-1)/31;return 1/(0.3723e-9*(10e3+100e3*frac)+0.197e-6);}
+/* the recommended oscillator, simulated on 3 V: 2.2 kΩ plus a 100 kΩ pot with 330 pF runs from 1 MHz down to 26 kHz. Period = a·R + b. */
+function loFreq(){var x=pot.value/1000,frac=taper==='lin'?1-x:(Math.pow(32,1-x)-1)/31;return 1/(0.3717e-9*(2.2e3+100e3*frac)+0.182e-6);}
 function duty(lo){return mode==='comb'?Math.min(.5,pulse*lo):.5;}
 function gain(n,D){return Math.abs(Math.sin(n*PI*D))/n;}          // size of window n, with the tuned fundamental as 1
 function tones(lo){var out=[];if(mode==='off')return out;var D=duty(lo),N=Math.min(64,Math.floor(1.52e6/lo));
-  SRC.forEach(function(s){if(!s.on)return;for(var n=1;n<=N;n++){var d=Math.abs(s.f-n*lo);if(d<20e3){var a=s.lvl*gain(n,D)/Math.sqrt(1+d*d/(FC*FC));if(a>.004)out.push({s:s,n:n,d:d,a:a});}}});return out;}
+  SRC.forEach(function(s){if(!s.on)return;for(var n=1;n<=N;n++){var d=Math.abs(s.f-n*lo);if(d<20e3){var fc=fcNow(),a=s.lvl*gain(n,D)*hpNow(d)/Math.sqrt(1+d*d/(fc*fc));if(a>.004)out.push({s:s,n:n,d:d,a:a});}}});return out;}
 function drawDial(){
   var o=fit(dialCv,390),g=o.g,w=o.w,pl=10,pw=w-20,small=pw<520,lo=loFreq(),D=duty(lo);
   var FMIN=1e4,FMAX=1.5e6,LG=Math.log(FMAX/FMIN);
@@ -709,8 +841,8 @@ function drawDial(){
   /* axis */
   seg(g,pl,yT1,pl+pw,yT1,C.muted,1);
   (small?[2e4,1e5,1e6]:[2e4,5e4,1e5,2e5,5e5,1e6]).forEach(function(f){seg(g,xt(f),yT1,xt(f),yT1+5,C.muted,1);txt(g,f>=1e6?'1 MHz':f/1e3+' kHz',xt(f),yT1+18,C.muted,'center',FS);});
-  g.fillStyle=rgba(C.lo,.55);g.fillRect(xt(24.3e3),yT1+26,xt(255e3)-xt(24.3e3),4);
-  txt(g,'knob range',xt(255e3)+6,yT1+33,C.muted,'left',FS);
+  g.fillStyle=rgba(C.lo,.55);g.fillRect(xt(26.2e3),yT1+26,xt(1e6)-xt(26.2e3),4);
+  txt(g,small?'knob':'knob range',xt(26.2e3)-6,yT1+33,C.muted,'right',FS);
   /* tones, and the lines that carry each source down to its note */
   var T=tones(lo);
   T.forEach(function(t){var x0=xt(t.s.f),x1=xb(t.d),rel=Math.min(1,t.a/t.s.lvl);
@@ -724,7 +856,7 @@ function drawDial(){
   /* bottom panel */
   seg(g,pl,yB1,pl+pw,yB1,C.muted,1);
   [0,5,10,15,20].forEach(function(k){var x=xb(k*1e3);seg(g,x,yB1,x,yB1+5,C.muted,1);txt(g,k?k+' kHz':'0',x,yB1+18,C.muted,k===0?'left':k===20?'right':'center',FS);});
-  var humH=Math.max(3,(yB1-yB0-18)*.5*(mode==='off'?1:D));seg(g,xb(120)+2,yB1,xb(120)+2,yB1-humH,C.muted,3);
+  var humH=Math.max(3,(yB1-yB0-18)*.5*(mode==='off'?1:D)*hpNow(60));seg(g,xb(120)+2,yB1,xb(120)+2,yB1-humH,C.muted,3);
   if(!small&&!T.some(function(t){return t.d<2500;}))txt(g,'hum',xb(120)+8,yB1-humH-5,C.muted,'left',FS);
   T.sort(function(a,b){return a.a-b.a;}).forEach(function(t,i){var x=xb(t.d),hgt=Math.max(3,(yB1-yB0-18)*Math.min(1,t.a));
     seg(g,x,yB1,x,yB1-hgt,C[t.s.col],3);g.beginPath();g.arc(x,yB1-hgt,4,0,2*PI);g.fillStyle=C[t.s.col];g.fill();
@@ -737,10 +869,10 @@ function readDial(){var lo=loFreq(),D=duty(lo),T=tones(lo).sort(function(a,b){re
   var head=mode==='comb'?'Comb: '+(pulse*1e6).toFixed(1)+' µs pulses at '+fmtF(lo)+', so the switch passes for '+Math.round(D*100)+' % of each cycle. ':'Chopper at '+fmtF(lo)+'. ',s;
   if(mode==='off')s='Badge as it is today: mains hum only. All six sources are above hearing.';
   else if(!T.length)s=head+'Nothing is inside a window, so only the hum is heard, at '+(mode==='comb'?Math.round(D*100)+' %':'half')+' level.';
-  else s=head+'In the headphones: '+T.slice(0,mode==='comb'?5:3).map(function(t){return t.s.low+' at '+fmtT(t.d)+(mode==='tuned'&&t.n>1?' (faint, ×'+t.n+' window)':'');}).join('; ')+'.';
+  else s=head+(filt?'Tone filter on. ':'')+'In the headphones: '+T.slice(0,mode==='comb'?5:3).map(function(t){return t.s.low+' at '+fmtT(t.d)+(mode==='tuned'&&t.n>1?' (faint, ×'+t.n+' window)':'');}).join('; ')+'.';
   $('dialRead').textContent=s;}
 /* sound: up to three sines per source, at the difference frequencies of its three strongest windows */
-var ac=null,master=null,hum=null,soundOn=false;
+var ac=null,master=null,hum=null,humHp=null,soundOn=false;
 function initAudio(){var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return false;ac=new AC();
   master=ac.createGain();master.gain.value=0;var comp=ac.createDynamicsCompressor();master.connect(comp);comp.connect(ac.destination);
   SRC.forEach(function(s){var tex=ac.createGain();tex.gain.value=1;tex.connect(master);
@@ -750,18 +882,20 @@ function initAudio(){var AC=window.AudioContext||window.webkitAudioContext;if(!A
     s.v=[0,1,2].map(function(){var osc=ac.createOscillator();osc.frequency.value=1000;var gn=ac.createGain();gn.gain.value=0;osc.connect(gn);gn.connect(tex);osc.start();
       if(s.tex==='wobble')lfo('sine',6,250,osc.frequency);if(s.tex==='drift')lfo('sine',.6,400,osc.frequency);return {osc:osc,gn:gn};});});
   var h=ac.createOscillator();h.type='sawtooth';h.frequency.value=60;var lp=ac.createBiquadFilter();lp.type='lowpass';lp.frequency.value=420;
-  hum=ac.createGain();hum.gain.value=0;h.connect(lp);lp.connect(hum);hum.connect(master);h.start();return true;}
+  humHp=ac.createBiquadFilter();humHp.type='highpass';humHp.frequency.value=20;humHp.Q.value=.7;
+  hum=ac.createGain();hum.gain.value=0;h.connect(lp);lp.connect(humHp);humHp.connect(hum);hum.connect(master);h.start();return true;}
 function updateAudio(){if(!ac)return;var now=ac.currentTime,lo=loFreq(),T=tones(lo);
   SRC.forEach(function(s){var mine=T.filter(function(t){return t.s===s;}).sort(function(a,b){return b.a-a.a;});
     s.v.forEach(function(v,i){var t=mine[i],a=0;if(t){a=t.a*Math.min(1,t.d/60);v.osc.frequency.setTargetAtTime(Math.min(t.d,19e3),now,.012);}
       v.gn.gain.setTargetAtTime(a*.5,now,.02);});});
-  hum.gain.setTargetAtTime(.1*(mode==='off'?1:duty(lo)),now,.03);master.gain.setTargetAtTime(soundOn?.5:0,now,.04);}
+  hum.gain.setTargetAtTime(.1*(mode==='off'?1:duty(lo)),now,.03);humHp.frequency.setTargetAtTime(filt&&mode!=='off'?330:20,now,.03);master.gain.setTargetAtTime(soundOn?.5:0,now,.04);}
 function updateDial(){drawDial();readDial();updateAudio();}
 $('snd').addEventListener('click',function(){if(!ac&&!initAudio()){this.textContent='No sound in this browser';return;}
   soundOn=!soundOn;if(ac.state==='suspended')ac.resume();this.setAttribute('aria-pressed',soundOn);this.textContent='Sound: '+(soundOn?'on':'off');updateAudio();});
 pot.addEventListener('input',updateDial);
 $('pulse').addEventListener('input',function(){pulse=this.value*1e-6;updateDial();});
 $('taper').addEventListener('change',function(){taper=this.value;updateDial();});
+$('filt').addEventListener('click',function(){filt=!filt;this.setAttribute('aria-pressed',filt);this.textContent='Tone filter: '+(filt?'on':'off');updateDial();});
 Array.prototype.forEach.call(document.querySelectorAll('#dial [data-mode]'),function(b){b.addEventListener('click',function(){mode=b.dataset.mode;press(b.parentElement,b);$('pulseField').hidden=mode!=='comb';updateDial();});});
 var chips=$('chips');
 SRC.forEach(function(s){var b=document.createElement('button');b.className='chip';b.style.setProperty('--c','var(--'+s.col+')');b.setAttribute('aria-pressed','true');
@@ -833,7 +967,7 @@ $('sweep2').addEventListener('click',function(){var btn=this;if(sweep2Id){cancel
 /* ---------- the response chart ---------- */
 var respCv=$('respCv'),respTip=$('respTip'),respGeo=null;
 function stockDb(f){var wl=2*PI*f*.1;return 20*Math.log10(wl/Math.sqrt(350*350+wl*wl)/Math.sqrt(1+f*f/(FC*FC)));}
-var TONE_DB=20*Math.log10(1/PI),KNOB_LO=24.3e3;
+var TONE_DB=20*Math.log10(1/PI),KNOB_LO=26.2e3;
 function drawResp(){
   var o=fit(respCv,270),g=o.g,w=o.w,small=w<520,x0=46,x1=w-14,yA=24,yZ=224;
   function X(f){return x0+(x1-x0)*Math.log10(f/100)/4;}
@@ -865,8 +999,54 @@ function setSw(st){sch.classList.toggle('s-pass',st==='pass');sch.classList.togg
 Array.prototype.forEach.call(document.querySelectorAll('#schem [data-st]'),function(b){b.addEventListener('click',function(){press(b.parentElement,b);clearInterval(chopId);chopId=0;
   if(b.dataset.st==='chop'){var up=true;setSw('pass');chopId=setInterval(function(){up=!up;setSw(up?'pass':'shunt');},650);}else setSw(b.dataset.st);});});
 
+/* ---------- Simulation 3: the comb's teeth ---------- */
+var combCv=$('combCv'),ckEl=$('ck'),cpEl=$('cp'),csEl=$('cs'),cmode='comb',CFM=1.02e6,combGeo=null;
+function csFreq(){return 20e3*Math.pow(50,csEl.value/1000);}
+function drawComb(){
+  var o=fit(combCv,336),g=o.g,w=o.w,pl=10,pw=w-20,small=pw<520;
+  var lo=ckEl.value*1e3,tau=cpEl.value*1e-6,D=cmode==='comb'?Math.min(.5,tau*lo):.5,fs=csFreq();
+  var yT0=44,yT1=176,yB0=246,yB1=304,H=yT1-yT0-10,N=Math.floor(CFM/lo),n,gn,x;
+  function xt(f){return pl+pw*Math.min(f,CFM)/CFM;}
+  function xb(f){return pl+pw*f/20e3;}
+  combGeo={pl:pl,pw:pw,y1:yT1+10};
+  txt(g,small?'HOW WELL EACH MULTIPLE IS CAUGHT':'HOW WELL EACH MULTIPLE OF THE OSCILLATOR IS CAUGHT',pl,13,C.muted,'left',FM);
+  seg(g,pl,yT1-H,pl+pw,yT1-H,C.soft,1,[3,3]);txt(g,small?'tuned-in level':'as loud as a source that is tuned in',pl+pw,yT1-H-5,C.muted,'right',FS);
+  for(n=1;n<=N;n++){gn=gain(n,D);if(gn>.02){g.fillStyle=rgba(C.lo,.04+.2*Math.min(1,gn));g.fillRect(xt(n*lo-16e3),yT0,xt(n*lo+16e3)-xt(n*lo-16e3),yT1-yT0);}}
+  for(n=1;n<=N;n++){gn=Math.min(1,gain(n,D));x=xt(n*lo);seg(g,x,yT1,x,yT1-Math.max(1,H*gn),C.lo,small?2:3);
+    if(gn>.03){g.beginPath();g.arc(x,yT1-H*gn,small?2.5:3.5,0,2*PI);g.fillStyle=C.lo;g.fill();}
+    if(!small&&n<=6&&gn>.03&&lo>=28e3)txt(g,'×'+n,x,yT1-H*gn-9,C.muted,'center',FS);}
+  if(cmode==='comb'){g.beginPath();for(var i=0;i<=240;i++){var f=CFM*i/240,a=PI*f*tau,e=PI*D*(a<1e-6?1:Math.abs(Math.sin(a)/a)),yy=yT1-H*Math.min(1,e);if(i)g.lineTo(xt(f),yy);else g.moveTo(xt(f),yy);}
+    g.setLineDash([4,4]);g.strokeStyle=C.muted;g.lineWidth=1;g.stroke();g.setLineDash([]);
+    var reach=1/tau;if(reach<CFM){seg(g,xt(reach),yT1+1,xt(reach),yT1+8,C.fg,2);txt(g,small?'reach':'reach: one cycle = one pulse',xt(reach),yT1+34,C.fg,xt(reach)>pl+pw-90?'right':'center',FS);}}
+  seg(g,pl,yT1,pl+pw,yT1,C.muted,1);
+  (small?[0,5e5,1e6]:[0,2e5,4e5,6e5,8e5,1e6]).forEach(function(f){seg(g,xt(f),yT1,xt(f),yT1+5,C.muted,1);txt(g,f>=1e6?'1 MHz':f?f/1e3+' kHz':'0',xt(f),yT1+19,C.muted,f===0?'left':f>=1e6?'right':'center',FS);});
+  var sx=xt(fs),lab='field '+fmtF(fs);g.font=FB;var tw=g.measureText(lab).width;
+  seg(g,sx,yT0-10,sx,yT1,C.sig,2);txt(g,lab,Math.min(Math.max(sx,pl+tw/2),pl+pw-tw/2),yT0-15,C.fg,'center',FB,C.panel);
+  var parts=[];for(n=1;n<=N+1;n++){var d=Math.abs(fs-n*lo);if(d<20e3){var am=gain(n,D)/Math.sqrt(1+d*d/(FC*FC));if(am>.004)parts.push({n:n,d:d,a:am});}}
+  parts.sort(function(p,q){return q.a-p.a;});
+  txt(g,'IN THE HEADPHONES',pl,yB0-18,C.muted,'left',FM);
+  seg(g,pl,yB1,pl+pw,yB1,C.muted,1);
+  [0,5,10,15,20].forEach(function(k){var xx=xb(k*1e3);seg(g,xx,yB1,xx,yB1+5,C.muted,1);txt(g,k?k+' kHz':'0',xx,yB1+19,C.muted,k===0?'left':k===20?'right':'center',FS);});
+  parts.forEach(function(p,i){var xx=xb(p.d),hh=Math.max(3,(yB1-yB0)*Math.min(1,p.a));
+    g.beginPath();g.moveTo(sx,yT1+40);g.bezierCurveTo(sx,yT1+62,xx,yB0-22,xx,yB0-2);g.strokeStyle=rgba(C.sig,.25+.5*Math.min(1,p.a*3));g.lineWidth=1.5;g.stroke();
+    seg(g,xx,yB1,xx,yB1-hh,C.sig,3);g.beginPath();g.arc(xx,yB1-hh,4,0,2*PI);g.fillStyle=C.sig;g.fill();
+    if(i===0)txt(g,fmtT(p.d),xx,yB1-hh-9,C.fg,xx>pl+pw-30?'right':xx<pl+30?'left':'center',FS,C.panel);});
+  if(!parts.length)txt(g,'Between two teeth: nothing comes through.',pl+pw/2,yB0+26,C.muted,'center',F);
+  $('ckOut').textContent=fmtF(lo);$('cpOut').textContent=(tau*1e6).toFixed(1)+' µs';$('csOut').textContent=fmtF(fs);
+  var s;if(!parts.length)s='A field at '+fmtF(fs)+' falls in a gap between the teeth, so nothing is heard. Bring the oscillator down toward 30 kHz and the gaps close.';
+  else{var p=parts[0],pc=p.a*100;s='A field at '+fmtF(fs)+' is '+fmtT(p.d)+' from tooth '+p.n+' ('+fmtF(p.n*lo)+'), so it comes out as a '+fmtT(p.d)+' note at '+(pc<10?pc.toFixed(1):Math.round(pc))+' % of the tuned-in level, about '+(59*p.a<10?(59*p.a).toFixed(1):Math.round(59*p.a))+' mV where tuning it in gives 59 mV.'
+    +(parts[1]?' Tooth '+parts[1].n+' catches it too, fainter, at '+fmtT(parts[1].d)+'.':'')
+    +(cmode==='comb'?' The switch passes for '+(D*100).toFixed(D<.1?1:0)+' % of each cycle.':' With the switch on half the time, only the odd teeth catch anything.');}
+  $('combRead').textContent=s;}
+[ckEl,cpEl,csEl].forEach(function(el){el.addEventListener('input',drawComb);});
+Array.prototype.forEach.call(document.querySelectorAll('#combsim [data-cm]'),function(b){b.addEventListener('click',function(){cmode=b.dataset.cm;press(b.parentElement,b);$('cpField').hidden=cmode!=='comb';drawComb();});});
+function combPick(e){if(!combGeo)return;var r=combCv.getBoundingClientRect(),y=e.clientY-r.top,f=CFM*(e.clientX-r.left-combGeo.pl)/combGeo.pw;if(y>combGeo.y1)return;
+  csEl.value=Math.round(1000*Math.log(Math.min(1e6,Math.max(20e3,f))/20e3)/Math.log(50));drawComb();}
+combCv.addEventListener('pointerdown',function(e){combPick(e);try{combCv.setPointerCapture(e.pointerId);}catch(x){}});
+combCv.addEventListener('pointermove',function(e){if(e.buttons)combPick(e);});
+
 /* ---------- redraw on anything that changes size or colour ---------- */
-function redraw(){readTokens();updateDial();updateScope();drawResp();}
+function redraw(){readTokens();updateDial();updateScope();drawResp();drawComb();}
 var rq=0;function later(){cancelAnimationFrame(rq);rq=requestAnimationFrame(redraw);}
 window.addEventListener('resize',later);
 if(window.matchMedia)try{window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',later);}catch(e){}
@@ -874,16 +1054,16 @@ if(document.fonts&&document.fonts.ready)document.fonts.ready.then(later);
 redraw();
 
 /* ---------- the Falstad frame ---------- */
-(function(){var fr=$('fsFrame'),wrap=$('fsWrap'),sh=$('fsShield');if(!fr)return;
-  var th=document.documentElement.getAttribute('data-theme');
+(function(){var th=document.documentElement.getAttribute('data-theme');
   var dark=th==='dark'||(th!=='light'&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);
-  var u='https://www.falstad.com/circuit/circuitjs.html?cct='+fr.getAttribute('data-cct')+'&hideMenu=true';
-  if(wrap.clientWidth<700)u+='&hideSidebar=true';
-  if(!dark)u+='&whiteBackground=true';
-  fr.src=u;
-  sh.addEventListener('click',function(){wrap.classList.add('live');});
-  wrap.addEventListener('mouseleave',function(){wrap.classList.remove('live');});
-  document.addEventListener('pointerdown',function(e){if(!wrap.contains(e.target))wrap.classList.remove('live');});
+  Array.prototype.forEach.call(document.querySelectorAll('.fs-wrap'),function(wrap){var fr=wrap.querySelector('.fs-frame'),sh=wrap.querySelector('.fs-shield');
+    var u='https://www.falstad.com/circuit/circuitjs.html?cct='+fr.getAttribute('data-cct')+'&hideMenu=true';
+    if(wrap.clientWidth<700)u+='&hideSidebar=true';
+    if(!dark)u+='&whiteBackground=true';
+    fr.src=u;
+    sh.addEventListener('click',function(){wrap.classList.add('live');});
+    wrap.addEventListener('mouseleave',function(){wrap.classList.remove('live');});
+    document.addEventListener('pointerdown',function(e){if(!wrap.contains(e.target))wrap.classList.remove('live');});});
 })();
 })();
 
