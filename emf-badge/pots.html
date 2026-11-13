@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>EMF badge tuning knob: which pot to buy</title>
+<meta name="short-title" content="EMF badge: which pot">
+<meta name="description" content="Every kind of pot that works as the EMF Explorer Badge's tuning knob, priced: trimmers, shaft and slide pots, thumbwheels, and position sensors used as sliders.">
+<style>
+/* self-hosted fonts: Google Fonts is blocked in China */
+@font-face{font-family:"Archivo Narrow";font-style:normal;font-weight:100 900;font-display:swap;src:url(../styles/fonts/ArchivoNarrow-var.woff2) format("woff2")}
+@font-face{font-family:"IBM Plex Sans";font-style:normal;font-weight:100 900;font-display:swap;src:url(../styles/fonts/IBMPlexSans-var.woff2) format("woff2")}
+@font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:400;font-display:swap;src:url(../styles/fonts/IBMPlexMono-400.woff2) format("woff2")}
+@font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:600;font-display:swap;src:url(../styles/fonts/IBMPlexMono-600.woff2) format("woff2")}
+</style>
+<style>
+/* Layout: one 44rem reading column; figures and tables break out to 60rem.
+   Colour carries meaning and keeps it on every figure: amber is the chopper (the oscillator, its knob, its windows),
+   blue is the 40 kHz example field, ink is what you hear. The six sources in the dial take the six --s colours. */
+:root{
+  color-scheme:light;
+  --bg:#f2f0ea; --panel:#fcfcfb; --panel-2:#edebe4; --fg:#171613; --muted:#55534d; --line:#d3d0c6; --soft:#e4e1d8;
+  --lo:#a86200; --sig:#2a78d6; --link:#1b58b3;
+  --s1:#e34948; --s2:#2a78d6; --s3:#1baf7a; --s4:#6250d6; --s5:#008300; --s6:#e87ba4;
+  --font-display:"Archivo Narrow","Arial Narrow","Helvetica Neue",Arial,sans-serif;
+  --font-body:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  color-scheme:dark;
+  --bg:#121211; --panel:#1a1a19; --panel-2:#252523; --fg:#f0efec; --muted:#b5b3aa; --line:#3b3a36; --soft:#2a2927;
+  --lo:#f0b24c; --sig:#3987e5; --link:#8db6ff;
+  --s1:#e66767; --s2:#3987e5; --s3:#199e70; --s4:#9085e9; --s5:#008300; --s6:#d55181;
+} }
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#121211; --panel:#1a1a19; --panel-2:#252523; --fg:#f0efec; --muted:#b5b3aa; --line:#3b3a36; --soft:#2a2927;
+  --lo:#f0b24c; --sig:#3987e5; --link:#8db6ff;
+  --s1:#e66767; --s2:#3987e5; --s3:#199e70; --s4:#9085e9; --s5:#008300; --s6:#d55181;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:400 1.0625rem/1.6 var(--font-body);
+  padding-block:2.25rem 4rem;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.page{max-width:60rem;margin-inline:auto;min-width:0}
+.page>p,.page>ul,.page>ol,.page>h1,.page>h2,.page>h3,.page>.note,.page>header>*{max-width:44rem}
+p,ul,ol{margin:0 0 1.05rem}
+ul,ol{padding-left:1.25rem}
+li{margin-bottom:.4rem}
+a{color:var(--link);text-underline-offset:.15em}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--lo);outline-offset:2px;border-radius:3px}
+strong{font-weight:600}
+code,.num{font-family:var(--font-mono);font-size:.92em;font-variant-numeric:tabular-nums}
+
+/* header: a title over a tuning scale, the page's one flourish */
+.crumb{font:400 .78rem/1.4 var(--font-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 1.4rem}
+.crumb a{color:inherit;text-decoration:none}
+.crumb a:hover{color:var(--fg);text-decoration:underline}
+h1{font:700 clamp(2.3rem,6.5vw,3.6rem)/1 var(--font-display);letter-spacing:.005em;text-wrap:balance;margin:0 0 .9rem}
+.dek{font-size:1.2rem;line-height:1.5;color:var(--muted);margin:0 0 1.1rem}
+.scale{position:relative;height:26px;max-width:60rem !important;margin:1.6rem 0 .5rem;
+  background:
+    repeating-linear-gradient(90deg,var(--fg) 0 1px,transparent 1px 10%) bottom/100% 14px no-repeat,
+    repeating-linear-gradient(90deg,var(--muted) 0 1px,transparent 1px 2%) bottom/100% 7px no-repeat;
+  border-bottom:1px solid var(--fg)}
+.scale::after{content:"";position:absolute;left:19%;top:0;bottom:-1px;width:3px;background:var(--lo)}
+.byline{font:400 .8rem/1.5 var(--font-mono);color:var(--muted);margin:0 0 1.6rem}
+.note{border:1px solid var(--line);border-left:4px solid var(--lo);background:var(--panel);border-radius:4px;padding:.8rem 1rem;margin:0 0 1.2rem}
+.note .tag{display:block;font:600 .72rem/1.2 var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem}
+.note p:last-child{margin-bottom:0}
+
+/* sections */
+main{counter-reset:sec}
+h2{counter-increment:sec;font:700 clamp(1.6rem,4vw,2.15rem)/1.1 var(--font-display);text-wrap:balance;
+  margin:3.6rem 0 1rem;padding-top:1.1rem;border-top:1px solid var(--fg)}
+h2::before{content:counter(sec,decimal-leading-zero);display:block;font:600 .74rem/1 var(--font-mono);letter-spacing:.1em;color:var(--lo);margin-bottom:.6rem}
+h3{font:700 1.25rem/1.2 var(--font-display);margin:2rem 0 .6rem}
+
+/* figures */
+.lab{margin:1.6rem 0 1.9rem;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:1rem 1rem .9rem;min-width:0}
+.lab-title{display:flex;flex-wrap:wrap;gap:.3rem .8rem;align-items:baseline;margin:0 0 .8rem}
+.lab-title b{font:700 1.15rem/1.2 var(--font-display)}
+.lab-title span{font:600 .7rem/1.2 var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.cv{position:relative}
+.cv canvas{display:block;width:100%;touch-action:pan-y}
+.tip{position:absolute;z-index:2;pointer-events:none;background:var(--fg);color:var(--bg);font-size:.8rem;line-height:1.35;padding:.35rem .55rem;border-radius:4px;max-width:15rem;transform:translate(-50%,-110%)}
+.controls{display:flex;flex-wrap:wrap;gap:.6rem .8rem;align-items:center;margin-top:.9rem}
+.btn,.seg button,.chip{font:500 .9rem/1.2 var(--font-body);color:var(--fg);background:var(--panel-2);border:1px solid var(--line);border-radius:5px;padding:.5rem .75rem;cursor:pointer}
+.btn:hover,.seg button:hover{border-color:var(--muted)}
+.btn[aria-pressed="true"],.seg button[aria-pressed="true"]{background:var(--fg);border-color:var(--fg);color:var(--bg)}
+.seg{display:inline-flex}
+.seg button{border-radius:0;margin-left:-1px}
+.seg button:first-child{border-radius:5px 0 0 5px;margin-left:0}
+.seg button:last-child{border-radius:0 5px 5px 0}
+.field{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:.6rem;align-items:center;flex:1 1 19rem;min-width:0}
+.field>span{font-size:.9rem;color:var(--muted);white-space:nowrap}
+.field output{font:600 .92rem/1 var(--font-mono);font-variant-numeric:tabular-nums;min-width:8.2ch;text-align:right}
+input[type=range]{width:100%;min-width:0;accent-color:var(--lo);height:1.6rem;margin:0}
+select{font:500 .9rem/1.2 var(--font-body);color:var(--fg);background:var(--panel-2);border:1px solid var(--line);border-radius:5px;padding:.45rem .5rem}
+.lbl{font-size:.9rem;color:var(--muted);display:inline-flex;gap:.5rem;align-items:center}
+.chips{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.9rem}
+.chip{display:inline-flex;align-items:center;gap:.45rem;border-radius:999px;padding:.35rem .7rem;font-size:.85rem;background:transparent}
+.chip i{width:.7rem;height:.7rem;border-radius:50%;background:var(--c);flex:none}
+.chip small{color:var(--muted);font:400 .8rem var(--font-mono)}
+.chip[aria-pressed="false"]{border-style:dashed;color:var(--muted)}
+.chip[aria-pressed="false"] i{background:transparent;box-shadow:inset 0 0 0 2px var(--line)}
+.readout{font-size:.92rem;margin:.9rem 0 0;min-height:2.9em}
+.lab figcaption,.cap{font-size:.88rem;line-height:1.5;color:var(--muted);margin:.8rem 0 0}
+.try{margin-top:.2rem}
+.try li{margin-bottom:.55rem}
+
+/* drawings */
+.scroll{overflow-x:auto}
+.sch{display:block;width:100%;min-width:640px;height:auto;font-family:var(--font-body);font-size:12px}
+.sch .w{fill:none;stroke:var(--fg);stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round}
+.sch .old{stroke:var(--muted)}
+.sch .osc{stroke:var(--lo)}
+.sch .dot{fill:var(--fg);stroke:none}
+.sch .dot.old{fill:var(--muted)}
+.sch .dot.osc{fill:var(--lo)}
+.sch .w .fillw{fill:var(--fg)}
+.sch .osc .fillw{fill:var(--lo)}
+.sch text{fill:var(--fg)}
+.sch .q{fill:var(--muted)}
+.sch .b{font-weight:600}
+.sch .p{font:400 10px var(--font-mono);fill:var(--muted)}
+.sch .box{fill:var(--panel-2);stroke:none}
+.sch .pnl{fill:none;stroke:var(--line)}
+.sch .oscbox{fill:var(--lo);fill-opacity:.07;stroke:var(--lo);stroke-width:1.25}
+.sch .flow{fill:none;stroke-width:9;stroke-linecap:round;stroke-linejoin:round;opacity:0;transition:opacity .15s}
+.sch .flow.pass{stroke:var(--sig)}
+.sch .flow.shunt{stroke:var(--muted)}
+.sch.s-pass .flow.pass{opacity:.32}
+.sch.s-shunt .flow.shunt{opacity:.38}
+.sch .arm{stroke:var(--fg);stroke-width:2.2;stroke-linecap:round;display:none}
+.sch.s-pass .arm.up,.sch.s-shunt .arm.down{display:inline}
+.sch .hi,.sch .lo-half{stroke:var(--lo);stroke-width:1.3;fill:none;opacity:.35}
+.sch.s-pass .hi,.sch.s-shunt .lo-half{opacity:1;stroke-width:2.4}
+
+/* tables */
+.tw{overflow-x:auto;margin:1rem 0 1.4rem;border-top:1px solid var(--fg);border-bottom:1px solid var(--line)}
+table{border-collapse:collapse;width:100%;min-width:38rem;font-size:.93rem;line-height:1.45}
+th,td{text-align:left;vertical-align:top;padding:.55rem 1rem .55rem 0}
+thead th{font:600 .7rem/1.3 var(--font-mono);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)}
+tbody tr+tr>*{border-top:1px solid var(--soft)}
+tbody th{font-weight:600}
+td.n{font-family:var(--font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.pick>*{background:var(--panel)}
+table.wide{min-width:54rem}
+/* the Falstad frame: a shield keeps page scrolling from being swallowed until the reader asks for the circuit */
+.fs-wrap{position:relative;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:var(--panel-2)}
+.fs-wrap iframe{display:block;width:100%;height:520px;border:0}
+.fs-shield{position:absolute;inset:0;width:100%;height:100%;border:0;background:transparent;cursor:pointer;display:flex;align-items:flex-start;justify-content:flex-start;padding:.6rem}
+.fs-shield span{font:600 .74rem/1 var(--font-mono);letter-spacing:.04em;background:var(--fg);color:var(--bg);padding:.42rem .6rem;border-radius:4px}
+.fs-wrap.live .fs-shield{display:none}
+.fs-link{font-size:.92rem;margin:.7rem 0 0}
+@media (max-width:560px){ .fs-wrap iframe{height:440px} }
+.v{display:inline-block;font:600 .66rem/1.2 var(--font-mono);letter-spacing:.06em;text-transform:uppercase;padding:.18rem .42rem;border:1px solid var(--muted);border-radius:3px;white-space:nowrap}
+.v.yes{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.v.no{border-style:dashed;color:var(--muted)}
+.small{font-size:.88rem;color:var(--muted)}
+.sources{font-size:.92rem}
+.sources ul{list-style:none;padding:0}
+.more{list-style:none;padding:0}
+.more li{border-top:1px solid var(--soft);padding:.7rem 0;margin:0}
+.more li:last-child{border-bottom:1px solid var(--soft)}
+.more a{font-weight:600}
+footer{margin-top:3.5rem;padding-top:1rem;border-top:1px solid var(--line);font-size:.85rem;color:var(--muted)}
+@media (max-width:560px){ body{font-size:1rem} .lab{padding:.8rem .7rem} .field{flex-basis:100%} }
+</style>
+</head>
+<body>
+<main class="page">
+<header>
+  <p class="crumb"><a href="../">slopswap</a> / <a href="./">emf badge</a> / pots</p>
+  <h1>Which pot to buy</h1>
+  <p class="dek">The knob is the largest single cost in the badge's tuning circuit. Here is every kind of pot that works, with prices.</p>
+  <div class="scale" aria-hidden="true"></div>
+  <p class="byline">Design notes · 13 November 2026 · part of <a href="./">A tuning knob for the EMF Explorer Badge</a></p>
+</header>
+<p>The <a href="./#osc">oscillator</a> uses the pot as a plain variable resistor, on two of its three pins, so almost anything whose resistance changes will tune it. That leaves the choice to price and feel, and the prices found run from four cents to four dollars.</p>
+
+<h2>Any value from 10 kΩ to 100 kΩ</h2>
+<p>The cheap parts mostly come in 10 kΩ. The frequency depends on the pot's resistance times the capacitor, so a smaller pot takes a larger capacitor and a smaller fixed resistor, and the range stays where it was.</p>
+<div class="tw"><table>
+  <thead><tr><th>Pot</th><th>Fixed resistor</th><th>Capacitor</th><th>Range, fresh cells</th><th>Range, cells at 2 V</th></tr></thead>
+  <tbody>
+    <tr><th scope="row">100 kΩ</th><td class="n">10 kΩ</td><td class="n">330 pF</td><td class="n">24 to 255 kHz</td><td class="n">19 to 203 kHz</td></tr>
+    <tr><th scope="row">50 kΩ</th><td class="n">4.7 kΩ</td><td class="n">680 pF</td><td class="n">24 to 262 kHz</td><td class="n">19 to 208 kHz</td></tr>
+    <tr><th scope="row">20 kΩ</th><td class="n">2 kΩ</td><td class="n">1.5 nF</td><td class="n">27 to 269 kHz</td><td class="n">21 to 214 kHz</td></tr>
+    <tr><th scope="row">10 kΩ</th><td class="n">1 kΩ</td><td class="n">3.3 nF</td><td class="n">24 to 230 kHz</td><td class="n">19 to 183 kHz</td></tr>
+    <tr><th scope="row">10 kΩ, narrower and more even</th><td class="n">2.2 kΩ</td><td class="n">1.5 nF</td><td class="n">48 to 246 kHz</td><td class="n">38 to 196 kHz</td></tr>
+  </tbody>
+</table></div>
+<p class="small">Simulated with the same 74HC14 model as the main page (<a href="badge_pots.py">badge_pots.py</a>), which gives the gate 150 Ω of output resistance. That resistance is in series with the fixed resistor, so it starts to count at 1 kΩ: with 400 Ω, which is plausible on tired cells, the top of the 10 kΩ range falls to about 150 kHz. Cheap pots are ±20 to ±30 %, and the bottom of the range moves by as much.</p>
+
+<h2>What each kind costs</h2>
+<div class="tw"><table class="wide">
+  <thead><tr><th>Kind</th><th>Example</th><th>Value</th><th>Price</th><th>As a knob</th></tr></thead>
+  <tbody>
+    <tr><th scope="row">Carbon trimmer, 6 mm</th><td><a href="https://www.lcsc.com/product-detail/C5205024.html">BOCHEN RM065-104</a></td><td class="n">100 kΩ</td><td class="n">$0.043 at 1,000<br>$0.037 at 10,000</td><td>A slotted disc for a fingernail or a screwdriver. Made to be set, not played: see below.</td></tr>
+    <tr><th scope="row">Square trimmer, 9.5 mm</th><td><a href="https://www.lcsc.com/product-detail/C48642122.html">BAOTER 3386P-104-LF</a></td><td class="n">100 kΩ</td><td class="n">from $0.10</td><td>A bigger slotted rotor, with the same caveat.</td></tr>
+    <tr><th scope="row">Carbon shaft pot, 16 mm</th><td><a href="https://www.lcsc.com/product-detail/C10566.html">HaiHuasheng R16-B103-3P</a></td><td class="n">10 kΩ</td><td class="n">from $0.135</td><td>A full-size panel pot with an 18 mm shaft, large for a badge. Out of stock at LCSC when read. <a href="https://jlcpcb.com/partdetail/11110-R16_B103_3P_18mm/C10566">JLCPCB's listing</a> says it has a switch, which could double as the mode switch; not confirmed.</td></tr>
+    <tr><th scope="row">Slide pot</th><td><a href="https://www.lcsc.com/product-detail/C49230417.html">YTL YSX-DWQ-P097</a></td><td class="n">10 kΩ</td><td class="n">from $0.30</td><td>A proper slider. The travel is not listed. A <a href="https://www.lcsc.com/product-detail/C49230422.html">second version</a> with more stock is from $0.37.</td></tr>
+    <tr><th scope="row">Shaft pot, 9 mm</th><td><a href="https://www.lcsc.com/product-detail/Variable-Resistors-Potentiometers_ALPSALPINE-RK09K1130AP5_C470295.html">Alps RK09K1130AP5</a></td><td class="n">10 kΩ</td><td class="n">$0.32 at 1,000</td><td>The ordinary knob.</td></tr>
+    <tr><th scope="row">Rotary position sensor</th><td><a href="https://www.lcsc.com/product-detail/C2687313.html">Alps RDC501018A</a></td><td class="n">not listed</td><td class="n">$0.41 at 1,000</td><td>A flat rotary part with no shaft of its own, so it needs a wheel or shaft added.</td></tr>
+    <tr><th scope="row">Thumbwheel pot</th><td><a href="https://www.lcsc.com/product-detail/C470643.html">Alps RK10J11E0034</a></td><td class="n">10 kΩ</td><td class="n">$0.53 at 900</td><td>A brand-name edge wheel.</td></tr>
+    <tr><th scope="row">Shaft pot, 9 mm</th><td><a href="https://www.newark.com/bourns/ptv09a-4015f-b104/pot-rotary-100kohm-9mm-20/dp/10C0382">Bourns PTV09A</a></td><td class="n">100 kΩ</td><td class="n">$0.74 at 1,000</td><td>The ordinary knob in the value the schematic shows. LCSC has <a href="https://www.lcsc.com/product-detail/C5341721.html">a version</a> from $0.69.</td></tr>
+    <tr><th scope="row">Slide position sensor</th><td><a href="https://www.lcsc.com/product-detail/C202389.html">Alps RDC1022A05</a></td><td class="n">10 kΩ</td><td class="n">from $0.76</td><td>22 mm of travel and a 4.5 mm lever. Slides very freely: see below.</td></tr>
+    <tr><th scope="row">Slide pot, brand-name</th><td><a href="https://www.lcsc.com/product-detail/C5357832.html">Bourns PTA3043</a></td><td class="n">10 kΩ</td><td class="n">from $1.36</td><td>What a slider costs from a Western catalogue.</td></tr>
+    <tr><th scope="row">Thumbwheel trimmer, brand-name</th><td><a href="https://www.lcsc.com/product-detail/C17214971.html">Bourns 3352T-1-104LF</a></td><td class="n">100 kΩ</td><td class="n">$4.08 at 1,000</td><td>A trimmer with its own edge wheel. Out-of-stock listings in the same family run $1.17 to $1.54 at 1,000.</td></tr>
+  </tbody>
+</table></div>
+<p class="small">All LCSC listings unless marked, read on 13 November 2026. "From" is the lowest price break shown, without its quantity. Every part here is linear or lists no taper, so expect the crowded top end that <a href="./#dial">the dial simulation</a> on the main page shows for a linear pot. For a log taper, the <a href="https://www.taydaelectronics.com/100k-ohm-logarithmic-taper-potentiometer-round-knurled-plastic-shaft-pcb-9mm.html">Alpha RV09AF 100 kΩ</a> is $0.67 for one at Tayda.</p>
+
+<h2>Trimmers: the cheapest end</h2>
+<p>A 100 kΩ carbon trimmer at about four cents is the floor. It drops into the schematic as drawn and takes the recommended build from $0.50 to $0.22. The cost is in use. A trimmer is turned through a slot, and it is built to be set a few times: Bourns rates its 3362 trimmer for 200 cycles of rotation. A badge that is played like an instrument could use that up in a few afternoons. A trimmer makes sense if the knob is closer to a preset than an instrument.</p>
+<p>The cheapest part that is a real knob is the 16 mm carbon shaft pot at about 14 cents, if it can be had and the badge has room for it. After it come the slide pot at 30 cents and the Alps shaft pot at 32 cents.</p>
+
+<h2>Position sensors as sliders</h2>
+<p>LCSC files a second family of sliders under <a href="https://www.lcsc.com/category/1270.html">position sensors</a> and not under potentiometers. A resistive linear position sensor is a slide pot made for a mechanism to move instead of a finger: a 10 kΩ track, a short lever and through-hole pins. It tunes this circuit like any other 10 kΩ pot, and it can undercut the brand-name thumbwheels and slide pots in the same catalogue: the Alps RDC1022A05 slider is from $0.76, where a Bourns slide pot is from $1.36 and Bourns thumbwheels start at $1.17, and the Alps rotary sensor at $0.41 is under the Alps thumbwheel at $0.53. The low-cost YTL slide pot is still cheaper than any of them.</p>
+<p>The drawback is feel. These parts slide with very little resistance (Alps rates the RDC10 series at 0.25 N at most), so they are not as pleasant under a thumb as a proper slide pot. In their favour, the same datasheet rates them for 200,000 strokes. They are linear only, so the top of the dial is crowded; the narrower 10 kΩ row in the first table evens that out.</p>
+<div class="tw"><table>
+  <thead><tr><th>Position sensor</th><th>Kind</th><th>Price</th></tr></thead>
+  <tbody>
+    <tr><th scope="row"><a href="https://www.lcsc.com/product-detail/C2687313.html">Alps RDC501018A</a></th><td>rotary, through-hole</td><td class="n">$0.41 at 1,000</td></tr>
+    <tr><th scope="row"><a href="https://www.lcsc.com/product-detail/C388852.html">Alps RDC506018A</a></th><td>rotary, surface-mount</td><td class="n">$0.53 at 1,200</td></tr>
+    <tr><th scope="row"><a href="https://www.lcsc.com/product-detail/C2153595.html">Bourns 3382G-1-103G</a></th><td>rotary, surface-mount</td><td class="n">$0.57 at 1,000</td></tr>
+    <tr><th scope="row"><a href="https://www.lcsc.com/product-detail/C202389.html">Alps RDC1022A05</a></th><td>slide, 22 mm travel, through-hole</td><td class="n">from $0.76</td></tr>
+    <tr><th scope="row"><a href="https://www.lcsc.com/product-detail/C351182.html">Alps RDC10320RB</a></th><td>slide, 32 mm travel</td><td class="n">from $1.17</td></tr>
+    <tr><th scope="row"><a href="https://www.lcsc.com/product-detail/C470772.html">Alps RDC1010A12</a></th><td>slide, 10 mm travel, through-hole</td><td class="n">$2.81</td></tr>
+  </tbody>
+</table></div>
+<p class="small">The category holds about 3,500 parts, most of them magnetic encoder chips, and only these Alps and Bourns resistive parts were priced for this page. Cheaper sliders from other makers may be in there; it is worth searching by hand before ordering.</p>
+
+<h2>The recommended build with each knob</h2>
+<div class="tw"><table>
+  <thead><tr><th>Knob</th><th>Knob price</th><th>With low-cost chips</th><th>With TI chips</th></tr></thead>
+  <tbody>
+    <tr><th scope="row">Carbon trimmer</th><td class="n">$0.04</td><td class="n">$0.22</td><td class="n">$1.21</td></tr>
+    <tr><th scope="row">Carbon shaft pot, 16 mm</th><td class="n">$0.14</td><td class="n">$0.31</td><td class="n">$1.31</td></tr>
+    <tr><th scope="row">Slide pot, YTL</th><td class="n">$0.30</td><td class="n">$0.48</td><td class="n">$1.47</td></tr>
+    <tr class="pick"><th scope="row">Alps shaft pot</th><td class="n">$0.32</td><td class="n">$0.50</td><td class="n">$1.49</td></tr>
+    <tr><th scope="row">Alps rotary position sensor</th><td class="n">$0.41</td><td class="n">$0.59</td><td class="n">$1.58</td></tr>
+    <tr><th scope="row">Alps thumbwheel</th><td class="n">$0.53</td><td class="n">$0.70</td><td class="n">$1.70</td></tr>
+    <tr><th scope="row">Bourns shaft pot</th><td class="n">$0.74</td><td class="n">$0.91</td><td class="n">$1.91</td></tr>
+    <tr><th scope="row">Alps slide position sensor</th><td class="n">$0.76</td><td class="n">$0.94</td><td class="n">$1.93</td></tr>
+  </tbody>
+</table></div>
+<p class="small">Both chips plus the knob, both ears. The highlighted row is the low-cost figure used on the main page; the brand-name figure there pairs the TI chips with the Bourns pot. A 10 kΩ knob changes one resistor and one capacitor, at no cost.</p>
+
+
+<h2>Sources</h2>
+<div class="sources"><ul>
+  <li><a href="https://media.masterelectronics.com/productfiles/mf-ale/rdc10.pdf">Alps RDC10 series datasheet</a>, for the slide position sensors' resistance, operating force and life</li>
+  <li><a href="https://www.rcscomponents.kiev.ua/datasheets/3362.pdf">Bourns 3362 datasheet</a>, for a trimmer's rotational life</li>
+  <li>LCSC category pages for <a href="https://www.lcsc.com/category/1270.html">position sensors</a>, <a href="https://www.lcsc.com/category/1194.html">thumbwheel potentiometers</a> and <a href="https://www.lcsc.com/category/1191.html">rotary potentiometers</a></li>
+  <li><a href="https://assets.nexperia.com/documents/data-sheet/74HC_HCT14.pdf">74HC14 datasheet</a>, Nexperia, for the Schmitt thresholds used in the simulation</li>
+  <li>Prices: the distributor pages linked in the tables, read on 13 November 2026</li>
+</ul></div>
+<footer>Simulated, not measured. The oscillator figures come from <a href="badge_pots.py">badge_pots.py</a>.</footer>
+</main>
+</body>
+</html>
