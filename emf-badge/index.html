@@ -1,0 +1,632 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>EMF Explorer Badge: a tuning knob for fields above 20 kHz</title>
+<meta name="short-title" content="EMF badge tuning knob">
+<meta name="description" content="How one switch chip, one oscillator and a pot could let the EMF Explorer Badge tune in fields from 20 kHz up towards 1 MHz. With two simulations to play with.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="A tuning knob for the EMF Explorer Badge">
+<meta property="og:description" content="How one switch chip, one oscillator and a pot could let the badge tune in fields from 20 kHz up towards 1 MHz. With two simulations to play with.">
+<meta property="og:url" content="https://slopswap.org/emf-badge/">
+<style>
+/* self-hosted fonts: Google Fonts is blocked in China */
+@font-face{font-family:"Archivo Narrow";font-style:normal;font-weight:100 900;font-display:swap;src:url(../styles/fonts/ArchivoNarrow-var.woff2) format("woff2")}
+@font-face{font-family:"IBM Plex Sans";font-style:normal;font-weight:100 900;font-display:swap;src:url(../styles/fonts/IBMPlexSans-var.woff2) format("woff2")}
+@font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:400;font-display:swap;src:url(../styles/fonts/IBMPlexMono-400.woff2) format("woff2")}
+@font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:600;font-display:swap;src:url(../styles/fonts/IBMPlexMono-600.woff2) format("woff2")}
+</style>
+<style>
+/* Layout: one 44rem reading column; the figures break out to 60rem.
+   Colour carries meaning and keeps it on every figure: amber is the chopper (the oscillator, its knob, its window),
+   blue is the 40 kHz example field, ink is what you hear. The six sources in the dial take the six --s colours. */
+:root{
+  color-scheme:light;
+  --bg:#f2f0ea; --panel:#fcfcfb; --panel-2:#edebe4; --fg:#171613; --muted:#55534d; --line:#d3d0c6; --soft:#e4e1d8;
+  --lo:#a86200; --sig:#2a78d6; --link:#1b58b3;
+  --s1:#e34948; --s2:#2a78d6; --s3:#1baf7a; --s4:#6250d6; --s5:#008300; --s6:#e87ba4;
+  --font-display:"Archivo Narrow","Arial Narrow","Helvetica Neue",Arial,sans-serif;
+  --font-body:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  color-scheme:dark;
+  --bg:#121211; --panel:#1a1a19; --panel-2:#252523; --fg:#f0efec; --muted:#b5b3aa; --line:#3b3a36; --soft:#2a2927;
+  --lo:#f0b24c; --sig:#3987e5; --link:#8db6ff;
+  --s1:#e66767; --s2:#3987e5; --s3:#199e70; --s4:#9085e9; --s5:#008300; --s6:#d55181;
+} }
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#121211; --panel:#1a1a19; --panel-2:#252523; --fg:#f0efec; --muted:#b5b3aa; --line:#3b3a36; --soft:#2a2927;
+  --lo:#f0b24c; --sig:#3987e5; --link:#8db6ff;
+  --s1:#e66767; --s2:#3987e5; --s3:#199e70; --s4:#9085e9; --s5:#008300; --s6:#d55181;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:400 1.0625rem/1.6 var(--font-body);
+  padding-block:2.25rem 4rem;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.page{max-width:60rem;margin-inline:auto;min-width:0}
+.page>p,.page>ul,.page>ol,.page>h1,.page>h2,.page>h3,.page>.note,.page>header>*{max-width:44rem}
+p,ul,ol{margin:0 0 1.05rem}
+ul,ol{padding-left:1.25rem}
+li{margin-bottom:.4rem}
+a{color:var(--link);text-underline-offset:.15em}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--lo);outline-offset:2px;border-radius:3px}
+strong{font-weight:600}
+code,.num{font-family:var(--font-mono);font-size:.92em;font-variant-numeric:tabular-nums}
+
+/* header: a title over a tuning scale, the page's one flourish */
+.crumb{font:400 .78rem/1.4 var(--font-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 1.4rem}
+.crumb a{color:inherit;text-decoration:none}
+.crumb a:hover{color:var(--fg);text-decoration:underline}
+h1{font:700 clamp(2.3rem,6.5vw,3.6rem)/1 var(--font-display);letter-spacing:.005em;text-wrap:balance;margin:0 0 .9rem}
+.dek{font-size:1.2rem;line-height:1.5;color:var(--muted);margin:0 0 1.1rem}
+.scale{position:relative;height:26px;max-width:60rem !important;margin:1.6rem 0 .5rem;
+  background:
+    repeating-linear-gradient(90deg,var(--fg) 0 1px,transparent 1px 10%) bottom/100% 14px no-repeat,
+    repeating-linear-gradient(90deg,var(--muted) 0 1px,transparent 1px 2%) bottom/100% 7px no-repeat;
+  border-bottom:1px solid var(--fg)}
+.scale::after{content:"";position:absolute;left:19%;top:0;bottom:-1px;width:3px;background:var(--lo)}
+.byline{font:400 .8rem/1.5 var(--font-mono);color:var(--muted);margin:0 0 1.6rem}
+.note{border:1px solid var(--line);border-left:4px solid var(--lo);background:var(--panel);border-radius:4px;padding:.8rem 1rem;margin:0 0 1.2rem}
+.note .tag{display:block;font:600 .72rem/1.2 var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem}
+.note p:last-child{margin-bottom:0}
+
+/* sections */
+main{counter-reset:sec}
+h2{counter-increment:sec;font:700 clamp(1.6rem,4vw,2.15rem)/1.1 var(--font-display);text-wrap:balance;
+  margin:3.6rem 0 1rem;padding-top:1.1rem;border-top:1px solid var(--fg)}
+h2::before{content:counter(sec,decimal-leading-zero);display:block;font:600 .74rem/1 var(--font-mono);letter-spacing:.1em;color:var(--lo);margin-bottom:.6rem}
+h3{font:700 1.25rem/1.2 var(--font-display);margin:2rem 0 .6rem}
+
+/* figures */
+.lab{margin:1.6rem 0 1.9rem;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:1rem 1rem .9rem;min-width:0}
+.lab-title{display:flex;flex-wrap:wrap;gap:.3rem .8rem;align-items:baseline;margin:0 0 .8rem}
+.lab-title b{font:700 1.15rem/1.2 var(--font-display)}
+.lab-title span{font:600 .7rem/1.2 var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.cv{position:relative}
+.cv canvas{display:block;width:100%;touch-action:pan-y}
+.tip{position:absolute;z-index:2;pointer-events:none;background:var(--fg);color:var(--bg);font-size:.8rem;line-height:1.35;padding:.35rem .55rem;border-radius:4px;max-width:15rem;transform:translate(-50%,-110%)}
+.controls{display:flex;flex-wrap:wrap;gap:.6rem .8rem;align-items:center;margin-top:.9rem}
+.btn,.seg button,.chip{font:500 .9rem/1.2 var(--font-body);color:var(--fg);background:var(--panel-2);border:1px solid var(--line);border-radius:5px;padding:.5rem .75rem;cursor:pointer}
+.btn:hover,.seg button:hover{border-color:var(--muted)}
+.btn[aria-pressed="true"],.seg button[aria-pressed="true"]{background:var(--fg);border-color:var(--fg);color:var(--bg)}
+.seg{display:inline-flex}
+.seg button{border-radius:0;margin-left:-1px}
+.seg button:first-child{border-radius:5px 0 0 5px;margin-left:0}
+.seg button:last-child{border-radius:0 5px 5px 0}
+.field{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:.6rem;align-items:center;flex:1 1 19rem;min-width:0}
+.field>span{font-size:.9rem;color:var(--muted);white-space:nowrap}
+.field output{font:600 .92rem/1 var(--font-mono);font-variant-numeric:tabular-nums;min-width:8.2ch;text-align:right}
+input[type=range]{width:100%;min-width:0;accent-color:var(--lo);height:1.6rem;margin:0}
+select{font:500 .9rem/1.2 var(--font-body);color:var(--fg);background:var(--panel-2);border:1px solid var(--line);border-radius:5px;padding:.45rem .5rem}
+.lbl{font-size:.9rem;color:var(--muted);display:inline-flex;gap:.5rem;align-items:center}
+.chips{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.9rem}
+.chip{display:inline-flex;align-items:center;gap:.45rem;border-radius:999px;padding:.35rem .7rem;font-size:.85rem;background:transparent}
+.chip i{width:.7rem;height:.7rem;border-radius:50%;background:var(--c);flex:none}
+.chip small{color:var(--muted);font:400 .8rem var(--font-mono)}
+.chip[aria-pressed="false"]{border-style:dashed;color:var(--muted)}
+.chip[aria-pressed="false"] i{background:transparent;box-shadow:inset 0 0 0 2px var(--line)}
+.readout{font-size:.92rem;margin:.9rem 0 0;min-height:2.9em}
+.lab figcaption,.cap{font-size:.88rem;line-height:1.5;color:var(--muted);margin:.8rem 0 0}
+.try{margin-top:.2rem}
+.try li{margin-bottom:.55rem}
+
+/* drawings */
+.scroll{overflow-x:auto}
+.sch{display:block;width:100%;min-width:640px;height:auto;font-family:var(--font-body);font-size:12px}
+.sch .w{fill:none;stroke:var(--fg);stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round}
+.sch .old{stroke:var(--muted)}
+.sch .osc{stroke:var(--lo)}
+.sch .dot{fill:var(--fg);stroke:none}
+.sch .dot.old{fill:var(--muted)}
+.sch .dot.osc{fill:var(--lo)}
+.sch text{fill:var(--fg)}
+.sch .q{fill:var(--muted)}
+.sch .b{font-weight:600}
+.sch .p{font:400 10px var(--font-mono);fill:var(--muted)}
+.sch .box{fill:var(--panel-2);stroke:none}
+.sch .oscbox{fill:var(--lo);fill-opacity:.07;stroke:var(--lo);stroke-width:1.25}
+.sch .flow{fill:none;stroke-width:9;stroke-linecap:round;stroke-linejoin:round;opacity:0;transition:opacity .15s}
+.sch .flow.pass{stroke:var(--sig)}
+.sch .flow.shunt{stroke:var(--muted)}
+.sch.s-pass .flow.pass{opacity:.32}
+.sch.s-shunt .flow.shunt{opacity:.38}
+.sch .arm{stroke:var(--fg);stroke-width:2.2;stroke-linecap:round;display:none}
+.sch.s-pass .arm.up,.sch.s-shunt .arm.down{display:inline}
+.sch .hi,.sch .lo-half{stroke:var(--lo);stroke-width:1.3;fill:none;opacity:.35}
+.sch.s-pass .hi,.sch.s-shunt .lo-half{opacity:1;stroke-width:2.4}
+
+/* tables */
+.tw{overflow-x:auto;margin:1rem 0 1.4rem;border-top:1px solid var(--fg);border-bottom:1px solid var(--line)}
+table{border-collapse:collapse;width:100%;min-width:34rem;font-size:.93rem;line-height:1.45}
+th,td{text-align:left;vertical-align:top;padding:.55rem 1rem .55rem 0}
+thead th{font:600 .7rem/1.3 var(--font-mono);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line);white-space:nowrap}
+tbody tr+tr>*{border-top:1px solid var(--soft)}
+tbody th{font-weight:600}
+td.n{font-family:var(--font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.sources{font-size:.92rem}
+.sources ul{list-style:none;padding:0}
+footer{margin-top:3.5rem;padding-top:1rem;border-top:1px solid var(--line);font-size:.85rem;color:var(--muted)}
+@media (max-width:560px){ body{font-size:1rem} .lab{padding:.8rem .7rem} .field{flex-basis:100%} }
+</style>
+</head>
+<body>
+<main class="page">
+<header>
+  <p class="crumb"><a href="../">slopswap</a> / emf badge</p>
+  <h1>A tuning knob for the EMF Explorer Badge</h1>
+  <p class="dek">The badge hears fields from 20 Hz to 20 kHz. One switch chip, one oscillator and a pot should let it tune in everything from 20 kHz up towards 1 MHz, with loudness and rhythm intact.</p>
+  <div class="scale" aria-hidden="true"></div>
+  <p class="byline">Design notes · 12 November 2026</p>
+  <div class="note"><span class="tag">Where this stands</span>
+    <p>The circuit is simulated, and a first build is wired on a breadboard with two transistors doing the switch's job. Nothing has been measured on a badge yet; that bench test is next. Every number on this page is from simulation or a datasheet.</p></div>
+</header>
+
+<h2>The short version</h2>
+<ul>
+  <li>The pickup coils already catch fields far above hearing. Those fields never reach the headphones, because the amplifier fades above 16 kHz and ears stop near 20 kHz.</li>
+  <li>A switch between the coil and the amplifier, flipped tens of thousands of times a second, shifts a slice of that band down into hearing. Engineers call that switch a chopper. A knob sets how fast it flips, and so which slice you hear.</li>
+  <li>This is how a radio tunes a station and how a bat detector hears bats. Here it takes two logic chips, a pot, a few passives, and one lifted resistor leg per channel.</li>
+  <li>In simulation, a field of the same strength gives the same size tone at 40 kHz, 200 kHz and 1 MHz.</li>
+</ul>
+
+<h2>Try the knob</h2>
+<p>This is a model of what the knob does, not a recording. The coloured spikes are things that put out fields above hearing, at typical frequencies. Turn the sound on, then move the knob.</p>
+
+<figure class="lab" id="dial">
+  <div class="lab-title"><b>The dial</b><span>Simulation 1</span></div>
+  <div class="cv"><canvas id="dialCv" role="img" aria-label="Top: six sources on a frequency axis from 10 kHz to 1.5 MHz, with the chopper's window. Bottom: the tones they make between 0 and 20 kHz."></canvas><div class="tip" id="dialTip" hidden></div></div>
+  <div class="controls">
+    <button class="btn" id="snd" aria-pressed="false">Sound: off</button>
+    <div class="seg" role="group" aria-label="Badge version">
+      <button data-mode="off" aria-pressed="false">Badge today</button><button data-mode="on" aria-pressed="true">Knob fitted</button>
+    </div>
+    <label class="field"><span>Knob</span><input type="range" id="pot" min="0" max="1000" step="1" value="124" aria-label="Knob position"><output id="loOut" for="pot"></output></label>
+  </div>
+  <div class="controls">
+    <span class="lbl">Range capacitor
+      <span class="seg" role="group" aria-label="Range capacitor">
+        <button data-band="0" aria-pressed="true">680 pF</button><button data-band="1" aria-pressed="false">150 pF</button><button data-band="2" aria-pressed="false">47 pF</button>
+      </span></span>
+    <label class="lbl">Pot <select id="taper"><option value="log">log, wired backwards</option><option value="lin">linear</option></select></label>
+    <button class="btn" id="sweep" aria-pressed="false">Sweep the knob</button>
+  </div>
+  <div class="chips" id="chips" role="group" aria-label="Sources"></div>
+  <p class="readout" id="dialRead" aria-live="polite"></p>
+  <figcaption>Source frequencies are typical values; real devices vary. The rhythms are invented, to show that rhythm survives. The amber band is the window: anything inside it lands in the headphones. The two fainter bands are the windows at three and five times the chopper frequency.</figcaption>
+</figure>
+
+<ol class="try">
+  <li><strong>Badge today, then Knob fitted.</strong> Today only the mains hum gets through. With the knob fitted, whatever sits in the amber window becomes a note.</li>
+  <li><strong>Move the knob slowly through the fluorescent ballast at 40 kHz.</strong> The note falls, vanishes as the knob crosses 40 kHz, and rises again. The note is the distance between the knob and the source.</li>
+  <li><strong>Park next to the induction hob at 25 kHz.</strong> It still buzzes. The switch moves a signal down without flattening it.</li>
+  <li><strong>Set the knob near 41.5 kHz and turn the ballast off with its button under the dial.</strong> The RFID reader at 125 kHz ticks faintly. That is the window at three times the chopper frequency.</li>
+  <li><strong>Change the range capacitor</strong> to reach the wireless charger and the DC-DC converter.</li>
+</ol>
+
+<h2>Why flipping a switch moves a sound</h2>
+<p>Point a strobe light at a spinning fan. If the strobe flashes almost in time with the blades, the fan seems to turn slowly, because each flash catches the blades a little further round than the one before. The fan has not slowed down. You are seeing the difference between two fast rates.</p>
+<p>The switch does this to the coil's signal. Each time it closes, it lets a short piece of the wave through to the amplifier. When the switch runs almost in time with the wave, each piece comes from a little further along the wave than the last. The amplifier is too slow to follow the pieces one by one, so it follows their average, and the average drifts up and down at the difference between the two rates. A 40 kHz field chopped at 39 kHz comes out as a 1 kHz tone.</p>
+
+<figure class="lab" id="scope">
+  <div class="lab-title"><b>The switch in slow motion</b><span>Simulation 2</span></div>
+  <div class="cv"><canvas id="scopeCv" role="img" aria-label="Four traces: the field at the coil, the switch, what reaches the amplifier, and what the amplifier puts out."></canvas></div>
+  <div class="controls">
+    <label class="field"><span>Field</span><input type="range" id="fs" min="20" max="80" step="0.5" value="40" aria-label="Field frequency"><output id="fsOut" for="fs"></output></label>
+    <label class="field"><span>Switch</span><input type="range" id="fl" min="20" max="80" step="0.1" value="36" aria-label="Switch frequency"><output id="flOut" for="fl"></output></label>
+  </div>
+  <div class="controls">
+    <label class="field"><span>Time shown</span><input type="range" id="sp" min="0.2" max="4" step="0.1" value="0.5" aria-label="Time shown"><output id="spOut" for="sp"></output></label>
+    <button class="btn" id="match">Match them exactly</button>
+    <button class="btn" id="sweep2" aria-pressed="false">Sweep the switch past the field</button>
+  </div>
+  <p class="readout" id="scopeRead" aria-live="polite"></p>
+  <figcaption>Trace 1 is the fast wave. The amber dots mark where the wave is each time the switch closes; joined up, they already trace the slow wave, like the strobe on the fan. Trace 3 is what gets through. Trace 4 is the amplifier's output, drawn twice as tall as the others: the thin line still carries fast ripple that nobody can hear, and the heavy line is the part below 20 kHz.</figcaption>
+</figure>
+
+<p>Four things follow from that picture.</p>
+<ul>
+  <li><strong>The note is the difference.</strong> Tune the switch closer to the source and the note falls. Pass through it and the note rises again. Two sources the same distance above and below the switch land on the same note.</li>
+  <li><strong>The window is as wide as the amplifier.</strong> Anything within about 16 kHz of the switch frequency comes out in the audible range. Further away, the difference is too high for the amplifier and the ear.</li>
+  <li><strong>The tone is about a third of the size of the wave that made it</strong> (1/π, or 10 dB down). Half the wave is thrown away and the rest is averaged. It is the same third at every frequency.</li>
+  <li><strong>It stays in proportion.</strong> Twice the field gives twice the tone, so moving closer gets louder, and anything that pulses, buzzes or wobbles keeps doing it.</li>
+</ul>
+<p>A square wave also contains its own third and fifth harmonics, so the switch opens fainter windows at three and five times its frequency, a third and a fifth as loud. One knob range therefore reaches higher than its numbers suggest.</p>
+
+<h2>Why the badge is already most of the way there</h2>
+<p>On the badge each coil feeds its amplifier through 100 Ω, which is close to a short circuit. That turns out to matter. A faster field induces more voltage in the coil, but the coil's own inductance holds back a faster current by exactly as much. The two cancel. The current in the coil follows the strength of the field and ignores its frequency, so a 1 MHz field puts as much current through the coil as a 10 kHz field of the same strength.</p>
+<p>What stops the badge hearing it comes after the coil. The 100 pF across the feedback resistor rolls the amplifier off above 16 kHz, and then hearing gives out. The switch sits ahead of all that. It turns the high-frequency current into an audio-frequency current before the amplifier sees it, so the roll-off never touches it.</p>
+
+<figure class="lab">
+  <div class="lab-title"><b>A field of the same strength, at any frequency</b><span>Calculated and simulated</span></div>
+  <div class="cv"><canvas id="respCv" role="img" aria-label="Response of the badge to a field of constant strength from 100 Hz to 1 MHz. Today it is flat from about 1 kHz to 10 kHz and falls away above 16 kHz. With the knob tuned to the source it is flat at minus 10 dB from 28 kHz to 1 MHz."></canvas><div class="tip" id="respTip" hidden></div></div>
+  <figcaption>Level at the amplifier output for a field of constant strength, relative to the badge's mid-band. The black curve is calculated from the badge's own values: a 100 mH coil with about 250 Ω of winding resistance, 100 Ω in, 100 kΩ with 100 pF in the feedback. It falls on the left because the winding resistance takes over below about 500 Hz, and on the right because of the 100 pF. The amber line is the simulated tone, about 10 dB down and flat from the bottom of the knob's range to 1 MHz. Not modelled: losses in the coil's ferrite core at high frequency, the likeliest thing to pull the right-hand end down.</figcaption>
+</figure>
+
+<h2>The circuit</h2>
+<p>There are two blocks. The switch does the shifting. The oscillator and its pot are the dial.</p>
+
+<figure class="lab" id="schem">
+  <div class="lab-title"><b>One channel of the prototype</b><span>Press a button to move the switch</span></div>
+  <div class="scroll">
+  <svg class="sch s-pass" id="sch" viewBox="0 36 760 596" role="img" aria-label="Schematic. The pickup coil goes to the common pin of an SPDT analog switch. One throw goes through C1 and the existing 100 ohm resistor to the op-amp; the other throw goes to ground. A three-inverter RC oscillator with a 20 kilohm pot drives the switch's select pin.">
+    <rect class="box" x="24" y="44" width="640" height="174" rx="6"/>
+    <text class="q" x="36" y="62">ALREADY ON THE BADGE</text>
+    <!-- current paths, shown under the wiring -->
+    <path class="flow pass" d="M150 120H260V340H300L344 320H380V276H310V120H400M456 130H590"/>
+    <path class="flow shunt" d="M150 120H260V340H300L344 360H380V372"/>
+    <g class="w old">
+      <path d="M150 120a6 7.5 0 0 1 0 15a6 7.5 0 0 1 0 15a6 7.5 0 0 1 0 15a6 7.5 0 0 1 0 15"/>
+      <path d="M150 180v6M142 186h16M145 190h10M148 194h4"/>
+      <path d="M150 120H286"/><circle cx="290" cy="120" r="3"/><circle cx="310" cy="120" r="3"/>
+      <path d="M314 120H325M365 120H400"/><path d="M325 120h5l2.5 -5l5 10l5 -10l5 10l5 -10l5 10l2.5 -5h5"/>
+      <polygon points="400,98 400,162 456,130"/>
+      <path d="M400 140H380V180"/><path d="M380 180v6M372 186h16M375 190h10M378 194h4"/>
+      <path d="M372 120V80H390M430 80H490V130"/><path d="M390 80h5l2.5 -5l5 10l5 -10l5 10l5 -10l5 10l2.5 -5h5"/>
+      <path d="M456 130H590"/>
+    </g>
+    <circle class="dot old" cx="372" cy="120" r="3"/><circle class="dot old" cx="490" cy="130" r="3"/>
+    <text x="164" y="146">pickup coil</text><text class="q" x="164" y="161">100 mH</text>
+    <text class="b" x="322" y="96" text-anchor="end">lift this leg</text>
+    <text class="q" x="345" y="108" text-anchor="middle">100 Ω</text>
+    <text class="q" x="410" y="68" text-anchor="middle">100 kΩ ‖ 100 pF</text>
+    <text x="406" y="124">−</text><text x="406" y="144">+</text>
+    <text class="q" x="428" y="180" text-anchor="middle">NJM2115</text>
+    <text class="q" x="596" y="134">to headphones</text>
+    <!-- the switch -->
+    <g class="w">
+      <path d="M260 120V340H296"/>
+      <path d="M344 320H380V276H310V252M310 244V120"/>
+      <path d="M301 244h18M301 252h18"/>
+      <path d="M344 360H380"/><path d="M380 360v6M372 366h16M375 370h10M378 374h4"/>
+      <rect x="278" y="298" width="92" height="84" rx="8" stroke-dasharray="4 3"/>
+    </g>
+    <line class="arm up" x1="300" y1="340" x2="340" y2="323"/>
+    <line class="arm down" x1="300" y1="340" x2="340" y2="357"/>
+    <circle class="dot" cx="260" cy="120" r="3"/><circle class="dot" cx="300" cy="340" r="3"/><circle class="dot" cx="344" cy="320" r="3"/><circle class="dot" cx="344" cy="360" r="3"/>
+    <text class="b" x="250" y="318" text-anchor="end">SPDT analog switch</text>
+    <text class="q" x="250" y="334" text-anchor="end">one of the three in a 4053</text>
+    <text class="b" x="324" y="244">C1</text><text class="q" x="324" y="259">10 µF</text>
+    <text class="p" x="296" y="355" text-anchor="end">14</text><text class="p" x="340" y="313" text-anchor="end">13</text><text class="p" x="340" y="376" text-anchor="end">12</text><text class="p" x="326" y="394">11 select</text>
+    <text class="q" x="392" y="324">to the amplifier</text><text class="q" x="392" y="364">to ground</text>
+    <!-- the oscillator and the wire that carries its square wave -->
+    <rect class="oscbox" x="84" y="456" width="580" height="168" rx="6"/>
+    <g class="w osc">
+      <path d="M456 540H560V410H320" /><path d="M320 410V342" stroke-dasharray="3 3"/>
+      <path d="M130 540H140M180 540H190"/><path d="M140 540h5l2.5 -5l5 10l5 -10l5 10l5 -10l5 10l2.5 -5h5"/>
+      <polygon points="190,526 190,554 246,540"/><circle cx="251" cy="540" r="5"/>
+      <path d="M256 540H290"/><polygon points="290,526 290,554 346,540"/><circle cx="351" cy="540" r="5"/>
+      <path d="M356 540H390"/><polygon points="390,526 390,554 446,540"/><circle cx="451" cy="540" r="5"/>
+      <path d="M270 540V500H260M220 500H200"/>
+      <path d="M220 500h5l2.5 -5l5 10l5 -10l5 10l5 -10l5 10l2.5 -5h5"/><path d="M160 500h5l2.5 -5l5 10l5 -10l5 10l5 -10l5 10l2.5 -5h5"/>
+      <path d="M160 500H130V580H230M270 580H370V540"/><path d="M230 580H246M246 571v18M254 571v18M254 580H270"/>
+      <path d="M180 492V482H160V500"/>
+    </g>
+    <polygon points="180,495 176,487 184,487" fill="var(--lo)"/>
+    <circle class="dot osc" cx="130" cy="540" r="3"/><circle class="dot osc" cx="270" cy="540" r="3"/><circle class="dot osc" cx="370" cy="540" r="3"/><circle class="dot osc" cx="560" cy="540" r="3"/>
+    <path class="hi" d="M578 474v-14h16"/><path class="lo-half" d="M594 460v14h16"/><path class="hi" d="M610 474v-14h16"/><path class="lo-half" d="M626 460v14h12"/>
+    <text class="q" x="578" y="446">square wave</text>
+    <text class="q" x="334" y="428">high: pass. low: ground.</text>
+    <text class="b" x="96" y="476">OSCILLATOR: THE DIAL</text>
+    <text class="q" x="252" y="476">three inverters of a CD4049UB</text>
+    <text class="b" x="122" y="536" text-anchor="end">X</text>
+    <text class="q" x="160" y="559" text-anchor="middle">R10</text><text class="q" x="160" y="573" text-anchor="middle">2.2 kΩ</text>
+    <text class="q" x="244" y="489" text-anchor="middle">R9 4.7 kΩ</text>
+    <text class="b" x="180" y="521" text-anchor="middle">pot 20 kΩ</text>
+    <text class="q" x="250" y="604" text-anchor="middle">C6 680 pF</text>
+    <text class="p" x="186" y="532" text-anchor="end">7</text><text class="p" x="258" y="532">6</text><text class="p" x="286" y="532" text-anchor="end">5</text><text class="p" x="358" y="532">4</text><text class="p" x="386" y="532" text-anchor="end">3</text><text class="p" x="458" y="532">2</text>
+    <text class="q" x="505" y="558" text-anchor="middle">output, pin 2</text>
+  </svg>
+  </div>
+  <div class="controls">
+    <div class="seg" role="group" aria-label="Switch position">
+      <button data-st="pass" aria-pressed="true">Pass</button><button data-st="shunt" aria-pressed="false">Ground</button><button data-st="chop" aria-pressed="false">Chop, slowed down</button>
+    </div>
+  </div>
+  <figcaption>Grey parts are on the badge now. Everything else is added. Held at <em>Pass</em> the badge is nearly its old self. Held at <em>Ground</em> it is muted. Chopping is flipping between the two at the oscillator's rate. Not drawn: +5 V to pin 16 of the 4053 and pin 1 of the CD4049UB, each with 100 nF to ground; 4053 pins 6, 7 and 8 to ground; unused inputs of both chips to ground.</figcaption>
+</figure>
+
+<h3>The switch</h3>
+<p>It has to be a two-way switch. While the amplifier side is disconnected, the coil must still see a short circuit, or its current has nowhere to go. In simulation a switch that only opens and closes the path, with no throw to ground, gave a tone with extra whistles on it and a mute that leaked. One section of a 4053 does both throws and never connects them at the same moment. The first breadboard build makes the same switch from two transistors and a spare inverter; the 4053 replaces all three.</p>
+<p>The switch's resistance hardly matters while chopping. The coil behaves as a current source, and 470 Ω in its way cost nothing in simulation. Its speed does matter: the switch has to change over in a small fraction of a cycle.</p>
+
+<h3>C1</h3>
+<p>C1 keeps the op-amp's DC offset out of the switch. Without it the switch would chop that offset into a square wave at the oscillator frequency and waste the amplifier's headroom. Use 10 µF. The first simulations used 1 µF, which resonates with the coil near 500 Hz and makes the mains hum the badge normally picks up 11 dB quieter at 120 Hz. With 10 µF the tone is the same size and the ordinary sound is within about 2 dB of the stock badge.</p>
+
+<h3>The oscillator</h3>
+<p>Three inverters in a ring with one resistor and capacitor to slow them down. The pot plus R9, together with C6, set the frequency. R10 only protects an input, and it has to stay small: at 22 kΩ it capped the oscillator near 800 kHz.</p>
+<div class="tw"><table>
+  <thead><tr><th>C6</th><th>Knob fully one way</th><th>Fully the other way</th><th>What lives there</th></tr></thead>
+  <tbody>
+    <tr><th scope="row">680 pF</th><td class="n">28 kHz</td><td class="n">123 kHz</td><td>induction hobs, lamp ballasts, chargers</td></tr>
+    <tr><th scope="row">150 pF</th><td class="n">111 kHz</td><td class="n">459 kHz</td><td>RFID readers, wireless chargers, DC-DC converters</td></tr>
+    <tr><th scope="row">47 pF</th><td class="n">277 kHz</td><td class="n">1.06 MHz</td><td>faster converters; the least certain range</td></tr>
+  </tbody>
+</table></div>
+<p>Simulated at 5 V. Expect the top of each range to vary by about 30 % from chip to chip.</p>
+<p>The pot's taper matters. Frequency goes as one over resistance, so a linear pot squeezes the upper half of each range into the last fifth of the turn, and tuning is about 19 times touchier at the top than at the bottom. A log pot wired backwards evens that out to within two or three times. The dial above lets you feel both.</p>
+
+<h3>Parts for one channel</h3>
+<div class="tw"><table>
+  <thead><tr><th>Part</th><th>Value</th><th>Job</th></tr></thead>
+  <tbody>
+    <tr><th scope="row">Analog switch</th><td>one section of a 4053 (a CD4053B on the bench)</td><td>the chopper</td></tr>
+    <tr><th scope="row">Inverters</th><td>three of the six in a CD4049UB</td><td>the oscillator</td></tr>
+    <tr><th scope="row">Pot</th><td class="n">20 kΩ</td><td>the knob</td></tr>
+    <tr><th scope="row">R9</th><td class="n">4.7 kΩ</td><td>sets the top of each range</td></tr>
+    <tr><th scope="row">R10</th><td class="n">2.2 kΩ</td><td>protects an inverter input</td></tr>
+    <tr><th scope="row">C6</th><td class="n">680 pF, 150 pF or 47 pF</td><td>picks the range</td></tr>
+    <tr><th scope="row">C1</th><td class="n">10 µF ceramic</td><td>blocks the op-amp's offset</td></tr>
+    <tr><th scope="row">Decoupling</th><td class="n">100 nF per chip</td><td>keeps the square wave out of the supply</td></tr>
+  </tbody>
+</table></div>
+<p>A second channel needs only another section of the same 4053 and another C1.</p>
+
+<h2>What the simulations say</h2>
+<div class="tw"><table>
+  <thead><tr><th>Question</th><th>Simulated answer</th></tr></thead>
+  <tbody>
+    <tr><th scope="row">How big is the tone?</th><td>A 40 kHz field chopped at 39 kHz gives a 1 kHz tone of 60 mV at the amplifier output. Today the same field leaves 73 mV of 40 kHz there, which nobody hears.</td></tr>
+    <tr><th scope="row">Does it fall off higher up?</th><td>No. The same field strength gives 61 mV at 200 kHz and 62 mV at 1 MHz with an ideal switch.</td></tr>
+    <tr><th scope="row">How fast must the switch be?</th><td>A CD4053 on 5 V takes about 450 ns to change over. It holds 60 mV up to 200 kHz and drops to about 50 mV at 1 MHz; 300 kHz is a comfortable top. A faster switch, modelled as 50 Ω, gives 64 mV at 1 MHz.</td></tr>
+    <tr><th scope="row">Is the mute complete?</th><td>Yes. With the switch parked at ground nothing measurable gets through, hum included.</td></tr>
+    <tr><th scope="row">Does the oscillator leak into the sound?</th><td>Some of it reaches the output, always at the oscillator frequency, so above hearing. It uses ±0.1 to ±0.3 V of the amplifier's ±1.2 V swing, depending on the switch.</td></tr>
+    <tr><th scope="row">What happens to ordinary sound while tuning?</th><td>It passes at half level, mixed with whatever is in the window.</td></tr>
+  </tbody>
+</table></div>
+<p><strong>How far to trust this.</strong> The models are simple fits to datasheet numbers, run in ngspice. A second simulator agreed where the two modelled the same thing: 47.8 mV against 48.0 mV on an earlier one-transistor version of the switch, with an ideal op-amp in both. Not modelled: ferrite loss in the coil, hiss, and the coils picking up the oscillator through the air.</p>
+
+<h2>What it means for the badge</h2>
+<ul>
+  <li><strong>One lifted leg per channel.</strong> The coil end of the 100 Ω input resistor comes off its pad and the switch goes in the gap. On a new board that is a footprint, not a bodge.</li>
+  <li><strong>A real bypass for normal listening.</strong> Parking the switch at <em>Pass</em> is not quite the stock badge, because C1 and the switch's resistance sit in the coil's path. A slide switch that joins the coil straight back to the 100 Ω gives exactly the old sound, and can cut the oscillator's power at the same time.</li>
+  <li><strong>A low-resistance switch chip.</strong> In normal listening, switch resistance thins the bass. With 470 Ω in the path everything below 500 Hz is 5 to 7 dB down; with 50 Ω it is within about 2 dB.</li>
+  <li><strong>74HC parts on the badge.</strong> The bench uses CD4000 chips on 5 V because they were in the drawer. On the badge's two AAA cells they would be slower still. A 74HC4053 or 74HC4066 for the switch and a 74HCU04 or 74HC14 for the oscillator run from 2 V up, wired between the badge's negative and positive rails so the signal sits in the middle. This has not been simulated at 3 V yet.</li>
+  <li><strong>One chip serves both ears.</strong> A 4053 holds three switches and one oscillator can drive them all. Tuning one ear and leaving the other normal is also possible, and is a choice to make by listening.</li>
+  <li><strong>Above about 300 kHz is the least certain.</strong> The coil's core losses are unknown, the switch has to be fast, and tuning gets touchy: the window is 32 kHz wide in a range 800 kHz wide.</li>
+</ul>
+
+<h2>Left out on purpose</h2>
+<ul>
+  <li><strong>Frequency dividers.</strong> A counter chip brings the whole band down at once, but it throws away loudness and follows only the strongest source.</li>
+  <li><strong>Comb mode.</strong> Narrow pulses instead of a square wave fold every window into hearing together, more quietly. It would be a third position on a mode switch, later.</li>
+  <li><strong>Automatic tuning.</strong> It needs a frequency counter, which in practice means a microcontroller. The knob comes first.</li>
+  <li><strong>The test rig.</strong> The prototype sits on a Jumperless breadboard that supplies power and a test tone and listens to the result. None of that goes on the badge.</li>
+  <li><strong>The single-AA supply.</strong> A separate question with its own notes.</li>
+</ul>
+
+<h2>Sources</h2>
+<div class="sources"><ul>
+  <li><a href="https://sporklogic.com/emf-explorer-badge">EMF Explorer Badge</a> and its <a href="https://sporklogic.com/emfguide">assembly guide</a>, SporkLogic</li>
+  <li><a href="https://makezine.com/projects/electromagnetic-symphony-explore-the-emf-universe/">Electromagnetic Symphony</a>, Make: Vol. 90, for the badge's circuit values</li>
+  <li><a href="https://static.datasheets.com/doc/13125088-njrc-njm2115l-ds.pdf">NJM2115 datasheet</a></li>
+  <li><a href="https://www.farnell.com/datasheets/1647944.pdf">Bourns RLB series datasheet</a>, for the 100 mH pickup coil</li>
+  <li><a href="https://www.ti.com/lit/ds/symlink/cd4053b.pdf">CD4053B datasheet</a>, Texas Instruments</li>
+  <li><a href="https://www.ti.com/lit/ds/symlink/cd4049ub.pdf">CD4049UB datasheet</a>, Texas Instruments</li>
+</ul></div>
+<footer>Simulation files and the breadboard notes exist and can be shared on request.</footer>
+</main>
+
+<script>
+(function(){
+'use strict';
+var $=function(id){return document.getElementById(id);};
+var PI=Math.PI, FC=15915;                       // the badge amplifier's corner: 100 kΩ with 100 pF
+function tok(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
+function rgba(hex,a){var h=hex.replace('#','');if(h.length===3)h=h.replace(/./g,'$&$&');var n=parseInt(h,16);if(isNaN(n))return hex;return 'rgba('+(n>>16&255)+','+(n>>8&255)+','+(n&255)+','+a+')';}
+var C={};
+function readTokens(){['bg','panel','panel-2','fg','muted','line','soft','lo','sig','s1','s2','s3','s4','s5','s6'].forEach(function(k){C[k]=tok('--'+k);});}
+var F='12px "IBM Plex Sans","Helvetica Neue",Arial,sans-serif', FB='600 12px "IBM Plex Sans","Helvetica Neue",Arial,sans-serif', FS='11px "IBM Plex Sans","Helvetica Neue",Arial,sans-serif', FM='600 10.5px "IBM Plex Mono",Menlo,Consolas,monospace';
+function fit(cv,h){var dpr=Math.min(window.devicePixelRatio||1,2.5),w=Math.max(260,Math.round(cv.parentElement.clientWidth));
+  cv.style.height=h+'px';var W=Math.round(w*dpr),H=Math.round(h*dpr);if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H;}
+  var g=cv.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,w,h);return {g:g,w:w,h:h};}
+function txt(g,s,x,y,col,al,font,halo){g.font=font||F;g.textAlign=al||'left';g.textBaseline='alphabetic';if(halo){g.lineJoin='round';g.lineWidth=4;g.strokeStyle=halo;g.strokeText(s,x,y);}g.fillStyle=col;g.fillText(s,x,y);}
+function seg(g,x0,y0,x1,y1,col,lw,dash){g.beginPath();g.setLineDash(dash||[]);g.moveTo(x0,y0);g.lineTo(x1,y1);g.strokeStyle=col;g.lineWidth=lw||1;g.stroke();g.setLineDash([]);}
+function fmtF(f){return f>=1e6?(f/1e6).toFixed(2)+' MHz':f>=1e5?(f/1e3).toFixed(0)+' kHz':(f/1e3).toFixed(1)+' kHz';}
+function fmtT(d){return d<1000?Math.round(d)+' Hz':(d/1e3).toFixed(1)+' kHz';}
+function press(group,btn){Array.prototype.forEach.call(group.querySelectorAll('button'),function(b){b.setAttribute('aria-pressed',b===btn?'true':'false');});}
+
+/* ---------- Simulation 1: the dial ---------- */
+var SRC=[
+  {id:'hob',name:'Induction hob',low:'induction hob',short:'hob',f:25e3,lvl:1,tex:'buzz',col:'s1',row:0},
+  {id:'lamp',name:'Fluorescent ballast',low:'fluorescent ballast',short:'ballast',f:40e3,lvl:.6,tex:'steady',col:'s2',row:1},
+  {id:'chg',name:'Phone charger',low:'phone charger',short:'charger',f:65e3,lvl:.8,tex:'wobble',col:'s3',row:0},
+  {id:'rfid',name:'RFID reader',low:'RFID reader',short:'RFID',f:125e3,lvl:.6,tex:'tick',col:'s4',row:1},
+  {id:'qi',name:'Wireless charger',low:'wireless charger',short:'Qi pad',f:150e3,lvl:.9,tex:'drift',col:'s5',row:0},
+  {id:'dcdc',name:'DC-DC converter',low:'DC-DC converter',short:'DC-DC',f:300e3,lvl:.5,tex:'steady',col:'s6',row:0}
+];
+SRC.forEach(function(s){s.on=true;});
+/* each range runs between the simulated ends; in between, period = a·R + b, with R = 4.7 kΩ plus the pot */
+var BANDS=[{lo:28e3,hi:123e3},{lo:111e3,hi:459e3},{lo:277e3,hi:1.06e6}];
+var band=0,taper='log',mode='on',hits=[];
+var pot=$('pot'),dialCv=$('dialCv'),tip=$('dialTip');
+function loFreq(){var x=pot.value/1000,B=BANDS[band],a=(1/B.lo-1/B.hi)/20e3,b=1/B.hi-a*4.7e3;
+  var frac=taper==='lin'?1-x:(Math.pow(32,1-x)-1)/31;return 1/(a*(4.7e3+20e3*frac)+b);}
+function tones(lo){var out=[];if(mode!=='on')return out;SRC.forEach(function(s){if(!s.on)return;[1,3,5].forEach(function(n){
+  var d=Math.abs(s.f-n*lo);if(d<20e3)out.push({s:s,n:n,d:d,a:s.lvl/n/Math.sqrt(1+d*d/(FC*FC))});});});return out;}
+function drawDial(){
+  var o=fit(dialCv,390),g=o.g,w=o.w,pl=10,pw=w-20,small=pw<520,lo=loFreq();
+  var FMIN=1e4,FMAX=1.5e6,LG=Math.log(FMAX/FMIN);
+  function xt(f){return pl+pw*Math.log(Math.min(Math.max(f,FMIN),FMAX)/FMIN)/LG;}
+  function xb(f){return pl+pw*f/20e3;}
+  var yT0=56,yT1=172,yB0=276,yB1=362;hits=[];
+  txt(g,'IN THE AIR',pl,13,C.muted,'left',FM);
+  /* what the badge hears today */
+  g.fillStyle=C['panel-2'];g.fillRect(pl,yT0,xt(20e3)-pl,yT1-yT0);
+  txt(g,small?'heard':'heard today',pl+5,yT0+14,C.muted,'left',FS);
+  var hx=pl+(xt(20e3)-pl)*.45;seg(g,hx,yT1,hx,yT1-34,C.muted,3);txt(g,'hum',hx,yT1-39,C.muted,'center',FS);
+  /* windows and the chopper line */
+  if(mode==='on'){[5,3,1].forEach(function(n){var c=n*lo;if(c-16e3>=FMAX)return;var x0=xt(c-16e3),x1=xt(c+16e3);
+      g.fillStyle=rgba(C.lo,n===1?.3:n===3?.16:.09);g.fillRect(x0,yT0,Math.max(2,x1-x0),yT1-yT0);
+      if(n>1&&!small)txt(g,'×'+n,(x0+x1)/2,yT0-5,C.muted,'center',FS);});
+    seg(g,xt(lo),yT0-14,xt(lo),yT1,C.lo,2);
+    var lab='chopper '+fmtF(lo),lx=xt(lo);g.font=FB;var tw=g.measureText(lab).width;
+    txt(g,lab,Math.min(Math.max(lx,pl+tw/2),pl+pw-tw/2),yT0-19,C.fg,'center',FB);
+    hits.push({x:xt(lo),y0:0,y1:yT1,text:'The chopper, at '+fmtF(lo)+'. Its window reaches 16 kHz either side.'});}
+  /* axis */
+  seg(g,pl,yT1,pl+pw,yT1,C.muted,1);
+  (small?[2e4,1e5,1e6]:[2e4,5e4,1e5,2e5,5e5,1e6]).forEach(function(f){seg(g,xt(f),yT1,xt(f),yT1+5,C.muted,1);txt(g,f>=1e6?'1 MHz':f/1e3+' kHz',xt(f),yT1+18,C.muted,'center',FS);});
+  var B=BANDS[band];g.fillStyle=rgba(C.lo,.55);g.fillRect(xt(B.lo),yT1+26,xt(B.hi)-xt(B.lo),4);
+  txt(g,'knob range',xt(B.hi)+6<pl+pw-60?xt(B.hi)+6:xt(B.lo)-6,yT1+33,C.muted,xt(B.hi)+6<pl+pw-60?'left':'right',FS);
+  /* tones, and the lines that carry each source down to its note */
+  var T=tones(lo);
+  T.forEach(function(t){var x0=xt(t.s.f),x1=xb(t.d),rel=Math.min(1,t.a/t.s.lvl*t.n);
+    g.beginPath();g.moveTo(x0,yT1+40);g.bezierCurveTo(x0,yT1+78,x1,yB0-40,x1,yB0+2);g.strokeStyle=rgba(C[t.s.col],(.25+.5*rel)/t.n);g.lineWidth=1.5;g.stroke();});
+  txt(g,'IN THE HEADPHONES',pl,264,C.muted,'left',FM,C.panel);
+  /* sources */
+  SRC.forEach(function(s){var x=xt(s.f),hgt=(yT1-yT0-30)*s.lvl,col=s.on?C[s.col]:C.line;
+    seg(g,x,yT1,x,yT1-hgt,col,3);g.beginPath();g.arc(x,yT1-hgt,4,0,2*PI);g.fillStyle=col;g.fill();
+    if(!small)txt(g,s.short,x,yT1-hgt-9-(s.row?13:0),s.on?C.fg:C.muted,'center',FS,C.panel);
+    hits.push({x:x,y0:yT0-20,y1:yT1+8,text:s.name+', about '+fmtF(s.f)+(s.on?'':' (switched off)')});});
+  /* bottom panel */
+  seg(g,pl,yB1,pl+pw,yB1,C.muted,1);
+  [0,5,10,15,20].forEach(function(k){var x=xb(k*1e3);seg(g,x,yB1,x,yB1+5,C.muted,1);txt(g,k?k+' kHz':'0',x,yB1+18,C.muted,k===0?'left':k===20?'right':'center',FS);});
+  var humH=(yB1-yB0-18)*(mode==='on'?.25:.5);seg(g,xb(120)+2,yB1,xb(120)+2,yB1-humH,C.muted,3);
+  if(!small&&!T.some(function(t){return t.d<2500;}))txt(g,'hum',xb(120)+8,yB1-humH-5,C.muted,'left',FS);
+  T.sort(function(a,b){return a.a-b.a;}).forEach(function(t,i){var x=xb(t.d),hgt=Math.max(3,(yB1-yB0-18)*Math.min(1,t.a));
+    seg(g,x,yB1,x,yB1-hgt,C[t.s.col],3);g.beginPath();g.arc(x,yB1-hgt,4,0,2*PI);g.fillStyle=C[t.s.col];g.fill();
+    if(i>=T.length-3&&t.d>900)txt(g,fmtT(t.d),x,yB1-hgt-9,C.fg,x>pl+pw-30?'right':'center',FS,C.panel);
+    hits.push({x:x,y0:yB0-10,y1:yB1+8,text:t.s.name+' → '+fmtT(t.d)+(t.n>1?', through the ×'+t.n+' window':'')});});
+  if(mode!=='on')txt(g,'Nothing above 20 kHz gets through.',pl+pw/2,yB0+36,C.muted,'center',F);
+  else if(!T.length)txt(g,'Nothing in the window. Move the knob.',pl+pw/2,yB0+36,C.muted,'center',F);
+}
+function readDial(){var lo=loFreq(),T=tones(lo).sort(function(a,b){return b.a-a.a;});$('loOut').textContent=fmtF(lo);
+  var s;if(mode!=='on')s='Badge as it is today: mains hum only. All six sources are above hearing.';
+  else if(!T.length)s='Chopper at '+fmtF(lo)+'. Nothing is inside a window, so only the hum is heard, at half level.';
+  else s='Chopper at '+fmtF(lo)+'. In the headphones: '+T.slice(0,3).map(function(t){return t.s.low+' at '+fmtT(t.d)+(t.n>1?' (faint, ×'+t.n+' window)':'');}).join('; ')+'.';
+  $('dialRead').textContent=s;}
+/* sound: one sine per source and window, at the difference frequency */
+var ac=null,master=null,hum=null,soundOn=false;
+function initAudio(){var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return false;ac=new AC();
+  master=ac.createGain();master.gain.value=0;var comp=ac.createDynamicsCompressor();master.connect(comp);comp.connect(ac.destination);
+  SRC.forEach(function(s){var tex=ac.createGain();tex.gain.value=1;tex.connect(master);
+    function lfo(type,f,depth,target){var l=ac.createOscillator();l.type=type;l.frequency.value=f;var lg=ac.createGain();lg.gain.value=depth;l.connect(lg);lg.connect(target);l.start();}
+    if(s.tex==='buzz'){tex.gain.value=.55;lfo('sine',120,.45,tex.gain);}
+    if(s.tex==='tick'){tex.gain.value=.5;lfo('square',7,.5,tex.gain);}
+    s.v=[1,3,5].map(function(n){var osc=ac.createOscillator();osc.frequency.value=1000;var gn=ac.createGain();gn.gain.value=0;osc.connect(gn);gn.connect(tex);osc.start();
+      if(s.tex==='wobble')lfo('sine',6,250,osc.frequency);if(s.tex==='drift')lfo('sine',.6,400,osc.frequency);return {n:n,osc:osc,gn:gn};});});
+  var h=ac.createOscillator();h.type='sawtooth';h.frequency.value=60;var lp=ac.createBiquadFilter();lp.type='lowpass';lp.frequency.value=420;
+  hum=ac.createGain();hum.gain.value=0;h.connect(lp);lp.connect(hum);hum.connect(master);h.start();return true;}
+function updateAudio(){if(!ac)return;var now=ac.currentTime,lo=loFreq();
+  SRC.forEach(function(s){s.v.forEach(function(v){var d=Math.abs(s.f-v.n*lo),a=0;
+    if(mode==='on'&&s.on&&d<19e3)a=s.lvl/v.n/Math.sqrt(1+d*d/(FC*FC))*Math.min(1,d/60);
+    v.osc.frequency.setTargetAtTime(Math.min(d,19e3),now,.012);v.gn.gain.setTargetAtTime(a*.5,now,.02);});});
+  hum.gain.setTargetAtTime(mode==='on'?.05:.1,now,.03);master.gain.setTargetAtTime(soundOn?.5:0,now,.04);}
+function updateDial(){drawDial();readDial();updateAudio();}
+$('snd').addEventListener('click',function(){if(!ac&&!initAudio()){this.textContent='No sound in this browser';return;}
+  soundOn=!soundOn;if(ac.state==='suspended')ac.resume();this.setAttribute('aria-pressed',soundOn);this.textContent='Sound: '+(soundOn?'on':'off');updateAudio();});
+pot.addEventListener('input',updateDial);
+$('taper').addEventListener('change',function(){taper=this.value;updateDial();});
+Array.prototype.forEach.call(document.querySelectorAll('#dial [data-mode]'),function(b){b.addEventListener('click',function(){mode=b.dataset.mode;press(b.parentElement,b);updateDial();});});
+Array.prototype.forEach.call(document.querySelectorAll('#dial [data-band]'),function(b){b.addEventListener('click',function(){band=+b.dataset.band;press(b.parentElement,b);updateDial();});});
+var chips=$('chips');
+SRC.forEach(function(s){var b=document.createElement('button');b.className='chip';b.style.setProperty('--c','var(--'+s.col+')');b.setAttribute('aria-pressed','true');
+  b.innerHTML='<i></i>'+s.name+' <small>'+fmtF(s.f).replace('.0','')+'</small>';
+  b.addEventListener('click',function(){s.on=!s.on;b.setAttribute('aria-pressed',s.on);updateDial();});chips.appendChild(b);});
+var sweepId=0;
+$('sweep').addEventListener('click',function(){var btn=this;if(sweepId){cancelAnimationFrame(sweepId);sweepId=0;btn.setAttribute('aria-pressed','false');return;}
+  btn.setAttribute('aria-pressed','true');var t0=performance.now();
+  (function step(now){var p=((now-t0)/16000)%1;pot.value=Math.round((p<.5?p*2:2-p*2)*1000);updateDial();sweepId=requestAnimationFrame(step);})(t0);});
+dialCv.addEventListener('pointermove',function(e){var r=dialCv.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top,best=null;
+  hits.forEach(function(h){var d=Math.abs(x-h.x);if(y>=h.y0&&y<=h.y1&&d<14&&(!best||d<best.d))best={d:d,h:h};});
+  if(best){tip.hidden=false;tip.textContent=best.h.text;tip.style.left=Math.min(Math.max(best.h.x,90),r.width-90)+'px';tip.style.top=Math.max(y,34)+'px';}else tip.hidden=true;});
+dialCv.addEventListener('pointerleave',function(){tip.hidden=true;});
+
+/* ---------- Simulation 2: the switch in slow motion ---------- */
+var scopeCv=$('scopeCv'),fsEl=$('fs'),flEl=$('fl'),spEl=$('sp');
+function drawScope(){
+  var o=fit(scopeCv,452),g=o.g,w=o.w,pl=10,pw=w-20,small=pw<520;
+  var fs=fsEl.value*1e3,fl=flEl.value*1e3,span=spEl.value*1e-3,A=30;
+  var y1=66,y2=152,y3=246,y4=362;
+  var N=Math.min(30000,Math.max(1500,Math.ceil(span*Math.max(fs,fl)*40))),dt=span/N,pre=Math.ceil(3e-4/dt),k=1-Math.exp(-2*PI*FC*dt);
+  var X=new Float32Array(N+1),S=new Uint8Array(N+1),Cc=new Float32Array(N+1),Y=new Float32Array(N+1),y=0,i,t,x,s;
+  for(i=-pre;i<=N;i++){t=i*dt;x=Math.sin(2*PI*fs*t);s=Math.sin(2*PI*fl*t)>=0?1:0;y+=(x*s-y)*k;if(i>=0){X[i]=x;S[i]=s;Cc[i]=x*s;Y[i]=y;}}
+  function px(i){return pl+pw*i/N;}
+  function trace(arr,yc,col,lw){g.beginPath();for(var i=0;i<=N;i++){var yy=yc-arr[i]*A;if(i)g.lineTo(px(i),yy);else g.moveTo(px(i),yy);}g.strokeStyle=col;g.lineWidth=lw;g.lineJoin='round';g.stroke();}
+  [y1,y3,y4].forEach(function(yc){seg(g,pl,yc,pl+pw,yc,C.soft,1);});
+  /* 1 the field, with a dot each time the switch closes */
+  txt(g,'1  Field at the coil, '+fmtF(fs),pl,y1-42,C.fg,'left',FB);
+  trace(X,y1,C.sig,1.4);
+  var m0=Math.ceil(-.25),M=Math.floor(span*fl-.25),dense=(M-m0)>pw/5,pts=[];
+  for(var m=m0;m<=M;m++){var tm=(m+.25)/fl;if(tm>=0&&tm<=span)pts.push([pl+pw*tm/span,y1-Math.sin(2*PI*fs*tm)*A]);}
+  g.beginPath();pts.forEach(function(p,i){if(i)g.lineTo(p[0],p[1]);else g.moveTo(p[0],p[1]);});g.strokeStyle=C.lo;g.lineWidth=1.6;g.stroke();
+  if(!dense)pts.forEach(function(p){g.beginPath();g.arc(p[0],p[1],3.2,0,2*PI);g.fillStyle=C.lo;g.fill();});
+  /* 2 the switch */
+  txt(g,'2  Switch, '+fmtF(fl)+(small?'':'.  Up: to the amplifier.  Down: to ground.'),pl,y2-28,C.fg,'left',FB);
+  g.beginPath();for(i=0;i<=N;i++){var yy=y2+10-S[i]*22;if(i){if(S[i]!==S[i-1])g.lineTo(px(i),y2+10-S[i-1]*22);g.lineTo(px(i),yy);}else g.moveTo(px(i),yy);}g.strokeStyle=C.lo;g.lineWidth=1.6;g.stroke();
+  /* 3 what gets through */
+  txt(g,'3  What reaches the amplifier',pl,y3-42,C.fg,'left',FB);
+  g.beginPath();g.moveTo(px(0),y3);for(i=0;i<=N;i++)g.lineTo(px(i),y3-Cc[i]*A);g.lineTo(px(N),y3);g.closePath();g.fillStyle=rgba(C.sig,.3);g.fill();
+  trace(Cc,y3,C.sig,1.2);
+  /* 4 what comes out: the real output (thin) and the part below 20 kHz (heavy) */
+  var parts=[];[1,3,5].forEach(function(n){var d=Math.abs(fs-n*fl);if(d<20e3)parts.push({d:d,a:1/(n*PI)/Math.sqrt(1+d*d/(FC*FC)),ph:Math.atan(d/FC)});});
+  var note=!parts.length?(small?', no note':'.  No note: the difference is above hearing'):parts[0].d<50?(small?', no note':'.  Matched: the average stands still, so no note'):(small?', ':'.  The slow wave is the note: ')+fmtT(parts[0].d);
+  txt(g,'4  What the amplifier puts out'+note,pl,y4-58,C.fg,'left',FB);
+  A=60;trace(Y,y4,rgba(C.sig,.75),1);
+  var Aud=new Float32Array(N+1);for(i=0;i<=N;i++){t=i*dt;var v=0;for(var j=0;j<parts.length;j++)v+=parts[j].a*Math.cos(2*PI*parts[j].d*t-parts[j].ph);Aud[i]=v;}
+  trace(Aud,y4,C.fg,2.6);
+  seg(g,pl,y4+50,pl+pw,y4+50,C.muted,1);txt(g,'0',pl,y4+66,C.muted,'left',FS);txt(g,(span*1e3).toFixed(1)+' ms',pl+pw,y4+66,C.muted,'right',FS);txt(g,'time',pl+pw/2,y4+66,C.muted,'center',FS);
+}
+function readScope(){var fs=+fsEl.value,fl=+flEl.value,d=Math.abs(fs-fl);$('fsOut').textContent=fs.toFixed(1)+' kHz';$('flOut').textContent=fl.toFixed(1)+' kHz';$('spOut').textContent=(+spEl.value).toFixed(1)+' ms';
+  var n=0,dn=d;[1,3,5].some(function(k){var x=Math.abs(fs-k*fl);if(x<20){n=k;dn=x;return true;}return false;});
+  $('scopeRead').textContent=!n?'The difference is '+d.toFixed(1)+' kHz, too high to hear. The source is outside the window.'
+    :dn<.05?'Matched exactly: the switch catches the same part of the wave every time, the average stops moving, and there is no note. This is the silent point in the middle of the dial.'
+    :n===1?'Field '+fs.toFixed(1)+' kHz, switch '+fl.toFixed(1)+' kHz. The difference is '+dn.toFixed(1)+' kHz, and that is the note.'
+    :'The field is '+dn.toFixed(1)+' kHz away from '+n+' times the switch frequency, so it comes through the fainter ×'+n+' window as a '+dn.toFixed(1)+' kHz note.';}
+function updateScope(){drawScope();readScope();}
+[fsEl,flEl,spEl].forEach(function(el){el.addEventListener('input',updateScope);});
+$('match').addEventListener('click',function(){flEl.value=fsEl.value;updateScope();});
+var sweep2Id=0;
+$('sweep2').addEventListener('click',function(){var btn=this;if(sweep2Id){cancelAnimationFrame(sweep2Id);sweep2Id=0;btn.setAttribute('aria-pressed','false');return;}
+  btn.setAttribute('aria-pressed','true');var t0=performance.now(),fs=+fsEl.value;if(+spEl.value<1)spEl.value=1;
+  (function step(now){var p=((now-t0)/12000)%1,tri=p<.5?p*2:2-p*2;flEl.value=Math.min(80,Math.max(20,fs-6+12*tri)).toFixed(1);updateScope();sweep2Id=requestAnimationFrame(step);})(t0);});
+
+/* ---------- the response chart ---------- */
+var respCv=$('respCv'),respTip=$('respTip'),respGeo=null;
+function stockDb(f){var wl=2*PI*f*.1;return 20*Math.log10(wl/Math.sqrt(350*350+wl*wl)/Math.sqrt(1+f*f/(FC*FC)));}
+var TONE_DB=20*Math.log10(1/PI);
+function drawResp(){
+  var o=fit(respCv,270),g=o.g,w=o.w,small=w<520,x0=46,x1=w-14,yA=24,yZ=224;
+  function X(f){return x0+(x1-x0)*Math.log10(f/100)/4;}
+  function Y(db){return yA+(3-db)*(yZ-yA)/45;}
+  respGeo={x0:x0,x1:x1};
+  g.fillStyle=C['panel-2'];g.fillRect(X(2e4),yA,x1-X(2e4),yZ-yA);
+  [0,-10,-20,-30,-40].forEach(function(d){seg(g,x0,Y(d),x1,Y(d),C.soft,1);txt(g,d?'−'+(-d):'0 dB',x0-7,Y(d)+4,C.muted,'right',FS);});
+  seg(g,x0,yZ,x1,yZ,C.muted,1);
+  (small?[100,1e4,1e6]:[100,1e3,1e4,1e5,1e6]).forEach(function(f){seg(g,X(f),yZ,X(f),yZ+5,C.muted,1);
+    txt(g,f>=1e6?'1 MHz':f>=1e3?f/1e3+' kHz':'100 Hz',X(f),yZ+19,C.muted,f===100?'left':f===1e6?'right':'center',FS);});
+  txt(g,'above hearing',X(2e4)+7,yA+15,C.muted,'left',FS);
+  g.beginPath();for(var i=0;i<=120;i++){var f=100*Math.pow(10,4*i/120);if(i)g.lineTo(X(f),Y(stockDb(f)));else g.moveTo(X(f),Y(stockDb(f)));}
+  g.strokeStyle=C.fg;g.lineWidth=2;g.lineJoin='round';g.stroke();
+  seg(g,X(28e3),Y(TONE_DB),x1,Y(TONE_DB),C.lo,3);g.beginPath();g.arc(X(28e3),Y(TONE_DB),4.5,0,2*PI);g.fillStyle=C.lo;g.fill();
+  txt(g,'the badge today',X(1500),Y(0)-10,C.fg,'center',FB,C.panel);
+  txt(g,small?'with the knob':'tuned in with the knob',x1-6,Y(TONE_DB)-9,C.fg,'right',FB);
+  if(!small){txt(g,'today: still there,',X(6e4),Y(-31),C.muted,'center',FS);txt(g,'fading, and inaudible',X(6e4),Y(-31)+14,C.muted,'center',FS);}
+}
+respCv.addEventListener('pointermove',function(e){if(!respGeo)return;var r=respCv.getBoundingClientRect(),x=e.clientX-r.left;
+  if(x<respGeo.x0||x>respGeo.x1){respTip.hidden=true;return;}
+  var f=100*Math.pow(10,4*(x-respGeo.x0)/(respGeo.x1-respGeo.x0));
+  respTip.hidden=false;respTip.textContent=(f<1e3?Math.round(f)+' Hz':fmtF(f))+': today '+stockDb(f).toFixed(0).replace('-','−')+' dB'+(f>=2e4?', inaudible':'')+(f>=28e3?'. Tuned in: −10 dB.':'');
+  respTip.style.left=Math.min(Math.max(x,90),r.width-90)+'px';respTip.style.top=Math.max(e.clientY-r.top,40)+'px';});
+respCv.addEventListener('pointerleave',function(){respTip.hidden=true;});
+
+/* ---------- the schematic's switch ---------- */
+var sch=$('sch'),chopId=0;
+function setSw(st){sch.classList.toggle('s-pass',st==='pass');sch.classList.toggle('s-shunt',st==='shunt');}
+Array.prototype.forEach.call(document.querySelectorAll('#schem [data-st]'),function(b){b.addEventListener('click',function(){press(b.parentElement,b);clearInterval(chopId);chopId=0;
+  if(b.dataset.st==='chop'){var up=true;setSw('pass');chopId=setInterval(function(){up=!up;setSw(up?'pass':'shunt');},650);}else setSw(b.dataset.st);});});
+
+/* ---------- redraw on anything that changes size or colour ---------- */
+function redraw(){readTokens();updateDial();updateScope();drawResp();}
+var rq=0;function later(){cancelAnimationFrame(rq);rq=requestAnimationFrame(redraw);}
+window.addEventListener('resize',later);
+if(window.matchMedia)try{window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',later);}catch(e){}
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(later);
+redraw();
+})();
+</script>
+</body>
+</html>
