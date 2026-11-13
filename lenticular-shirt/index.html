@@ -764,8 +764,8 @@ var DEF_ART={s:'data:image/webp;base64,UklGRuTyAQBXRUJQVlA4WAoAAAAQAAAARQUARQUAQ
           else if (key === 'iOpa') r.fill = c.u8_();
           else if (key === 'lfx2') { c.skip(8); r.fx = readDesc(c); }
           else if (key === 'SoCo') { c.skip(4); r.solid = colorOf(readDesc(c)['Clr ']); }
-          else if (key === 'GdFl') r.unsupported.push('gradient fill layer');
-          else if (key === 'PtFl') r.unsupported.push('pattern fill layer');
+          else if (key === 'GdFl') { r.unsupported.push('gradient fill layer'); r.nofill = true; }
+          else if (key === 'PtFl') { r.unsupported.push('pattern fill layer'); r.nofill = true; }
           else if (key === 'vmsk' || key === 'vsms') r.vector = true;
           else if (ADJ[key]) r.adjust = key;
         } catch (e) { if (e.short) throw e; r.unsupported.push('unreadable ' + key + ' block'); }
@@ -1031,6 +1031,8 @@ var DEF_ART={s:'data:image/webp;base64,UklGRuTyAQBXRUJQVlA4WAoAAAAQAAAARQUARQUAQ
   function note(psd, n, what) { var msg = '“' + n.name + '”: ' + what; if (psd.warnings.indexOf(msg) < 0) psd.warnings.push(msg); }
   async function drawLeaf(psd, n, grid, buf, clip) {
     var W = grid.W, H = grid.H, tile;
+    if (n.rec.nofill) { n.rec.unsupported.forEach(function (u) { note(psd, n, u + ' (not drawn)'); }); return null; }
+    if (!MODESOK(n.blend)) { note(psd, n, 'blend mode "' + n.blend.trim() + '" (layer not drawn)'); return null; }
     try { tile = await decodeLayer(psd, n, grid); }
     catch (e) { note(psd, n, e.message === 'zip' ? 'ZIP-compressed layer (skipped)' : 'could not be read (' + e.message + ')'); return null; }
     if (!tile) return null;
@@ -1039,7 +1041,6 @@ var DEF_ART={s:'data:image/webp;base64,UklGRuTyAQBXRUJQVlA4WAoAAAAQAAAARQUARQUAQ
     var stroke = null;
     try { stroke = applyEffects(n, tile, grid, psd); } catch (e) { note(psd, n, 'layer effects could not be read'); }
     if (!n.rec.fx && n.fill < 255) for (i = 0; i < tile.w * tile.h; i++) tile.rgba[i * 4 + 3] *= n.fill / 255;
-    if (!MODESOK(n.blend)) note(psd, n, 'blend mode "' + n.blend.trim() + '" (drawn as normal)');
     n.rec.unsupported.forEach(function (u) { note(psd, n, u + ' (not drawn)'); }); n.rec.unsupported = [];
     var op = n.opacity / 255;
     if (stroke && !stroke.inside) drawTile(buf, W, H, stroke, op, 'norm', clip);
@@ -1061,7 +1062,7 @@ var DEF_ART={s:'data:image/webp;base64,UklGRuTyAQBXRUJQVlA4WAoAAAAQAAAARQUARQUAQ
   var $ = function (id) { return document.getElementById(id); };
   var LS = 'lenticular-shirt-viewer.v1', ARTW = 1350, FILMS = [100, 150, 200, 250, 300, 400, 700], MESH = 0.12, CURE = 0.9;
   var DEF = { proc: 'barrier', views: 2, pitch: 1.27, ridge: 0.52, height: 0.72, passes: 2, split: 50, guard: 0, reg: 0, cap: 0, lensAngle: 49, spot: true, spotA: '#f04bcd', spotB: '#ffd400', swap: false, snap: true, angle: 30, curve: 55, printIn: 18, zone: 'diff', loupeSpan: 10, lu: null, lv: null };
-  var KNOWN = { 'Layer 5 copy 2': { assign: 'both', mm: 0 }, 'Layer 2': { assign: 'b', label: 'Jump' }, 'ledgenew': { assign: 'a', label: 'Ledge', split: true, mm: 3 }, 'Layer 5 copy': { assign: 'a', label: 'Ledge', mm: 4 }, 'Layer 7': { assign: 'a', label: 'Ledge', mm: -3 }, 'Group 1': { assign: 'off' } };
+  var KNOWN = { 'Layer 5 copy 2': { assign: 'both', mm: 0 }, 'Layer 2': { assign: 'b', label: 'Jump' }, 'ledgenew': { assign: 'a', label: 'Ledge', split: true, mm: 3 }, 'Layer 5 copy': { assign: 'a', label: 'Ledge', mm: 4 }, 'Layer 7': { assign: 'a', label: 'Ledge', mm: -3 } };
   var SHIRT = [17, 17, 19], TOPC = [30, 30, 33], WALLC = [8, 8, 9];
   // The eye averages fine stripes in linear light, so all mixing is done there (0..4095) and converted back for display.
   var S2L = new Uint16Array(256), L2S = new Uint8Array(4096);
@@ -1081,6 +1082,9 @@ var DEF_ART={s:'data:image/webp;base64,UklGRuTyAQBXRUJQVlA4WAoAAAAQAAAARQUARQUAQ
   function guessAssign(name, visible) {
     if (assignMem[name]) return assignMem[name];
     if (KNOWN[name]) return KNOWN[name].assign;
+    return guessByName(name, visible);
+  }
+  function guessByName(name, visible) {
     if (/ledge|stand|left|view ?a\b|^a$/i.test(name)) return 'a';
     if (/jump|leap|right|view ?b\b|^b$/i.test(name)) return 'b';
     return visible === false ? 'off' : 'both';
@@ -1114,9 +1118,10 @@ var DEF_ART={s:'data:image/webp;base64,UklGRuTyAQBXRUJQVlA4WAoAAAAQAAAARQUARQUAQ
   var composedKey = -1;
   function compose() { composedKey = multi() ? S.views : 0; if (composedKey) compose3D(); else composeFlip(); }
   // A layer's place in the 3D scene: shown or not, and how far it travels sideways over the whole sweep (mm; + is behind the shirt).
+  function keyOf(n) { return n.key || n.name; } // memory is kept per layer: its name, or "name #2" for a second layer of the same name
   function d3Of(n) {
-    var m = d3Mem[n.name]; if (m) return m;
-    var k = KNOWN[n.name] || {};
+    var m = d3Mem[keyOf(n)]; if (m) return m;
+    var k = (keyOf(n) === n.name && KNOWN[n.name]) || {};
     return { on: n.assign !== 'off' && n.assign !== 'b', mm: typeof k.mm === 'number' ? k.mm : n.assign === 'a' ? 3 : 0 };
   }
   function nodeBox(nd) { // bounding box of a layer's ink, found once
@@ -1683,7 +1688,7 @@ var DEF_ART={s:'data:image/webp;base64,UklGRuTyAQBXRUJQVlA4WAoAAAAQAAAARQUARQUAQ
     var h = '', mu = multi();
     ART.nodes.slice().reverse().forEach(function (n) { var idx = ART.nodes.indexOf(n), d3 = d3Of(n), opts = mu ? [['on', 'In'], ['out', 'Out']] : [['a', 'A'], ['b', 'B'], ['both', 'Both'], ['off', 'Off']], cur = mu ? (d3.on ? 'on' : 'out') : n.assign;
       var tool = n.psdNode && n.kind === 'group' ? '<button type="button" class="ghost mini" data-split="' + esc(n.name) + '" title="List this group’s layers separately, so each can sit at its own depth or in its own view">Split</button>' : n.psdNode && n.parent ? '<button type="button" class="ghost mini" data-join="' + esc(n.parent) + '" title="Treat the group as one layer again">Join</button>' : '';
-      h += '<div class="layer"><div class="th" style="background-image:url(' + (n.thumb || '') + ')"></div><div class="nm">' + esc(n.name) + '<small>' + (n.kind === 'group' ? 'group' : n.kind === 'image' ? 'image' : 'layer') + (n.parent ? ' in ' + esc(n.parent) : '') + (n.visible === false ? ' · hidden in Photoshop' : '') + '</small></div>' + tool + '<div class="seg" role="radiogroup" aria-label="' + (mu ? 'In the 3D scene: ' : 'View for ') + esc(n.name) + '">' +
+      h += '<div class="layer"><div class="th" style="background-image:url(' + (n.thumb || '') + ')"></div><div class="nm">' + esc(n.name) + '<small>' + (n.kind === 'group' ? 'group' : n.kind === 'image' ? 'image' : 'layer') + (n.key && n.key !== n.name ? ', another with this name' : '') + (n.parent ? ' in ' + esc(n.parent) : '') + (n.visible === false ? ' · hidden in Photoshop' : '') + '</small></div>' + tool + '<div class="seg" role="radiogroup" aria-label="' + (mu ? 'In the 3D scene: ' : 'View for ') + esc(n.name) + '">' +
         opts.map(function (o) { return '<label><input type="radio" name="as' + idx + '" id="as' + idx + o[0] + '" value="' + o[0] + '"' + (cur === o[0] ? ' checked' : '') + ' data-idx="' + idx + '">' + o[1] + '</label>'; }).join('') + '</div></div>'; });
     $('layers').innerHTML = h || '<p class="note" style="padding:8px 0">No layers to show.</p>';
     $('artNote').textContent = mu ? S.views + ' views, made by sliding each layer by its depth' : 'A = ' + ART.labelA + ', B = ' + ART.labelB;
@@ -1698,17 +1703,23 @@ var DEF_ART={s:'data:image/webp;base64,UklGRuTyAQBXRUJQVlA4WAoAAAAQAAAARQUARQUAQ
   }
   $('depths').addEventListener('input', function (e) {
     var t = e.target; if (!t.dataset || t.dataset.idx === undefined) return; stopSweep(); var n = ART.nodes[+t.dataset.idx], mm = parseFloat(t.value);
-    d3Mem[n.name] = { on: true, mm: mm }; $('dpo' + t.dataset.idx).textContent = depthText(mm); dirtyArt = true; schedule(); persistSoon();
+    d3Mem[keyOf(n)] = { on: true, mm: mm }; $('dpo' + t.dataset.idx).textContent = depthText(mm); dirtyArt = true; schedule(); persistSoon();
   });
-  function wanted(n) { return n.assign !== 'off' || !!(d3Mem[n.name] && d3Mem[n.name].on); }
+  function wanted(n) { return n.assign !== 'off' || !!(d3Mem[keyOf(n)] && d3Mem[keyOf(n)].on); }
   function isSplit(name) { return name in splitMem ? !!splitMem[name] : !!(KNOWN[name] && KNOWN[name].split); }
   function psdNodes(psd, old) { // top-level layers and groups, bottom first; a split group is listed as its own layers
-    var nodes = [];
+    var nodes = [], seen = {};
+    function keyFor(c) { var k = seen[c.name] = (seen[c.name] || 0) + 1; return k > 1 ? c.name + ' #' + k : c.name; }
+    function pick(c, key, fallback) { // a remembered choice; then what is known about this file's layers, unless hidden in Photoshop; then the group's; then a guess
+      if (assignMem[key]) return assignMem[key];
+      if (key === c.name && KNOWN[c.name]) return c.visible === false ? 'off' : KNOWN[c.name].assign;
+      return fallback || guessByName(c.name, c.visible); }
     function add(c, parent, fallback) { var r = c.rec; if (c.kind === 'adjust') return; if (c.kind === 'pixel' && (r.right <= r.left || r.bottom <= r.top)) return; if (c.kind === 'group' && !c.children.length) return;
-      var prev = old ? old.filter(function (o) { return o.psdNode === c; })[0] : null;
-      nodes.push({ name: c.name, assign: assignMem[c.name] || (KNOWN[c.name] && KNOWN[c.name].assign) || fallback || guessAssign(c.name, c.visible), kind: c.kind === 'group' ? 'group' : 'layer', visible: c.visible, psdNode: c, parent: parent || null, rgba: prev ? prev.rgba : null, thumb: prev ? prev.thumb : null, bb: prev ? prev.bb : null }); }
+      var prev = old ? old.filter(function (o) { return o.psdNode === c; })[0] : null, key = keyFor(c);
+      nodes.push({ name: c.name, key: key, assign: pick(c, key, fallback), kind: c.kind === 'group' ? 'group' : 'layer', visible: c.visible, psdNode: c, parent: parent || null, rgba: prev ? prev.rgba : null, thumb: prev ? prev.thumb : null, bb: prev ? prev.bb : null }); }
     psd.tree.children.forEach(function (c) {
-      if (c.kind === 'group' && c.children.length && isSplit(c.name)) { var ga = guessAssign(c.name, c.visible); c.children.forEach(function (ch) { add(ch, c.name, ch.visible === false ? 'off' : ga); }); }
+      var real = c.kind === 'group' ? c.children.filter(function (ch) { return ch.kind !== 'adjust'; }) : [];
+      if (real.length && isSplit(c.name)) { var ga = c.visible === false ? 'off' : (KNOWN[c.name] && KNOWN[c.name].assign) || guessAssign(c.name, c.visible); seen[c.name] = (seen[c.name] || 0) + 1; c.children.forEach(function (ch) { add(ch, c.name, ch.visible === false ? 'off' : ga); }); }
       else add(c);
     });
     return nodes;
@@ -1722,7 +1733,7 @@ var DEF_ART={s:'data:image/webp;base64,UklGRuTyAQBXRUJQVlA4WAoAAAAQAAAARQUARQUAQ
   });
   $('layers').addEventListener('change', async function (e) {
     var t = e.target; if (!t.dataset || t.dataset.idx === undefined) return; var n = ART.nodes[+t.dataset.idx];
-    if (t.value === 'on' || t.value === 'out') d3Mem[n.name] = { on: t.value === 'on', mm: d3Of(n).mm }; else { n.assign = t.value; assignMem[n.name] = t.value; }
+    if (t.value === 'on' || t.value === 'out') d3Mem[keyOf(n)] = { on: t.value === 'on', mm: d3Of(n).mm }; else { n.assign = t.value; assignMem[keyOf(n)] = t.value; }
     if (!n.rgba && wanted(n) && n.psdNode && ART.psd) { setSource(ART.src, 'reading “' + n.name + '”…', !!watch); try { await renderPsdNode(ART.psd, ART.grid, n); } catch (err) { } setSource(ART.src, watch ? 'linked, re-reads on save' : 'loaded once', !!watch); showPsdWarnings(); }
     persist(); artChanged(false);
   });
@@ -1801,7 +1812,7 @@ var DEF_ART={s:'data:image/webp;base64,UklGRuTyAQBXRUJQVlA4WAoAAAAQAAAARQUARQUAQ
       });
     });
   })();
-  window.__lent = { S: S, buildSegs: geom, geom: geom, classify: classify, ranges: ranges, loadFiles: loadFiles, startWatch: startWatch, multi: multi, d3Of: d3Of, art: function () { return ART; } };
+  window.__lent = { S: S, buildSegs: geom, geom: geom, classify: classify, ranges: ranges, loadFiles: loadFiles, startWatch: startWatch, multi: multi, d3Of: d3Of, psdNodes: psdNodes, art: function () { return ART; } };
 
   loadDefault().catch(function (e) { $('psdWarns').innerHTML = '<div class="warn"><b>Built-in artwork failed to load.</b> Drop your PSD below to continue.</div>'; });
 })();
