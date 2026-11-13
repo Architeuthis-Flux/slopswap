@@ -151,6 +151,7 @@ tbody tr+tr>*{border-top:1px solid var(--soft)}
 tbody th{font-weight:600}
 td.n{font-family:var(--font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
 tr.pick>*{background:var(--panel)}
+table.wide{min-width:54rem}
 .v{display:inline-block;font:600 .66rem/1.2 var(--font-mono);letter-spacing:.06em;text-transform:uppercase;padding:.18rem .42rem;border:1px solid var(--muted);border-radius:3px;white-space:nowrap}
 .v.yes{background:var(--fg);color:var(--bg);border-color:var(--fg)}
 .v.no{border-style:dashed;color:var(--muted)}
@@ -170,7 +171,7 @@ footer{margin-top:3.5rem;padding-top:1rem;border-top:1px solid var(--line);font-
 <header>
   <p class="crumb"><a href="../">slopswap</a> / emf badge</p>
   <h1>A tuning knob for the EMF Explorer Badge</h1>
-  <p class="dek">The badge hears fields from 20 Hz to 20 kHz. One analog switch chip, one oscillator and a pot should let it tune in everything from 20 kHz to a few hundred kilohertz, for between 50 cents and two dollars of parts.</p>
+  <p class="dek">The badge hears fields from 20 Hz to 20 kHz. One analog switch chip, one oscillator and a pot should let it tune in everything from 20 kHz to a few hundred kilohertz, for somewhere between 20 cents and two dollars of parts, most of it the knob.</p>
   <div class="scale" aria-hidden="true"></div>
   <p class="byline">Design notes · 13 November 2026</p>
   <div class="note"><span class="tag">Where this stands</span>
@@ -182,7 +183,8 @@ footer{margin-top:3.5rem;padding-top:1rem;border-top:1px solid var(--line);font-
   <li>The pickup coils already catch fields far above hearing. Those fields never reach the headphones, because the amplifier fades above 16 kHz and ears stop near 20 kHz.</li>
   <li>A switch between the coil and the amplifier, flipped tens of thousands of times a second, shifts a slice of that band down into hearing. Engineers call that switch a chopper. A knob sets how fast it flips, and so which slice you hear.</li>
   <li><strong>The build to make:</strong> one 74HC4053 analog switch chip between the coils and the amplifier, flipped by one gate of a 74HC14 with a pot. Both are through-hole and both run from the badge's two AAA cells.</li>
-  <li><strong>What it costs:</strong> for both ears, about $0.50 a badge with low-cost chips or $1.90 with Texas Instruments chips, at 1,000 pieces. The pot is the largest item either way.</li>
+  <li><strong>What it costs:</strong> for both ears, about $0.50 a badge with low-cost chips or $1.90 with Texas Instruments chips, at 1,000 pieces and with an ordinary 9 mm pot. The pot is the largest item either way.</li>
+  <li><strong>The knob is the lever.</strong> Pots that work run from a four-cent trimmer to a four-dollar thumbwheel. A trimmer takes the low-cost build to $0.22, but it is made to be set, not played.</li>
   <li><strong>The cheapest version that still sounds right</strong> uses the switch chip as its own oscillator and tunes one ear, for about $0.40.</li>
   <li>A CMOS 555 works and so do two transistors, but neither saves money. Swapping the switch chip for a single transistor saves little and adds 25 dB of hiss.</li>
   <li>Comb mode, which folds every band into hearing at once, is a three-position switch and two more passives.</li>
@@ -349,7 +351,7 @@ footer{margin-top:3.5rem;padding-top:1rem;border-top:1px solid var(--line);font-
   <tbody>
     <tr><th scope="row">Analog switch</th><td>74HC4053, DIP-16</td><td>sections 1 and 2 chop the two coils; section 3 is spare</td></tr>
     <tr><th scope="row">Schmitt inverters</th><td>74HC14, DIP-14</td><td>gate 1 oscillates, gate 2 drives the switches; two more gates make comb mode</td></tr>
-    <tr><th scope="row">Pot</th><td class="n">100 kΩ, log taper</td><td>the knob</td></tr>
+    <tr><th scope="row">Pot</th><td class="n">100 kΩ, log taper</td><td>the knob; a 10 kΩ pot works with 1 kΩ and 3.3 nF</td></tr>
     <tr><th scope="row">Resistor</th><td class="n">10 kΩ</td><td>sets the top of the range</td></tr>
     <tr><th scope="row">Capacitor</th><td class="n">330 pF</td><td>sets the range</td></tr>
     <tr><th scope="row">Capacitor</th><td class="n">100 nF</td><td>across the rails, beside the chips</td></tr>
@@ -528,6 +530,78 @@ footer{margin-top:3.5rem;padding-top:1rem;border-top:1px solid var(--line);font-
   </tbody>
 </table></div>
 
+<h2>The knob: which pot to buy</h2>
+<p>The oscillator uses the pot as a plain variable resistor, on two of its three pins, so almost anything whose resistance changes will tune it. That leaves the choice to price and feel, and the prices found run from four cents to four dollars.</p>
+
+<h3>Any value from 10 kΩ to 100 kΩ</h3>
+<p>The cheap parts mostly come in 10 kΩ. The frequency depends on the pot's resistance times the capacitor, so a smaller pot takes a larger capacitor and a smaller fixed resistor, and the range stays where it was.</p>
+<div class="tw"><table>
+  <thead><tr><th>Pot</th><th>Fixed resistor</th><th>Capacitor</th><th>Range, fresh cells</th><th>Range, cells at 2 V</th></tr></thead>
+  <tbody>
+    <tr><th scope="row">100 kΩ</th><td class="n">10 kΩ</td><td class="n">330 pF</td><td class="n">24 to 255 kHz</td><td class="n">19 to 203 kHz</td></tr>
+    <tr><th scope="row">50 kΩ</th><td class="n">4.7 kΩ</td><td class="n">680 pF</td><td class="n">24 to 262 kHz</td><td class="n">19 to 208 kHz</td></tr>
+    <tr><th scope="row">20 kΩ</th><td class="n">2 kΩ</td><td class="n">1.5 nF</td><td class="n">27 to 269 kHz</td><td class="n">21 to 214 kHz</td></tr>
+    <tr><th scope="row">10 kΩ</th><td class="n">1 kΩ</td><td class="n">3.3 nF</td><td class="n">24 to 230 kHz</td><td class="n">19 to 183 kHz</td></tr>
+    <tr><th scope="row">10 kΩ, narrower and more even</th><td class="n">2.2 kΩ</td><td class="n">1.5 nF</td><td class="n">48 to 246 kHz</td><td class="n">38 to 196 kHz</td></tr>
+  </tbody>
+</table></div>
+<p class="small">Simulated with the same 74HC14 model as the rest of the page, which gives the gate 150 Ω of output resistance. That resistance is in series with the fixed resistor, so it starts to count at 1 kΩ: with 400 Ω, which is plausible on tired cells, the top of the 10 kΩ range falls to about 150 kHz. Cheap pots are ±20 to ±30 %, and the bottom of the range moves by as much.</p>
+
+<h3>What each kind costs</h3>
+<div class="tw"><table class="wide">
+  <thead><tr><th>Kind</th><th>Example</th><th>Value</th><th>Price</th><th>As a knob</th></tr></thead>
+  <tbody>
+    <tr><th scope="row">Carbon trimmer, 6 mm</th><td><a href="https://www.lcsc.com/product-detail/C5205024.html">BOCHEN RM065-104</a></td><td class="n">100 kΩ</td><td class="n">$0.043 at 1,000<br>$0.037 at 10,000</td><td>A slotted disc for a fingernail or a screwdriver. Made to be set, not played: see below.</td></tr>
+    <tr><th scope="row">Square trimmer, 9.5 mm</th><td><a href="https://www.lcsc.com/product-detail/C48642122.html">BAOTER 3386P-104-LF</a></td><td class="n">100 kΩ</td><td class="n">from $0.10</td><td>A bigger slotted rotor, with the same caveat.</td></tr>
+    <tr><th scope="row">Carbon shaft pot, 16 mm</th><td><a href="https://www.lcsc.com/product-detail/C10566.html">HaiHuasheng R16-B103-3P</a></td><td class="n">10 kΩ</td><td class="n">from $0.135</td><td>A full-size panel pot with an 18 mm shaft, large for a badge. Out of stock at LCSC when read. <a href="https://jlcpcb.com/partdetail/11110-R16_B103_3P_18mm/C10566">JLCPCB's listing</a> says it has a switch, which could double as the mode switch; not confirmed.</td></tr>
+    <tr><th scope="row">Slide pot</th><td><a href="https://www.lcsc.com/product-detail/C49230417.html">YTL YSX-DWQ-P097</a></td><td class="n">10 kΩ</td><td class="n">from $0.30</td><td>A proper slider. The travel is not listed. A <a href="https://www.lcsc.com/product-detail/C49230422.html">second version</a> with more stock is from $0.37.</td></tr>
+    <tr><th scope="row">Shaft pot, 9 mm</th><td><a href="https://www.lcsc.com/product-detail/Variable-Resistors-Potentiometers_ALPSALPINE-RK09K1130AP5_C470295.html">Alps RK09K1130AP5</a></td><td class="n">10 kΩ</td><td class="n">$0.32 at 1,000</td><td>The ordinary knob.</td></tr>
+    <tr><th scope="row">Rotary position sensor</th><td><a href="https://www.lcsc.com/product-detail/C2687313.html">Alps RDC501018A</a></td><td class="n">not listed</td><td class="n">$0.41 at 1,000</td><td>A flat rotary part with no shaft of its own, so it needs a wheel or shaft added.</td></tr>
+    <tr><th scope="row">Thumbwheel pot</th><td><a href="https://www.lcsc.com/product-detail/C470643.html">Alps RK10J11E0034</a></td><td class="n">10 kΩ</td><td class="n">$0.53 at 900</td><td>A brand-name edge wheel.</td></tr>
+    <tr><th scope="row">Shaft pot, 9 mm</th><td><a href="https://www.newark.com/bourns/ptv09a-4015f-b104/pot-rotary-100kohm-9mm-20/dp/10C0382">Bourns PTV09A</a></td><td class="n">100 kΩ</td><td class="n">$0.74 at 1,000</td><td>The ordinary knob in the value the schematic shows. LCSC has <a href="https://www.lcsc.com/product-detail/C5341721.html">a version</a> from $0.69.</td></tr>
+    <tr><th scope="row">Slide position sensor</th><td><a href="https://www.lcsc.com/product-detail/C202389.html">Alps RDC1022A05</a></td><td class="n">10 kΩ</td><td class="n">from $0.76</td><td>22 mm of travel and a 4.5 mm lever. Slides very freely: see below.</td></tr>
+    <tr><th scope="row">Slide pot, brand-name</th><td><a href="https://www.lcsc.com/product-detail/C5357832.html">Bourns PTA3043</a></td><td class="n">10 kΩ</td><td class="n">from $1.36</td><td>What a slider costs from a Western catalogue.</td></tr>
+    <tr><th scope="row">Thumbwheel trimmer, brand-name</th><td><a href="https://www.lcsc.com/product-detail/C17214971.html">Bourns 3352T-1-104LF</a></td><td class="n">100 kΩ</td><td class="n">$4.08 at 1,000</td><td>A trimmer with its own edge wheel. Out-of-stock listings in the same family run $1.17 to $1.54 at 1,000.</td></tr>
+  </tbody>
+</table></div>
+<p class="small">All LCSC listings unless marked, read on 13 November 2026. "From" is the lowest price break shown, without its quantity. Every part here is linear or lists no taper, so expect the crowded top end the dial simulation shows for a linear pot. For a log taper, the <a href="https://www.taydaelectronics.com/100k-ohm-logarithmic-taper-potentiometer-round-knurled-plastic-shaft-pcb-9mm.html">Alpha RV09AF 100 kΩ</a> is $0.67 for one at Tayda.</p>
+
+<h3>Trimmers: the cheapest end</h3>
+<p>A 100 kΩ carbon trimmer at about four cents is the floor. It drops into the schematic as drawn and takes the recommended build from $0.50 to $0.22. The cost is in use. A trimmer is turned through a slot, and it is built to be set a few times: Bourns rates its 3362 trimmer for 200 cycles of rotation. A badge that is played like an instrument could use that up in a few afternoons. A trimmer makes sense if the knob is closer to a preset than an instrument.</p>
+<p>The cheapest part that is a real knob is the 16 mm carbon shaft pot at about 14 cents, if it can be had and the badge has room for it. After it come the slide pot at 30 cents and the Alps shaft pot at 32 cents.</p>
+
+<h3>Position sensors as sliders</h3>
+<p>LCSC files a second family of sliders under <a href="https://www.lcsc.com/category/1270.html">position sensors</a> and not under potentiometers. A resistive linear position sensor is a slide pot made for a mechanism to move instead of a finger: a 10 kΩ track, a short lever and through-hole pins. It tunes this circuit like any other 10 kΩ pot, and it can undercut the brand-name thumbwheels and slide pots in the same catalogue: the Alps RDC1022A05 slider is from $0.76, where a Bourns slide pot is from $1.36 and Bourns thumbwheels start at $1.17, and the Alps rotary sensor at $0.41 is under the Alps thumbwheel at $0.53. The low-cost YTL slide pot is still cheaper than any of them.</p>
+<p>The drawback is feel. These parts slide with very little resistance (Alps rates the RDC10 series at 0.25 N at most), so they are not as pleasant under a thumb as a proper slide pot. In their favour, the same datasheet rates them for 200,000 strokes. They are linear only, so the top of the dial is crowded; the narrower 10 kΩ row in the first table evens that out.</p>
+<div class="tw"><table>
+  <thead><tr><th>Position sensor</th><th>Kind</th><th>Price</th></tr></thead>
+  <tbody>
+    <tr><th scope="row"><a href="https://www.lcsc.com/product-detail/C2687313.html">Alps RDC501018A</a></th><td>rotary, through-hole</td><td class="n">$0.41 at 1,000</td></tr>
+    <tr><th scope="row"><a href="https://www.lcsc.com/product-detail/C388852.html">Alps RDC506018A</a></th><td>rotary, surface-mount</td><td class="n">$0.53 at 1,200</td></tr>
+    <tr><th scope="row"><a href="https://www.lcsc.com/product-detail/C2153595.html">Bourns 3382G-1-103G</a></th><td>rotary, surface-mount</td><td class="n">$0.57 at 1,000</td></tr>
+    <tr><th scope="row"><a href="https://www.lcsc.com/product-detail/C202389.html">Alps RDC1022A05</a></th><td>slide, 22 mm travel, through-hole</td><td class="n">from $0.76</td></tr>
+    <tr><th scope="row"><a href="https://www.lcsc.com/product-detail/C351182.html">Alps RDC10320RB</a></th><td>slide, 32 mm travel</td><td class="n">from $1.17</td></tr>
+    <tr><th scope="row"><a href="https://www.lcsc.com/product-detail/C470772.html">Alps RDC1010A12</a></th><td>slide, 10 mm travel, through-hole</td><td class="n">$2.81</td></tr>
+  </tbody>
+</table></div>
+<p class="small">The category holds about 3,500 parts, most of them magnetic encoder chips, and only these Alps and Bourns resistive parts were priced for this page. Cheaper sliders from other makers may be in there; it is worth searching by hand before ordering.</p>
+
+<h3>The recommended build with each knob</h3>
+<div class="tw"><table>
+  <thead><tr><th>Knob</th><th>Knob price</th><th>With low-cost chips</th><th>With TI chips</th></tr></thead>
+  <tbody>
+    <tr><th scope="row">Carbon trimmer</th><td class="n">$0.04</td><td class="n">$0.22</td><td class="n">$1.21</td></tr>
+    <tr><th scope="row">Carbon shaft pot, 16 mm</th><td class="n">$0.14</td><td class="n">$0.31</td><td class="n">$1.31</td></tr>
+    <tr><th scope="row">Slide pot, YTL</th><td class="n">$0.30</td><td class="n">$0.48</td><td class="n">$1.47</td></tr>
+    <tr class="pick"><th scope="row">Alps shaft pot</th><td class="n">$0.32</td><td class="n">$0.50</td><td class="n">$1.49</td></tr>
+    <tr><th scope="row">Alps rotary position sensor</th><td class="n">$0.41</td><td class="n">$0.59</td><td class="n">$1.58</td></tr>
+    <tr><th scope="row">Alps thumbwheel</th><td class="n">$0.53</td><td class="n">$0.70</td><td class="n">$1.70</td></tr>
+    <tr><th scope="row">Bourns shaft pot</th><td class="n">$0.74</td><td class="n">$0.91</td><td class="n">$1.91</td></tr>
+    <tr><th scope="row">Alps slide position sensor</th><td class="n">$0.76</td><td class="n">$0.94</td><td class="n">$1.93</td></tr>
+  </tbody>
+</table></div>
+<p class="small">Both chips plus the knob, both ears. The highlighted row is the low-cost figure used in the next section; the brand-name figure there pairs the TI chips with the Bourns pot. A 10 kΩ knob changes one resistor and one capacitor, at no cost.</p>
+
 <h2>What each build costs</h2>
 <p>Prices for the parts that differ between builds. "From" means the lowest price break the distributor shows, without the quantity.</p>
 <div class="tw"><table>
@@ -556,11 +630,11 @@ footer{margin-top:3.5rem;padding-top:1rem;border-top:1px solid var(--line);font-
   </tbody>
 </table></div>
 <p class="small">Low-cost uses the HGSEMI chips and the $0.32 pot. Brand-name uses the TI chips and the $0.74 pot; the transistors and surface-mount parts are the same LCSC prices in both columns. Not included, because they were not priced: ten to fifteen cents of resistors and capacitors, the mode switch, sockets, and board area. Machine assembly for build 6 is not included either.</p>
-<p>At low-cost prices every build but the 555 one sits within eleven cents of the others, and in each of those the pot costs more than all the silicon. So the choice between them is about sound and ease of assembly, not chip count. At brand-name prices the second chip is the 60 cent question, and build 2 answers it by tuning one ear.</p>
+<p>At low-cost prices every build but the 555 one sits within eleven cents of the others, and in each of those the pot costs more than all the silicon. So the choice between them is about sound and ease of assembly, not chip count, and the knob in the section above moves the total more than any of them. At brand-name prices the second chip is the 60 cent question, and build 2 answers it by tuning one ear.</p>
 
 <h2>Other ways to cut cost</h2>
 <ul>
-  <li><strong>The pot.</strong> It is the biggest lever. Any pot from 10 kΩ to 100 kΩ should do if the fixed resistor and the capacitor are scaled with it (1 kΩ and 3.3 nF for a 10 kΩ pot), so buy whichever is cheapest in a log taper. A thumbwheel trimmer would cost less than a shaft pot, but was not priced.</li>
+  <li><strong>The pot.</strong> It is the biggest lever, and it has its own section above: any value from 10 kΩ to 100 kΩ works, and the knob can cost anything from four cents to 76 cents before the brand-name thumbwheels.</li>
   <li><strong>No series capacitor.</strong> An earlier draft of this circuit put 10 µF between the switch and R2 to block the op-amp's offset. On the badge's rails it is not needed: without it the tone is unchanged and a 1 mV offset leaves 60 mV of DC at the output, less than the stock badge has.</li>
   <li><strong>One range.</strong> One capacitor covers 24 to 255 kHz, and the fainter windows at three times the frequency reach past 700 kHz. A range switch and extra capacitors buy little.</li>
   <li><strong>One ear.</strong> Tuning one ear and leaving the other normal saves the oscillator chip (build 2), and may be the nicer instrument. That is a choice to make by listening.</li>
@@ -588,14 +662,14 @@ footer{margin-top:3.5rem;padding-top:1rem;border-top:1px solid var(--line);font-
   <li><strong>The oscillator's leak.</strong> A scope on the op-amp output while tuning. If it swings more than about ±0.3 V, look at the feedback capacitor's value first.</li>
   <li><strong>Tired cells.</strong> Repeat on two cells at about 1.0 V each. The simulation says the tone holds; the 74HC4053's resistance down there is the least certain number on this page.</li>
   <li><strong>The top of the dial.</strong> Whether the tone holds up above 200 kHz, where the coil's core is the unknown.</li>
-  <li><strong>The pot.</strong> Linear against log, by feel.</li>
+  <li><strong>The pot.</strong> Linear against log, by feel, and whether a trimmer or a free-sliding position sensor is good enough to play.</li>
   <li><strong>Comb mode</strong>, once tuning works: whether 17 mV where tuning gives 59 mV is loud enough to be worth a switch position.</li>
 </ol>
 
 <h2>More detail</h2>
 <ul class="more">
-  <li><a href="https://claude.ai/artifact/663uHWHUT2BFKQ6CyuPiE6">EMF Explorer Badge: two upgrades</a><br><span class="small">The earlier survey this grew from: frequency dividers, the first chopper sketches, automatic tuning, and the single-AA supply, with schematics and prices.</span></li>
-  <li><a href="https://claude.ai/artifact/5X3o9C31B8L73uPBfRuUVo">Breadboard prototype and bench notes</a><br><span class="small">The 5 V prototype built from parts on hand: breadboard drawings, transistor substitutes, the three-range oscillator to 1 MHz, and the LTspice files.</span></li>
+  <li><a href="upgrades.html">EMF Explorer Badge: two upgrades</a><br><span class="small">The earlier survey this grew from: frequency dividers, the first chopper sketches, automatic tuning, and the single-AA supply, with schematics and prices.</span></li>
+  <li><a href="breadboard.html">Breadboard prototype and bench notes</a><br><span class="small">The 5 V prototype built from parts on hand: breadboard drawings, transistor substitutes, the three-range oscillator to 1 MHz, and the LTspice files.</span></li>
 </ul>
 
 <h2>Sources</h2>
@@ -606,7 +680,9 @@ footer{margin-top:3.5rem;padding-top:1rem;border-top:1px solid var(--line);font-
   <li><a href="https://xdevs.com/doc/_Datasheets/Multiplexer/74hc4053.pdf">74HC4053 datasheet</a>, Philips, for resistance, switching times and supply range</li>
   <li><a href="https://assets.nexperia.com/documents/data-sheet/74HC_HCT14.pdf">74HC14 datasheet</a>, Nexperia, for the Schmitt thresholds</li>
   <li><a href="https://shop-archive.boxtec.ch/pub/adafruit/tlc555.pdf">TLC555 datasheet</a>, Texas Instruments, for the 2 V minimum supply and thresholds</li>
-  <li>Prices: the distributor pages linked in the price table, read on 13 November 2026</li>
+  <li><a href="https://media.masterelectronics.com/productfiles/mf-ale/rdc10.pdf">Alps RDC10 series datasheet</a>, for the slide position sensors' resistance, operating force and life; <a href="https://www.rcscomponents.kiev.ua/datasheets/3362.pdf">Bourns 3362 datasheet</a>, for a trimmer's rotational life</li>
+  <li>LCSC category pages for <a href="https://www.lcsc.com/category/1270.html">position sensors</a>, <a href="https://www.lcsc.com/category/1194.html">thumbwheel potentiometers</a> and <a href="https://www.lcsc.com/category/1191.html">rotary potentiometers</a></li>
+  <li>Prices: the distributor pages linked in the price tables, read on 13 November 2026</li>
 </ul></div>
 <footer>The simulation scripts exist and can be shared on request.</footer>
 </main>
