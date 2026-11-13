@@ -368,7 +368,7 @@ footer{margin-top:3.5rem;padding-top:1rem;border-top:1px solid var(--line);font-
 <p>If the top end turns out to be too fiddly, a larger fixed resistor pulls it back in: 4.7 kΩ stops near 500 kHz and 10 kΩ near 250 kHz.</p>
 
 <h3>Normal listening</h3>
-<p>A mode switch that holds the select pin high leaves the coil connected to the amplifier through the chip. That is not quite the stock badge: the chip's resistance sits in the coil's path and takes about 2.5 dB off everything below 300 Hz on fresh cells, and about 6.5 dB once they are down to 2 V. If that matters, a second pole on the mode switch can join the coil straight to R2.</p>
+<p>A mode switch that holds the select pin high leaves the coil connected to the amplifier through the chip. That is not quite the stock badge: the chip's resistance sits in the coil's path and takes about 2.5 dB off everything below 300 Hz on fresh cells, and about 6.5 dB once they are down to 2 V. If that matters, a two-pole switch can take each coil straight to its resistor instead, which leaves the stock signal path in normal listening. <a href="kicad.html">The schematic generator</a> has that as an option.</p>
 
 <h3>One thing to check on the badge itself</h3>
 <p>This design needs the 100 pF feedback capacitors, C5 and C6, that the V2 schematic shows. The KiCad file in the public repository shows 10 pF. With 10 pF the oscillator's leak at the amplifier output swings ±0.6 V in simulation, against ±0.15 V with 100 pF, and that is most of the amplifier's headroom on tired cells.</p>
@@ -386,6 +386,7 @@ footer{margin-top:3.5rem;padding-top:1rem;border-top:1px solid var(--line);font-
     <tr><th scope="row">Mode switch</th><td>two- or three-position slide</td><td>normal, tuned, and comb if fitted</td></tr>
   </tbody>
 </table></div>
+<p>To put this into KiCad, <a href="kicad.html">the schematic generator</a> makes a KiCad 9 schematic of this build or of the transistor one, with footprints and LCSC part numbers filled in, either on its own for pasting into the badge's schematic or with the badge drawn alongside.</p>
 
 <h2>The switch: what else could do it</h2>
 <p>The switch chip is where the sound quality is decided. Every alternative was simulated on the badge's ±1.5 V with the same 40 kHz field, and again on ±1.0 V to stand in for tired cells.</p>
@@ -758,8 +759,17 @@ footer{margin-top:3.5rem;padding-top:1rem;border-top:1px solid var(--line);font-
   <li><strong>Comb mode</strong>, once tuning works: whether 17 mV where tuning gives 59 mV is loud enough to be worth a switch position.</li>
 </ol>
 
+<h2 id="addon">Or as an add-on board</h2>
+<p>One more way to build it leaves the badge's layout alone. The two 100 Ω resistors each sit between a coil and an amplifier input, so their four holes are exactly the four points the chopper has to come between. A small board could stand on pins in those holes, carry the resistors itself, and hold the whole tuning circuit.</p>
+<figure class="lab">
+  <div class="lab-title"><b>A proposed add-on</b><span>A 3D rendering, not a photograph</span></div>
+  <a href="kicad.html#addon"><img src="addon-3d.jpg" width="1200" height="982" alt="The back of the badge with a small purple board standing on pins between the two battery holders, carrying two chips, a pot and a slide switch. Its lower edges run parallel to the badge's angled bottom edges, just above the two coils." loading="lazy" style="display:block;width:100%;max-width:38rem;height:auto;margin:0 auto;border-radius:4px;background:#f6f5f1"></a>
+  <figcaption>The add-on, in purple, sits between the battery holders. Its lower edges follow the badge's angled outline and stop just above the coils. It still needs three wires for power, and nothing on it is routed yet. Rendered from the badge's own board file with R1 and R2 removed; badge board and artwork are EMF Explorer Badge V2.1, CC BY-NC-SA 4.0. Measurements, a second view and the board file are on <a href="kicad.html#addon">the KiCad page</a>.</figcaption>
+</figure>
+
 <h2>More detail</h2>
 <ul class="more">
+  <li><a href="kicad.html">A KiCad schematic of the chopper</a><br><span class="small">Pick the options and download a KiCad 9 schematic with symbols, checked footprints and LCSC part numbers. Also the proposed add-on board.</span></li>
   <li><a href="pots.html">Which pot to buy</a><br><span class="small">Every kind of pot that works as the knob, priced: trimmers, shaft and slide pots, thumbwheels, and position sensors used as sliders.</span></li>
   <li><a href="upgrades.html">EMF Explorer Badge: two upgrades</a><br><span class="small">The earlier survey this grew from: frequency dividers, the first chopper sketches, automatic tuning, and the single-AA supply, with schematics and prices.</span></li>
   <li><a href="breadboard.html">Breadboard prototype and bench notes</a><br><span class="small">The 5 V prototype built from parts on hand: breadboard drawings, transistor substitutes, the three-range oscillator to 1 MHz, and the LTspice files.</span></li>

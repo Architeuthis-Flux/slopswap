@@ -170,6 +170,18 @@ table.wide{min-width:54rem}
 footer{margin-top:3.5rem;padding-top:1rem;border-top:1px solid var(--line);font-size:.85rem;color:var(--muted)}
 @media (max-width:560px){ body{font-size:1rem} .lab{padding:.8rem .7rem} .field{flex-basis:100%} }
 </style>
+<style>
+.potgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(8.6rem,1fr));gap:1rem .9rem;margin:.2rem 0 .4rem}
+.pot{display:flex;flex-direction:column;gap:.15rem;min-width:0}
+.pot svg{width:100%;height:auto;max-width:11rem;display:block}
+.pot b{font:600 .92rem/1.25 var(--font-display);letter-spacing:.01em}
+.pot span{font-size:.8rem;line-height:1.35;color:var(--muted)}
+.pot .b{fill:var(--panel-2);stroke:var(--fg);stroke-width:1.6}
+.pot .m{fill:var(--lo);stroke:var(--fg);stroke-width:1.6}
+.pot .k{stroke:var(--fg);stroke-width:1.6;fill:none;stroke-linecap:round}
+.pot .k.s{stroke-width:2.2}.pot .k.t{stroke-width:1.2}.pot .k.a{stroke:var(--muted);stroke-width:1.3;stroke-linejoin:round}
+.pot .h{fill:var(--panel);stroke:var(--fg);stroke-width:1.6;stroke-linejoin:round}
+</style>
 </head>
 <body>
 <main class="page">
@@ -198,6 +210,18 @@ footer{margin-top:3.5rem;padding-top:1rem;border-top:1px solid var(--line);font-
 <p class="small">Simulated with the same 74HC14 model as the main page (<a href="badge_pots.py">badge_pots.py</a>), which gives the gate 150 Ω of output resistance. That resistance is in series with the fixed resistor, so the small values lean on it: with 400 Ω, which is plausible on tired cells, the tops fall to about 740, 680, 510 and 330 kHz for the first four rows. Cheap pots are ±20 to ±30 %, which moves the bottom of the range between 20 and 37 kHz.</p>
 
 <h2>What each kind costs</h2>
+<figure class="lab pots"><div class="lab-title"><b>The kinds of pot</b><span>Sketches, not to scale with each other</span></div>
+<div class="potgrid">
+<div class="pot"><svg viewBox="0 0 120 84" role="img" aria-label="Carbon trimmer"><line class="k" x1="46" y1="58" x2="46" y2="78"/><line class="k" x1="60" y1="58" x2="60" y2="78"/><line class="k" x1="74" y1="58" x2="74" y2="78"/><rect class="b" x="38" y="52" width="44" height="8" rx="2"/><circle class="b" cx="60" cy="34" r="22"/><circle class="m" cx="60" cy="34" r="13"/><line class="k s" x1="51" y1="34" x2="69" y2="34"/><line class="k s" x1="60" y1="25" x2="60" y2="43"/></svg><b>Carbon trimmer</b><span>An open disc with a slot. Set it with a screwdriver or a fingernail.</span></div>
+<div class="pot"><svg viewBox="0 0 120 84" role="img" aria-label="Square trimmer"><line class="k" x1="46" y1="56" x2="46" y2="78"/><line class="k" x1="60" y1="56" x2="60" y2="78"/><line class="k" x1="74" y1="56" x2="74" y2="78"/><rect class="b" x="36" y="10" width="48" height="48" rx="4"/><circle class="m" cx="60" cy="34" r="15"/><line class="k s" x1="49" y1="34" x2="71" y2="34"/></svg><b>Square trimmer</b><span>A sealed box with a slotted rotor on top.</span></div>
+<div class="pot"><svg viewBox="0 0 120 84" role="img" aria-label="Sixteen millimetre shaft pot"><line class="k" x1="48" y1="62" x2="48" y2="78"/><line class="k" x1="60" y1="62" x2="60" y2="78"/><line class="k" x1="72" y1="62" x2="72" y2="78"/><rect class="b" x="30" y="42" width="60" height="22" rx="3"/><rect class="b" x="50" y="34" width="20" height="9"/><rect class="m" x="54.5" y="6" width="11" height="29" rx="1.5"/><line class="k s" x1="60" y1="6" x2="60" y2="16"/></svg><b>Shaft pot, 16 mm</b><span>The full-size panel pot. Wants a knob pushed on.</span></div>
+<div class="pot"><svg viewBox="0 0 120 84" role="img" aria-label="Nine millimetre shaft pot"><line class="k" x1="52" y1="62" x2="52" y2="78"/><line class="k" x1="60" y1="62" x2="60" y2="78"/><line class="k" x1="68" y1="62" x2="68" y2="78"/><line class="k" x1="42" y1="52" x2="42" y2="72"/><line class="k" x1="78" y1="52" x2="78" y2="72"/><rect class="b" x="42" y="42" width="36" height="20" rx="2"/><rect class="b" x="53" y="36" width="14" height="7"/><rect class="m" x="55.5" y="8" width="9" height="29" rx="1.5"/><line class="k s" x1="60" y1="8" x2="60" y2="18"/></svg><b>Shaft pot, 9 mm</b><span>The same idea, small enough for a badge. The low-cost rotary pot looks like this too.</span></div>
+<div class="pot"><svg viewBox="0 0 120 84" role="img" aria-label="Thumbwheel pot"><line class="k" x1="50" y1="62" x2="50" y2="78"/><line class="k" x1="60" y1="62" x2="60" y2="78"/><line class="k" x1="70" y1="62" x2="70" y2="78"/><path class="m" d="M36 38 A24 24 0 0 1 84 38 Z"/><line class="k t" x1="80.0" y1="38.0" x2="84.0" y2="38.0"/><line class="k t" x1="79.3" y1="32.8" x2="83.2" y2="31.8"/><line class="k t" x1="77.3" y1="28.0" x2="80.8" y2="26.0"/><line class="k t" x1="74.1" y1="23.9" x2="77.0" y2="21.0"/><line class="k t" x1="70.0" y1="20.7" x2="72.0" y2="17.2"/><line class="k t" x1="65.2" y1="18.7" x2="66.2" y2="14.8"/><line class="k t" x1="60.0" y1="18.0" x2="60.0" y2="14.0"/><line class="k t" x1="54.8" y1="18.7" x2="53.8" y2="14.8"/><line class="k t" x1="50.0" y1="20.7" x2="48.0" y2="17.2"/><line class="k t" x1="45.9" y1="23.9" x2="43.0" y2="21.0"/><line class="k t" x1="42.7" y1="28.0" x2="39.2" y2="26.0"/><line class="k t" x1="40.7" y1="32.8" x2="36.8" y2="31.8"/><line class="k t" x1="40.0" y1="38.0" x2="36.0" y2="38.0"/><rect class="b" x="34" y="38" width="52" height="24" rx="3"/></svg><b>Thumbwheel</b><span>A knurled wheel on edge. Roll it with a thumb at the side of the board.</span></div>
+<div class="pot"><svg viewBox="0 0 120 84" role="img" aria-label="Slide pot"><line class="k" x1="20" y1="56" x2="20" y2="78"/><line class="k" x1="60" y1="56" x2="60" y2="78"/><line class="k" x1="100" y1="56" x2="100" y2="78"/><rect class="b" x="10" y="36" width="100" height="20" rx="3"/><line class="k" x1="20" y1="46" x2="100" y2="46"/><rect class="m" x="62" y="16" width="10" height="34" rx="2"/></svg><b>Slide pot</b><span>A lever in a slot, with a firm, even drag.</span></div>
+<div class="pot"><svg viewBox="0 0 120 84" role="img" aria-label="Slide position sensor"><line class="k" x1="24" y1="52" x2="24" y2="78"/><line class="k" x1="60" y1="52" x2="60" y2="78"/><line class="k" x1="96" y1="52" x2="96" y2="78"/><rect class="b" x="14" y="40" width="92" height="12" rx="2"/><line class="k" x1="22" y1="46" x2="98" y2="46"/><rect class="m" x="44" y="26" width="6" height="22" rx="1.5"/><path class="k a" d="M56 31 h22 m-5 -4 l5 4 l-5 4"/><path class="k a" d="M38 31 h-22 m5 -4 l-5 4 l5 4"/></svg><b>Slide position sensor</b><span>The same shape, slimmer, and the lever slides with almost no drag.</span></div>
+<div class="pot"><svg viewBox="0 0 120 84" role="img" aria-label="Rotary position sensor"><line class="k" x1="46" y1="60" x2="46" y2="78"/><line class="k" x1="60" y1="60" x2="60" y2="78"/><line class="k" x1="74" y1="60" x2="74" y2="78"/><rect class="b" x="34" y="10" width="52" height="52" rx="5"/><circle class="m" cx="60" cy="36" r="17"/><path class="h" d="M52 30 h16 a10 10 0 0 1 -16 14 z"/></svg><b>Rotary position sensor</b><span>A flat ring with a D-shaped hole. It needs a shaft of your own through it.</span></div>
+</div>
+<figcaption>Amber is the part you move. These are drawings of each type, not of any one maker's part; prices and part numbers are in the table below.</figcaption></figure>
 <div class="tw"><table class="wide">
   <thead><tr><th>Kind</th><th>Example</th><th>Value</th><th>Price</th><th>As a knob</th></tr></thead>
   <tbody>

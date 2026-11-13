@@ -1,0 +1,637 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>EMF badge chopper: KiCad schematic generator</title>
+<meta name="short-title" content="EMF badge: KiCad schematic">
+<meta name="description" content="Pick the options for the EMF Explorer Badge's tuning chopper and download a KiCad 9 schematic with library symbols, checked footprints and LCSC part numbers. Also: a proposed add-on board that plugs into two resistor positions.">
+<style>
+/* self-hosted fonts: Google Fonts is blocked in China */
+@font-face{font-family:"Archivo Narrow";font-style:normal;font-weight:100 900;font-display:swap;src:url(../styles/fonts/ArchivoNarrow-var.woff2) format("woff2")}
+@font-face{font-family:"IBM Plex Sans";font-style:normal;font-weight:100 900;font-display:swap;src:url(../styles/fonts/IBMPlexSans-var.woff2) format("woff2")}
+@font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:400;font-display:swap;src:url(../styles/fonts/IBMPlexMono-400.woff2) format("woff2")}
+@font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:600;font-display:swap;src:url(../styles/fonts/IBMPlexMono-600.woff2) format("woff2")}
+</style>
+<style>
+/* Layout: one 44rem reading column; figures and tables break out to 60rem.
+   Colour carries meaning and keeps it on every figure: amber is the chopper (the oscillator, its knob, its windows),
+   blue is the 40 kHz example field, ink is what you hear. The six sources in the dial take the six --s colours. */
+:root{
+  color-scheme:light;
+  --bg:#f2f0ea; --panel:#fcfcfb; --panel-2:#edebe4; --fg:#171613; --muted:#55534d; --line:#d3d0c6; --soft:#e4e1d8;
+  --lo:#a86200; --sig:#2a78d6; --link:#1b58b3;
+  --s1:#e34948; --s2:#2a78d6; --s3:#1baf7a; --s4:#6250d6; --s5:#008300; --s6:#e87ba4;
+  --font-display:"Archivo Narrow","Arial Narrow","Helvetica Neue",Arial,sans-serif;
+  --font-body:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  color-scheme:dark;
+  --bg:#121211; --panel:#1a1a19; --panel-2:#252523; --fg:#f0efec; --muted:#b5b3aa; --line:#3b3a36; --soft:#2a2927;
+  --lo:#f0b24c; --sig:#3987e5; --link:#8db6ff;
+  --s1:#e66767; --s2:#3987e5; --s3:#199e70; --s4:#9085e9; --s5:#008300; --s6:#d55181;
+} }
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#121211; --panel:#1a1a19; --panel-2:#252523; --fg:#f0efec; --muted:#b5b3aa; --line:#3b3a36; --soft:#2a2927;
+  --lo:#f0b24c; --sig:#3987e5; --link:#8db6ff;
+  --s1:#e66767; --s2:#3987e5; --s3:#199e70; --s4:#9085e9; --s5:#008300; --s6:#d55181;
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none !important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:400 1.0625rem/1.6 var(--font-body);
+  padding-block:2.25rem 4rem;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.page{max-width:60rem;margin-inline:auto;min-width:0}
+.page>p,.page>ul,.page>ol,.page>h1,.page>h2,.page>h3,.page>.note,.page>header>*{max-width:44rem}
+p,ul,ol{margin:0 0 1.05rem}
+ul,ol{padding-left:1.25rem}
+li{margin-bottom:.4rem}
+a{color:var(--link);text-underline-offset:.15em}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--lo);outline-offset:2px;border-radius:3px}
+strong{font-weight:600}
+code,.num{font-family:var(--font-mono);font-size:.92em;font-variant-numeric:tabular-nums}
+
+/* header: a title over a tuning scale, the page's one flourish */
+.crumb{font:400 .78rem/1.4 var(--font-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 1.4rem}
+.crumb a{color:inherit;text-decoration:none}
+.crumb a:hover{color:var(--fg);text-decoration:underline}
+h1{font:700 clamp(2.3rem,6.5vw,3.6rem)/1 var(--font-display);letter-spacing:.005em;text-wrap:balance;margin:0 0 .9rem}
+.dek{font-size:1.2rem;line-height:1.5;color:var(--muted);margin:0 0 1.1rem}
+.scale{position:relative;height:26px;max-width:60rem !important;margin:1.6rem 0 .5rem;
+  background:
+    repeating-linear-gradient(90deg,var(--fg) 0 1px,transparent 1px 10%) bottom/100% 14px no-repeat,
+    repeating-linear-gradient(90deg,var(--muted) 0 1px,transparent 1px 2%) bottom/100% 7px no-repeat;
+  border-bottom:1px solid var(--fg)}
+.scale::after{content:"";position:absolute;left:19%;top:0;bottom:-1px;width:3px;background:var(--lo)}
+.byline{font:400 .8rem/1.5 var(--font-mono);color:var(--muted);margin:0 0 1.6rem}
+.note{border:1px solid var(--line);border-left:4px solid var(--lo);background:var(--panel);border-radius:4px;padding:.8rem 1rem;margin:0 0 1.2rem}
+.note .tag{display:block;font:600 .72rem/1.2 var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.35rem}
+.note p:last-child{margin-bottom:0}
+
+/* sections */
+main{counter-reset:sec}
+h2{counter-increment:sec;font:700 clamp(1.6rem,4vw,2.15rem)/1.1 var(--font-display);text-wrap:balance;
+  margin:3.6rem 0 1rem;padding-top:1.1rem;border-top:1px solid var(--fg)}
+h2::before{content:counter(sec,decimal-leading-zero);display:block;font:600 .74rem/1 var(--font-mono);letter-spacing:.1em;color:var(--lo);margin-bottom:.6rem}
+h3{font:700 1.25rem/1.2 var(--font-display);margin:2rem 0 .6rem}
+
+/* figures */
+.lab{margin:1.6rem 0 1.9rem;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:1rem 1rem .9rem;min-width:0}
+.lab-title{display:flex;flex-wrap:wrap;gap:.3rem .8rem;align-items:baseline;margin:0 0 .8rem}
+.lab-title b{font:700 1.15rem/1.2 var(--font-display)}
+.lab-title span{font:600 .7rem/1.2 var(--font-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.cv{position:relative}
+.cv canvas{display:block;width:100%;touch-action:pan-y}
+.tip{position:absolute;z-index:2;pointer-events:none;background:var(--fg);color:var(--bg);font-size:.8rem;line-height:1.35;padding:.35rem .55rem;border-radius:4px;max-width:15rem;transform:translate(-50%,-110%)}
+.controls{display:flex;flex-wrap:wrap;gap:.6rem .8rem;align-items:center;margin-top:.9rem}
+.btn,.seg button,.chip{font:500 .9rem/1.2 var(--font-body);color:var(--fg);background:var(--panel-2);border:1px solid var(--line);border-radius:5px;padding:.5rem .75rem;cursor:pointer}
+.btn:hover,.seg button:hover{border-color:var(--muted)}
+.btn[aria-pressed="true"],.seg button[aria-pressed="true"]{background:var(--fg);border-color:var(--fg);color:var(--bg)}
+.seg{display:inline-flex}
+.seg button{border-radius:0;margin-left:-1px}
+.seg button:first-child{border-radius:5px 0 0 5px;margin-left:0}
+.seg button:last-child{border-radius:0 5px 5px 0}
+.field{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:.6rem;align-items:center;flex:1 1 19rem;min-width:0}
+.field>span{font-size:.9rem;color:var(--muted);white-space:nowrap}
+.field output{font:600 .92rem/1 var(--font-mono);font-variant-numeric:tabular-nums;min-width:8.2ch;text-align:right}
+input[type=range]{width:100%;min-width:0;accent-color:var(--lo);height:1.6rem;margin:0}
+select{font:500 .9rem/1.2 var(--font-body);color:var(--fg);background:var(--panel-2);border:1px solid var(--line);border-radius:5px;padding:.45rem .5rem}
+.lbl{font-size:.9rem;color:var(--muted);display:inline-flex;gap:.5rem;align-items:center}
+.chips{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.9rem}
+.chip{display:inline-flex;align-items:center;gap:.45rem;border-radius:999px;padding:.35rem .7rem;font-size:.85rem;background:transparent}
+.chip i{width:.7rem;height:.7rem;border-radius:50%;background:var(--c);flex:none}
+.chip small{color:var(--muted);font:400 .8rem var(--font-mono)}
+.chip[aria-pressed="false"]{border-style:dashed;color:var(--muted)}
+.chip[aria-pressed="false"] i{background:transparent;box-shadow:inset 0 0 0 2px var(--line)}
+.readout{font-size:.92rem;margin:.9rem 0 0;min-height:2.9em}
+.lab figcaption,.cap{font-size:.88rem;line-height:1.5;color:var(--muted);margin:.8rem 0 0}
+.try{margin-top:.2rem}
+.try li{margin-bottom:.55rem}
+
+/* drawings */
+.scroll{overflow-x:auto}
+.sch{display:block;width:100%;min-width:640px;height:auto;font-family:var(--font-body);font-size:12px}
+.sch .w{fill:none;stroke:var(--fg);stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round}
+.sch .old{stroke:var(--muted)}
+.sch .osc{stroke:var(--lo)}
+.sch .dot{fill:var(--fg);stroke:none}
+.sch .dot.old{fill:var(--muted)}
+.sch .dot.osc{fill:var(--lo)}
+.sch .w .fillw{fill:var(--fg)}
+.sch .osc .fillw{fill:var(--lo)}
+.sch text{fill:var(--fg)}
+.sch .q{fill:var(--muted)}
+.sch .b{font-weight:600}
+.sch .p{font:400 10px var(--font-mono);fill:var(--muted)}
+.sch .box{fill:var(--panel-2);stroke:none}
+.sch .pnl{fill:none;stroke:var(--line)}
+.sch .oscbox{fill:var(--lo);fill-opacity:.07;stroke:var(--lo);stroke-width:1.25}
+.sch .flow{fill:none;stroke-width:9;stroke-linecap:round;stroke-linejoin:round;opacity:0;transition:opacity .15s}
+.sch .flow.pass{stroke:var(--sig)}
+.sch .flow.shunt{stroke:var(--muted)}
+.sch.s-pass .flow.pass{opacity:.32}
+.sch.s-shunt .flow.shunt{opacity:.38}
+.sch .arm{stroke:var(--fg);stroke-width:2.2;stroke-linecap:round;display:none}
+.sch.s-pass .arm.up,.sch.s-shunt .arm.down{display:inline}
+.sch .hi,.sch .lo-half{stroke:var(--lo);stroke-width:1.3;fill:none;opacity:.35}
+.sch.s-pass .hi,.sch.s-shunt .lo-half{opacity:1;stroke-width:2.4}
+
+/* tables */
+.tw{overflow-x:auto;margin:1rem 0 1.4rem;border-top:1px solid var(--fg);border-bottom:1px solid var(--line)}
+table{border-collapse:collapse;width:100%;min-width:38rem;font-size:.93rem;line-height:1.45}
+th,td{text-align:left;vertical-align:top;padding:.55rem 1rem .55rem 0}
+thead th{font:600 .7rem/1.3 var(--font-mono);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--line)}
+tbody tr+tr>*{border-top:1px solid var(--soft)}
+tbody th{font-weight:600}
+td.n{font-family:var(--font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.pick>*{background:var(--panel)}
+table.wide{min-width:54rem}
+/* the Falstad frame: a shield keeps page scrolling from being swallowed until the reader asks for the circuit */
+.fs-wrap{position:relative;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:var(--panel-2)}
+.fs-wrap iframe{display:block;width:100%;height:520px;border:0}
+.fs-shield{position:absolute;inset:0;width:100%;height:100%;border:0;background:transparent;cursor:pointer;display:flex;align-items:flex-start;justify-content:flex-start;padding:.6rem}
+.fs-shield span{font:600 .74rem/1 var(--font-mono);letter-spacing:.04em;background:var(--fg);color:var(--bg);padding:.42rem .6rem;border-radius:4px}
+.fs-wrap.live .fs-shield{display:none}
+.fs-link{font-size:.92rem;margin:.7rem 0 0}
+@media (max-width:560px){ .fs-wrap iframe{height:440px} }
+.v{display:inline-block;font:600 .66rem/1.2 var(--font-mono);letter-spacing:.06em;text-transform:uppercase;padding:.18rem .42rem;border:1px solid var(--muted);border-radius:3px;white-space:nowrap}
+.v.yes{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.v.no{border-style:dashed;color:var(--muted)}
+.small{font-size:.88rem;color:var(--muted)}
+.sources{font-size:.92rem}
+.sources ul{list-style:none;padding:0}
+.more{list-style:none;padding:0}
+.more li{border-top:1px solid var(--soft);padding:.7rem 0;margin:0}
+.more li:last-child{border-bottom:1px solid var(--soft)}
+.more a{font-weight:600}
+footer{margin-top:3.5rem;padding-top:1rem;border-top:1px solid var(--line);font-size:.85rem;color:var(--muted)}
+@media (max-width:560px){ body{font-size:1rem} .lab{padding:.8rem .7rem} .field{flex-basis:100%} }
+</style>
+<style>
+/* this page: an options panel, a preview of the sheet, and tables of what was checked */
+.opts{display:grid;gap:1.1rem 1.6rem;grid-template-columns:repeat(auto-fit,minmax(15.5rem,1fr));margin:1.1rem 0 1.3rem}
+.opt{min-width:0}
+.opt>span{display:block;font:600 .72rem/1.2 var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem}
+.opt p{font-size:.86rem;line-height:1.42;color:var(--muted);margin:.45rem 0 0;max-width:none}
+.opt .seg{display:inline-flex;flex-wrap:wrap}
+.seg button[disabled]{opacity:.42;cursor:not-allowed}
+.prev{background:#fff;border:1px solid var(--line);border-radius:6px;overflow-x:auto}
+.prev img{display:block;width:100%;min-width:680px;height:auto}
+.dl{display:flex;flex-wrap:wrap;gap:.6rem 1rem;align-items:center;margin:.9rem 0 0}
+.dl code{font-size:.84rem;overflow-wrap:anywhere}
+.btn.go{background:var(--fg);color:var(--bg);border-color:var(--fg);font-weight:600}
+.btn.go:hover{opacity:.86}
+.shots{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(17rem,1fr));align-items:start}
+.shots img{display:block;width:100%;height:auto;border-radius:4px;background:#f6f5f1}
+td code,th code,li code,p code{overflow-wrap:anywhere}
+#bom td,#bom th{font-size:.9rem}
+#bom tr.own>*{color:var(--muted)}
+.count{font-size:.92rem;color:var(--muted);margin:.5rem 0 0}
+</style>
+</head>
+<body>
+<main class="page">
+<header>
+  <p class="crumb"><a href="../">slopswap</a> / <a href="./">emf badge</a> / kicad</p>
+  <h1>A KiCad schematic of the chopper</h1>
+  <p class="dek">Choose the options and download a KiCad 9 schematic of the tuning circuit, with library symbols, footprints and LCSC part numbers already filled in.</p>
+  <div class="scale" aria-hidden="true"></div>
+  <p class="byline">Design notes · 13 November 2026 · part of <a href="./">A tuning knob for the EMF Explorer Badge</a></p>
+  <div class="note"><span class="tag">Before you rely on it</span>
+    <p>The circuit comes from simulation. The file comes from a script, and KiCad itself has checked every version of it: the connections, the footprints, the 3D models. No board has been made from it yet. <a href="#checked">What was checked</a> lists exactly what, and what was not.</p></div>
+</header>
+
+<h2 id="pick">Pick the build</h2>
+<div class="opts">
+  <div class="opt"><span>Circuit</span>
+    <div class="seg" role="group" aria-label="Circuit" data-k="build"><button data-v="rec" aria-pressed="true">Switch chip</button><button data-v="tr" aria-pressed="false">Transistors</button></div>
+    <p id="d-build"></p></div>
+  <div class="opt"><span>Normal listening</span>
+    <div class="seg" role="group" aria-label="Normal listening" data-k="bypass"><button data-v="0" aria-pressed="true">Through the chip</button><button data-v="1" aria-pressed="false">True bypass</button></div>
+    <p id="d-bypass"></p></div>
+  <div class="opt"><span>Comb mode</span>
+    <div class="seg" role="group" aria-label="Comb mode" data-k="comb"><button data-v="0" aria-pressed="true">Leave out</button><button data-v="1" aria-pressed="false">Include</button></div>
+    <p id="d-comb"></p></div>
+  <div class="opt"><span>Knob</span>
+    <div class="seg" role="group" aria-label="Knob" data-k="pot"><button data-v="ptv09" aria-pressed="true">9 mm shaft pot</button><button data-v="t3386" aria-pressed="false">Trimmer</button></div>
+    <p id="d-pot"></p></div>
+  <div class="opt"><span>On the sheet</span>
+    <div class="seg" role="group" aria-label="On the sheet" data-k="badge"><button data-v="0" aria-pressed="true">Additions only</button><button data-v="1" aria-pressed="false">With the badge</button></div>
+    <p id="d-badge"></p></div>
+</div>
+
+<figure class="lab">
+  <div class="lab-title"><b>The sheet you will get</b><span id="pv-sub">KiCad's own rendering of this choice</span></div>
+  <div class="prev"><a id="pvl" href="#" target="_blank" rel="noopener"><img id="pv" alt="" width="1496" height="990"></a></div>
+  <div class="dl"><button class="btn go" id="dl">Download the schematic</button><code id="fn"></code></div>
+  <figcaption>The picture is KiCad's rendering of the same file, made ahead of time for each drawing; select it to open it full size. The knob choice changes the footprint and part number, not the drawing. The download is built in your browser when you press the button.</figcaption>
+</figure>
+
+<h2>What is on the sheet</h2>
+<p id="summary"></p>
+<div class="tw"><table class="wide" id="bom">
+  <thead><tr><th>Ref</th><th>Value</th><th>Part number</th><th>Footprint</th><th>LCSC</th></tr></thead>
+  <tbody></tbody>
+</table></div>
+<p class="count" id="count"></p>
+<p>Every symbol carries two extra fields. <code>LCSC</code> holds the LCSC part number, under the field name that the usual JLCPCB and LCSC bill-of-materials tools look for. <code>MPN</code> holds the maker's part number. Capacitors have no LCSC number: pick ones whose lead spacing suits the footprint, 2.5 mm for the small values and 5 mm for 100 nF and 1 µF.</p>
+
+<h2>Using it</h2>
+<ol>
+  <li>Download the file and open it in KiCad 9's schematic editor. Its symbols are copies of KiCad's own library symbols, kept inside the file, so it opens whole even if a library is missing.</li>
+  <li><strong>Additions only:</strong> select everything, copy, and paste it into the badge's schematic. Use Paste Special and keep the annotations if you want the part numbers as drawn; they start after the badge's own. Then make the one change the notes on the sheet describe: on the chip build, delete the wire from each coil to its 100 Ω resistor and put the two labels on the ends. The power symbols are the badge's own <code>+VDC</code>, <code>-VDC</code> and <code>GND</code>, so they join by name.</li>
+  <li><strong>With the badge:</strong> the sheet is a complete schematic, the badge redrawn with its own part names and footprints and the chopper beside it. Use it to try a layout from scratch, or to read the whole circuit in one place.</li>
+  <li>Update the board from the schematic. Each part arrives with its footprint, and each footprint brings its 3D model, except the pot: KiCad ships no model for either pot footprint.</li>
+</ol>
+
+<h2>What the options mean</h2>
+<p><strong>Switch chip</strong> is the recommended build from <a href="./#osc">the main page</a>: one 74HC4053 and one 74HC14. KiCad has no 74HC4053 symbol, so the sheet uses its CD4053B symbol, which has the same pins, with the value changed.</p>
+<p><strong>Transistors</strong> is the cheapest version that works in simulation: a two-transistor oscillator and one FET per coil. It is about 25 dB hissier while tuning and covers about 50 to 300 kHz. It is here so its board area can be compared. The FET is a BSS138 in a surface-mount SOT-23, because <a href="./">the through-hole 2N7000 fades as the cells sag</a>.</p>
+<p><strong>True bypass</strong> swaps the one-pole mode switch for a two-pole one that takes each coil straight to its resistor. In NORMAL the badge's signal path is then the stock one, without the chip's resistance, which otherwise costs about 2.5 dB below 300 Hz on fresh cells and more on tired ones. Two things to know. The oscillator keeps running in NORMAL, because both poles are used by the coils; with the coils disconnected from the chip, all that can reach the amplifier is charge fed through the chip's open switch, which is not simulated. Expect ultrasonic ripple at the output, as in tuned mode, and nothing you can hear. A three-pole switch would stop the oscillator too, but KiCad's library has no footprint for one.</p>
+<p><strong>Comb mode</strong> adds a 330 pF capacitor, a 6.8 kΩ resistor and a second small switch for TUNED or COMB. <a href="./#comb">The main page</a> draws a single three-position switch. The sheet uses two two-position switches instead: the only three-position slide footprint in KiCad's library has no 3D model, its pin order could not be confirmed against the symbol, and a search did not find the part at LCSC.</p>
+<p><strong>The knob</strong> is a 100 kΩ linear pot either way, wired so that clockwise raises the frequency if pin 3 is the clockwise end. Swap pins 1 and 3 to reverse it. Other pots, and what they cost, are on <a href="pots.html">the pots page</a>.</p>
+<p>The tone filters and the reversing chopper from the main page are not in the generator.</p>
+
+<h2 id="checked">What was checked</h2>
+<p><strong>Connections.</strong> The options make twenty different files: five circuits, two knobs, with and without the badge. Each one was exported as a netlist by KiCad 9.0.9 and compared, net for net, with a netlist written out by hand from the circuit description. All twenty match.</p>
+<p><strong>Electrical rules.</strong> With the badge on the sheet, KiCad's rule check reports no errors. It leaves two kinds of warning. One is that the switch chip's grounded pins are tied to a power rail, which is what an analog switch wired this way looks like. The other is that three of the badge's own footprints are not in KiCad's standard library: <code>DPDT slide switch</code>, <code>CP_Radial_D4.0mm_P2.54mm</code>, <code>Inductor_D5.0mm_Horizontal_O3.81mm_Z9.0mm</code>. They are in the badge project. An additions-only sheet reports its power rails as undriven and its coil labels as unconnected, until it is pasted into the badge schematic.</p>
+<p><strong>Footprints.</strong> Each footprint was looked up in KiCad 9.0.9's library. Its pad numbers were compared with the symbol's pin numbers, and its 3D model file was looked for in KiCad's model package.</p>
+<div class="tw"><table class="wide">
+  <thead><tr><th>Part</th><th>Footprint</th><th>In KiCad's library</th><th>Pads match pins</th><th>3D model</th></tr></thead>
+  <tbody>
+<tr><th scope="row">74HC4053 switch chip</th><td><code>Package_DIP:DIP-16_W7.62mm</code></td><td><span class="v yes">yes</span></td><td><span class="v yes">yes</span></td><td><span class="v yes">yes</span></td></tr><tr><th scope="row">74HC14 inverters</th><td><code>Package_DIP:DIP-14_W7.62mm</code></td><td><span class="v yes">yes</span></td><td><span class="v yes">yes</span></td><td><span class="v yes">yes</span></td></tr><tr><th scope="row">Resistors</th><td><code>Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal</code></td><td><span class="v yes">yes</span></td><td><span class="v yes">yes</span></td><td><span class="v yes">yes</span></td></tr><tr><th scope="row">Capacitors, 2.5 mm pitch (330 pF, 100 pF)</th><td><code>Capacitor_THT:C_Disc_D3.4mm_W2.1mm_P2.50mm</code></td><td><span class="v yes">yes</span></td><td><span class="v yes">yes</span></td><td><span class="v yes">yes</span></td></tr><tr><th scope="row">Capacitors, 5 mm pitch (100 nF, 1 µF)</th><td><code>Capacitor_THT:C_Disc_D4.3mm_W1.9mm_P5.00mm</code></td><td><span class="v yes">yes</span></td><td><span class="v yes">yes</span></td><td><span class="v yes">yes</span></td></tr><tr><th scope="row">Pot, 9 mm shaft (Bourns PTV09A)</th><td><code>Potentiometer_THT:Potentiometer_Bourns_PTV09A-1_Single_Vertical</code></td><td><span class="v yes">yes</span></td><td><span class="v yes">yes</span></td><td><span class="v no">none in KiCad</span></td></tr><tr><th scope="row">Pot, square trimmer (3386P)</th><td><code>Potentiometer_THT:Potentiometer_Bourns_3386P_Vertical</code></td><td><span class="v yes">yes</span></td><td><span class="v yes">yes</span></td><td><span class="v no">none in KiCad</span></td></tr><tr><th scope="row">Mode switch, one pole (C&amp;K OS102011MS2QN1)</th><td><code>Button_Switch_THT:SW_Slide_SPDT_Straight_CK_OS102011MS2Q</code></td><td><span class="v yes">yes</span></td><td><span class="v yes">yes</span></td><td><span class="v yes">yes</span></td></tr><tr><th scope="row">Bypass switch, two poles (C&amp;K JS202011CQN)</th><td><code>Button_Switch_THT:SW_CK_JS202011CQN_DPDT_Straight</code></td><td><span class="v yes">yes</span></td><td><span class="v yes">yes</span></td><td><span class="v yes">yes</span></td></tr><tr><th scope="row">2N3904</th><td><code>Package_TO_SOT_THT:TO-92_Inline</code></td><td><span class="v yes">yes</span></td><td><span class="v yes">yes</span></td><td><span class="v yes">yes</span></td></tr><tr><th scope="row">BSS138</th><td><code>Package_TO_SOT_SMD:SOT-23</code></td><td><span class="v yes">yes</span></td><td><span class="v yes">yes</span></td><td><span class="v yes">yes</span></td></tr>
+  </tbody>
+</table></div>
+<p><strong>Pin order on the parts that can catch you out.</strong></p>
+<ul>
+  <li><strong>One-pole switch.</strong> The middle pad is the pole. C&amp;K's datasheet lists the connections as 1-2 and 2-3.</li>
+  <li><strong>Two-pole switch.</strong> The poles are pads 2 and 5. The footprint numbers its pads around the part like a chip, so the slider joins 2-1 with 5-6, or 2-3 with 5-4. The sheet is wired that way. That pairing is read from where the pads sit, not from a drawing of the part's insides, so check it with a meter before ordering boards.</li>
+  <li><strong>Pot.</strong> KiCad's footprint is named for the Bourns PTV09A-1. The part at LCSC is a PTV09A-4, the same rear-mount body without the bushing. Bourns' datasheet gives one board pattern for its rear-mount styles, as far as its text shows; compare the drawing before ordering. Pin 2 is the wiper. Which end is clockwise is not stated in the text, so check the direction on the bench.</li>
+  <li><strong>Transistors.</strong> 2N3904 in TO-92: emitter, base, collector on pads 1, 2, 3. BSS138 in SOT-23: gate, source, drain.</li>
+</ul>
+<p><strong>Not checked.</strong> Nothing has been built or laid out. The resistor LCSC numbers were read from LCSC's listing titles, not from the product pages. Stock and prices for the switches were not read. KiCad's footprints for the two switches are drawn for the exact C&amp;K parts named; a cheaper switch will need its own footprint.</p>
+
+<h2 id="addon">Or as an add-on board</h2>
+<p>An idea from planning this: leave the badge's layout alone, and make the chopper a small board that plugs into the holes of the two 100 Ω resistors.</p>
+<p>It fits better than it has any right to. Each of those resistors sits between a coil and an amplifier input, so its two holes are exactly the two points the chopper has to come between. Four holes give both coils and both inputs. The resistors move onto the add-on, and the badge's own board does not change.</p>
+<figure class="lab">
+  <div class="lab-title"><b>The proposal</b><span>A 3D rendering, not a photograph</span></div>
+  <div class="shots">
+    <img src="addon-3d.jpg" width="1200" height="982" alt="The back of the badge with a small purple board standing on pins between the two battery holders, carrying two chips, a pot and a slide switch. Its lower edges run parallel to the badge's angled bottom edges, just above the two coils." loading="lazy">
+    <img src="addon-back.jpg" width="1000" height="1020" alt="The same, seen straight on from the back of the badge." loading="lazy">
+  </div>
+  <figcaption>The add-on is purple. It stands on four pins in the holes that R1 and R2 leave free, in the channel between the battery holders, and its lower edges follow the badge's angled outline, stopping just above the coils. The badge is rendered from its own board file with R1 and R2 removed; its coils show as the LED-shaped stand-ins that file uses. The add-on's pot is a plain block, because KiCad has no model for it. Badge board and artwork: EMF Explorer Badge V2.1, CC BY-NC-SA 4.0.</figcaption>
+</figure>
+<p>The measurements come from the badge's published board file.</p>
+<ul>
+  <li>The two resistors are 26.7 mm apart, each with its holes 10.2 mm apart, in a channel about 30 mm wide between the battery holders.</li>
+  <li>The add-on drawn here is 29.8 mm wide and 37 mm tall. Its lower edges are parallel to the badge's bottom edges and sit about 4.5 mm inside them, which leaves the coil pads and legs clear.</li>
+  <li>It stands 5 mm off the badge, which clears the resistors beside it. The battery holders and the LED are taller, so it stays between them.</li>
+  <li>It carries the base build: both chips, the pot, one mode switch, the 2.2 kΩ resistor, three capacitors, and the two 100 Ω resistors standing on end.</li>
+</ul>
+<p>Three things it does not solve yet. It needs power, which the resistor holes do not carry: the picture shows a three-pin header for +, 0 V and −, and the nearest place to pick those up is the op-amp, on pins 8, 4, and 3 or 5. It is a tight fit: the board's edges come within a fraction of a millimetre of the battery holders, and that has not been checked against real parts. And only the parts are placed. Nothing is routed, and with two DIP chips on a board this size the routing may want two layers of care.</p>
+<p>The board in the picture is a real KiCad file, with the outline and the four leg positions taken from the badge: <a href="addon-concept.kicad_pcb" download>addon-concept.kicad_pcb</a>. It is drawn as seen from the back of the badge, so its left is the badge's right.</p>
+
+<h2>Sources</h2>
+<div class="sources"><ul>
+  <li><a href="https://github.com/drc3p0/emf-explorer-badge">EMF Explorer Badge design files</a>, CC BY-NC-SA 4.0, for the schematic, the board outline, and the positions of the resistors, coils and battery holders</li>
+  <li>KiCad 9.0.9 symbol, footprint and 3D model libraries, for the symbols, the pad numbers and positions, and the models</li>
+  <li><a href="https://www.bourns.com/data/global/pdfs/PTV09.pdf">Bourns PTV09 datasheet</a>, for the pot's ordering codes and board pattern</li>
+  <li><a href="https://www.lcsc.com/datasheet/C221829.pdf">C&amp;K OS series datasheet</a>, LCSC's copy, for the one-pole switch's connections</li>
+  <li>LCSC listings for the <a href="https://www.lcsc.com/product-detail/C221829.html">OS102011MS2QN1</a> and <a href="https://www.lcsc.com/product-detail/C221663.html">JS202011CQN</a> switches, the <a href="https://www.lcsc.com/product-detail/C507177.html">74HC4053</a>, the <a href="https://www.lcsc.com/product-detail/C507186.html">74HC14</a>, the <a href="https://www.lcsc.com/product-detail/C5341721.html">PTV09A pot</a>, the <a href="https://www.lcsc.com/product-detail/C48642122.html">3386P trimmer</a>, and the <a href="https://www.lcsc.com/product-detail/C58595.html">UNI-ROYAL MFR0W4F resistors</a></li>
+</ul></div>
+<footer>Simulated and machine-checked, not built. The circuit and its numbers are on <a href="./">the main page</a>.</footer>
+</main>
+
+<script type="application/json" id="lib">{"Analog_Switch:CD4053B":{"text":"(symbol \"Analog_Switch:CD4053B\" (exclude_from_sim no) (in_bom yes) (on_board yes) (property \"Reference\" \"U\" (at -10.16 16.51 0) (effects (font (size 1.27 1.27) ) (justify left) ) ) (property \"Value\" \"CD4053B\" (at 3.81 16.51 0) (effects (font (size 1.27 1.27) ) (justify left) ) ) (property \"Footprint\" \"\" (at 3.81 -19.05 0) (effects (font (size 1.27 1.27) ) (justify left) (hide yes) ) ) (property \"Datasheet\" \"http://www.ti.com/lit/ds/symlink/cd4052b.pdf\" (at -0.508 5.08 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"Description\" \"CMOS triple 2-channel analog multiplexer/demultiplexer, TSSOP-16/DIP-16/SOIC-16\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"ki_keywords\" \"analog switch selector multiplexer\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"ki_fp_filters\" \"TSSOP*4.4x5mm*P0.65mm* DIP*W7.62* SOIC*3.9x9.9mm*P1.27mm* SO*5.3x10.2mm*P1.27mm*\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (symbol \"CD4053B_0_1\" (rectangle (start -10.16 15.24) (end 10.16 -15.24) (stroke (width 0.254) (type default) ) (fill (type background) ) ) (rectangle (start -10.16 6.35) (end -5.08 13.97) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy -8.128 5.08) (xy -6.604 5.08) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy -8.128 -2.54) (xy -6.604 -2.54) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy -8.128 -10.16) (xy -6.604 -10.16) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (circle (center -6.096 5.08) (radius 0.508) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (circle (center -6.096 -2.54) (radius 0.508) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (circle (center -6.096 -10.16) (radius 0.508) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy -5.588 5.334) (xy -3.302 6.096) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy -5.588 -2.286) (xy -3.302 -1.524) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy -5.588 -9.906) (xy -3.302 -9.144) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy -4.572 11.43) (xy -5.08 11.43) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy -4.572 4.572) (xy -4.572 5.207) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy -4.572 3.302) (xy -4.572 3.937) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy -4.572 2.032) (xy -4.572 2.667) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy -4.572 0.508) (xy -4.572 1.143) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy -4.572 -0.762) (xy -4.572 -0.127) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy -4.572 -3.302) (xy -4.572 -2.667) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy -4.572 -4.572) (xy -4.572 -3.937) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy -4.572 -5.842) (xy -4.572 -5.207) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy -4.572 -7.112) (xy -4.572 -6.477) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy -4.572 -8.382) (xy -4.572 -7.747) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy -4.572 -11.176) (xy -4.572 -10.541) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy -4.572 -12.446) (xy -4.572 -11.811) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy -4.572 -12.7) (xy -5.207 -12.7) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy -3.81 11.43) (xy -3.175 11.43) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (circle (center -2.286 5.08) (radius 0.508) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (circle (center -2.286 -2.54) (radius 0.508) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (circle (center -2.286 -10.16) (radius 0.508) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy -1.778 11.43) (xy -2.286 11.43) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy -1.778 5.334) (xy 2.286 7.62) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy -1.778 -2.286) (xy 2.286 0) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy -1.778 -9.906) (xy 2.286 -7.62) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy -0.508 11.43) (xy -1.016 11.43) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy -0.508 10.922) (xy -0.508 11.43) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy -0.508 9.906) (xy -0.508 10.414) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy -0.508 8.89) (xy -0.508 9.525) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy -0.508 8.89) (xy -0.508 9.398) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy -0.508 7.62) (xy -0.508 8.255) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy -0.508 6.35) (xy -0.508 6.985) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy -0.508 5.08) (xy -0.508 5.715) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy -0.508 3.81) (xy -0.508 4.445) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy -0.508 2.54) (xy -0.508 3.175) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy -0.508 1.27) (xy -0.508 1.905) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy -0.508 -0.254) (xy -0.508 0.381) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy -0.508 -2.794) (xy -0.508 -2.159) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy -0.508 -4.064) (xy -0.508 -3.429) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy -0.508 -5.334) (xy -0.508 -4.699) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy -0.508 -6.604) (xy -0.508 -5.969) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy -0.508 -7.874) (xy -0.508 -7.239) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (circle (center 3.556 5.08) (radius 0.508) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (circle (center 3.556 2.54) (radius 0.508) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (circle (center 3.556 -2.54) (radius 0.508) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (circle (center 3.556 -5.08) (radius 0.508) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (circle (center 3.556 -10.16) (radius 0.508) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (circle (center 3.556 -12.7) (radius 0.508) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy 4.064 5.08) (xy 5.842 5.08) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy 4.064 2.54) (xy 5.842 2.54) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy 4.064 -2.54) (xy 5.842 -2.54) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy 4.064 -5.08) (xy 5.842 -5.08) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy 4.064 -10.16) (xy 5.842 -10.16) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy 4.064 -12.7) (xy 5.842 -12.7) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) ) (symbol \"CD4053B_1_1\" (pin input line (at -12.7 12.7 0) (length 2.54) (name \"S1\" (effects (font (size 1.27 1.27) ) ) ) (number \"11\" (effects (font (size 1.27 1.27) ) ) ) ) (pin input line (at -12.7 10.16 0) (length 2.54) (name \"S2\" (effects (font (size 1.27 1.27) ) ) ) (number \"10\" (effects (font (size 1.27 1.27) ) ) ) ) (pin input line (at -12.7 7.62 0) (length 2.54) (name \"S3\" (effects (font (size 1.27 1.27) ) ) ) (number \"9\" (effects (font (size 1.27 1.27) ) ) ) ) (pin bidirectional line (at -12.7 5.08 0) (length 2.54) (name \"A\" (effects (font (size 1.27 1.27) ) ) ) (number \"14\" (effects (font (size 1.27 1.27) ) ) ) ) (pin bidirectional line (at -12.7 -2.54 0) (length 2.54) (name \"B\" (effects (font (size 1.27 1.27) ) ) ) (number \"15\" (effects (font (size 1.27 1.27) ) ) ) ) (pin bidirectional line (at -12.7 -10.16 0) (length 2.54) (name \"C\" (effects (font (size 1.27 1.27) ) ) ) (number \"4\" (effects (font (size 1.27 1.27) ) ) ) ) (pin input line (at -12.7 -12.7 0) (length 2.54) (name \"INH\" (effects (font (size 1.27 1.27) ) ) ) (number \"6\" (effects (font (size 1.27 1.27) ) ) ) ) (pin power_in line (at -2.54 -17.78 90) (length 2.54) (name \"VEE\" (effects (font (size 1.27 1.27) ) ) ) (number \"7\" (effects (font (size 1.27 1.27) ) ) ) ) (pin power_in line (at 0 -17.78 90) (length 2.54) (name \"VSS\" (effects (font (size 1.27 1.27) ) ) ) (number \"8\" (effects (font (size 1.27 1.27) ) ) ) ) (pin power_in line (at 2.54 17.78 270) (length 2.54) (name \"VDD\" (effects (font (size 1.27 1.27) ) ) ) (number \"16\" (effects (font (size 1.27 1.27) ) ) ) ) (pin bidirectional line (at 12.7 5.08 180) (length 2.54) (name \"A0\" (effects (font (size 1.27 1.27) ) ) ) (number \"12\" (effects (font (size 1.27 1.27) ) ) ) ) (pin bidirectional line (at 12.7 2.54 180) (length 2.54) (name \"A1\" (effects (font (size 1.27 1.27) ) ) ) (number \"13\" (effects (font (size 1.27 1.27) ) ) ) ) (pin bidirectional line (at 12.7 -2.54 180) (length 2.54) (name \"B0\" (effects (font (size 1.27 1.27) ) ) ) (number \"2\" (effects (font (size 1.27 1.27) ) ) ) ) (pin bidirectional line (at 12.7 -5.08 180) (length 2.54) (name \"B1\" (effects (font (size 1.27 1.27) ) ) ) (number \"1\" (effects (font (size 1.27 1.27) ) ) ) ) (pin bidirectional line (at 12.7 -10.16 180) (length 2.54) (name \"C0\" (effects (font (size 1.27 1.27) ) ) ) (number \"5\" (effects (font (size 1.27 1.27) ) ) ) ) (pin bidirectional line (at 12.7 -12.7 180) (length 2.54) (name \"C1\" (effects (font (size 1.27 1.27) ) ) ) (number \"3\" (effects (font (size 1.27 1.27) ) ) ) ) ) (embedded_fonts no) )","desc":"CMOS triple 2-channel analog multiplexer/demultiplexer, TSSOP-16/DIP-16/SOIC-16","units":{"1":[{"num":"11","x":-12.7,"y":12.7},{"num":"10","x":-12.7,"y":10.16},{"num":"9","x":-12.7,"y":7.62},{"num":"14","x":-12.7,"y":5.08},{"num":"15","x":-12.7,"y":-2.54},{"num":"4","x":-12.7,"y":-10.16},{"num":"6","x":-12.7,"y":-12.7},{"num":"7","x":-2.54,"y":-17.78},{"num":"8","x":0.0,"y":-17.78},{"num":"16","x":2.54,"y":17.78},{"num":"12","x":12.7,"y":5.08},{"num":"13","x":12.7,"y":2.54},{"num":"2","x":12.7,"y":-2.54},{"num":"1","x":12.7,"y":-5.08},{"num":"5","x":12.7,"y":-10.16},{"num":"3","x":12.7,"y":-12.7}]}},"74xx:74HC14":{"text":"(symbol \"74xx:74HC14\" (pin_names (offset 1.016) ) (exclude_from_sim no) (in_bom yes) (on_board yes) (property \"Reference\" \"U\" (at 0 1.27 0) (effects (font (size 1.27 1.27) ) ) ) (property \"Value\" \"74HC14\" (at 0 -1.27 0) (effects (font (size 1.27 1.27) ) ) ) (property \"Footprint\" \"\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"Datasheet\" \"http://www.ti.com/lit/gpn/sn74HC14\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"Description\" \"Hex inverter schmitt trigger\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"ki_locked\" \"\" (at 0 0 0) (effects (font (size 1.27 1.27) ) ) ) (property \"ki_keywords\" \"HCMOS not inverter\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"ki_fp_filters\" \"DIP*W7.62mm*\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (symbol \"74HC14_1_0\" (polyline (pts (xy -3.81 3.81) (xy -3.81 -3.81) (xy 3.81 0) (xy -3.81 3.81) ) (stroke (width 0.254) (type default) ) (fill (type background) ) ) (pin input line (at -7.62 0 0) (length 3.81) (name \"~\" (effects (font (size 1.27 1.27) ) ) ) (number \"1\" (effects (font (size 1.27 1.27) ) ) ) ) (pin output inverted (at 7.62 0 180) (length 3.81) (name \"~\" (effects (font (size 1.27 1.27) ) ) ) (number \"2\" (effects (font (size 1.27 1.27) ) ) ) ) ) (symbol \"74HC14_1_1\" (polyline (pts (xy -2.54 -1.27) (xy -0.635 -1.27) (xy -0.635 1.27) (xy 0 1.27) ) (stroke (width 0) (type default) ) (fill (type none) ) ) (polyline (pts (xy -1.905 -1.27) (xy -1.905 1.27) (xy -0.635 1.27) ) (stroke (width 0) (type default) ) (fill (type none) ) ) ) (symbol \"74HC14_2_0\" (polyline (pts (xy -3.81 3.81) (xy -3.81 -3.81) (xy 3.81 0) (xy -3.81 3.81) ) (stroke (width 0.254) (type default) ) (fill (type background) ) ) (pin input line (at -7.62 0 0) (length 3.81) (name \"~\" (effects (font (size 1.27 1.27) ) ) ) (number \"3\" (effects (font (size 1.27 1.27) ) ) ) ) (pin output inverted (at 7.62 0 180) (length 3.81) (name \"~\" (effects (font (size 1.27 1.27) ) ) ) (number \"4\" (effects (font (size 1.27 1.27) ) ) ) ) ) (symbol \"74HC14_2_1\" (polyline (pts (xy -2.54 -1.27) (xy -0.635 -1.27) (xy -0.635 1.27) (xy 0 1.27) ) (stroke (width 0) (type default) ) (fill (type none) ) ) (polyline (pts (xy -1.905 -1.27) (xy -1.905 1.27) (xy -0.635 1.27) ) (stroke (width 0) (type default) ) (fill (type none) ) ) ) (symbol \"74HC14_3_0\" (polyline (pts (xy -3.81 3.81) (xy -3.81 -3.81) (xy 3.81 0) (xy -3.81 3.81) ) (stroke (width 0.254) (type default) ) (fill (type background) ) ) (pin input line (at -7.62 0 0) (length 3.81) (name \"~\" (effects (font (size 1.27 1.27) ) ) ) (number \"5\" (effects (font (size 1.27 1.27) ) ) ) ) (pin output inverted (at 7.62 0 180) (length 3.81) (name \"~\" (effects (font (size 1.27 1.27) ) ) ) (number \"6\" (effects (font (size 1.27 1.27) ) ) ) ) ) (symbol \"74HC14_3_1\" (polyline (pts (xy -2.54 -1.27) (xy -0.635 -1.27) (xy -0.635 1.27) (xy 0 1.27) ) (stroke (width 0) (type default) ) (fill (type none) ) ) (polyline (pts (xy -1.905 -1.27) (xy -1.905 1.27) (xy -0.635 1.27) ) (stroke (width 0) (type default) ) (fill (type none) ) ) ) (symbol \"74HC14_4_0\" (polyline (pts (xy -3.81 3.81) (xy -3.81 -3.81) (xy 3.81 0) (xy -3.81 3.81) ) (stroke (width 0.254) (type default) ) (fill (type background) ) ) (pin input line (at -7.62 0 0) (length 3.81) (name \"~\" (effects (font (size 1.27 1.27) ) ) ) (number \"9\" (effects (font (size 1.27 1.27) ) ) ) ) (pin output inverted (at 7.62 0 180) (length 3.81) (name \"~\" (effects (font (size 1.27 1.27) ) ) ) (number \"8\" (effects (font (size 1.27 1.27) ) ) ) ) ) (symbol \"74HC14_4_1\" (polyline (pts (xy -2.54 -1.27) (xy -0.635 -1.27) (xy -0.635 1.27) (xy 0 1.27) ) (stroke (width 0) (type default) ) (fill (type none) ) ) (polyline (pts (xy -1.905 -1.27) (xy -1.905 1.27) (xy -0.635 1.27) ) (stroke (width 0) (type default) ) (fill (type none) ) ) ) (symbol \"74HC14_5_0\" (polyline (pts (xy -3.81 3.81) (xy -3.81 -3.81) (xy 3.81 0) (xy -3.81 3.81) ) (stroke (width 0.254) (type default) ) (fill (type background) ) ) (pin input line (at -7.62 0 0) (length 3.81) (name \"~\" (effects (font (size 1.27 1.27) ) ) ) (number \"11\" (effects (font (size 1.27 1.27) ) ) ) ) (pin output inverted (at 7.62 0 180) (length 3.81) (name \"~\" (effects (font (size 1.27 1.27) ) ) ) (number \"10\" (effects (font (size 1.27 1.27) ) ) ) ) ) (symbol \"74HC14_5_1\" (polyline (pts (xy -2.54 -1.27) (xy -0.635 -1.27) (xy -0.635 1.27) (xy 0 1.27) ) (stroke (width 0) (type default) ) (fill (type none) ) ) (polyline (pts (xy -1.905 -1.27) (xy -1.905 1.27) (xy -0.635 1.27) ) (stroke (width 0) (type default) ) (fill (type none) ) ) ) (symbol \"74HC14_6_0\" (polyline (pts (xy -3.81 3.81) (xy -3.81 -3.81) (xy 3.81 0) (xy -3.81 3.81) ) (stroke (width 0.254) (type default) ) (fill (type background) ) ) (pin input line (at -7.62 0 0) (length 3.81) (name \"~\" (effects (font (size 1.27 1.27) ) ) ) (number \"13\" (effects (font (size 1.27 1.27) ) ) ) ) (pin output inverted (at 7.62 0 180) (length 3.81) (name \"~\" (effects (font (size 1.27 1.27) ) ) ) (number \"12\" (effects (font (size 1.27 1.27) ) ) ) ) ) (symbol \"74HC14_6_1\" (polyline (pts (xy -2.54 -1.27) (xy -0.635 -1.27) (xy -0.635 1.27) (xy 0 1.27) ) (stroke (width 0) (type default) ) (fill (type none) ) ) (polyline (pts (xy -1.905 -1.27) (xy -1.905 1.27) (xy -0.635 1.27) ) (stroke (width 0) (type default) ) (fill (type none) ) ) ) (symbol \"74HC14_7_0\" (pin power_in line (at 0 12.7 270) (length 5.08) (name \"VCC\" (effects (font (size 1.27 1.27) ) ) ) (number \"14\" (effects (font (size 1.27 1.27) ) ) ) ) (pin power_in line (at 0 -12.7 90) (length 5.08) (name \"GND\" (effects (font (size 1.27 1.27) ) ) ) (number \"7\" (effects (font (size 1.27 1.27) ) ) ) ) ) (symbol \"74HC14_7_1\" (rectangle (start -5.08 7.62) (end 5.08 -7.62) (stroke (width 0.254) (type default) ) (fill (type background) ) ) ) (embedded_fonts no) )","desc":"Hex inverter schmitt trigger","units":{"1":[{"num":"1","x":-7.62,"y":0.0},{"num":"2","x":7.62,"y":0.0}],"2":[{"num":"3","x":-7.62,"y":0.0},{"num":"4","x":7.62,"y":0.0}],"3":[{"num":"5","x":-7.62,"y":0.0},{"num":"6","x":7.62,"y":0.0}],"4":[{"num":"9","x":-7.62,"y":0.0},{"num":"8","x":7.62,"y":0.0}],"5":[{"num":"11","x":-7.62,"y":0.0},{"num":"10","x":7.62,"y":0.0}],"6":[{"num":"13","x":-7.62,"y":0.0},{"num":"12","x":7.62,"y":0.0}],"7":[{"num":"14","x":0.0,"y":12.7},{"num":"7","x":0.0,"y":-12.7}]}},"Device:R_Small_US":{"text":"(symbol \"Device:R_Small_US\" (pin_numbers (hide yes) ) (pin_names (offset 0.254) (hide yes) ) (exclude_from_sim no) (in_bom yes) (on_board yes) (property \"Reference\" \"R\" (at 0.762 0.508 0) (effects (font (size 1.27 1.27) ) (justify left) ) ) (property \"Value\" \"R_Small_US\" (at 0.762 -1.016 0) (effects (font (size 1.27 1.27) ) (justify left) ) ) (property \"Footprint\" \"\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"Datasheet\" \"~\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"Description\" \"Resistor, small US symbol\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"ki_keywords\" \"r resistor\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"ki_fp_filters\" \"R_*\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (symbol \"R_Small_US_1_1\" (polyline (pts (xy 0 1.524) (xy 1.016 1.143) (xy 0 0.762) (xy -1.016 0.381) (xy 0 0) ) (stroke (width 0) (type default) ) (fill (type none) ) ) (polyline (pts (xy 0 0) (xy 1.016 -0.381) (xy 0 -0.762) (xy -1.016 -1.143) (xy 0 -1.524) ) (stroke (width 0) (type default) ) (fill (type none) ) ) (pin passive line (at 0 2.54 270) (length 1.016) (name \"~\" (effects (font (size 1.27 1.27) ) ) ) (number \"1\" (effects (font (size 1.27 1.27) ) ) ) ) (pin passive line (at 0 -2.54 90) (length 1.016) (name \"~\" (effects (font (size 1.27 1.27) ) ) ) (number \"2\" (effects (font (size 1.27 1.27) ) ) ) ) ) (embedded_fonts no) )","desc":"Resistor, small US symbol","units":{"1":[{"num":"1","x":0.0,"y":2.54},{"num":"2","x":0.0,"y":-2.54}]}},"Device:C_Small":{"text":"(symbol \"Device:C_Small\" (pin_numbers (hide yes) ) (pin_names (offset 0.254) (hide yes) ) (exclude_from_sim no) (in_bom yes) (on_board yes) (property \"Reference\" \"C\" (at 0.254 1.778 0) (effects (font (size 1.27 1.27) ) (justify left) ) ) (property \"Value\" \"C_Small\" (at 0.254 -2.032 0) (effects (font (size 1.27 1.27) ) (justify left) ) ) (property \"Footprint\" \"\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"Datasheet\" \"~\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"Description\" \"Unpolarized capacitor, small symbol\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"ki_keywords\" \"capacitor cap\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"ki_fp_filters\" \"C_*\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (symbol \"C_Small_0_1\" (polyline (pts (xy -1.524 0.508) (xy 1.524 0.508) ) (stroke (width 0.3048) (type default) ) (fill (type none) ) ) (polyline (pts (xy -1.524 -0.508) (xy 1.524 -0.508) ) (stroke (width 0.3302) (type default) ) (fill (type none) ) ) ) (symbol \"C_Small_1_1\" (pin passive line (at 0 2.54 270) (length 2.032) (name \"~\" (effects (font (size 1.27 1.27) ) ) ) (number \"1\" (effects (font (size 1.27 1.27) ) ) ) ) (pin passive line (at 0 -2.54 90) (length 2.032) (name \"~\" (effects (font (size 1.27 1.27) ) ) ) (number \"2\" (effects (font (size 1.27 1.27) ) ) ) ) ) (embedded_fonts no) )","desc":"Unpolarized capacitor, small symbol","units":{"1":[{"num":"1","x":0.0,"y":2.54},{"num":"2","x":0.0,"y":-2.54}]}},"Device:R_Potentiometer_US":{"text":"(symbol \"Device:R_Potentiometer_US\" (pin_names (offset 1.016) (hide yes) ) (exclude_from_sim no) (in_bom yes) (on_board yes) (property \"Reference\" \"RV\" (at -4.445 0 90) (effects (font (size 1.27 1.27) ) ) ) (property \"Value\" \"R_Potentiometer_US\" (at -2.54 0 90) (effects (font (size 1.27 1.27) ) ) ) (property \"Footprint\" \"\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"Datasheet\" \"~\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"Description\" \"Potentiometer, US symbol\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"ki_keywords\" \"resistor variable\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"ki_fp_filters\" \"Potentiometer*\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (symbol \"R_Potentiometer_US_0_1\" (polyline (pts (xy 0 2.54) (xy 0 2.286) ) (stroke (width 0) (type default) ) (fill (type none) ) ) (polyline (pts (xy 0 2.286) (xy 1.016 1.905) (xy 0 1.524) (xy -1.016 1.143) (xy 0 0.762) ) (stroke (width 0) (type default) ) (fill (type none) ) ) (polyline (pts (xy 0 0.762) (xy 1.016 0.381) (xy 0 0) (xy -1.016 -0.381) (xy 0 -0.762) ) (stroke (width 0) (type default) ) (fill (type none) ) ) (polyline (pts (xy 0 -0.762) (xy 1.016 -1.143) (xy 0 -1.524) (xy -1.016 -1.905) (xy 0 -2.286) ) (stroke (width 0) (type default) ) (fill (type none) ) ) (polyline (pts (xy 0 -2.286) (xy 0 -2.54) ) (stroke (width 0) (type default) ) (fill (type none) ) ) (polyline (pts (xy 1.143 0) (xy 2.286 0.508) (xy 2.286 -0.508) (xy 1.143 0) ) (stroke (width 0) (type default) ) (fill (type outline) ) ) (polyline (pts (xy 2.54 0) (xy 1.524 0) ) (stroke (width 0) (type default) ) (fill (type none) ) ) ) (symbol \"R_Potentiometer_US_1_1\" (pin passive line (at 0 3.81 270) (length 1.27) (name \"1\" (effects (font (size 1.27 1.27) ) ) ) (number \"1\" (effects (font (size 1.27 1.27) ) ) ) ) (pin passive line (at 0 -3.81 90) (length 1.27) (name \"3\" (effects (font (size 1.27 1.27) ) ) ) (number \"3\" (effects (font (size 1.27 1.27) ) ) ) ) (pin passive line (at 3.81 0 180) (length 1.27) (name \"2\" (effects (font (size 1.27 1.27) ) ) ) (number \"2\" (effects (font (size 1.27 1.27) ) ) ) ) ) (embedded_fonts no) )","desc":"Potentiometer, US symbol","units":{"1":[{"num":"1","x":0.0,"y":3.81},{"num":"3","x":0.0,"y":-3.81},{"num":"2","x":3.81,"y":0.0}]}},"Switch:SW_SPDT":{"text":"(symbol \"Switch:SW_SPDT\" (pin_names (offset 0) (hide yes) ) (exclude_from_sim no) (in_bom yes) (on_board yes) (property \"Reference\" \"SW\" (at 0 5.08 0) (effects (font (size 1.27 1.27) ) ) ) (property \"Value\" \"SW_SPDT\" (at 0 -5.08 0) (effects (font (size 1.27 1.27) ) ) ) (property \"Footprint\" \"\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"Datasheet\" \"~\" (at 0 -7.62 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"Description\" \"Switch, single pole double throw\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"ki_keywords\" \"switch single-pole double-throw spdt ON-ON\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (symbol \"SW_SPDT_0_1\" (circle (center -2.032 0) (radius 0.4572) (stroke (width 0) (type default) ) (fill (type none) ) ) (polyline (pts (xy -1.651 0.254) (xy 1.651 2.286) ) (stroke (width 0) (type default) ) (fill (type none) ) ) (circle (center 2.032 2.54) (radius 0.4572) (stroke (width 0) (type default) ) (fill (type none) ) ) (circle (center 2.032 -2.54) (radius 0.4572) (stroke (width 0) (type default) ) (fill (type none) ) ) ) (symbol \"SW_SPDT_1_1\" (rectangle (start -3.175 3.81) (end 3.175 -3.81) (stroke (width 0) (type default) ) (fill (type background) ) ) (pin passive line (at -5.08 0 0) (length 2.54) (name \"B\" (effects (font (size 1.27 1.27) ) ) ) (number \"2\" (effects (font (size 1.27 1.27) ) ) ) ) (pin passive line (at 5.08 2.54 180) (length 2.54) (name \"A\" (effects (font (size 1.27 1.27) ) ) ) (number \"1\" (effects (font (size 1.27 1.27) ) ) ) ) (pin passive line (at 5.08 -2.54 180) (length 2.54) (name \"C\" (effects (font (size 1.27 1.27) ) ) ) (number \"3\" (effects (font (size 1.27 1.27) ) ) ) ) ) (embedded_fonts no) )","desc":"Switch, single pole double throw","units":{"1":[{"num":"2","x":-5.08,"y":0.0},{"num":"1","x":5.08,"y":2.54},{"num":"3","x":5.08,"y":-2.54}]}},"Switch:SW_DPDT_x2":{"text":"(symbol \"Switch:SW_DPDT_x2\" (pin_names (offset 0) (hide yes) ) (exclude_from_sim no) (in_bom yes) (on_board yes) (property \"Reference\" \"SW\" (at 0 5.08 0) (effects (font (size 1.27 1.27) ) ) ) (property \"Value\" \"SW_DPDT_x2\" (at 0 -5.08 0) (effects (font (size 1.27 1.27) ) ) ) (property \"Footprint\" \"\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"Datasheet\" \"~\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"Description\" \"Switch, dual pole double throw, separate symbols\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"ki_keywords\" \"switch dual-pole double-throw DPDT spdt ON-ON\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"ki_fp_filters\" \"SW*DPDT*\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (symbol \"SW_DPDT_x2_0_0\" (circle (center -2.032 0) (radius 0.508) (stroke (width 0) (type default) ) (fill (type none) ) ) (circle (center 2.032 -2.54) (radius 0.508) (stroke (width 0) (type default) ) (fill (type none) ) ) ) (symbol \"SW_DPDT_x2_0_1\" (rectangle (start -3.175 3.81) (end 3.175 -3.81) (stroke (width 0.254) (type default) ) (fill (type background) ) ) (polyline (pts (xy -1.524 0.254) (xy 1.5748 2.286) ) (stroke (width 0) (type default) ) (fill (type none) ) ) (circle (center 2.032 2.54) (radius 0.508) (stroke (width 0) (type default) ) (fill (type none) ) ) ) (symbol \"SW_DPDT_x2_1_1\" (pin passive line (at -5.08 0 0) (length 2.54) (name \"B\" (effects (font (size 1.27 1.27) ) ) ) (number \"2\" (effects (font (size 1.27 1.27) ) ) ) ) (pin passive line (at 5.08 2.54 180) (length 2.54) (name \"A\" (effects (font (size 1.27 1.27) ) ) ) (number \"1\" (effects (font (size 1.27 1.27) ) ) ) ) (pin passive line (at 5.08 -2.54 180) (length 2.54) (name \"C\" (effects (font (size 1.27 1.27) ) ) ) (number \"3\" (effects (font (size 1.27 1.27) ) ) ) ) ) (symbol \"SW_DPDT_x2_2_1\" (pin passive line (at -5.08 0 0) (length 2.54) (name \"B\" (effects (font (size 1.27 1.27) ) ) ) (number \"5\" (effects (font (size 1.27 1.27) ) ) ) ) (pin passive line (at 5.08 2.54 180) (length 2.54) (name \"A\" (effects (font (size 1.27 1.27) ) ) ) (number \"4\" (effects (font (size 1.27 1.27) ) ) ) ) (pin passive line (at 5.08 -2.54 180) (length 2.54) (name \"C\" (effects (font (size 1.27 1.27) ) ) ) (number \"6\" (effects (font (size 1.27 1.27) ) ) ) ) ) (embedded_fonts no) )","desc":"Switch, dual pole double throw, separate symbols","units":{"1":[{"num":"2","x":-5.08,"y":0.0},{"num":"1","x":5.08,"y":2.54},{"num":"3","x":5.08,"y":-2.54}],"2":[{"num":"5","x":-5.08,"y":0.0},{"num":"4","x":5.08,"y":2.54},{"num":"6","x":5.08,"y":-2.54}]}},"Transistor_BJT:2N3904":{"text":"(symbol \"Transistor_BJT:2N3904\" (pin_names (offset 0) (hide yes) ) (exclude_from_sim no) (in_bom yes) (on_board yes) (property \"Reference\" \"Q\" (at 5.08 1.905 0) (effects (font (size 1.27 1.27) ) (justify left) ) ) (property \"Value\" \"2N3904\" (at 5.08 0 0) (effects (font (size 1.27 1.27) ) (justify left) ) ) (property \"Footprint\" \"Package_TO_SOT_THT:TO-92_Inline\" (at 5.08 -1.905 0) (effects (font (size 1.27 1.27) (italic yes) ) (justify left) (hide yes) ) ) (property \"Datasheet\" \"https://www.onsemi.com/pub/Collateral/2N3903-D.PDF\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (justify left) (hide yes) ) ) (property \"Description\" \"0.2A Ic, 40V Vce, Small Signal NPN Transistor, TO-92\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"Sim.Device\" \"NPN\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"Sim.Pins\" \"1=E 2=B 3=C\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"ki_keywords\" \"NPN Transistor\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"ki_fp_filters\" \"TO?92*\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (symbol \"2N3904_0_1\" (polyline (pts (xy -2.54 0) (xy 0.635 0) ) (stroke (width 0) (type default) ) (fill (type none) ) ) (polyline (pts (xy 0.635 1.905) (xy 0.635 -1.905) ) (stroke (width 0.508) (type default) ) (fill (type none) ) ) (circle (center 1.27 0) (radius 2.8194) (stroke (width 0.254) (type default) ) (fill (type none) ) ) ) (symbol \"2N3904_1_1\" (polyline (pts (xy 0.635 0.635) (xy 2.54 2.54) ) (stroke (width 0) (type default) ) (fill (type none) ) ) (polyline (pts (xy 0.635 -0.635) (xy 2.54 -2.54) ) (stroke (width 0) (type default) ) (fill (type none) ) ) (polyline (pts (xy 1.27 -1.778) (xy 1.778 -1.27) (xy 2.286 -2.286) (xy 1.27 -1.778) ) (stroke (width 0) (type default) ) (fill (type outline) ) ) (pin input line (at -5.08 0 0) (length 2.54) (name \"B\" (effects (font (size 1.27 1.27) ) ) ) (number \"2\" (effects (font (size 1.27 1.27) ) ) ) ) (pin passive line (at 2.54 5.08 270) (length 2.54) (name \"C\" (effects (font (size 1.27 1.27) ) ) ) (number \"3\" (effects (font (size 1.27 1.27) ) ) ) ) (pin passive line (at 2.54 -5.08 90) (length 2.54) (name \"E\" (effects (font (size 1.27 1.27) ) ) ) (number \"1\" (effects (font (size 1.27 1.27) ) ) ) ) ) (embedded_fonts no) )","desc":"0.2A Ic, 40V Vce, Small Signal NPN Transistor, TO-92","units":{"1":[{"num":"2","x":-5.08,"y":0.0},{"num":"3","x":2.54,"y":5.08},{"num":"1","x":2.54,"y":-5.08}]}},"Transistor_FET:BSS138":{"text":"(symbol \"Transistor_FET:BSS138\" (pin_names (offset 0) (hide yes) ) (exclude_from_sim no) (in_bom yes) (on_board yes) (property \"Reference\" \"Q\" (at 5.08 1.905 0) (effects (font (size 1.27 1.27) ) (justify left) ) ) (property \"Value\" \"BSS138\" (at 5.08 0 0) (effects (font (size 1.27 1.27) ) (justify left) ) ) (property \"Footprint\" \"Package_TO_SOT_SMD:SOT-23\" (at 5.08 -1.905 0) (effects (font (size 1.27 1.27) (italic yes) ) (justify left) (hide yes) ) ) (property \"Datasheet\" \"https://www.onsemi.com/pub/Collateral/BSS138-D.PDF\" (at 5.08 -3.81 0) (effects (font (size 1.27 1.27) ) (justify left) (hide yes) ) ) (property \"Description\" \"50V Vds, 0.22A Id, N-Channel MOSFET, SOT-23\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"ki_keywords\" \"N-Channel MOSFET\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"ki_fp_filters\" \"SOT?23*\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (symbol \"BSS138_0_1\" (polyline (pts (xy 0.254 1.905) (xy 0.254 -1.905) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy 0.254 0) (xy -2.54 0) ) (stroke (width 0) (type default) ) (fill (type none) ) ) (polyline (pts (xy 0.762 2.286) (xy 0.762 1.27) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy 0.762 0.508) (xy 0.762 -0.508) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy 0.762 -1.27) (xy 0.762 -2.286) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy 0.762 -1.778) (xy 3.302 -1.778) (xy 3.302 1.778) (xy 0.762 1.778) ) (stroke (width 0) (type default) ) (fill (type none) ) ) (polyline (pts (xy 1.016 0) (xy 2.032 0.381) (xy 2.032 -0.381) (xy 1.016 0) ) (stroke (width 0) (type default) ) (fill (type outline) ) ) (circle (center 1.651 0) (radius 2.794) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy 2.54 2.54) (xy 2.54 1.778) ) (stroke (width 0) (type default) ) (fill (type none) ) ) (circle (center 2.54 1.778) (radius 0.254) (stroke (width 0) (type default) ) (fill (type outline) ) ) (circle (center 2.54 -1.778) (radius 0.254) (stroke (width 0) (type default) ) (fill (type outline) ) ) (polyline (pts (xy 2.54 -2.54) (xy 2.54 0) (xy 0.762 0) ) (stroke (width 0) (type default) ) (fill (type none) ) ) (polyline (pts (xy 2.921 0.381) (xy 3.683 0.381) ) (stroke (width 0) (type default) ) (fill (type none) ) ) (polyline (pts (xy 3.302 0.381) (xy 2.921 -0.254) (xy 3.683 -0.254) (xy 3.302 0.381) ) (stroke (width 0) (type default) ) (fill (type none) ) ) ) (symbol \"BSS138_1_1\" (pin input line (at -5.08 0 0) (length 2.54) (name \"G\" (effects (font (size 1.27 1.27) ) ) ) (number \"1\" (effects (font (size 1.27 1.27) ) ) ) ) (pin passive line (at 2.54 5.08 270) (length 2.54) (name \"D\" (effects (font (size 1.27 1.27) ) ) ) (number \"3\" (effects (font (size 1.27 1.27) ) ) ) ) (pin passive line (at 2.54 -5.08 90) (length 2.54) (name \"S\" (effects (font (size 1.27 1.27) ) ) ) (number \"2\" (effects (font (size 1.27 1.27) ) ) ) ) ) (embedded_fonts no) )","desc":"50V Vds, 0.22A Id, N-Channel MOSFET, SOT-23","units":{"1":[{"num":"1","x":-5.08,"y":0.0},{"num":"3","x":2.54,"y":5.08},{"num":"2","x":2.54,"y":-5.08}]}},"power:+VDC":{"text":"(symbol \"power:+VDC\" (power) (pin_numbers (hide yes) ) (pin_names (offset 0) (hide yes) ) (exclude_from_sim no) (in_bom yes) (on_board yes) (property \"Reference\" \"#PWR\" (at 0 -2.54 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"Value\" \"+VDC\" (at 0 6.35 0) (effects (font (size 1.27 1.27) ) ) ) (property \"Footprint\" \"\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"Datasheet\" \"\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"Description\" \"Power symbol creates a global label with name \\\"+VDC\\\"\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"ki_keywords\" \"global power\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (symbol \"+VDC_0_1\" (polyline (pts (xy -1.143 3.175) (xy 1.143 3.175) ) (stroke (width 0.508) (type default) ) (fill (type none) ) ) (circle (center 0 3.175) (radius 1.905) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy 0 2.032) (xy 0 4.318) ) (stroke (width 0.508) (type default) ) (fill (type none) ) ) (polyline (pts (xy 0 0) (xy 0 1.27) ) (stroke (width 0) (type default) ) (fill (type none) ) ) ) (symbol \"+VDC_1_1\" (pin power_in line (at 0 0 90) (length 0) (name \"~\" (effects (font (size 1.27 1.27) ) ) ) (number \"1\" (effects (font (size 1.27 1.27) ) ) ) ) ) (embedded_fonts no) )","desc":"Power symbol creates a global label with name \\\"+VDC\\\"","units":{"1":[{"num":"1","x":0.0,"y":0.0}]}},"power:-VDC":{"text":"(symbol \"power:-VDC\" (power) (pin_numbers (hide yes) ) (pin_names (offset 0) (hide yes) ) (exclude_from_sim no) (in_bom yes) (on_board yes) (property \"Reference\" \"#PWR\" (at 0 -2.54 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"Value\" \"-VDC\" (at 0 6.35 0) (effects (font (size 1.27 1.27) ) ) ) (property \"Footprint\" \"\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"Datasheet\" \"\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"Description\" \"Power symbol creates a global label with name \\\"-VDC\\\"\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"ki_keywords\" \"global power\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (symbol \"-VDC_0_1\" (polyline (pts (xy -1.143 3.175) (xy 1.143 3.175) ) (stroke (width 0.508) (type default) ) (fill (type none) ) ) (circle (center 0 3.175) (radius 1.905) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy 0 0) (xy 0 1.27) ) (stroke (width 0) (type default) ) (fill (type none) ) ) ) (symbol \"-VDC_1_1\" (pin power_in line (at 0 0 90) (length 0) (name \"~\" (effects (font (size 1.27 1.27) ) ) ) (number \"1\" (effects (font (size 1.27 1.27) ) ) ) ) ) (embedded_fonts no) )","desc":"Power symbol creates a global label with name \\\"-VDC\\\"","units":{"1":[{"num":"1","x":0.0,"y":0.0}]}},"power:GND":{"text":"(symbol \"power:GND\" (power) (pin_numbers (hide yes) ) (pin_names (offset 0) (hide yes) ) (exclude_from_sim no) (in_bom yes) (on_board yes) (property \"Reference\" \"#PWR\" (at 0 -6.35 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"Value\" \"GND\" (at 0 -3.81 0) (effects (font (size 1.27 1.27) ) ) ) (property \"Footprint\" \"\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"Datasheet\" \"\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"Description\" \"Power symbol creates a global label with name \\\"GND\\\" , ground\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"ki_keywords\" \"global power\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (symbol \"GND_0_1\" (polyline (pts (xy 0 0) (xy 0 -1.27) (xy 1.27 -1.27) (xy 0 -2.54) (xy -1.27 -1.27) (xy 0 -1.27) ) (stroke (width 0) (type default) ) (fill (type none) ) ) ) (symbol \"GND_1_1\" (pin power_in line (at 0 0 270) (length 0) (name \"~\" (effects (font (size 1.27 1.27) ) ) ) (number \"1\" (effects (font (size 1.27 1.27) ) ) ) ) ) (embedded_fonts no) )","desc":"Power symbol creates a global label with name \\\"GND\\\" , ground","units":{"1":[{"num":"1","x":0.0,"y":0.0}]}},"power:PWR_FLAG":{"text":"(symbol \"power:PWR_FLAG\" (power) (pin_numbers (hide yes) ) (pin_names (offset 0) (hide yes) ) (exclude_from_sim no) (in_bom yes) (on_board yes) (property \"Reference\" \"#FLG\" (at 0 1.905 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"Value\" \"PWR_FLAG\" (at 0 3.81 0) (effects (font (size 1.27 1.27) ) ) ) (property \"Footprint\" \"\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"Datasheet\" \"~\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"Description\" \"Special symbol for telling ERC where power comes from\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"ki_keywords\" \"flag power\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (symbol \"PWR_FLAG_0_0\" (pin power_out line (at 0 0 90) (length 0) (name \"~\" (effects (font (size 1.27 1.27) ) ) ) (number \"1\" (effects (font (size 1.27 1.27) ) ) ) ) ) (symbol \"PWR_FLAG_0_1\" (polyline (pts (xy 0 0) (xy 0 1.27) (xy -1.016 1.905) (xy 0 2.54) (xy 1.016 1.905) (xy 0 1.27) ) (stroke (width 0) (type default) ) (fill (type none) ) ) ) (embedded_fonts no) )","desc":"Special symbol for telling ERC where power comes from","units":{"0":[{"num":"1","x":0.0,"y":0.0}]}},"Amplifier_Operational:LM358":{"text":"(symbol \"Amplifier_Operational:LM358\" (pin_names (offset 0.127) ) (exclude_from_sim no) (in_bom yes) (on_board yes) (property \"Reference\" \"U\" (at 0 5.08 0) (effects (font (size 1.27 1.27) ) (justify left) ) ) (property \"Value\" \"LM358\" (at 0 -5.08 0) (effects (font (size 1.27 1.27) ) (justify left) ) ) (property \"Footprint\" \"\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"Datasheet\" \"http://www.ti.com/lit/ds/symlink/lm2904-n.pdf\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"Description\" \"Low-Power, Dual Operational Amplifiers, DIP-8/SOIC-8/TO-99-8\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"ki_locked\" \"\" (at 0 0 0) (effects (font (size 1.27 1.27) ) ) ) (property \"ki_keywords\" \"dual opamp\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"ki_fp_filters\" \"SOIC*3.9x4.9mm*P1.27mm* DIP*W7.62mm* TO*99* OnSemi*Micro8* TSSOP*3x3mm*P0.65mm* TSSOP*4.4x3mm*P0.65mm* MSOP*3x3mm*P0.65mm* SSOP*3.9x4.9mm*P0.635mm* LFCSP*2x2mm*P0.5mm* *SIP* SOIC*5.3x6.2mm*P1.27mm*\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (symbol \"LM358_1_1\" (polyline (pts (xy -5.08 5.08) (xy 5.08 0) (xy -5.08 -5.08) (xy -5.08 5.08) ) (stroke (width 0.254) (type default) ) (fill (type background) ) ) (pin input line (at -7.62 2.54 0) (length 2.54) (name \"+\" (effects (font (size 1.27 1.27) ) ) ) (number \"3\" (effects (font (size 1.27 1.27) ) ) ) ) (pin input line (at -7.62 -2.54 0) (length 2.54) (name \"-\" (effects (font (size 1.27 1.27) ) ) ) (number \"2\" (effects (font (size 1.27 1.27) ) ) ) ) (pin output line (at 7.62 0 180) (length 2.54) (name \"~\" (effects (font (size 1.27 1.27) ) ) ) (number \"1\" (effects (font (size 1.27 1.27) ) ) ) ) ) (symbol \"LM358_2_1\" (polyline (pts (xy -5.08 5.08) (xy 5.08 0) (xy -5.08 -5.08) (xy -5.08 5.08) ) (stroke (width 0.254) (type default) ) (fill (type background) ) ) (pin input line (at -7.62 2.54 0) (length 2.54) (name \"+\" (effects (font (size 1.27 1.27) ) ) ) (number \"5\" (effects (font (size 1.27 1.27) ) ) ) ) (pin input line (at -7.62 -2.54 0) (length 2.54) (name \"-\" (effects (font (size 1.27 1.27) ) ) ) (number \"6\" (effects (font (size 1.27 1.27) ) ) ) ) (pin output line (at 7.62 0 180) (length 2.54) (name \"~\" (effects (font (size 1.27 1.27) ) ) ) (number \"7\" (effects (font (size 1.27 1.27) ) ) ) ) ) (symbol \"LM358_3_1\" (pin power_in line (at -2.54 7.62 270) (length 3.81) (name \"V+\" (effects (font (size 1.27 1.27) ) ) ) (number \"8\" (effects (font (size 1.27 1.27) ) ) ) ) (pin power_in line (at -2.54 -7.62 90) (length 3.81) (name \"V-\" (effects (font (size 1.27 1.27) ) ) ) (number \"4\" (effects (font (size 1.27 1.27) ) ) ) ) ) (embedded_fonts no) )","desc":"Low-Power, Dual Operational Amplifiers, DIP-8/SOIC-8/TO-99-8","units":{"1":[{"num":"3","x":-7.62,"y":2.54},{"num":"2","x":-7.62,"y":-2.54},{"num":"1","x":7.62,"y":0.0}],"2":[{"num":"5","x":-7.62,"y":2.54},{"num":"6","x":-7.62,"y":-2.54},{"num":"7","x":7.62,"y":0.0}],"3":[{"num":"8","x":-2.54,"y":7.62},{"num":"4","x":-2.54,"y":-7.62}]}},"Connector_Audio:AudioJack3_SwitchTR":{"text":"(symbol \"Connector_Audio:AudioJack3_SwitchTR\" (exclude_from_sim no) (in_bom yes) (on_board yes) (property \"Reference\" \"J\" (at 0 8.89 0) (effects (font (size 1.27 1.27) ) ) ) (property \"Value\" \"AudioJack3_SwitchTR\" (at 0 6.35 0) (effects (font (size 1.27 1.27) ) ) ) (property \"Footprint\" \"\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"Datasheet\" \"~\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"Description\" \"Audio Jack, 3 Poles (Stereo / TRS), Switched TR Poles (Normalling)\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"ki_keywords\" \"audio jack receptacle stereo headphones phones TRS connector\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"ki_fp_filters\" \"Jack*\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (symbol \"AudioJack3_SwitchTR_0_1\" (rectangle (start -5.08 -5.08) (end -6.35 -7.62) (stroke (width 0.254) (type default) ) (fill (type outline) ) ) (polyline (pts (xy -1.905 -5.08) (xy -1.27 -5.715) (xy -0.635 -5.08) (xy -0.635 0) (xy 2.54 0) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy 0 -5.08) (xy 0.635 -5.715) (xy 1.27 -5.08) (xy 2.54 -5.08) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy 0.508 -0.254) (xy 0.762 -0.762) ) (stroke (width 0) (type default) ) (fill (type none) ) ) (polyline (pts (xy 1.778 -5.334) (xy 2.032 -5.842) ) (stroke (width 0) (type default) ) (fill (type none) ) ) (rectangle (start 2.54 3.81) (end -5.08 -10.16) (stroke (width 0.254) (type default) ) (fill (type background) ) ) (polyline (pts (xy 2.54 2.54) (xy -2.54 2.54) (xy -2.54 -5.08) (xy -3.175 -5.715) (xy -3.81 -5.08) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy 2.54 -2.54) (xy 0.508 -2.54) (xy 0.508 -0.254) (xy 0.254 -0.762) ) (stroke (width 0) (type default) ) (fill (type none) ) ) (polyline (pts (xy 2.54 -7.62) (xy 1.778 -7.62) (xy 1.778 -5.334) (xy 1.524 -5.842) ) (stroke (width 0) (type default) ) (fill (type none) ) ) ) (symbol \"AudioJack3_SwitchTR_1_1\" (pin passive line (at 5.08 2.54 180) (length 2.54) (name \"~\" (effects (font (size 1.27 1.27) ) ) ) (number \"S\" (effects (font (size 1.27 1.27) ) ) ) ) (pin passive line (at 5.08 0 180) (length 2.54) (name \"~\" (effects (font (size 1.27 1.27) ) ) ) (number \"R\" (effects (font (size 1.27 1.27) ) ) ) ) (pin passive line (at 5.08 -2.54 180) (length 2.54) (name \"~\" (effects (font (size 1.27 1.27) ) ) ) (number \"RN\" (effects (font (size 1.27 1.27) ) ) ) ) (pin passive line (at 5.08 -5.08 180) (length 2.54) (name \"~\" (effects (font (size 1.27 1.27) ) ) ) (number \"T\" (effects (font (size 1.27 1.27) ) ) ) ) (pin passive line (at 5.08 -7.62 180) (length 2.54) (name \"~\" (effects (font (size 1.27 1.27) ) ) ) (number \"TN\" (effects (font (size 1.27 1.27) ) ) ) ) ) (embedded_fonts no) )","desc":"Audio Jack, 3 Poles (Stereo / TRS), Switched TR Poles (Normalling)","units":{"1":[{"num":"S","x":5.08,"y":2.54},{"num":"R","x":5.08,"y":0.0},{"num":"RN","x":5.08,"y":-2.54},{"num":"T","x":5.08,"y":-5.08},{"num":"TN","x":5.08,"y":-7.62}]}},"Device:Battery_Cell":{"text":"(symbol \"Device:Battery_Cell\" (pin_numbers (hide yes) ) (pin_names (offset 0) (hide yes) ) (exclude_from_sim no) (in_bom yes) (on_board yes) (property \"Reference\" \"BT\" (at 2.54 2.54 0) (effects (font (size 1.27 1.27) ) (justify left) ) ) (property \"Value\" \"Battery_Cell\" (at 2.54 0 0) (effects (font (size 1.27 1.27) ) (justify left) ) ) (property \"Footprint\" \"\" (at 0 1.524 90) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"Datasheet\" \"~\" (at 0 1.524 90) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"Description\" \"Single-cell battery\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"Sim.Device\" \"V\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"Sim.Type\" \"DC\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"Sim.Pins\" \"1=+ 2=-\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"ki_keywords\" \"battery cell\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (symbol \"Battery_Cell_0_1\" (rectangle (start -2.286 1.778) (end 2.286 1.524) (stroke (width 0) (type default) ) (fill (type outline) ) ) (rectangle (start -1.524 1.016) (end 1.524 0.508) (stroke (width 0) (type default) ) (fill (type outline) ) ) (polyline (pts (xy 0 1.778) (xy 0 2.54) ) (stroke (width 0) (type default) ) (fill (type none) ) ) (polyline (pts (xy 0 0.762) (xy 0 0) ) (stroke (width 0) (type default) ) (fill (type none) ) ) (polyline (pts (xy 0.762 3.048) (xy 1.778 3.048) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy 1.27 3.556) (xy 1.27 2.54) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) ) (symbol \"Battery_Cell_1_1\" (pin passive line (at 0 5.08 270) (length 2.54) (name \"+\" (effects (font (size 1.27 1.27) ) ) ) (number \"1\" (effects (font (size 1.27 1.27) ) ) ) ) (pin passive line (at 0 -2.54 90) (length 2.54) (name \"-\" (effects (font (size 1.27 1.27) ) ) ) (number \"2\" (effects (font (size 1.27 1.27) ) ) ) ) ) (embedded_fonts no) )","desc":"Single-cell battery","units":{"1":[{"num":"1","x":0.0,"y":5.08},{"num":"2","x":0.0,"y":-2.54}]}},"Device:C_Polarized_Small":{"text":"(symbol \"Device:C_Polarized_Small\" (pin_numbers (hide yes) ) (pin_names (offset 0.254) (hide yes) ) (exclude_from_sim no) (in_bom yes) (on_board yes) (property \"Reference\" \"C\" (at 0.254 1.778 0) (effects (font (size 1.27 1.27) ) (justify left) ) ) (property \"Value\" \"C_Polarized_Small\" (at 0.254 -2.032 0) (effects (font (size 1.27 1.27) ) (justify left) ) ) (property \"Footprint\" \"\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"Datasheet\" \"~\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"Description\" \"Polarized capacitor, small symbol\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"ki_keywords\" \"cap capacitor\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"ki_fp_filters\" \"CP_*\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (symbol \"C_Polarized_Small_0_1\" (rectangle (start -1.524 0.6858) (end 1.524 0.3048) (stroke (width 0) (type default) ) (fill (type none) ) ) (rectangle (start -1.524 -0.3048) (end 1.524 -0.6858) (stroke (width 0) (type default) ) (fill (type outline) ) ) (polyline (pts (xy -1.27 1.524) (xy -0.762 1.524) ) (stroke (width 0) (type default) ) (fill (type none) ) ) (polyline (pts (xy -1.016 1.27) (xy -1.016 1.778) ) (stroke (width 0) (type default) ) (fill (type none) ) ) ) (symbol \"C_Polarized_Small_1_1\" (pin passive line (at 0 2.54 270) (length 1.8542) (name \"~\" (effects (font (size 1.27 1.27) ) ) ) (number \"1\" (effects (font (size 1.27 1.27) ) ) ) ) (pin passive line (at 0 -2.54 90) (length 1.8542) (name \"~\" (effects (font (size 1.27 1.27) ) ) ) (number \"2\" (effects (font (size 1.27 1.27) ) ) ) ) ) (embedded_fonts no) )","desc":"Polarized capacitor, small symbol","units":{"1":[{"num":"1","x":0.0,"y":2.54},{"num":"2","x":0.0,"y":-2.54}]}},"Device:L":{"text":"(symbol \"Device:L\" (pin_numbers (hide yes) ) (pin_names (offset 1.016) (hide yes) ) (exclude_from_sim no) (in_bom yes) (on_board yes) (property \"Reference\" \"L\" (at -1.27 0 90) (effects (font (size 1.27 1.27) ) ) ) (property \"Value\" \"L\" (at 1.905 0 90) (effects (font (size 1.27 1.27) ) ) ) (property \"Footprint\" \"\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"Datasheet\" \"~\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"Description\" \"Inductor\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"ki_keywords\" \"inductor choke coil reactor magnetic\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"ki_fp_filters\" \"Choke_* *Coil* Inductor_* L_*\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (symbol \"L_0_1\" (arc (start 0 2.54) (mid 0.6323 1.905) (end 0 1.27) (stroke (width 0) (type default) ) (fill (type none) ) ) (arc (start 0 1.27) (mid 0.6323 0.635) (end 0 0) (stroke (width 0) (type default) ) (fill (type none) ) ) (arc (start 0 0) (mid 0.6323 -0.635) (end 0 -1.27) (stroke (width 0) (type default) ) (fill (type none) ) ) (arc (start 0 -1.27) (mid 0.6323 -1.905) (end 0 -2.54) (stroke (width 0) (type default) ) (fill (type none) ) ) ) (symbol \"L_1_1\" (pin passive line (at 0 3.81 270) (length 1.27) (name \"1\" (effects (font (size 1.27 1.27) ) ) ) (number \"1\" (effects (font (size 1.27 1.27) ) ) ) ) (pin passive line (at 0 -3.81 90) (length 1.27) (name \"2\" (effects (font (size 1.27 1.27) ) ) ) (number \"2\" (effects (font (size 1.27 1.27) ) ) ) ) ) (embedded_fonts no) )","desc":"Inductor","units":{"1":[{"num":"1","x":0.0,"y":3.81},{"num":"2","x":0.0,"y":-3.81}]}},"Device:LED":{"text":"(symbol \"Device:LED\" (pin_numbers (hide yes) ) (pin_names (offset 1.016) (hide yes) ) (exclude_from_sim no) (in_bom yes) (on_board yes) (property \"Reference\" \"D\" (at 0 2.54 0) (effects (font (size 1.27 1.27) ) ) ) (property \"Value\" \"LED\" (at 0 -2.54 0) (effects (font (size 1.27 1.27) ) ) ) (property \"Footprint\" \"\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"Datasheet\" \"~\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"Description\" \"Light emitting diode\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"Sim.Pins\" \"1=K 2=A\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"ki_keywords\" \"LED diode\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (property \"ki_fp_filters\" \"LED* LED_SMD:* LED_THT:*\" (at 0 0 0) (effects (font (size 1.27 1.27) ) (hide yes) ) ) (symbol \"LED_0_1\" (polyline (pts (xy -3.048 -0.762) (xy -4.572 -2.286) (xy -3.81 -2.286) (xy -4.572 -2.286) (xy -4.572 -1.524) ) (stroke (width 0) (type default) ) (fill (type none) ) ) (polyline (pts (xy -1.778 -0.762) (xy -3.302 -2.286) (xy -2.54 -2.286) (xy -3.302 -2.286) (xy -3.302 -1.524) ) (stroke (width 0) (type default) ) (fill (type none) ) ) (polyline (pts (xy -1.27 0) (xy 1.27 0) ) (stroke (width 0) (type default) ) (fill (type none) ) ) (polyline (pts (xy -1.27 -1.27) (xy -1.27 1.27) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) (polyline (pts (xy 1.27 -1.27) (xy 1.27 1.27) (xy -1.27 0) (xy 1.27 -1.27) ) (stroke (width 0.254) (type default) ) (fill (type none) ) ) ) (symbol \"LED_1_1\" (pin passive line (at -3.81 0 0) (length 2.54) (name \"K\" (effects (font (size 1.27 1.27) ) ) ) (number \"1\" (effects (font (size 1.27 1.27) ) ) ) ) (pin passive line (at 3.81 0 180) (length 2.54) (name \"A\" (effects (font (size 1.27 1.27) ) ) ) (number \"2\" (effects (font (size 1.27 1.27) ) ) ) ) ) (embedded_fonts no) )","desc":"Light emitting diode","units":{"1":[{"num":"1","x":-3.81,"y":0.0},{"num":"2","x":3.81,"y":0.0}]}}}</script>
+<script>
+/* EMF Explorer Badge tuning chopper: KiCad 9 schematic generator.
+   Runs in a browser (window.EMFGEN) and under Node (globalThis.EMFGEN). Needs the symbol table (LIB) built from KiCad's own libraries. */
+(function (root) {
+'use strict';
+var FP = {
+  R: 'Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal',
+  Cs: 'Capacitor_THT:C_Disc_D3.4mm_W2.1mm_P2.50mm',
+  Cb: 'Capacitor_THT:C_Disc_D4.3mm_W1.9mm_P5.00mm',
+  CP: 'Capacitor_THT:CP_Radial_D4.0mm_P2.54mm',
+  DIP8: 'Package_DIP:DIP-8_W7.62mm', DIP14: 'Package_DIP:DIP-14_W7.62mm', DIP16: 'Package_DIP:DIP-16_W7.62mm',
+  SPDT: 'Button_Switch_THT:SW_Slide_SPDT_Straight_CK_OS102011MS2Q',
+  DPDT: 'Button_Switch_THT:SW_CK_JS202011CQN_DPDT_Straight',
+  TO92: 'Package_TO_SOT_THT:TO-92_Inline', SOT23: 'Package_TO_SOT_SMD:SOT-23',
+  L: 'Inductor_THT:Inductor_D5.0mm_Horizontal_O3.81mm_Z9.0mm',
+  JACK: 'Connector_Audio:Jack_3.5mm_CUI_SJ1-3525N_Horizontal',
+  LED: 'LED_THT:LED_D5.0mm_Horizontal_O1.27mm_Z9.0mm',
+  BAT: 'Battery:BatteryHolder_Keystone_2466_1xAAA',
+  SW1: 'Button_Switch_THT:DPDT slide switch'
+};
+var POTS = {
+  ptv09: { fp: 'Potentiometer_THT:Potentiometer_Bourns_PTV09A-1_Single_Vertical', mpn: 'PTV09A-4020U-B104', lcsc: 'C5341721', desc: '9 mm shaft pot, 100 k linear' },
+  t3386: { fp: 'Potentiometer_THT:Potentiometer_Bourns_3386P_Vertical', mpn: '3386P-104', lcsc: 'C48642122', desc: 'Single-turn cermet trimmer, 100 k' }
+};
+var PART = {   // value-independent ordering data; lcsc filled in from PARTS below
+  U4053: { mpn: '74HC4053N', lcsc: 'C507177', ds: 'https://assets.nexperia.com/documents/data-sheet/74HC_HCT4053.pdf', desc: 'Triple two-way analog switch' },
+  U14: { mpn: '74HC14N', lcsc: 'C507186', ds: 'https://assets.nexperia.com/documents/data-sheet/74HC_HCT14.pdf', desc: 'Six Schmitt-trigger inverters' },
+  SPDT: { mpn: 'OS102011MS2QN1', lcsc: 'C221829', ds: 'https://www.ckswitches.com/media/1428/os.pdf', desc: 'Slide switch, one pole, two positions' },
+  DPDT: { mpn: 'JS202011CQN', lcsc: 'C221663', ds: 'https://www.ckswitches.com/media/1422/js.pdf', desc: 'Slide switch, two poles, two positions' },
+  NPN: { mpn: '2N3904', lcsc: 'C118538', ds: 'https://www.onsemi.com/pub/Collateral/2N3903-D.PDF', desc: 'NPN transistor' },
+  FET: { mpn: 'BSS138', lcsc: 'C78284', ds: 'https://www.onsemi.com/pub/Collateral/BSS138-D.PDF', desc: 'N-channel MOSFET, low threshold' }
+};
+var RD = 'Metal film resistor, 1/4 W, 1 %';
+var PASSIVE = {   // resistors: UNI-ROYAL MFR0W4F series at LCSC. Capacitors are left without a number: choose one whose lead pitch suits the footprint.
+  '2.2k': { mpn: 'MFR0W4F2201A50', lcsc: 'C58595', desc: RD }, '6.8k': { mpn: 'MFR0W4F6801A50', lcsc: 'C58600', desc: RD }, '4.7k': { mpn: 'MFR0W4F4701A50', lcsc: 'C57204', desc: RD },
+  '22k': { mpn: 'MFR0W4F2202A50', lcsc: 'C58612', desc: RD }, '1k': { mpn: 'MFR0W4F1001A50', lcsc: 'C57435', desc: RD }, '100k': { mpn: 'MFR0W4F1003A50', lcsc: 'C58597', desc: RD },
+  '330pF': { desc: 'Ceramic capacitor, C0G, 2.5 mm pitch' }, '100pF': { desc: 'Ceramic capacitor, C0G, 2.5 mm pitch' }, '100nF': { desc: 'Ceramic capacitor, 5 mm pitch' }, '1uF': { desc: 'Ceramic or film capacitor, 5 mm pitch, not polarised' }
+};
+
+function rng(seed) { var a = seed >>> 0; return function () { a |= 0; a = a + 0x6D2B79F5 | 0; var t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function hash(s) { var h = 2166136261; for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+function n(v) { var r = Math.round(v * 10000) / 10000; return String(r === 0 ? 0 : r); }
+function q(s) { return '"' + String(s).replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"'; }
+function tw(s, size) { return s.length * (size || 1.27) * 0.9; }   // rough text width
+
+function Sheet(LIB, project, seed) {
+  var rnd = rng(hash(seed)), out = [], used = {}, pins = [], segs = [], comps = {}, order = [], pwr = 0, self = this;
+  function uuid() { var h = ''; for (var i = 0; i < 32; i++) { var v = Math.floor(rnd() * 16); if (i === 12) v = 4; if (i === 16) v = 8 + (v & 3); h += v.toString(16); } return h.slice(0, 8) + '-' + h.slice(8, 12) + '-' + h.slice(12, 16) + '-' + h.slice(16, 20) + '-' + h.slice(20); }
+  var rootId = uuid();
+  function tr(rot, mir, px, py) { if (mir === 'y') px = -px; if (mir === 'x') py = -py; if (rot === 90) return [-py, -px]; if (rot === 180) return [-px, py]; if (rot === 270) return [py, px]; return [px, -py]; }
+  var FX = '(effects (font (size 1.27 1.27)))', FXH = '(effects (font (size 1.27 1.27)) (hide yes))';
+  function prop(name, val, x, y, ang, hide) { return '(property ' + q(name) + ' ' + q(val) + ' (at ' + n(x) + ' ' + n(y) + ' ' + ang + ') ' + (hide ? FXH : FX) + ')'; }
+  /* place a symbol. o: rot, mir, unit, ref/val text positions as [cx, cy] (centre of the text), fp, part {mpn,lcsc,ds,desc} */
+  this.sym = function (id, ref, val, x, y, o) {
+    o = o || {}; var L = LIB[id]; if (!L) throw new Error('no symbol ' + id);
+    used[id] = 1; var rot = o.rot || 0, mir = o.mir || null, unit = o.unit || 1, ang = (rot === 90 || rot === 270) ? 90 : 0, p = o.part || {};
+    var s = '(symbol (lib_id ' + q(id) + ') (at ' + n(x) + ' ' + n(y) + ' ' + rot + ')' + (mir ? ' (mirror ' + mir + ')' : '') + ' (unit ' + unit + ') (exclude_from_sim no) (in_bom yes) (on_board yes) (dnp no) (uuid ' + q(uuid()) + ')';
+    var ra = o.refAt || [x, y - 5.08], va = o.valAt || [x, y + 5.08];
+    s += ' ' + prop('Reference', ref, ra[0], ra[1], ang, o.hideRef) + ' ' + prop('Value', val, va[0], va[1], ang, o.hideVal);
+    s += ' ' + prop('Footprint', o.fp || '', x, y, 0, true) + ' ' + prop('Datasheet', p.ds || '~', x, y, 0, true) + ' ' + prop('Description', p.desc || L.desc || '', x, y, 0, true);
+    if (!o.power) { s += ' ' + prop('LCSC', p.lcsc || '', x, y, 0, true) + ' ' + prop('MPN', p.mpn || '', x, y, 0, true); }
+    var pl = (L.units[unit] || []).concat(L.units[0] || []), res = {};
+    for (var i = 0; i < pl.length; i++) { var d = tr(rot, mir, pl[i].x, pl[i].y), pt = [x + d[0], y + d[1]]; res[pl[i].num] = pt; pins.push({ ref: ref, num: pl[i].num, x: pt[0], y: pt[1] }); s += ' (pin ' + q(pl[i].num) + ' (uuid ' + q(uuid()) + '))'; }
+    s += ' (instances (project ' + q(project) + ' (path ' + q('/' + rootId) + ' (reference ' + q(ref) + ') (unit ' + unit + ')))))';
+    out.push(s);
+    if (!o.power && !comps[ref]) { comps[ref] = { ref: ref, value: val, fp: o.fp || '', lcsc: p.lcsc || '', mpn: p.mpn || '', desc: p.desc || L.desc || '', lib: id, badge: !!o.badge }; order.push(ref); }
+    return res;
+  };
+  /* power symbol; dir: which way the symbol's body points away from the wire ('up','down','left','right') */
+  this.pwr = function (net, x, y, dir) {
+    var id = 'power:' + net, gnd = net === 'GND';
+    var rotFor = gnd ? { down: 0, right: 90, up: 180, left: 270 } : { up: 0, left: 90, down: 180, right: 270 };
+    dir = dir || (net === '+VDC' ? 'up' : 'down'); var rot = rotFor[dir], a = gnd ? 4.2 : 6.6, b = (gnd ? 3.4 : 5.9) + tw(net) / 2;
+    var off = { up: [0, -a], down: [0, a], left: [-b, 0], right: [b, 0] }[dir]; pwr++;
+    return self.sym(id, '#PWR' + (pwr < 10 ? '0' : '') + pwr, net, x, y, { rot: rot, power: true, hideRef: true, refAt: [x, y], valAt: [x + off[0], y + off[1]] });
+  };
+  this.flag = function (x, y) { pwr++; return self.sym('power:PWR_FLAG', '#FLG' + (pwr < 10 ? '0' : '') + pwr, 'PWR_FLAG', x, y, { power: true, hideRef: true, hideVal: true, refAt: [x, y], valAt: [x, y] }); };
+  this.wire = function () {
+    var a = Array.prototype.slice.call(arguments);
+    for (var i = 0; i + 1 < a.length; i++) {
+      var p = a[i], r = a[i + 1]; if (Math.abs(p[0] - r[0]) > 1e-6 && Math.abs(p[1] - r[1]) > 1e-6) throw new Error('diagonal wire ' + p + ' ' + r);
+      if (Math.abs(p[0] - r[0]) < 1e-6 && Math.abs(p[1] - r[1]) < 1e-6) continue;
+      segs.push([p[0], p[1], r[0], r[1]]);
+    }
+  };
+  this.label = function (name, x, y, rot) { out.push('(label ' + q(name) + ' (at ' + n(x) + ' ' + n(y) + ' ' + (rot || 0) + ') (effects (font (size 1.27 1.27)) (justify ' + (rot === 180 ? 'right' : 'left') + ' bottom)) (uuid ' + q(uuid()) + '))'); };
+  this.glabel = function (name, x, y, rot, shape) {
+    out.push('(global_label ' + q(name) + ' (shape ' + (shape || 'passive') + ') (at ' + n(x) + ' ' + n(y) + ' ' + (rot || 0) + ') (effects (font (size 1.27 1.27)) (justify ' + (rot === 180 ? 'right' : 'left') + ')) (uuid ' + q(uuid()) + ') (property "Intersheetrefs" "${INTERSHEET_REFS}" (at ' + n(x) + ' ' + n(y) + ' 0) (effects (font (size 1.27 1.27)) (hide yes))))');
+  };
+  this.nc = function (pt) { out.push('(no_connect (at ' + n(pt[0]) + ' ' + n(pt[1]) + ') (uuid ' + q(uuid()) + '))'); };
+  this.text = function (str, x, y, size) { size = size || 1.27; out.push('(text ' + q(str).replace(/\n/g, '\\n') + ' (exclude_from_sim no) (at ' + n(x) + ' ' + n(y) + ' 0) (effects (font (size ' + size + ' ' + size + ')) (justify left top)) (uuid ' + q(uuid()) + '))'); };
+  this.box = function (x1, y1, x2, y2) { out.push('(rectangle (start ' + n(x1) + ' ' + n(y1) + ') (end ' + n(x2) + ' ' + n(y2) + ') (stroke (width 0) (type dash)) (fill (type none)) (uuid ' + q(uuid()) + '))'); };
+  this.finish = function (title, rev, comment) {
+    // junction dots: where three or more wire ends or pins meet, or where an end lands on the middle of a wire
+    var pts = {}, key = function (x, y) { return n(x) + ',' + n(y); };
+    function inside(s, p) { var e = 1e-6; if (Math.abs(s[0] - s[2]) < e) return Math.abs(p.x - s[0]) < e && p.y > Math.min(s[1], s[3]) + e && p.y < Math.max(s[1], s[3]) - e; return Math.abs(p.y - s[1]) < e && p.x > Math.min(s[0], s[2]) + e && p.x < Math.max(s[0], s[2]) - e; }
+    function add(x, y) { var k = key(x, y); if (!pts[k]) pts[k] = { x: x, y: y, c: 0 }; pts[k].c++; }
+    segs.forEach(function (s) { add(s[0], s[1]); add(s[2], s[3]); }); pins.forEach(function (p) { add(p.x, p.y); });
+    var j = [], jp = [];
+    Object.keys(pts).forEach(function (k) {
+      var p = pts[k], mid = segs.some(function (s) { return inside(s, p); });
+      if (mid || p.c >= 3) { jp.push(p); j.push('(junction (at ' + n(p.x) + ' ' + n(p.y) + ') (diameter 0) (color 0 0 0 0) (uuid ' + q(uuid()) + '))'); }
+    });
+    // a wire never runs through a junction: cut it there, as KiCad's own editor does
+    var w = [];
+    segs.forEach(function (s) {
+      var cuts = jp.filter(function (p) { return inside(s, p); }).map(function (p) { return [p.x, p.y]; }), v = Math.abs(s[0] - s[2]) < 1e-6 ? 1 : 0;
+      var all = [[s[0], s[1]]].concat(cuts, [[s[2], s[3]]]).sort(function (a, b) { return a[v] - b[v]; });
+      for (var i = 0; i + 1 < all.length; i++) w.push('(wire (pts (xy ' + n(all[i][0]) + ' ' + n(all[i][1]) + ') (xy ' + n(all[i + 1][0]) + ' ' + n(all[i + 1][1]) + ')) (stroke (width 0) (type default)) (uuid ' + q(uuid()) + '))');
+    });
+    var libs = Object.keys(used).map(function (id) { return LIB[id].text; }).join('\n');
+    return '(kicad_sch (version 20250114) (generator "eeschema") (generator_version "9.0") (uuid ' + q(rootId) + ') (paper "A4")\n' +
+      '(title_block (title ' + q(title) + ') (date "2026-11-13") (rev ' + q(rev) + ') (comment 1 ' + q(comment) + ') (comment 2 "slopswap.org/emf-badge/kicad.html - simulated only, not built"))\n' +
+      '(lib_symbols\n' + libs + '\n)\n' + j.join('\n') + '\n' + w.join('\n') + '\n' + out.join('\n') + '\n(sheet_instances (path "/" (page "1")))\n(embedded_fonts no)\n)\n';
+  };
+  this.bom = function () { return order.map(function (r) { return comps[r]; }); };
+}
+root.EMFGEN = { Sheet: Sheet, FP: FP, POTS: POTS, PART: PART, PASSIVE: PASSIVE, tw: tw };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+/* The drawing itself: where each part goes for each choice of options. Coordinates are millimetres on KiCad's 1.27 mm grid. */
+(function (root) {
+'use strict';
+var G = root.EMFGEN, FP = G.FP, tw = G.tw;
+function defaults(o) {
+  o = o || {}; var r = { build: o.build === 'tr' ? 'tr' : 'rec', bypass: !!o.bypass, comb: !!o.comb, pot: o.pot === 't3386' ? 't3386' : 'ptv09', badge: !!o.badge };
+  if (r.build === 'tr') { r.bypass = false; r.comb = false; } return r;
+}
+function name(o) { o = defaults(o); return 'emf-badge-chopper-' + (o.build === 'tr' ? 'transistor' : 'chip' + (o.bypass ? '-bypass' : '') + (o.comb ? '-comb' : '')) + (o.pot === 't3386' ? '-trimmer' : '') + (o.badge ? '-with-badge' : ''); }
+function generate(opts, LIB) {
+  var o = defaults(opts), project = name(o), S = new G.Sheet(LIB, project, project), P = G.PART, pot = G.POTS[o.pot];
+  function pas(v) { var p = G.PASSIVE[v] || {}; return { lcsc: p.lcsc || '', mpn: p.mpn || '', desc: p.desc || '' }; }
+  /* two-pin parts. dir 'v' (pin 1 on top), 'vr' (pin 2 on top), 'h' (pin 1 on the left), 'hr' (pin 2 on the left) */
+  function two(id, ref, val, x, y, dir, fp, extra) {
+    var rot = { v: 0, vr: 180, h: 90, hr: 270 }[dir], horiz = dir[0] === 'h', e = extra || {};
+    var w = Math.max(tw(ref), tw(val)), ra = horiz ? [x, y - 3.7] : [x + 1.7 + tw(ref) / 2, y - 1.1], va = horiz ? [x, y - 1.95] : [x + 1.7 + tw(val) / 2, y + 1.2];
+    if (e.below) { ra = [x, y + 2.2]; va = [x, y + 3.95]; } if (e.left) { ra = [x - 1.7 - tw(ref) / 2, y - 1.1]; va = [x - 1.7 - tw(val) / 2, y + 1.2]; }
+    return S.sym(id, ref, val, x, y, { rot: rot, fp: fp, part: e.part || pas(val), refAt: ra, valAt: va, badge: e.badge });
+  }
+  function R(ref, val, x, y, dir, e) { return two('Device:R_Small_US', ref, val, x, y, dir, FP.R, e); }
+  function C(ref, val, x, y, dir, e) { return two('Device:C_Small', ref, val, x, y, dir, (e && e.fp) || FP.Cs, e); }
+  function spdt(ref, x, y, a, b, at) {   // drawn with the pole on the right; a = what the 2-3 position does, b = the 2-1 position
+    var p = S.sym('Switch:SW_SPDT', ref, 'SPDT', x, y, { rot: 180, fp: FP.SPDT, part: P.SPDT, refAt: [x, y - 5.3], hideVal: true, valAt: [x, y] });
+    at = at || [x - 6.5, y + 4.6]; S.text('2-3: ' + a + '\n2-1: ' + b, at[0], at[1], 1.0); return p;
+  }
+  var GP = { 1: ['1', '2'], 2: ['3', '4'], 3: ['5', '6'], 4: ['9', '8'], 5: ['11', '10'], 6: ['13', '12'] };
+  function gate(unit, x, y, hideVal) { var p = S.sym('74xx:74HC14', 'U3', '74HC14', x, y, { unit: unit, fp: FP.DIP14, part: P.U14, refAt: unit === 7 ? [x + 8.6, y - 1.2] : [x - 1.5, y - 4.4], valAt: unit === 7 ? [x + 9.8, y + 1.2] : [x - 1.5, y + 4.4], hideVal: hideVal !== false }); if (GP[unit]) { p.i = p[GP[unit][0]]; p.o = p[GP[unit][1]]; } return p; }
+
+  var coilCut = o.build === 'rec';   // the chip build cuts the track between each coil and its 100 ohm resistor; the transistor build does not
+  /* ---------------- the badge itself (optional) ---------------- */
+  if (o.badge) {
+    var rows = [{ y: 45.72, L: 'I1', R: 'R2', Rf: 'R4', Cf: 'C5', Co: 'C2', Cg: 'C4', u: 2, pin: 'T' }, { y: 83.82, L: 'I2', R: 'R1', Rf: 'R3', Cf: 'C6', Co: 'C1', Cg: 'C3', u: 1, pin: 'R' }];
+    var J = S.sym('Connector_Audio:AudioJack3_SwitchTR', 'J1', 'SJ1-3525N', 157.48, 63.5, { rot: 180, fp: FP.JACK, part: { mpn: 'SJ1-3525N', desc: '3.5 mm stereo jack' }, refAt: [160.02, 52.8], valAt: [160.02, 71.6], badge: true });
+    rows.forEach(function (r) {
+      var y = r.y, b = { badge: true };
+      var L = S.sym('Device:L', r.L, '100mH', 33.02, y, { rot: 90, fp: FP.L, part: { desc: 'Pickup coil' }, refAt: [33.02, y - 4.2], valAt: [33.02, y - 2.4], badge: true });
+      S.wire(L['1'], [26.67, y], [26.67, y + 2.54]); S.pwr('GND', 26.67, y + 2.54, 'down');
+      var Ri = R(r.R, '100', 71.12, y, 'h', b);
+      if (coilCut) { S.wire(L['2'], [40.64, y]); S.glabel(r.L + '_COIL', 40.64, y, 0); S.wire([66.04, y], Ri['1']); S.glabel(r.R + '_IN', 66.04, y, 180); }
+      else { S.wire(L['2'], Ri['1']); S.wire([53.34, y], [53.34, y - 5.08], [55.88, y - 5.08]); S.glabel(r.L + '_COIL', 55.88, y - 5.08, 0); }
+      var U = S.sym('Amplifier_Operational:LM358', 'U1', 'NJM2115D', 93.98, y - 2.54, { unit: r.u, fp: FP.DIP8, part: { mpn: 'NJM2115D', desc: 'Dual op-amp' }, refAt: [96.5, y - 7.4], valAt: [100.3, y + 1.3], hideVal: r.u !== 2, badge: true });
+      var pm = r.u === 1 ? { p: '3', m: '2', o: '1' } : { p: '5', m: '6', o: '7' };
+      S.wire(Ri['2'], U[pm.m]); S.wire(U[pm.p], [83.82, y - 5.08]); S.pwr('GND', 83.82, y - 5.08, 'left');
+      var Rf = R(r.Rf, '100K', 93.98, y + 7.62, 'h', b), Cf = C(r.Cf, '100pF', 93.98, y + 13.97, 'h', { badge: true, below: true });
+      S.wire([78.74, y], [78.74, y + 13.97], Cf['1']); S.wire([78.74, y + 7.62], Rf['1']);
+      S.wire(U[pm.o], [111.76, y - 2.54]); S.wire(Rf['2'], [106.68, y + 7.62]); S.wire(Cf['2'], [106.68, y + 13.97], [106.68, y - 2.54]);
+      var Co = two('Device:C_Polarized_Small', r.Co, '4.7u', 114.3, y - 2.54, 'h', FP.CP, b);
+      var Cg = C(r.Cg, '10uF', 121.92, y + 2.54, 'vr', { badge: true, fp: FP.Cb });
+      S.wire(Co['2'], [139.7, y - 2.54], [139.7, J[r.pin][1]], J[r.pin]); S.wire([121.92, y - 2.54], Cg['2']); S.pwr('GND', 121.92, y + 5.08, 'down');
+    });
+    S.wire(J['S'], [147.32, 66.04], [147.32, 68.58]); S.pwr('GND', 147.32, 68.58, 'down'); S.nc(J['TN']); S.nc(J['RN']);
+    var UP = S.sym('Amplifier_Operational:LM358', 'U1', 'NJM2115D', 190.5, 55.88, { unit: 3, fp: FP.DIP8, part: { mpn: 'NJM2115D', desc: 'Dual op-amp' }, refAt: [194.5, 54.6], valAt: [194.5, 57.2], hideVal: true, badge: true });
+    S.wire(UP['8'], [187.96, 45.72]); S.pwr('+VDC', 187.96, 45.72, 'up'); S.wire(UP['4'], [187.96, 66.04]); S.pwr('-VDC', 187.96, 66.04, 'down');
+    var R5 = R('R5', '100', 205.74, 48.26, 'vr', { badge: true }), D1 = S.sym('Device:LED', 'D1', 'LED', 205.74, 57.15, { rot: 90, fp: FP.LED, part: { desc: 'Power LED' }, refAt: [201.9, 56.0], valAt: [201.6, 58.3], badge: true });
+    S.pwr('+VDC', 205.74, 45.72, 'up'); S.wire(R5['1'], D1['2']); S.wire(D1['1'], [205.74, 63.5]); S.pwr('-VDC', 205.74, 63.5, 'down');
+    var B1 = S.sym('Device:Battery_Cell', 'AAA_Battery1', 'AAA', 228.6, 45.72, { fp: FP.BAT, part: { desc: 'AAA holder' }, refAt: [218.2, 43.2], valAt: [223.6, 45.6], badge: true });
+    var B2 = S.sym('Device:Battery_Cell', 'AAA_Battery2', 'AAA', 228.6, 60.96, { fp: FP.BAT, part: { desc: 'AAA holder' }, refAt: [218.2, 58.4], valAt: [223.6, 60.8], badge: true });
+    S.wire(B1['1'], [228.6, 38.1]); S.pwr('+VDC', 228.6, 38.1, 'up'); S.wire(B1['2'], B2['1']);
+    var SA = S.sym('Switch:SW_DPDT_x2', 'SW1', 'Power', 243.84, 53.34, { mir: 'y', unit: 1, fp: FP.SW1, part: { desc: 'Power switch (the badge\'s own footprint)' }, refAt: [243.84, 47.6], valAt: [243.84, 59.0], badge: true });
+    var SB = S.sym('Switch:SW_DPDT_x2', 'SW1', 'Power', 243.84, 68.58, { mir: 'y', unit: 2, fp: FP.SW1, part: { desc: 'Power switch (the badge\'s own footprint)' }, refAt: [243.84, 62.9], valAt: [243.84, 74.2], hideVal: true, badge: true });
+    S.wire([228.6, 50.8], SA['1']); S.wire(SA['2'], [254, 53.34], [254, 55.88]); S.pwr('GND', 254, 55.88, 'down'); S.nc(SA['3']); S.nc(SB['6']);
+    S.wire(B2['2'], [228.6, 78.74], [254, 78.74], [254, 68.58], SB['5']); S.wire(SB['4'], [233.68, 66.04]); S.pwr('-VDC', 233.68, 66.04, 'down');
+    S.flag(236.22, 66.04); S.flag(251.46, 53.34); S.wire([228.6, 38.1], [233.68, 38.1]); S.flag(233.68, 38.1);
+    S.text('The badge: EMF Explorer Badge V2, CC BY-NC-SA 4.0, github.com/drc3p0/emf-explorer-badge.\nRedrawn from its schematic with its own part names and footprints. C5 and C6 are shown as 100 pF (the published KiCad file has 10 pF).' +
+      (coilCut ? '\nThe one change to the badge: the track from each coil to its 100 ohm resistor is cut, and both sides go to the chopper below.' : '\nNothing on the badge is cut: the chopper below hangs on the two coil nodes.'), 20.32, 20.32, 1.27);
+    S.text('The chopper additions below are shared under the same licence.', 20.32, 104.14, 1.27);
+  } else {
+    S.text('EMF Explorer Badge: tuning chopper, additions only.\nSelect everything on this sheet, copy, and paste it into the badge schematic. Nets join by name: +VDC, -VDC and GND are the badge\'s own power symbols.\n' +
+      (coilCut ? 'On the badge schematic, delete the wire between I1 and R2. Put the label I1_COIL on the coil end and R2_IN on the resistor end.\nDo the same between I2 and R1 with I2_COIL and R1_IN.'
+        : 'Nothing on the badge is cut. Put the label I1_COIL on the wire between I1 and R2, and I2_COIL on the wire between I2 and R1.') +
+      '\nThis design needs C5 and C6 to be 100 pF, as the V2 schematic PDF shows. The published KiCad file has 10 pF.\nPart numbers start after the badge\'s own (R5, C6, U1, SW1), so nothing collides.', 20.32, 20.32, 1.5);
+  }
+
+  if (o.build === 'rec') {
+    /* ---------------- the switch chip ---------------- */
+    var U2 = S.sym('Analog_Switch:CD4053B', 'U2', '74HC4053', 101.6, 149.86, { fp: FP.DIP16, part: P.U4053, refAt: [95.0, 130.9], valAt: [95.0, 132.9] });
+    S.wire(U2['11'], [76.2, 137.16]); S.wire(U2['10'], U2['11']); S.label('LO', 76.2, 137.16, 0);
+    S.wire(U2['9'], [83.82, 142.24], [83.82, 170.18], [101.6, 170.18], U2['8']); S.wire(U2['6'], [83.82, 162.56]); S.wire(U2['7'], [99.06, 170.18]); S.pwr('-VDC', 93.98, 170.18, 'down');
+    S.nc(U2['4']); S.nc(U2['5']); S.nc(U2['3']);
+    S.wire(U2['13'], [116.84, 147.32]); S.glabel('R2_IN', 116.84, 147.32, 0); S.wire(U2['1'], [116.84, 154.94]); S.glabel('R1_IN', 116.84, 154.94, 0);
+    S.wire(U2['12'], [127.0, 144.78], [127.0, 157.48]); S.wire(U2['2'], [127.0, 152.4]); S.pwr('GND', 127.0, 157.48, 'down');
+    S.wire(U2['16'], [104.14, 129.54]); S.pwr('+VDC', 104.14, 129.54, 'up');
+    var C9 = C('C9', '100nF', 119.38, 132.08, 'v', { fp: FP.Cb }); S.wire([104.14, 129.54], C9['1']); S.pwr('-VDC', 119.38, 134.62, 'down');
+    if (o.bypass) {
+      var WA = S.sym('Switch:SW_DPDT_x2', 'SW3', 'DPDT', 60.96, 142.24, { unit: 1, fp: FP.DPDT, part: P.DPDT, refAt: [60.96, 136.9], hideVal: true, valAt: [60.96, 142.24] });
+      var WB = S.sym('Switch:SW_DPDT_x2', 'SW3', 'DPDT', 60.96, 154.94, { unit: 2, fp: FP.DPDT, part: P.DPDT, refAt: [60.96, 149.6], hideVal: true, valAt: [60.96, 154.94] });
+      S.wire(WA['3'], U2['14']); S.wire(WB['4'], U2['15']);
+      S.wire(WA['1'], [68.58, 139.7]); S.glabel('R2_IN', 68.58, 139.7, 0); S.wire(WB['6'], [68.58, 157.48]); S.glabel('R1_IN', 68.58, 157.48, 0);
+      S.wire(WA['2'], [53.34, 142.24]); S.glabel('I1_COIL', 53.34, 142.24, 180); S.wire(WB['5'], [53.34, 154.94]); S.glabel('I2_COIL', 53.34, 154.94, 180);
+      S.text('SW3, true bypass. The slider joins 2-1 and 5-6 together, or 2-3 and 5-4:\nthat pairing comes from where the pads sit, so check it with a meter.\n2-1, 5-6: NORMAL. Each coil goes straight to its resistor, as on the stock badge.\n2-3, 5-4: TUNED. Each coil goes through the chip.', 20.32, 121.92, 1.0);
+    } else {
+      S.wire(U2['14'], [73.66, 144.78]); S.glabel('I1_COIL', 73.66, 144.78, 180); S.wire(U2['15'], [73.66, 152.4]); S.glabel('I2_COIL', 73.66, 152.4, 180);
+    }
+    S.text('74HC4053: section 1 (pins 14, 13, 12) chops I1, section 2 (pins 15, 1, 2) chops I2.\nSelect high: coil to its resistor. Select low: coil to 0 V. Section 3 is spare.', 86.36, 181.61, 1.0);
+    /* ---------------- the oscillator ---------------- */
+    var UG = gate(7, 144.78, 152.4, false); S.wire(UG['14'], [144.78, 137.16]); S.pwr('+VDC', 144.78, 137.16, 'up');
+    var C10 = C('C10', '100nF', 137.16, 152.4, 'v', { fp: FP.Cb, left: true }); S.wire([144.78, 137.16], [137.16, 137.16], C10['1']);
+    S.wire(C10['2'], [137.16, 167.64], [144.78, 167.64]); S.wire(UG['7'], [144.78, 167.64]); S.pwr('-VDC', 144.78, 167.64, 'down');
+    var UA = gate(1, 165.1, 124.46), UB = gate(2, 185.42, 124.46);
+    var C7 = C('C7', '330pF', 152.4, 129.54, 'v'); S.pwr('-VDC', 152.4, 132.08, 'down');
+    var RV = S.sym('Device:R_Potentiometer_US', 'RV1', '100k', 160.02, 111.76, { rot: 90, fp: pot.fp, part: pot, refAt: [160.02, 114.6], valAt: [160.02, 116.4] });
+    var R6 = R('R6', '2.2k', 170.18, 111.76, 'h');
+    S.wire([152.4, 105.41], [152.4, 127.0]); S.wire([152.4, 124.46], UA.i); S.wire([152.4, 111.76], RV['1']); S.wire(RV['2'], [160.02, 105.41], [152.4, 105.41]);
+    S.wire(RV['3'], R6['1']); S.wire(R6['2'], [175.26, 111.76], [175.26, 124.46]); S.wire(UA.o, UB.i);
+    S.text('Clockwise raises the frequency, if pin 3 is the clockwise end of the pot.\nAbout 26 kHz to 1 MHz on fresh cells; the top is ragged.', 152.4, 99.06, 1.0);
+    var src = UB.o;   // src: where the wave leaves; end: the point that becomes LO
+    if (o.comb) {
+      var C8 = C('C8', '330pF', 200.66, 142.24, 'h'), R7 = R('R7', '6.8k', 205.74, 147.32, 'v'), UC = gate(3, 215.9, 142.24), UD = gate(4, 233.68, 142.24);
+      S.wire([195.58, 124.46], [195.58, 142.24], C8['1']); S.wire(C8['2'], UC.i); S.wire([205.74, 142.24], R7['1']); S.pwr('-VDC', 205.74, 149.86, 'down'); S.wire(UC.o, UD.i);
+      var W4 = spdt('SW4', 251.46, 132.08, 'TUNED, one steady window', 'COMB, 3 us pulses');
+      S.wire(UB.o, [243.84, 124.46], [243.84, 129.54], W4['3']); S.wire(UD.o, [243.84, 142.24], [243.84, 134.62], W4['1']);
+      src = W4['2'];
+      if (!o.bypass) { var W2 = spdt('SW2', 266.7, 129.54, 'NORMAL', 'TUNED or COMB'); S.wire(src, W2['1']); S.wire(W2['3'], [259.08, 127.0], [259.08, 121.92]); S.pwr('+VDC', 259.08, 121.92, 'up'); S.wire(W2['2'], [274.32, 129.54]); S.label('LO', 274.32, 129.54, 0); }
+      else { S.wire(src, [259.08, 132.08]); S.label('LO', 259.08, 132.08, 0); }
+    } else if (!o.bypass) {
+      var V2 = spdt('SW2', 210.82, 121.92, 'NORMAL, select held high', 'TUNED'); S.wire(src, V2['1']); S.wire(V2['3'], [203.2, 119.38], [203.2, 116.84]); S.pwr('+VDC', 203.2, 116.84, 'up'); S.wire(V2['2'], [218.44, 121.92]); S.label('LO', 218.44, 121.92, 0);
+    } else { S.wire(src, [195.58, 124.46]); S.label('LO', 195.58, 124.46, 0); }
+    /* spare gates: inputs tied low, outputs left open */
+    var spare = o.comb ? [[5, 170.18], [6, 193.04]] : [[3, 170.18], [4, 193.04], [5, 215.9], [6, 238.76]];
+    spare.forEach(function (g) { var p = gate(g[0], g[1], 157.48); S.wire(p.i, [g[1] - 10.16, 157.48], [g[1] - 10.16, 163.83]); S.nc(p.o); });
+    S.wire([160.02, 163.83], [spare[spare.length - 1][1] - 10.16, 163.83]); S.pwr('-VDC', 160.02, 163.83, 'down');
+  } else {
+    /* ---------------- transistor version: two-transistor oscillator and one FET per coil ---------------- */
+    var W = spdt('SW2', 157.48, 106.68, 'TUNED, oscillator powered', 'NORMAL, oscillator off: the badge is stock', [153.67, 95.9]);
+    S.wire(W['3'], [149.86, 104.14], [149.86, 101.6]); S.pwr('+VDC', 149.86, 101.6, 'up'); S.wire(W['1'], [149.86, 109.22], [149.86, 111.76]); S.pwr('-VDC', 149.86, 111.76, 'down');
+    var C11 = C('C11', '100nF', 137.16, 106.68, 'v', { fp: FP.Cb, left: true }); S.wire(C11['1'], [137.16, 101.6]); S.pwr('+VDC', 137.16, 101.6, 'up'); S.pwr('-VDC', 137.16, 109.22, 'down');
+    var Q1 = S.sym('Transistor_BJT:2N3904', 'Q1', '2N3904', 175.26, 132.08, { mir: 'y', fp: FP.TO92, part: P.NPN, refAt: [167.5, 131.0], valAt: [166.3, 133.3] });
+    var Q2 = S.sym('Transistor_BJT:2N3904', 'Q2', '2N3904', 205.74, 132.08, { fp: FP.TO92, part: P.NPN, refAt: [213.2, 134.6], valAt: [214.6, 136.8] });
+    var R8 = R('R8', '4.7k', 172.72, 116.84, 'v', { left: true }), R9 = R('R9', '4.7k', 208.28, 116.84, 'v');
+    var RVt = S.sym('Device:R_Potentiometer_US', 'RV1', '100k', 190.5, 111.76, { fp: pot.fp, part: pot, refAt: [186.3, 110.6], valAt: [186.0, 112.9] });
+    var R6t = R('R6', '22k', 185.42, 121.92, 'v', { left: true }), R7t = R('R7', '22k', 195.58, 121.92, 'v');
+    S.wire(W['2'], [208.28, 106.68], R9['1']); S.wire(R8['1'], [172.72, 106.68]); S.wire(RVt['1'], [190.5, 106.68]);
+    S.wire(RVt['3'], [190.5, 119.38]); S.wire(RVt['2'], [194.31, 116.84], [190.5, 116.84]); S.wire(R6t['1'], R7t['1']);
+    S.wire(R8['2'], Q1['3']); S.wire(R9['2'], Q2['3']); S.wire(R6t['2'], [185.42, 132.08], Q1['2']); S.wire(R7t['2'], [195.58, 132.08], Q2['2']);
+    S.label('B1', 181.61, 132.08, 0); S.label('B2', 196.85, 132.08, 0);
+    var C7t = C('C7', '100pF', 165.1, 127.0, 'h'), C8t = C('C8', '100pF', 215.9, 127.0, 'h', { below: true });
+    S.wire(C7t['2'], Q1['3']); S.wire(C7t['1'], [156.21, 127.0]); S.label('B2', 156.21, 127.0, 0); S.wire(Q2['3'], C8t['1']); S.wire(C8t['2'], [220.98, 127.0]); S.label('B1', 220.98, 127.0, 0);
+    S.wire([208.28, 121.92], [212.09, 121.92]); S.label('LO', 212.09, 121.92, 0);
+    S.wire(Q1['1'], [172.72, 142.24], [208.28, 142.24], Q2['1']); S.pwr('-VDC', 190.5, 142.24, 'down');
+    S.text('About 50 to 300 kHz in simulation. Clockwise raises the frequency, if pin 3 is the clockwise end of the pot.', 153.67, 92.71, 1.0);
+    [{ x: 63.5, coil: 'I1_COIL', q: 'Q3', c: 'C9', rg: 'R10', rp: 'R12' }, { x: 114.3, coil: 'I2_COIL', q: 'Q4', c: 'C10', rg: 'R11', rp: 'R13' }].forEach(function (f) {
+      var x = f.x, Q = S.sym('Transistor_FET:BSS138', f.q, 'BSS138', x, 144.78, { fp: FP.SOT23, part: P.FET, refAt: [x + 7.4, 143.7], valAt: [x + 8.6, 146.0] });
+      var Cc = C(f.c, '1uF', x + 2.54, 134.62, 'v', { fp: FP.Cb }); S.wire(Cc['2'], Q['3']); S.wire(Cc['1'], [x + 2.54, 129.54], [x + 5.08, 129.54]); S.glabel(f.coil, x + 5.08, 129.54, 0);
+      var Rg = R(f.rg, '1k', x - 12.7, 144.78, 'h'), Rp = R(f.rp, '100k', x - 7.62, 149.86, 'v', { left: true });
+      S.wire(Rg['2'], Q['1']); S.wire([x - 7.62, 144.78], Rp['1']); S.wire(Rp['2'], [x + 2.54, 152.4]); S.wire(Q['2'], [x + 2.54, 152.4]); S.pwr('-VDC', x + 2.54, 152.4, 'down');
+      S.wire(Rg['1'], [x - 21.59, 144.78]); S.label('LO', x - 21.59, 144.78, 0);
+    });
+    S.text('One FET per coil. Gate high: the coil\'s current goes to the negative rail through the capacitor. Gate low: the badge as it is.\nIn simulation this is about 25 dB hissier than the chip version while it tunes. It is here to compare board area.', 35.56, 165.1, 1.0);
+  }
+  var bits = o.build === 'tr' ? 'transistor version' : '74HC4053 + 74HC14' + (o.bypass ? ', true bypass' : '') + (o.comb ? ', comb mode' : '');
+  return { name: project, text: S.finish('EMF Explorer Badge: tuning chopper', '2026-11-13', bits + (o.badge ? ', with the badge circuit' : ', additions only')), bom: S.bom(), options: o };
+}
+G.generate = generate; G.fileName = name; G.defaults = defaults;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+(function () {
+  'use strict';
+  var LIB = JSON.parse(document.getElementById('lib').textContent), G = window.EMFGEN;
+  var st = { build: 'rec', bypass: false, comb: false, pot: 'ptv09', badge: false };
+  var $ = function (id) { return document.getElementById(id); };
+  var TXT = {
+    build: { rec: 'One 74HC4053 and one 74HC14. The recommended build.', tr: 'Two 2N3904 and two BSS138. Cheapest, hissier, and the FETs are surface-mount. For comparing board area.' },
+    bypass: { 0: 'A one-pole switch holds the chip on. The chip stays in the signal path.', 1: 'A two-pole switch takes each coil straight to its resistor. The stock signal path.', tr: 'The transistor version is always bypassed when its oscillator is off.' },
+    comb: { 0: 'One steady window, moved by the knob.', 1: 'Adds 330 pF, 6.8 kΩ and a TUNED or COMB switch.', tr: 'Not offered on the transistor version: it stalls at one end of the pot.' },
+    pot: { ptv09: 'Bourns PTV09A-4020U-B104, 100 kΩ linear. LCSC C5341721.', t3386: 'A 3386P square trimmer, 100 kΩ. LCSC C48642122. Set with a screwdriver.' },
+    badge: { 0: 'Only the new parts, with labels where they join the badge. For pasting into the badge schematic.', 1: 'The badge redrawn alongside, so the sheet is the whole circuit.' }
+  };
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
+  function render() {
+    var o = G.defaults(st), tr = o.build === 'tr', r = G.generate(o, LIB);
+    document.querySelectorAll('.seg[data-k]').forEach(function (seg) {
+      var k = seg.getAttribute('data-k'), cur = (k === 'bypass' || k === 'comb' || k === 'badge') ? (o[k] ? '1' : '0') : o[k], off = tr && (k === 'bypass' || k === 'comb');
+      seg.querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-pressed', String(!off && b.getAttribute('data-v') === cur)); b.disabled = off; });
+      $('d-' + k).textContent = off ? TXT[k].tr : TXT[k][cur];
+    });
+    var img = $('pv'); img.src = r.name.replace('emf-badge-chopper-', 'kicad-').replace('-trimmer', '') + '.png'; $('pvl').href = img.src;
+    img.alt = 'KiCad rendering of the schematic for this choice: ' + r.name.replace('emf-badge-chopper-', '').replace(/-/g, ', ') + '.';
+    $('fn').textContent = r.name + '.kicad_sch';
+    var rows = '', added = 0, list = r.bom.filter(function (c) { return !c.badge; }).concat(r.bom.filter(function (c) { return c.badge; }));
+    list.forEach(function (c) {
+      if (!c.badge) added++;
+      rows += '<tr' + (c.badge ? ' class="own"' : '') + '><th scope="row">' + esc(c.ref) + '</th><td>' + esc(c.value) + '</td><td>' + (c.badge && !c.mpn ? 'on the badge now' : esc(c.mpn || '—')) + '</td><td><code>' + esc(c.fp) + '</code></td><td>' + (c.lcsc ? '<a href="https://www.lcsc.com/product-detail/' + esc(c.lcsc) + '.html">' + esc(c.lcsc) + '</a>' : '—') + '</td></tr>';
+    });
+    document.querySelector('#bom tbody').innerHTML = rows;
+    $('count').textContent = added + ' parts added' + (o.badge ? ', listed first; the badge\'s own ' + (r.bom.length - added) + ' follow in grey.' : '.');
+    $('summary').textContent = tr ? 'Nothing on the badge is cut. Each FET and its capacitor hang on a coil, and a one-pole switch turns the oscillator on.'
+      : 'One change to the badge: the track from each coil to its 100 Ω resistor is cut, and both ends go to the ' + (o.bypass ? 'bypass switch and the chip.' : 'chip.');
+    return r;
+  }
+  document.querySelectorAll('.seg[data-k] button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var k = b.parentNode.getAttribute('data-k'), v = b.getAttribute('data-v');
+      st[k] = (k === 'bypass' || k === 'comb' || k === 'badge') ? v === '1' : v; render();
+    });
+  });
+  $('dl').addEventListener('click', function () {
+    var r = G.generate(G.defaults(st), LIB), url = URL.createObjectURL(new Blob([r.text], { type: 'application/octet-stream' })), a = document.createElement('a');
+    a.href = url; a.download = r.name + '.kicad_sch'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+  });
+  render();
+})();
+</script>
+</body>
+</html>
