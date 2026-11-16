@@ -1,0 +1,191 @@
+/* Crabbe Construction & Design
+   Layout: full-width bands in the company's slate, teal and sand. Photos sit in a frame of
+   drafting lines that overshoot their corners, the way the lines in the logo do. */
+
+@font-face { font-family: "EB Garamond"; font-style: normal; font-weight: 400 600; font-display: swap; src: url(fonts/eb-garamond.woff2) format("woff2"); }
+@font-face { font-family: "EB Garamond"; font-style: italic; font-weight: 400 500; font-display: swap; src: url(fonts/eb-garamond-italic.woff2) format("woff2"); }
+@font-face { font-family: "Reem Kufi"; font-style: normal; font-weight: 400 700; font-display: swap; src: url(fonts/reem-kufi.woff2) format("woff2"); }
+
+:root {
+  color-scheme: light;
+  --ink: #192a3d;        /* navy text */
+  --deep: #23383f;       /* header, services, footer */
+  --slate: #597882;      /* philosophy block */
+  --sand: #cdbda2;       /* accent block and drafting lines */
+  --sand-pale: #f4f1ea;  /* sand, thinned out, behind the project cards */
+  --paper: #fafbfc;
+  --muted: #56616b;
+  --serif: "EB Garamond", Garamond, "Iowan Old Style", Georgia, serif;
+  --sans: "Reem Kufi", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --gutter: clamp(1rem, 4vw, 2.5rem);
+  --band: clamp(3.5rem, 8vw, 6.5rem);   /* vertical padding of a band */
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 5rem; -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 400 1.0625rem/1.65 var(--sans); }
+main { overflow-x: clip; }
+img { display: block; max-width: 100%; }
+a { color: inherit; }
+h1, h2, h3 { margin: 0; font-family: var(--serif); font-weight: 500; line-height: 1.15; text-wrap: balance; }
+p, figure, blockquote { margin: 0; }
+:focus-visible { outline: 2px solid var(--sand); outline-offset: 3px; }
+.wrap { width: 100%; max-width: 74rem; margin-inline: auto; padding-inline: var(--gutter); }
+.label { font: 500 .75rem/1.4 var(--sans); letter-spacing: .3em; text-transform: uppercase; }
+.skip { position: absolute; left: -999rem; }
+.skip:focus { left: 1rem; top: 1rem; z-index: 20; padding: .5rem 1rem; background: #fff; }
+
+.btn { display: inline-block; padding: .9rem 1.6rem; border: 1px solid currentColor; font: 500 .75rem/1 var(--sans); letter-spacing: .28em; text-transform: uppercase; text-decoration: none; transition: background-color .2s, color .2s, border-color .2s; }
+.btn:hover { background: var(--ink); border-color: var(--ink); color: #fff; }
+.btn.solid { background: var(--sand); border-color: var(--sand); color: var(--ink); }
+.btn.solid:hover { background: #fff; border-color: #fff; color: var(--ink); }
+
+/* Drafting-line frame: two crossing pairs of hairlines that run past the corners. */
+.framed { position: relative; --off: .6rem; --over: 1.6rem; }
+.framed::before, .framed::after { content: ""; position: absolute; pointer-events: none; border: 0 solid var(--sand); }
+.framed::before { inset: calc(-1 * var(--off)) calc(-1 * var(--over)); border-block-width: 1px; }
+.framed::after { inset: calc(-1 * var(--over)) calc(-1 * var(--off)); border-inline-width: 1px; }
+
+/* ---------- header ---------- */
+.top { position: sticky; top: 0; z-index: 10; background: var(--deep); color: #fff; }
+.top .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem 2rem; padding-block: .6rem; }
+.brand { display: flex; align-items: center; gap: .75rem; font: 500 .75rem/1.5 var(--sans); letter-spacing: .28em; text-transform: uppercase; text-decoration: none; }
+.brand img { width: 2.75rem; height: 2.75rem; }
+.top nav { order: 2; display: flex; align-items: center; gap: 1.75rem; margin-left: auto; max-width: 100%; overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
+.top nav::-webkit-scrollbar { display: none; }
+.top nav a { padding-block: .5rem; border-bottom: 1px solid transparent; font: 400 .75rem/1 var(--sans); letter-spacing: .22em; text-transform: uppercase; text-decoration: none; color: rgba(255, 255, 255, .82); }
+.top nav a:hover, .top nav a[aria-current] { color: #fff; border-bottom-color: var(--sand); }
+.top .tel { order: 3; padding: .55rem .9rem; border: 1px solid var(--sand); font: 400 .75rem/1 var(--sans); letter-spacing: .12em; text-decoration: none; white-space: nowrap; color: var(--sand); }
+.top .tel:hover { background: var(--sand); color: var(--ink); }
+
+/* ---------- home: hero ---------- */
+.hero { position: relative; isolation: isolate; display: grid; align-items: end; min-height: min(82vh, 46rem); background: var(--deep); color: #fff; }
+.hero > img { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; }
+.hero::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(to top, rgba(35, 56, 63, .92), rgba(35, 56, 63, .34) 50%, rgba(35, 56, 63, 0) 85%); }
+.hero .wrap { padding-block: clamp(3rem, 8vw, 5.5rem); }
+.hero h1 { font-weight: 400; font-size: clamp(1.9rem, 5.4vw, 4.25rem); letter-spacing: .14em; text-transform: uppercase; }
+.hero h1 small { display: block; margin-top: .9rem; font: 400 clamp(.8rem, 1.5vw, 1.05rem)/1 var(--sans); letter-spacing: .55em; color: var(--sand); }
+.hero .lede { max-width: 26ch; margin-top: 1.75rem; font: italic 400 clamp(1.3rem, 2.4vw, 1.8rem)/1.35 var(--serif); }
+.actions { display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 2.25rem; }
+
+/* ---------- home: intro ---------- */
+.intro { padding-block: var(--band); background: #fff; text-align: center; }
+.intro p { max-width: 38ch; margin-inline: auto; font: 400 clamp(1.35rem, 2.5vw, 1.95rem)/1.42 var(--serif); text-wrap: balance; }
+
+/* ---------- home: services ---------- */
+.services { padding-block: var(--band); background: var(--deep); color: #fff; }
+.ghost { margin-bottom: -.2em; overflow: hidden; font: 400 clamp(2.6rem, 11vw, 8rem)/1 var(--sans); letter-spacing: .18em; text-transform: uppercase; text-align: right; color: rgba(255, 255, 255, .07); user-select: none; }
+.services h2 { color: var(--sand); }
+.service-grid { display: grid; gap: 3rem clamp(2.5rem, 6vw, 5rem); margin-top: 2.5rem; }
+.service { padding-top: 1.6rem; border-top: 1px solid rgba(205, 189, 162, .55); }
+.service h3 { margin-bottom: .9rem; font-size: clamp(1.5rem, 2.4vw, 1.9rem); }
+.service p { max-width: 60ch; font-size: 1rem; color: rgba(255, 255, 255, .84); }
+.service p + p { margin-top: .9rem; }
+
+/* ---------- home: philosophy, portrait, experience ---------- */
+.about { padding-block: var(--band); background: var(--paper); }
+.about-grid { display: grid; gap: 2.75rem; }
+.philosophy { position: relative; padding-block: clamp(2.25rem, 5vw, 4rem); color: #fff; }
+.philosophy::before { content: ""; position: absolute; z-index: -1; inset: 0 calc(-1 * var(--gutter)); background: var(--slate); }
+.about-grid > * { position: relative; z-index: 0; }
+.philosophy blockquote { margin-top: 1.5rem; font: italic 400 clamp(1.25rem, 2vw, 1.55rem)/1.5 var(--serif); }
+.by { margin-top: 1.5rem; font: 500 .8125rem/1 var(--sans); letter-spacing: .3em; text-transform: uppercase; color: #e9e1d2; }
+.by::before { content: ""; display: inline-block; width: 2.5rem; height: 1px; margin-right: 1rem; vertical-align: middle; background: var(--sand); }
+.portrait { width: min(100%, 24rem); margin: var(--over, 1.6rem) auto; }
+.portrait img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; object-position: 50% 20%; }
+.experience { padding: clamp(1.75rem, 4vw, 3rem); background: var(--sand); }
+.experience h2 { margin-bottom: 1rem; font-size: clamp(1.7rem, 3vw, 2.2rem); }
+.experience p { font-size: 1rem; }
+
+/* ---------- project cards (home and Works) ---------- */
+.work { padding-block: var(--band); background: var(--sand-pale); }
+.section-head { margin-bottom: clamp(2rem, 5vw, 3.5rem); text-align: center; }
+.section-head .label { color: var(--muted); letter-spacing: .6em; }
+.section-head h2 { margin-top: .6rem; font-weight: 400; font-size: clamp(2rem, 4vw, 2.75rem); letter-spacing: .14em; text-transform: uppercase; }
+.cards { display: grid; gap: clamp(2rem, 5vw, 3.5rem); }
+.card { display: grid; background: #fff; box-shadow: 0 24px 48px -32px rgba(25, 42, 61, .45); }
+.card-photo { display: block; min-height: 12rem; background: var(--sand); }
+.card-photo img { width: 100%; height: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+.card-text { display: grid; align-content: center; justify-items: center; gap: 1.1rem; padding: clamp(2rem, 5vw, 3.75rem); text-align: center; }
+.card-text .label { color: var(--muted); }
+.card h3 { font: 500 clamp(1.1rem, 2vw, 1.35rem)/1.5 var(--sans); letter-spacing: .24em; text-transform: uppercase; }
+.rule { width: 2.75rem; height: 1px; background: var(--sand); }
+.card-text > p:not(.label) { max-width: 32ch; color: var(--muted); }
+.more { margin-top: clamp(2rem, 5vw, 3.5rem); text-align: center; }
+
+/* ---------- inner pages ---------- */
+.page-head { padding-block: clamp(3rem, 7vw, 5rem) clamp(5rem, 11vw, 8rem); background: var(--deep); color: #fff; }
+.page-head .label { margin-bottom: 1rem; color: var(--sand); }
+.page-head h1 { font-weight: 400; font-size: clamp(2rem, 5vw, 3.5rem); letter-spacing: .1em; text-transform: uppercase; }
+.page-head .lede { max-width: 44ch; margin-top: 1.25rem; font: italic 400 clamp(1.2rem, 2.2vw, 1.5rem)/1.4 var(--serif); color: rgba(255, 255, 255, .88); }
+.work.plain, .project { margin-top: clamp(-5.5rem, -7vw, -3rem); padding-block: 0 var(--band); background: none; }
+.cover { margin-bottom: clamp(2.5rem, 6vw, 4rem); background: var(--sand-pale); }
+.cover img { width: 100%; max-height: 80vh; object-fit: cover; }
+.prose { max-width: 65ch; margin: 0 auto clamp(2.5rem, 6vw, 4rem); padding: clamp(1.5rem, 4vw, 2.5rem); background: #fff; font-size: 1.0625rem; }
+.project > .wrap > .prose:first-child { box-shadow: 0 24px 48px -32px rgba(25, 42, 61, .45); }
+.prose > * + * { margin-top: 1.1em; }
+.prose h2, .prose h3 { margin-top: 1.6em; font-size: 1.6rem; }
+.prose h3 { font-size: 1.3rem; }
+.prose a { color: var(--slate); text-underline-offset: .15em; }
+.prose ul, .prose ol { padding-left: 1.25rem; }
+.prose blockquote { padding-left: 1.25rem; border-left: 1px solid var(--sand); font: italic 400 1.25rem/1.5 var(--serif); }
+.prose img { height: auto; }
+.gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); gap: .75rem; }
+.gallery img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; transition: opacity .2s; }
+.gallery a:hover img { opacity: .86; }
+.pager { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; margin-top: clamp(2.5rem, 6vw, 4rem); padding-top: 1.5rem; border-top: 1px solid var(--sand); font: 500 .75rem/1.5 var(--sans); letter-spacing: .24em; text-transform: uppercase; }
+.pager a { text-decoration: none; }
+.pager a:hover { color: var(--slate); }
+
+/* ---------- photo viewer ---------- */
+.lightbox { width: 100vw; max-width: none; height: 100dvh; max-height: none; margin: 0; padding: 0; border: 0; background: rgba(20, 32, 37, .96); }
+.lightbox::backdrop { background: rgba(20, 32, 37, .96); }
+.lightbox img { position: absolute; inset: 3.5rem 1rem; width: calc(100% - 2rem); height: calc(100% - 7rem); object-fit: contain; }
+.lightbox button { position: absolute; z-index: 1; width: 3rem; height: 3rem; border: 1px solid rgba(205, 189, 162, .6); background: rgba(35, 56, 63, .7); color: #fff; font: 400 1.5rem/1 var(--serif); cursor: pointer; }
+.lightbox button:hover { background: var(--sand); color: var(--ink); }
+.lightbox [data-act="close"] { top: .5rem; right: .5rem; }
+.lightbox [data-act="prev"] { bottom: .5rem; left: .5rem; }
+.lightbox [data-act="next"] { bottom: .5rem; right: .5rem; }
+
+/* ---------- contact and footer ---------- */
+.contact { padding-block: var(--band); background: var(--sand); text-align: center; }
+.contact .lead { max-width: 44ch; margin-inline: auto; font: 400 clamp(1.15rem, 2vw, 1.4rem)/1.4 var(--serif); letter-spacing: .08em; text-wrap: balance; }
+.contact h2 { margin-block: .75rem 2.25rem; font-weight: 400; font-size: clamp(2.2rem, 5vw, 3.25rem); letter-spacing: .14em; text-transform: uppercase; }
+.contact .phone, .contact .email { display: inline-block; margin: .5rem 0 1.75rem; font: 400 clamp(1.8rem, 4.5vw, 2.75rem)/1.2 var(--serif); letter-spacing: .08em; text-decoration: none; border-bottom: 1px solid transparent; }
+.contact .email { font-size: clamp(1.2rem, 3vw, 1.6rem); overflow-wrap: anywhere; }
+.contact .phone:hover, .contact .email:hover { border-bottom-color: var(--ink); }
+.signoff { margin-top: .5rem; font: italic 400 1.3rem/1.4 var(--serif); }
+.foot { padding-block: 2.5rem; background: var(--deep); color: rgba(255, 255, 255, .82); font-size: .875rem; }
+.foot .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.5rem; }
+.foot img { width: 3.5rem; height: 3.5rem; }
+.foot .small { margin-left: auto; font-size: .8125rem; color: rgba(255, 255, 255, .62); }
+.foot a { color: inherit; }
+
+/* ---------- wider screens ---------- */
+@media (min-width: 46rem) {
+  .service-grid { grid-template-columns: 1fr 1fr; }
+  .card { grid-template-columns: 1.2fr 1fr; }
+  .card:nth-child(even) .card-photo { order: 2; }
+}
+@media (min-width: 60rem) {
+  .about-grid { grid-template-columns: 7fr 5fr; gap: 0 clamp(3rem, 6vw, 5.5rem); align-items: start; }
+  .philosophy { grid-area: 1 / 1; padding-bottom: 7rem; padding-right: clamp(2rem, 4vw, 3.5rem); }
+  .philosophy::before { inset: 0 0 0 -50vw; }
+  .portrait { grid-area: 1 / 2 / span 2; align-self: center; width: 100%; margin: 2rem 0; }
+  .experience { grid-area: 2 / 1; margin: -4rem 0 0 clamp(2rem, 6vw, 5rem); }
+}
+
+/* ---------- phones ---------- */
+@media (max-width: 45.99rem) {
+  .top { position: static; }
+  .top .wrap { gap: .25rem 1rem; }
+  .brand { flex: 1; min-width: 0; font-size: .6875rem; letter-spacing: .2em; }
+  .top nav { order: 3; width: 100%; margin-left: 0; gap: 1.4rem; }
+  .framed { --off: .4rem; --over: .9rem; }
+  .foot .small { margin-left: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { transition: none !important; }
+}

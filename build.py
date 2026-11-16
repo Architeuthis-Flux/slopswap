@@ -11,6 +11,7 @@ import json
 import re
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
@@ -116,14 +117,19 @@ def main() -> None:
     sections = []
     for d in projects:
         shutil.copytree(d, OUT / d.name)
+        if (d / "build.py").exists():
+            # a folder with its own build.py builds itself into its _site copy (crabbe-construction does).
+            # check=True: a failed build fails the deploy, so the last good site stays up.
+            subprocess.run([sys.executable, str(d / "build.py"), str(OUT / d.name)], check=True)
+        own_index = (OUT / d.name / "index.html").exists()
         (OUT / d.name / RECENT).write_text(json.dumps(recent(d), ensure_ascii=False, indent=0))
         name = d.name.replace("-", " ")
-        if not (d / "index.html").exists():
+        if not own_index:
             crumb = f'<p class="eyebrow"><a href="../">slopswap</a> / {html.escape(d.name)}</p>'
             (OUT / d.name / "index.html").write_text(
                 page(name, theme_of(d), "../", f"{crumb}\n<h1>{html.escape(name)}</h1>\n{listing(d, '')}"))
         # a folder with its own index curates itself: the root links it without listing its files
-        files = "" if (d / "index.html").exists() else "\n" + listing(d, d.name + "/")
+        files = "" if own_index else "\n" + listing(d, d.name + "/")
         sections.append(f'<h2><a href="{d.name}/">{html.escape(name)}</a></h2>{files}')
 
     bust(OUT, version())
