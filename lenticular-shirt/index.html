@@ -1141,8 +1141,9 @@ var DEF_ART={fulltext:'data:image/webp;base64,UklGRiTmAQBXRUJQVlA4WAoAAAAQAAAARQ
   var LS = 'lenticular-shirt-viewer.v1', ARTW = 1350, FILMS = [100, 150, 200, 250, 300, 400, 700], MESH = 0.12, CURE = 0.9;
   var DEF = { proc: 'barrier', views: 2, pitch: 1.27, ridge: 0.52, height: 0.72, passes: 2, split: 50, guard: 0, reg: 0, cap: 0, lensAngle: 49, spot: true, spotA: '#f04bcd', spotB: '#ffd400', swap: false, snap: true, angle: 30, curve: 55, printIn: 18, zone: 'diff', loupeSpan: 10, lu: null, lv: null };
   var KNOWN = { 'Layer 5 copy 2': { assign: 'both', mm: 0 }, 'Layer 2': { assign: 'b', label: 'Jump' }, 'ledgenew': { assign: 'a', label: 'Ledge', split: true, mm: 3 }, 'Layer 5 copy': { assign: 'a', label: 'Ledge', mm: 4 }, 'Layer 7': { assign: 'a', label: 'Ledge', mm: -3 },
-    'lentV62guy.png': { assign: 'a', label: 'Guy', mm: -3, z: 4 }, 'lentV62oldlogo.png': { assign: 'b', label: 'Old logo', z: 3 }, 'lentV62fulltext.png': { assign: 'b', on3: true, mm: 0, z: 1 },
-    'lentV62textcut.png': { assign: 'a', on3: false, z: 2 }, 'Screenshot 2026-11-12 at 12.10.36\u202fPM.png': { assign: 'a', on3: false }, 'Screenshot 2026-11-12 at 12.10.36 PM.png': { assign: 'a', on3: false } };
+    'lentV62guy.png': { assign: 'a', label: 'Guy', mm: -3, z: 4 }, 'lentV62oldlogo.png': { assign: 'b', label: 'Old logo', z: 3 }, 'lentV62fulltext.png': { assign: 'b', on3: true, mm: 0, z: 1, raise: true },
+    'lentV62textcut.png': { assign: 'a', on3: false, z: 2, raise: true }, 'Screenshot 2026-11-12 at 12.10.36\u202fPM.png': { assign: 'a', on3: false, z: 2, raise: true }, 'Screenshot 2026-11-12 at 12.10.36 PM.png': { assign: 'a', on3: false, z: 2, raise: true } };
+  // raise: the wordmark is the same in both views apart from the notch for the head, so its black is raised in HD on the films like a layer set to Both
   var SHIRT = [17, 17, 19], TOPC = [30, 30, 33], WALLC = [8, 8, 9];
   // The eye averages fine stripes in linear light, so all mixing is done there (0..4095) and converted back for display.
   var S2L = new Uint16Array(256), L2S = new Uint8Array(4096);
@@ -1901,7 +1902,7 @@ var DEF_ART={fulltext:'data:image/webp;base64,UklGRiTmAQBXRUJQVlA4WAoAAAAQAAAARQ
       });
     });
   })();
-  window.__lent = { S: S, buildSegs: geom, geom: geom, classify: classify, ranges: ranges, loadFiles: loadFiles, startWatch: startWatch, multi: multi, d3Of: d3Of, psdNodes: psdNodes, keyOf: keyOf, hooks: hooks, art: function () { return ART; } };
+  window.__lent = { S: S, known: function (name) { return KNOWN[name] || null; }, buildSegs: geom, geom: geom, classify: classify, ranges: ranges, loadFiles: loadFiles, startWatch: startWatch, multi: multi, d3Of: d3Of, psdNodes: psdNodes, keyOf: keyOf, hooks: hooks, art: function () { return ART; } };
 
   loadDefault().catch(function (e) { $('psdWarns').innerHTML = '<div class="warn"><b>Built-in artwork failed to load.</b> Drop your PSD below to continue.</div>'; });
 })();
@@ -2039,7 +2040,7 @@ var DEF_ART={fulltext:'data:image/webp;base64,UklGRiTmAQBXRUJQVlA4WAoAAAAQAAAARQ
   function isFull(n) { var c = cache.get(L.keyOf(n)); return !!(c && c.full && n.file && c.id === fileId(n.file)); }
   function inScene(n) { return L.multi() ? L.d3Of(n).on : n.assign !== 'off'; }
   function isStatic(n) { return L.multi() ? L.d3Of(n).mm === 0 : n.assign === 'both'; }
-  function raiseOn(n) { var v = F.raise[L.keyOf(n)]; return v === undefined ? isStatic(n) : v; }
+  function raiseOn(n) { var v = F.raise[L.keyOf(n)], k = L.known(n.name); return v === undefined ? isStatic(n) || !!(k && k.raise) : v; }
   var loadingFull = false;
   async function loadFull(status) {
     var ART = L.art(); if (!ART || loadingFull) return; loadingFull = true;
