@@ -139,10 +139,33 @@
 #viewer .depths{display:flex;flex-direction:column;gap:7px}
 #viewer .drop{border:1.5px dashed var(--line);border-radius:4px;padding:12px;display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between}
 #viewer .drop.over{border-color:var(--b);background:color-mix(in srgb,var(--b) 8%,transparent)}
+#viewer .filmgrid{display:grid;grid-template-columns:292px minmax(0,1fr) 318px;gap:16px;align-items:start}
+#viewer .filmcol{display:flex;flex-direction:column;gap:9px;min-width:0}
+#viewer .fields{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 10px;align-items:center;font-size:13.5px}
+#viewer .fields span{white-space:nowrap;color:var(--muted);font-size:12.5px}
+#viewer .fnum{font:500 13.5px var(--mono);color:var(--ink);background:var(--panel2);border:1px solid var(--line);border-radius:3px;padding:4px 6px;width:74px;text-align:right}
+#viewer .filmseg{align-self:flex-start}
+#viewer .filmseg label{padding:7px 12px;font-size:13px}
+#viewer .raise{display:flex;flex-direction:column;gap:5px}
+#viewer .proofbox{border:1px solid var(--line);border-radius:3px;overflow:hidden;background:#2a2a2e;line-height:0}
+#viewer .proofbox canvas{display:block;width:100%;height:auto;image-rendering:pixelated}
+#viewer dl.filmsum{margin:0;display:flex;flex-direction:column;gap:5px}
+#viewer dl.filmsum div{display:grid;grid-template-columns:74px minmax(0,1fr);gap:8px}
+#viewer dl.filmsum dt{font:600 12px var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding-top:2px}
+#viewer dl.filmsum dd{margin:0;font:500 13px/1.35 var(--mono);overflow-wrap:anywhere}
+#viewer dl.filmsum .muted{color:var(--muted)}
+#viewer .filmthumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px}
+#viewer .filmthumbs figure{margin:0}
+#viewer .filmthumbs img{display:block;width:100%;height:auto;border:1px solid var(--line);background:#fff}
+#viewer .filmthumbs figcaption{font-size:12px;color:var(--muted)}
+#viewer #filmCard progress{width:100%;height:8px;accent-color:var(--ink)}
+#viewer #filmCard a{color:inherit;text-decoration-color:var(--b);text-underline-offset:3px}
 #viewer .artgrid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:16px}
 #viewer ol.plain{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:5px}
 #viewer code{font-family:var(--mono);font-size:.92em;background:var(--panel2);padding:1px 4px;border-radius:2px}
 @media (max-width: 1160px){
+#viewer .filmgrid{grid-template-columns:270px minmax(0,1fr)}
+#viewer .filmgrid>.filmcol:last-child{grid-column:1/-1}
 #viewer .bench{grid-template-columns:280px minmax(0,1fr)}
 #viewer .sidebar{grid-row:1 / span 2}
 #viewer .stagecard{position:static}
@@ -159,6 +182,7 @@
 #viewer .read{grid-template-columns:repeat(2,minmax(0,1fr))}
 #viewer .legend,#viewer .hint{display:none}
 #viewer .artgrid{grid-template-columns:minmax(0,1fr)}
+#viewer .filmgrid{grid-template-columns:minmax(0,1fr)}
 #viewer h1{font-size:22px}
 }
 @media (prefers-reduced-motion: reduce){
@@ -363,7 +387,45 @@
     </div>
   </div>
 
-<section class="card" aria-label="HD ink builds">
+<section class="card" id="filmCard" aria-label="Films">
+    <div class="row" style="justify-content:space-between"><h2>Films</h2><span class="note">One black-and-white film per screen, interlaced the way the page is set, with a T above and below and a letter for the ink.</span></div>
+    <p class="note" id="filmOff" hidden>Films are made for the first process only: walls over a flat interlace.</p>
+    <div class="filmgrid" id="filmBody">
+      <div class="filmcol">
+        <div class="fields">
+          <label for="fW">Film width</label><span><input id="fW" class="fnum" type="number" min="8" max="60" step="0.5"> in</span>
+          <label for="fDpi">Resolution</label><span><input id="fDpi" class="fnum" type="number" min="150" max="1440" step="1"> dpi</span>
+          <label for="fChoke" title="How far the white is pulled in from the edge of the colour printed on it.">Underbase choke</label><span><input id="fChoke" class="fnum" type="number" min="0" max="1" step="0.01"> mm</span>
+          <label for="fRaise" title="Black narrower than this stays flat: the HD stencil cannot hold it.">Raise black wider than</label><span><input id="fRaise" class="fnum" type="number" min="0" max="3" step="0.05"> mm</span>
+        </div>
+        <h3>Films to make</h3>
+        <div class="seg filmseg" role="group" aria-label="Films to make"><label title="White underbase and white"><input type="checkbox" id="fOnW">W</label><label title="Cyan"><input type="checkbox" id="fOnC">C</label><label title="Magenta"><input type="checkbox" id="fOnM">M</label><label title="Yellow"><input type="checkbox" id="fOnY">Y</label><label title="Black"><input type="checkbox" id="fOnK">K</label><label title="HD: ridges and raised black"><input type="checkbox" id="fOnH">H</label></div>
+        <h3>Raise the black in HD on</h3>
+        <div id="filmRaise" class="raise"></div>
+        <label class="check"><input type="checkbox" id="fCmyK"><span>Print three-colour black as K</span></label>
+        <label class="check"><input type="checkbox" id="fMirror"><span>Mirror the films</span></label>
+      </div>
+      <div class="filmcol">
+        <div class="row" style="justify-content:space-between"><h3>Proof</h3>
+          <span class="row"><select id="fProof" aria-label="What the proof shows" style="width:auto"><option value="print">All inks as printed</option><option value="W">Film W</option><option value="C">Film C</option><option value="M">Film M</option><option value="Y">Film Y</option><option value="K">Film K</option><option value="H">Film H</option></select>
+          <select id="fZoom" aria-label="Proof zoom" style="width:auto"><option value="1">100%</option><option value="2">200%</option><option value="4">400%</option></select></span></div>
+        <div class="proofbox"><canvas id="filmProof" role="img" aria-label="The films at the loupe, drawn film pixel for film pixel"></canvas></div>
+        <p class="note" id="filmProofCap"></p>
+        <p class="note" id="filmInks"></p>
+      </div>
+      <div class="filmcol">
+        <dl class="filmsum" id="filmSummary"></dl>
+        <div class="warns" id="filmWarns"></div>
+        <div class="row"><button type="button" id="filmExport">Export films (PDF)</button><button type="button" class="ghost" id="filmLoad" hidden>Read full-size art</button></div>
+        <progress id="filmBar" max="1" value="0" hidden></progress>
+        <p class="note" id="filmStatus" aria-live="polite"></p>
+        <div id="filmResult"></div>
+      </div>
+    </div>
+    <p class="note">How the films are cut. Every pixel of the art is put on the nearest solid process build, so the art should already be screened (a Hard Mix fill in Photoshop does it). Black knocks out the colour and the white under it. W is everything that is not black, pulled in by the choke. Where the page puts ridges, the stripe seen from the right runs from each ridge’s centre to the split and the other stripe from the split to the next centre, so the seams sit under the HD lines. H carries the ridges, plus the black of any layer ticked above where it is wide enough to hold. The T’s stem is the artboard’s centre line; each film’s letter has its own place beside it, so stacked films read W C M Y K H.</p>
+  </section>
+
+  <section class="card" aria-label="HD ink builds">
     <div class="row" style="justify-content:space-between"><h2>HD ink builds</h2><span class="note">Click a row to load it. Each row uses the narrowest ridge and gap that stencil can hold.</span></div>
     <div class="tablewrap"><table>
       <thead><tr><th>Capillary film</th><th class="n">Cured height</th><th class="n">Narrowest line / gap</th><th class="n">Tightest pitch</th><th class="n">Each stripe</th><th class="n">Clean view, each side</th><th class="n">Register within</th></tr></thead>
@@ -1607,7 +1669,7 @@ var DEF_ART={s:'data:image/webp;base64,UklGRuTyAQBXRUJQVlA4WAoAAAAQAAAARQUARQUAQ
     if (ART) $('printSub').textContent = 'Changing art is ' + fx1((ART.zx1 - ART.zx0) / ART.W * S.printIn) + ' in wide' + (S.curve ? ', ' + Math.round((ART.zx1 - ART.zx0) / ART.W * mmW() / radius() * 180 / Math.PI) + '° of chest' : '');
     $('loupeSpanOut').textContent = S.loupeSpan + ' mm';
   }
-  var raf = 0, dirtyGeom = false, dirtyArt = false;
+  var raf = 0, dirtyGeom = false, dirtyArt = false, hooks = []; // hooks: called after every redraw (the Films panel listens)
   function geometryChanged() { dirtyGeom = true; gcache.clear(); schedule(); }
   function schedule() { if (!raf) raf = requestAnimationFrame(frame); }
   function frame() {
@@ -1617,6 +1679,7 @@ var DEF_ART={s:'data:image/webp;base64,UklGRuTyAQBXRUJQVlA4WAoAAAAQAAAARQUARQUAQ
     var C = render($('shirt'), false); render($('loupe'), true); drawStateBar(C);
     var bar = $('loupeBar'), lc = $('loupe'), mmPx = lc.clientWidth / S.loupeSpan, unit = S.loupeSpan > 20 ? 5 : 1; bar.style.width = (unit * mmPx).toFixed(1) + 'px'; $('loupeLbl').textContent = unit + ' mm';
     if (dirtyGeom) { drawPlan(); readouts(); drawBuilds(); labels(); dirtyGeom = false; persistSoon(); } else drawPlanEye();
+    for (var hk = 0; hk < hooks.length; hk++) { try { hooks[hk](); } catch (e) { if (window.console) console.error(e); } }
     drawSection();
     $('hudAngle').textContent = angleText(S.angle);
     var gc = geom(localAngle(0)), st = classify(gc);
@@ -1758,9 +1821,9 @@ var DEF_ART={s:'data:image/webp;base64,UklGRuTyAQBXRUJQVlA4WAoAAAAQAAAARQUARQUAQ
     if (merge) { W = ART.W; H = ART.H; }
     var slots = { a: nodes.some(function (n) { return n.assign === 'a'; }), b: nodes.some(function (n) { return n.assign === 'b'; }) };
     imgs.forEach(function (x) { var r = imgToRGBA(x.im, W, H), ex = nodes.filter(function (n) { return n.name === x.f.name; })[0];
-      if (ex) { ex.rgba = r; ex.bb = null; ex.thumb = thumbOf(r, W, H); return; }
+      if (ex) { ex.rgba = r; ex.bb = null; ex.file = x.f; ex.thumb = thumbOf(r, W, H); return; }
       var as = assignMem[x.f.name] || (/ledge|stand|left|[-_ ]a\./i.test(x.f.name) ? 'a' : /jump|leap|right|[-_ ]b\./i.test(x.f.name) ? 'b' : null);
-      nodes.push({ name: x.f.name, assign: as, kind: 'image', rgba: r, thumb: thumbOf(r, W, H) }); if (as) slots[as] = true; });
+      nodes.push({ name: x.f.name, assign: as, kind: 'image', rgba: r, thumb: thumbOf(r, W, H), file: x.f }); if (as) slots[as] = true; }); // file: the film exporter reads it again at full size
     nodes.forEach(function (n) { if (!n.assign) { n.assign = !slots.a ? 'a' : !slots.b ? 'b' : 'both'; slots[n.assign] = true; } });
     ART = { W: W, H: H, docW: imgs[0].im.naturalWidth, dpi: 0, src: imgs.length > 1 ? imgs.length + ' images' : imgs[0].f.name, nodes: nodes, imageSet: true };
     artChanged(false); showPsdWarnings();
@@ -1812,9 +1875,408 @@ var DEF_ART={s:'data:image/webp;base64,UklGRuTyAQBXRUJQVlA4WAoAAAAQAAAARQUARQUAQ
       });
     });
   })();
-  window.__lent = { S: S, buildSegs: geom, geom: geom, classify: classify, ranges: ranges, loadFiles: loadFiles, startWatch: startWatch, multi: multi, d3Of: d3Of, psdNodes: psdNodes, art: function () { return ART; } };
+  window.__lent = { S: S, buildSegs: geom, geom: geom, classify: classify, ranges: ranges, loadFiles: loadFiles, startWatch: startWatch, multi: multi, d3Of: d3Of, psdNodes: psdNodes, keyOf: keyOf, hooks: hooks, art: function () { return ART; } };
 
   loadDefault().catch(function (e) { $('psdWarns').innerHTML = '<div class="warn"><b>Built-in artwork failed to load.</b> Drop your PSD below to continue.</div>'; });
+})();
+
+</script>
+<script>
+/* Film positives for the walls-over-a-flat-interlace process.
+   One 1-bit film per screen (W C M Y K H), interlaced the way the page is set, with T marks and a letter, on pages one film wide.
+
+   The art must already be solid process builds (every pixel one of white, C, M, Y, their overprints, or black), which is what a
+   Hard Mix fill gives in Photoshop. Each layer is read from the PNG linked in the viewer, at whatever size it was exported, and
+   every pixel is put on the nearest solid build. Black knocks everything out under it: no colour and no white beneath K.
+
+   Coordinates: "art px" are film pixels across the whole artboard (print width x resolution). A ridge is centred on the
+   artboard's centre line and every pitch from it. The stripe seen from the right runs from a ridge centre to the split;
+   the other runs from the split to the next ridge centre, so the seam between neighbours is hidden under the ridge. */
+(function () {
+  'use strict';
+  var L = window.__lent; if (!L || !document.getElementById('filmCard')) return;
+  var S = L.S, $ = function (id) { return document.getElementById(id); };
+  var BC = 1, BM = 2, BY = 4, BK = 8, BA = 16, BR = 32; // one byte per pixel: inks, art present, black to raise in HD
+  var FILMS = ['W', 'C', 'M', 'Y', 'K', 'H'];
+  var FILMNAME = { W: 'white', C: 'cyan', M: 'magenta', Y: 'yellow', K: 'black', H: 'HD' };
+  // sRGB of each solid build under U.S. Web Coated (SWOP) v2, relative colorimetric with black point compensation.
+  // Every build that contains K lands within a few levels of the last two, so K is read as K alone.
+  var SOLIDS = [[255, 255, 255, BA], [0, 174, 239, BA | BC], [236, 0, 140, BA | BM], [255, 242, 0, BA | BY], [237, 28, 36, BA | BM | BY], [0, 166, 80, BA | BC | BY],
+    [46, 48, 146, BA | BC | BM], [54, 54, 57, BA | BC | BM | BY], [35, 31, 32, BA | BK], [0, 0, 0, BA | BK]];
+  var CLASSNAME = {}; CLASSNAME[BA] = 'white'; CLASSNAME[BA | BC] = 'C'; CLASSNAME[BA | BM] = 'M'; CLASSNAME[BA | BY] = 'Y'; CLASSNAME[BA | BM | BY] = 'M+Y'; CLASSNAME[BA | BC | BY] = 'C+Y';
+  CLASSNAME[BA | BC | BM] = 'C+M'; CLASSNAME[BA | BC | BM | BY] = 'C+M+Y'; CLASSNAME[BA | BK] = 'black';
+  var CLUT = new Uint8Array(32768); // 5 bits per channel -> class; bit 64 marks a colour more than about 40 levels from every solid
+  (function () {
+    for (var i = 0; i < 32768; i++) { var r = ((i >> 10) & 31) * 8 + 4, g = ((i >> 5) & 31) * 8 + 4, b = (i & 31) * 8 + 4, best = 0, bd = 1e9;
+      for (var k = 0; k < SOLIDS.length; k++) { var s = SOLIDS[k], d = (r - s[0]) * (r - s[0]) + (g - s[1]) * (g - s[1]) + (b - s[2]) * (b - s[2]); if (d < bd) { bd = d; best = s[3]; } }
+      CLUT[i] = best | (bd > 1600 ? 64 : 0); }
+  })();
+  function classOf(r, g, b) { return CLUT[(r >> 3) << 10 | (g >> 3) << 5 | (b >> 3)]; }
+  function classExact(r, g, b) { // the same answer without the table's rounding; used where there are few colours to look up (a palette)
+    var best = 0, bd = 1e9; for (var k = 0; k < SOLIDS.length; k++) { var s = SOLIDS[k], d = (r - s[0]) * (r - s[0]) + (g - s[1]) * (g - s[1]) + (b - s[2]) * (b - s[2]); if (d < bd) { bd = d; best = s[3]; } }
+    return best | (bd > 1600 ? 64 : 0); }
+
+  // ---------- options ----------
+  var KEY = 'lenticular-shirt-films.v1';
+  var F = { filmW: 24, dpi: 600, choke: 0.1, minRaise: 0.5, cmyK: false, mirror: false, on: { W: true, C: true, M: true, Y: true, K: true, H: true }, raise: {}, proof: 'print', zoom: 2 };
+  try { var sv = JSON.parse(localStorage.getItem(KEY) || '{}'); Object.keys(F).forEach(function (k) { if (sv[k] !== undefined && typeof sv[k] === typeof F[k]) F[k] = sv[k]; }); } catch (e) { }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(F)); } catch (e) { } }
+  var MINRUN = 1.5, FILLGAP = 0.8; // mm: ridge pieces shorter than this are dropped, breaks shorter than this are bridged
+  function tick() { return new Promise(function (r) { setTimeout(r, 0); }); }
+
+  // ---------- layers as planes of class bytes, stored row by row over the span that has art ----------
+  function newPlane(W, H) { return { W: W, H: H, rows: new Array(H), bb: [W, -1, H, -1], n: new Float64Array(64), off: 0, px: 0 }; }
+  function putRow(pl, y, cls) {
+    var W = pl.W, a = 0, b = W - 1; while (a < W && !cls[a]) a++; if (a === W) return; while (!cls[b]) b--;
+    var d = new Uint8Array(b - a + 1), x, c;
+    for (x = a; x <= b; x++) { c = cls[x]; if (c & 64) { pl.off++; c &= 63; } d[x - a] = c; if (c) { pl.n[c]++; pl.px++; } }
+    pl.rows[y] = { x0: a, d: d }; var bb = pl.bb; if (a < bb[0]) bb[0] = a; if (b > bb[1]) bb[1] = b; if (y < bb[2]) bb[2] = y; if (y > bb[3]) bb[3] = y;
+  }
+  function planeFromRGBA(rgba, W, H) {
+    var pl = newPlane(W, H), cls = new Uint8Array(W), x, y, i;
+    for (y = 0; y < H; y++) { for (x = 0, i = y * W * 4; x < W; x++, i += 4) cls[x] = rgba[i + 3] < 128 ? 0 : classOf(rgba[i], rgba[i + 1], rgba[i + 2]); putRow(pl, y, cls); }
+    return pl;
+  }
+  // A PNG read straight from the file a row at a time, so a 10800 px layer never has to exist as one decoded bitmap.
+  async function readPNG(file, progress) {
+    var hd = new DataView(await file.slice(0, 33).arrayBuffer());
+    if (hd.byteLength < 33 || hd.getUint32(0) !== 0x89504E47 || hd.getUint32(4) !== 0x0D0A1A0A) throw new Error('not a PNG');
+    var W = hd.getUint32(16), H = hd.getUint32(20), depth = hd.getUint8(24), ct = hd.getUint8(25);
+    if (hd.getUint8(28)) throw new Error('interlaced');
+    var ch = { 0: 1, 2: 3, 3: 1, 4: 2, 6: 4 }[ct]; if (!ch) throw new Error('unknown PNG colour type');
+    var bits = ch * depth, bpp = Math.max(1, bits >> 3), rb = Math.ceil(W * bits / 8), pl = newPlane(W, H), pal = null, palC = null, trns = null, cls = new Uint8Array(W);
+    var ds = new DecompressionStream('deflate'), wr = ds.writable.getWriter(), rd = ds.readable.getReader(), feedErr = null;
+    var feeding = (async function () {
+      try {
+        for (var pos = 8; ;) { var h = new DataView(await file.slice(pos, pos + 8).arrayBuffer()); if (h.byteLength < 8) break;
+          var len = h.getUint32(0), type = String.fromCharCode(h.getUint8(4), h.getUint8(5), h.getUint8(6), h.getUint8(7));
+          if (type === 'PLTE') pal = new Uint8Array(await file.slice(pos + 8, pos + 8 + len).arrayBuffer());
+          else if (type === 'tRNS') trns = new Uint8Array(await file.slice(pos + 8, pos + 8 + len).arrayBuffer());
+          else if (type === 'IDAT') { for (var o = 0; o < len; o += 1 << 20) await wr.write(new Uint8Array(await file.slice(pos + 8 + o, pos + 8 + Math.min(len, o + (1 << 20))).arrayBuffer())); }
+          else if (type === 'IEND') break;
+          pos += 12 + len; }
+        await wr.close();
+      } catch (e) { feedErr = e; try { await wr.abort(e); } catch (e2) { } }
+    })();
+    function convert(line) {
+      var x, i, v, st, o;
+      if (ct === 3) {
+        if (!palC) { palC = new Uint8Array(256); if (!pal) throw new Error('PNG has no palette'); for (i = 0; i * 3 < pal.length; i++) palC[i] = (trns && i < trns.length && trns[i] < 128) ? 0 : classExact(pal[i * 3], pal[i * 3 + 1], pal[i * 3 + 2]); }
+        if (depth === 8) for (x = 0; x < W; x++) cls[x] = palC[line[x]];
+        else { var mask = (1 << depth) - 1; for (x = 0; x < W; x++) { i = x * depth; cls[x] = palC[(line[i >> 3] >> (8 - depth - (i & 7))) & mask]; } }
+      } else if (ct === 6) { st = depth === 16 ? 8 : 4; o = depth === 16 ? 2 : 1; for (x = 0, i = 0; x < W; x++, i += st) cls[x] = line[i + 3 * o] < 128 ? 0 : classOf(line[i], line[i + o], line[i + 2 * o]); }
+      else if (ct === 2) { st = depth === 16 ? 6 : 3; o = depth === 16 ? 2 : 1; var kr = -1, kg = -1, kb = -1; if (trns && trns.length >= 6) { kr = trns[depth === 16 ? 0 : 1]; kg = trns[depth === 16 ? 2 : 3]; kb = trns[depth === 16 ? 4 : 5]; }
+        for (x = 0, i = 0; x < W; x++, i += st) cls[x] = (line[i] === kr && line[i + o] === kg && line[i + 2 * o] === kb) ? 0 : classOf(line[i], line[i + o], line[i + 2 * o]); }
+      else if (ct === 4) { st = depth === 16 ? 4 : 2; o = depth === 16 ? 2 : 1; for (x = 0, i = 0; x < W; x++, i += st) { v = line[i]; cls[x] = line[i + o] < 128 ? 0 : classOf(v, v, v); } }
+      else { var mx = (1 << Math.min(depth, 8)) - 1; for (x = 0; x < W; x++) { if (depth >= 8) v = line[x * (depth >> 3)]; else { i = x * depth; v = Math.round(((line[i >> 3] >> (8 - depth - (i & 7))) & mx) * 255 / mx); } cls[x] = classOf(v, v, v); } }
+    }
+    var cur = new Uint8Array(rb + 1), prev = new Uint8Array(rb), line = new Uint8Array(rb), fill = 0, y = 0, t0 = Date.now();
+    for (; ;) {
+      var r = await rd.read(); if (r.done) break; var buf = r.value, p = 0;
+      while (p < buf.length && y < H) {
+        var take = Math.min(rb + 1 - fill, buf.length - p); cur.set(buf.subarray(p, p + take), fill); fill += take; p += take;
+        if (fill === rb + 1) {
+          var ft = cur[0], i, a, b, c, pa, pb, pc, q;
+          if (ft === 0) line.set(cur.subarray(1));
+          else if (ft === 1) { for (i = 0; i < rb; i++) line[i] = cur[i + 1] + (i >= bpp ? line[i - bpp] : 0); }
+          else if (ft === 2) { for (i = 0; i < rb; i++) line[i] = cur[i + 1] + prev[i]; }
+          else if (ft === 3) { for (i = 0; i < rb; i++) line[i] = cur[i + 1] + (((i >= bpp ? line[i - bpp] : 0) + prev[i]) >> 1); }
+          else if (ft === 4) { for (i = 0; i < rb; i++) { a = i >= bpp ? line[i - bpp] : 0; b = prev[i]; c = i >= bpp ? prev[i - bpp] : 0; q = a + b - c; pa = Math.abs(q - a); pb = Math.abs(q - b); pc = Math.abs(q - c); line[i] = cur[i + 1] + (pa <= pb && pa <= pc ? a : pb <= pc ? b : c); } }
+          else throw new Error('bad PNG filter');
+          convert(line); putRow(pl, y, cls); var t = prev; prev = line; line = t; fill = 0; y++;
+          if ((y & 255) === 0 && Date.now() - t0 > 60) { if (progress) progress(y / H); await tick(); t0 = Date.now(); }
+        }
+      }
+    }
+    await feeding; if (feedErr) throw feedErr; if (y < H) throw new Error('the PNG ended early');
+    return pl;
+  }
+  // Anything the row reader cannot take (interlaced PNG, JPEG, WebP) goes through the browser's own decoder in bands.
+  async function readViaCanvas(file, progress) {
+    var bm = await createImageBitmap(file), W = bm.width, H = bm.height, pl = newPlane(W, H), bh = 256, cv = document.createElement('canvas'); cv.width = W; cv.height = bh;
+    var cx = cv.getContext('2d', { willReadFrequently: true }), cls = new Uint8Array(W);
+    for (var y0 = 0; y0 < H; y0 += bh) { var h = Math.min(bh, H - y0); cx.clearRect(0, 0, W, bh); cx.drawImage(bm, 0, y0, W, h, 0, 0, W, h); var d = cx.getImageData(0, 0, W, h).data;
+      for (var j = 0; j < h; j++) { for (var x = 0, i = j * W * 4; x < W; x++, i += 4) cls[x] = d[i + 3] < 128 ? 0 : classOf(d[i], d[i + 1], d[i + 2]); putRow(pl, y0 + j, cls); }
+      if (progress) progress((y0 + h) / H); await tick(); }
+    if (bm.close) bm.close(); return pl;
+  }
+  async function readFile(file, progress) {
+    if (/\.png$/i.test(file.name) || file.type === 'image/png') { try { return await readPNG(file, progress); } catch (e) { if (!/interlaced|not a PNG/.test(e.message)) throw e; } }
+    return readViaCanvas(file, progress);
+  }
+
+  var cache = new Map(); // layer key -> { id, plane, full }
+  function fileId(f) { return f.name + '|' + f.size + '|' + f.lastModified; }
+  function planeFor(n) {
+    var ART = L.art(), k = L.keyOf(n), c = cache.get(k);
+    if (c && c.full && n.file && c.id === fileId(n.file)) return c.plane;
+    if (c && !c.full && c.id === n.rgba) return c.plane;
+    if (!n.rgba) return null;
+    c = { id: n.rgba, plane: planeFromRGBA(n.rgba, ART.W, ART.H), full: false }; cache.set(k, c); return c.plane;
+  }
+  function isFull(n) { var c = cache.get(L.keyOf(n)); return !!(c && c.full && n.file && c.id === fileId(n.file)); }
+  function inScene(n) { return L.multi() ? L.d3Of(n).on : n.assign !== 'off'; }
+  function isStatic(n) { return L.multi() ? L.d3Of(n).mm === 0 : n.assign === 'both'; }
+  function raiseOn(n) { var v = F.raise[L.keyOf(n)]; return v === undefined ? isStatic(n) : v; }
+  var loadingFull = false;
+  async function loadFull(status) {
+    var ART = L.art(); if (!ART || loadingFull) return; loadingFull = true;
+    try {
+      var todo = ART.nodes.filter(function (n) { return inScene(n) && n.file && !isFull(n); });
+      for (var i = 0; i < todo.length; i++) { var n = todo[i], f = n.file;
+        var pl = await readFile(f, function (p) { if (status) status('Reading ' + f.name + ' (' + (i + 1) + ' of ' + todo.length + ')', (i + p) / todo.length); });
+        cache.set(L.keyOf(n), { id: fileId(f), plane: pl, full: true }); }
+    } finally { loadingFull = false; }
+  }
+
+  // ---------- the scene: geometry in film pixels, the layers of each view, where the ridges run ----------
+  function scene() {
+    var ART = L.art(); if (!ART || !ART.Z || S.proc !== 'barrier') return null;
+    var dpi = F.dpi, ppmm = dpi / 25.4, Wf = Math.round(S.printIn * dpi), Hf = Math.round(Wf * ART.H / ART.W), xc = Math.round(Wf / 2);
+    var P = Math.max(6, Math.round(S.pitch * ppmm)), w = Math.max(2, Math.min(P - 2, Math.round(S.ridge * ppmm))), g = P - w, wl = w >> 1, wr = w - wl, mu = L.multi(), N = mu ? S.views : 2;
+    var sel = new Uint8Array(P), selDead = new Uint8Array(P), rid = new Uint8Array(P), ph, k, edges = [];
+    if (mu) { for (k = 0; k <= N; k++) edges.push(k === 0 ? 0 : k === N ? P : wr + Math.round(k * g / N)); for (ph = 0; ph < P; ph++) { k = 0; while (ph >= edges[k + 1]) k++; sel[ph] = selDead[ph] = S.swap ? N - 1 - k : k; } }
+    else { var a = Math.round(g * S.split / 100), c = Math.min(Math.max(0, Math.round(S.guard * ppmm)), g), d0 = Math.max(wr, Math.min(P - wl - c, wr + a - (c >> 1))), d1 = d0 + c, first = S.swap ? 1 : 0;
+      for (ph = 0; ph < P; ph++) { sel[ph] = ph < d0 ? first : ph < d1 ? 255 : 1 - first; selDead[ph] = ph < wr + a ? first : 1 - first; } edges = [0, d0, d1, P]; }
+    for (ph = 0; ph < P; ph++) rid[ph] = (ph < wr || ph >= P - wl) ? 1 : 0;
+    var views = [], used = [], bx0 = Wf, bx1 = -1, by0 = Hf, by1 = -1;
+    for (k = 0; k < N; k++) views.push([]);
+    function grow(pl, dx) { if (pl.bb[1] < 0) return; var sx = Wf / pl.W, sy = Hf / pl.H; bx0 = Math.min(bx0, Math.floor(pl.bb[0] * sx) + dx); bx1 = Math.max(bx1, Math.ceil((pl.bb[1] + 1) * sx) + dx); by0 = Math.min(by0, Math.floor(pl.bb[2] * sy)); by1 = Math.max(by1, Math.ceil((pl.bb[3] + 1) * sy)); }
+    ART.nodes.forEach(function (n) {
+      if (!inScene(n)) return; var pl = planeFor(n); if (!pl) return; var raise = raiseOn(n), dx;
+      if (mu) { var mm = L.d3Of(n).mm; for (k = 0; k < N; k++) { dx = Math.round(mm * (0.5 - k / (N - 1)) * ppmm); views[k].push({ pl: pl, dx: dx, raise: raise }); grow(pl, dx); } }
+      else { var e = { pl: pl, dx: 0, raise: raise }; if (n.assign !== 'b') views[0].push(e); if (n.assign !== 'a') views[1].push(e); grow(pl, 0); }
+      used.push({ n: n, pl: pl, full: isFull(n) });
+    });
+    // ridges: the page's zone, sampled down each ridge's centre line, with short breaks bridged and short pieces dropped
+    var Z = ART.Z, ZW = ART.W, ZH = ART.H, zx = new Int32Array(Wf), zy = new Int32Array(Hf), x, y;
+    for (x = 0; x < Wf; x++) zx[x] = Math.min(ZW - 1, Math.floor(x * ZW / Wf)); for (y = 0; y < Hf; y++) zy[y] = Math.min(ZH - 1, Math.floor(y * ZH / Hf));
+    var nLo = Math.floor((-xc - wr) / P), nHi = Math.ceil((Wf - xc + wl) / P), nR = nHi - nLo + 1, RUN = new Uint8Array(nR * Hf), minLen = Math.round(MINRUN * ppmm), minGap = Math.round(FILLGAP * ppmm), ridges = 0, ridgeLen = 0;
+    for (var n = nLo; n <= nHi; n++) { x = xc + n * P; if (x < 0 || x >= Wf) continue; var o = (n - nLo) * Hf, zc = zx[x], y0, on = false;
+      for (y = 0; y < Hf; y++) RUN[o + y] = Z[zy[y] * ZW + zc] >= 128 ? 1 : 0;
+      for (y = 0, y0 = -1; y <= Hf; y++) { var v = y < Hf && RUN[o + y]; if (!v && y0 < 0) y0 = y; if (v && y0 >= 0) { if (y0 > 0 && y - y0 < minGap) RUN.fill(1, o + y0, o + y); y0 = -1; } }
+      for (y = 0, y0 = -1; y <= Hf; y++) { v = y < Hf && RUN[o + y]; if (v && y0 < 0) y0 = y; if (!v && y0 >= 0) { if (y - y0 < minLen) RUN.fill(0, o + y0, o + y); else { on = true; ridgeLen += y - y0; bx0 = Math.min(bx0, x - wl); bx1 = Math.max(bx1, x + wr); by0 = Math.min(by0, y0); by1 = Math.max(by1, y); } y0 = -1; } }
+      if (on) ridges++; }
+    return { ART: ART, dpi: dpi, ppmm: ppmm, Wf: Wf, Hf: Hf, xc: xc, P: P, w: w, g: g, wl: wl, wr: wr, N: N, mu: mu, sel: sel, selDead: selDead, rid: rid, edges: edges, views: views, used: used,
+      Z: Z, ZW: ZW, zx: zx, zy: zy, nLo: nLo, RUN: RUN, ridges: ridges, ridgeLen: ridgeLen, choke: Math.max(0, Math.round(F.choke * ppmm)), rr: Math.max(0, Math.floor(Math.round(F.minRaise * ppmm) / 2)), cmyK: F.cmyK,
+      bb: bx1 < 0 ? null : [Math.max(0, bx0), Math.min(Wf, bx1), Math.max(0, by0), Math.min(Hf, by1)] };
+  }
+  function paintRow(row, X0, Wd, e, y, G) {
+    var pl = e.pl, r = pl.rows[pl.H === G.Hf ? y : Math.min(pl.H - 1, Math.floor((y + 0.5) * pl.H / G.Hf))]; if (!r) return;
+    var d = r.d, dx = e.dx, raise = e.raise, cmyK = G.cmyK, xs, xe, x, c;
+    if (pl.W === G.Wf) { xs = Math.max(X0, r.x0 + dx); xe = Math.min(X0 + Wd, r.x0 + d.length + dx);
+      for (x = xs; x < xe; x++) { c = d[x - dx - r.x0]; if (c) row[x - X0] = (raise && ((c & BK) || (cmyK && (c & 7) === 7))) ? c | BR : c; } }
+    else { var sc = pl.W / G.Wf, inv = G.Wf / pl.W; xs = Math.max(X0, Math.floor(r.x0 * inv) + dx - 1); xe = Math.min(X0 + Wd, Math.ceil((r.x0 + d.length) * inv) + dx + 1);
+      for (x = xs; x < xe; x++) { var sx = Math.floor((x - dx + 0.5) * sc) - r.x0; if (sx < 0 || sx >= d.length) continue; c = d[sx]; if (c) row[x - X0] = (raise && ((c & BK) || (cmyK && (c & 7) === 7))) ? c | BR : c; } }
+  }
+  // Square erosion or dilation by r pixels; everything outside the buffer counts as empty.
+  function morph(src, W, H, r, erode) {
+    if (r <= 0) return src; var tmp = new Uint8Array(W * H), out = new Uint8Array(W * H), pre = new Int32Array(W + 1), cnt = new Int32Array(W), full = 2 * r + 1, x, y, o;
+    for (y = 0; y < H; y++) { o = y * W; for (x = 0; x < W; x++) pre[x + 1] = pre[x] + src[o + x];
+      for (x = 0; x < W; x++) { var s = pre[Math.min(W, x + r + 1)] - pre[Math.max(0, x - r)]; tmp[o + x] = erode ? (s === full ? 1 : 0) : (s ? 1 : 0); } }
+    for (y = 0; y < Math.min(H, r); y++) { o = y * W; for (x = 0; x < W; x++) cnt[x] += tmp[o + x]; }
+    for (y = 0; y < H; y++) { var add = y + r, del = y - r - 1; if (add < H) { o = add * W; for (x = 0; x < W; x++) cnt[x] += tmp[o + x]; } if (del >= 0) { o = del * W; for (x = 0; x < W; x++) cnt[x] -= tmp[o + x]; }
+      o = y * W; for (x = 0; x < W; x++) out[o + x] = erode ? (cnt[x] === full ? 1 : 0) : (cnt[x] ? 1 : 0); }
+    return out;
+  }
+  // The six films over a window of the artboard, as one byte per pixel (1 = ink).
+  function region(G, x0, y0, w, h) {
+    var halo = Math.max(G.choke, 2 * G.rr) + 1, X0 = x0 - halo, Y0 = y0 - halo, Wd = w + 2 * halo, Hd = h + 2 * halo, n = Wd * Hd, nv = G.views.length,
+      cls = new Uint8Array(n), vr = [], v, i, j, x, y, o, c, k, P = G.P;
+    for (v = 0; v < nv; v++) vr.push(new Uint8Array(Wd));
+    var colSel = new Uint8Array(Wd), colDead = new Uint8Array(Wd), colRid = new Int32Array(Wd), colIn = new Uint8Array(Wd);
+    for (i = 0; i < Wd; i++) { x = X0 + i; colRid[i] = -1; if (x < 0 || x >= G.Wf) continue; colIn[i] = 1; var q = x - G.xc, ph = ((q % P) + P) % P; colSel[i] = G.sel[ph]; colDead[i] = G.selDead[ph]; if (G.rid[ph]) colRid[i] = Math.floor((q + G.wl) / P) - G.nLo; }
+    for (j = 0; j < Hd; j++) { y = Y0 + j; if (y < 0 || y >= G.Hf) continue;
+      for (v = 0; v < nv; v++) { vr[v].fill(0); var es = G.views[v]; for (var e = 0; e < es.length; e++) paintRow(vr[v], X0, Wd, es[e], y, G); }
+      o = j * Wd; var zr = G.zy[y] * G.ZW;
+      for (i = 0; i < Wd; i++) { if (!colIn[i]) continue; v = colSel[i]; if (v === 255) { if (G.Z[zr + G.zx[X0 + i]] >= 128) continue; v = colDead[i]; } cls[o + i] = vr[v][i]; } }
+    var mW = new Uint8Array(n), mC = new Uint8Array(n), mM = new Uint8Array(n), mY = new Uint8Array(n), mK = new Uint8Array(n), mR = new Uint8Array(n), mH = new Uint8Array(n), anyR = false;
+    for (i = 0; i < n; i++) { c = cls[i]; if (!c) continue; k = (c & BK) || (G.cmyK && (c & 7) === 7);
+      if (k) { mK[i] = 1; if (c & BR) { mR[i] = 1; anyR = true; } } else { mW[i] = 1; if (c & BC) mC[i] = 1; if (c & BM) mM[i] = 1; if (c & BY) mY[i] = 1; } }
+    if (G.choke > 0) mW = morph(mW, Wd, Hd, G.choke, true);
+    if (anyR && G.rr > 0) mR = morph(morph(mR, Wd, Hd, G.rr, true), Wd, Hd, G.rr, false); // only black wide enough for the HD stencil is raised
+    for (j = 0; j < Hd; j++) { y = Y0 + j; if (y < 0 || y >= G.Hf) continue; o = j * Wd; zr = G.zy[y] * G.ZW;
+      for (i = 0; i < Wd; i++) { var ri = colRid[i]; if (ri >= 0 && G.RUN[ri * G.Hf + y]) mH[o + i] = 1; else if (anyR && mR[o + i] && G.Z[zr + G.zx[X0 + i]] < 128) mH[o + i] = 1; } }
+    function crop(m) { var out = new Uint8Array(w * h); for (var jj = 0; jj < h; jj++) out.set(m.subarray((jj + halo) * Wd + halo, (jj + halo) * Wd + halo + w), jj * w); return out; }
+    return { W: crop(mW), C: crop(mC), M: crop(mM), Y: crop(mY), K: crop(mK), H: crop(mH) };
+  }
+
+  // ---------- the film page: the art's bounding box centred across the film, a T above and below on the centre line ----------
+  function pageOf(G) {
+    if (!G || !G.bb) return null; var d = G.dpi, inch = function (v) { return Math.round(v * d); };
+    var pad = inch(0.15), bx0 = Math.max(0, G.bb[0] - pad), bx1 = Math.min(G.Wf, G.bb[1] + pad), by0 = Math.max(0, G.bb[2] - pad), by1 = Math.min(G.Hf, G.bb[3] + pad), bw = bx1 - bx0, bh = by1 - by0;
+    var W = inch(F.filmW), th = inch(0.47), tw = inch(0.40), ts = inch(0.09), gap = inch(0.25), margin = inch(0.35), side = inch(0.25);
+    var offX = Math.round((W - bw) / 2) - bx0, offY = margin + th + gap - by0, H = margin + th + gap + bh + gap + th + margin, cx = G.xc + offX;
+    return { W: W, H: H, bx0: bx0, by0: by0, bw: bw, bh: bh, offX: offX, offY: offY, cx: cx, th: th, tw: tw, ts: ts, topT: margin, botT: margin + th + gap + bh + gap, slot0: Math.round(tw / 2) + inch(0.3), slot: inch(0.75),
+      fits: bw + 2 * side <= W && cx - tw / 2 >= 0 && cx + tw / 2 + inch(0.3) + 6 * inch(0.75) <= W };
+  }
+  var glyphs = {};
+  function glyph(ch, capH) { // a bold sans capital, rasterised to ink / no ink
+    var key = ch + capH; if (glyphs[key]) return glyphs[key];
+    var fs = Math.round(capH / 0.716), cv = document.createElement('canvas'), cx = cv.getContext('2d'), font = 'bold ' + fs + 'px "Helvetica Neue", Helvetica, Arial, sans-serif'; cx.font = font;
+    var gw = Math.ceil(cx.measureText(ch).width) + 4; cv.width = gw; cv.height = capH + 4; cx = cv.getContext('2d'); cx.font = font; cx.textBaseline = 'alphabetic'; cx.fillStyle = '#000'; cx.fillText(ch, 2, capH + 1);
+    var d = cx.getImageData(0, 0, gw, capH + 4).data, m = new Uint8Array(gw * (capH + 4)); for (var i = 0; i < m.length; i++) m[i] = d[i * 4 + 3] >= 128 ? 1 : 0;
+    return (glyphs[key] = { w: gw, h: capH + 4, m: m });
+  }
+  function drawMarks(put, PG, slotIndex, letter) {
+    function rect(x, y, w, h) { for (var j = 0; j < h; j++) for (var i = 0; i < w; i++) put(x + i, y + j); }
+    [PG.topT, PG.botT].forEach(function (ty) {
+      rect(PG.cx - Math.round(PG.tw / 2), ty, PG.tw, PG.ts); rect(PG.cx - Math.floor(PG.ts / 2), ty, PG.ts, PG.th); // bar, then the stem on the centre line
+      var gl = glyph(letter, PG.th), gx = PG.cx + PG.slot0 + slotIndex * PG.slot, gy = ty - 1;
+      for (var j = 0; j < gl.h; j++) for (var i = 0; i < gl.w; i++) if (gl.m[j * gl.w + i]) put(gx + i, gy + j);
+    });
+  }
+
+  // ---------- PDF: one page per film, each a single 1-bit image ----------
+  async function deflate(u8) { return new Uint8Array(await new Response(new Blob([u8]).stream().pipeThrough(new CompressionStream('deflate'))).arrayBuffer()); }
+  async function buildPDF(pages, dpi, title) {
+    var enc = new TextEncoder(), parts = [], offs = [], pos = 0;
+    function add(x) { var u = typeof x === 'string' ? enc.encode(x) : x; parts.push(u); pos += u.length; }
+    function obj(n, body) { offs[n] = pos; add(n + ' 0 obj\n'); if (typeof body === 'string') add(body); else body(); add('\nendobj\n'); }
+    add('%PDF-1.4\n'); add(new Uint8Array([37, 226, 227, 207, 211, 10]));
+    var nObj = 3 + pages.length * 3, kids = pages.map(function (p, i) { return (4 + i * 3) + ' 0 R'; }).join(' ');
+    obj(1, '<< /Type /Catalog /Pages 2 0 R >>'); obj(2, '<< /Type /Pages /Count ' + pages.length + ' /Kids [' + kids + '] >>');
+    var now = new Date(), z = function (v) { return (v < 10 ? '0' : '') + v; }, stamp = 'D:' + now.getUTCFullYear() + z(now.getUTCMonth() + 1) + z(now.getUTCDate()) + z(now.getUTCHours()) + z(now.getUTCMinutes()) + z(now.getUTCSeconds()) + 'Z';
+    obj(3, '<< /Title (' + title.replace(/[()\\]/g, ' ') + ') /Creator (Lenticular Shirt Viewer) /Producer (Lenticular Shirt Viewer) /CreationDate (' + stamp + ') >>');
+    for (var i = 0; i < pages.length; i++) { var p = pages[i], n = 4 + i * 3, wpt = (p.W * 72 / dpi).toFixed(3), hpt = (p.H * 72 / dpi).toFixed(3), content = 'q ' + wpt + ' 0 0 ' + hpt + ' 0 0 cm /Im0 Do Q';
+      obj(n, '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ' + wpt + ' ' + hpt + '] /Resources << /XObject << /Im0 ' + (n + 2) + ' 0 R >> >> /Contents ' + (n + 1) + ' 0 R >>');
+      obj(n + 1, '<< /Length ' + content.length + ' >>\nstream\n' + content + '\nendstream');
+      (function (p) { obj(n + 2, function () { add('<< /Type /XObject /Subtype /Image /Width ' + p.W + ' /Height ' + p.H + ' /ColorSpace /DeviceGray /BitsPerComponent 1 /Filter /FlateDecode /Length ' + p.z.length + ' >>\nstream\n'); add(p.z); add('\nendstream'); }); })(p); }
+    var xref = pos, s = 'xref\n0 ' + (nObj + 1) + '\n0000000000 65535 f \n';
+    for (var k = 1; k <= nObj; k++) s += ('0000000000' + offs[k]).slice(-10) + ' 00000 n \n';
+    add(s + 'trailer\n<< /Size ' + (nObj + 1) + ' /Root 1 0 R /Info 3 0 R >>\nstartxref\n' + xref + '\n%%EOF\n');
+    return new Blob(parts, { type: 'application/pdf' });
+  }
+
+  // ---------- export ----------
+  var busy = false, lastURL = null;
+  function status(msg, frac) { $('filmStatus').textContent = msg || ''; var b = $('filmBar'); b.hidden = frac === undefined; if (frac !== undefined) b.value = Math.max(0, Math.min(1, frac)); }
+  async function exportFilms() {
+    if (busy) return; busy = true; $('filmExport').disabled = true; $('filmResult').innerHTML = '';
+    try {
+      await loadFull(status);
+      var G = scene(), PG = pageOf(G); if (!PG) throw new Error('There is no art to put on film.');
+      if (!PG.fits) throw new Error('The art is ' + (PG.bw / G.dpi).toFixed(1) + ' in wide and will not fit across ' + F.filmW + ' in film with its marks.');
+      var films = FILMS.filter(function (f) { return F.on[f]; }), rb = Math.ceil(PG.W / 8), bufs = {}, ink = {}, put = {};
+      films.forEach(function (f) { var b = new Uint8Array(rb * PG.H); b.fill(255); bufs[f] = b; ink[f] = 0;
+        put[f] = function (px, py) { if (px < 0 || py < 0 || px >= PG.W || py >= PG.H) return; if (F.mirror) px = PG.W - 1 - px; b[py * rb + (px >> 3)] &= ~(0x80 >> (px & 7)); }; });
+      var band = 128, t0 = Date.now();
+      for (var y = PG.by0; y < PG.by0 + PG.bh; y += band) { var h = Math.min(band, PG.by0 + PG.bh - y), R = region(G, PG.bx0, y, PG.bw, h);
+        films.forEach(function (f) { var m = R[f], b = bufs[f], n = 0, i, j, o, px, row;
+          for (j = 0; j < h; j++) { o = j * PG.bw; row = (y + j + PG.offY) * rb; for (i = 0; i < PG.bw; i++) if (m[o + i]) { n++; px = PG.bx0 + i + PG.offX; if (F.mirror) px = PG.W - 1 - px; b[row + (px >> 3)] &= ~(0x80 >> (px & 7)); } }
+          ink[f] += n; });
+        if (Date.now() - t0 > 80) { status('Making films', 0.05 + 0.75 * (y - PG.by0) / PG.bh); await tick(); t0 = Date.now(); } }
+      var pages = [], skipped = [];
+      for (var i = 0; i < films.length; i++) { var f = films[i]; if (!ink[f]) { skipped.push(f); continue; }
+        drawMarks(put[f], PG, FILMS.indexOf(f), f); status('Packing film ' + f, 0.8 + 0.2 * i / films.length); await tick();
+        pages.push({ f: f, W: PG.W, H: PG.H, z: await deflate(bufs[f]), thumb: thumbOf(bufs[f], PG.W, PG.H, rb), ink: ink[f] }); bufs[f] = null; }
+      if (!pages.length) throw new Error('Every film came out empty.');
+      var base = ((G.ART.src || 'shirt').replace(/\.[a-z]+$/i, '').replace(/[^\w-]+/g, '-').replace(/^-|-$/g, '') || 'shirt'), name = base + '-films-' + G.dpi + 'dpi.pdf';
+      var blob = await buildPDF(pages, G.dpi, base + ' films: ' + pages.map(function (p) { return p.f; }).join(' '));
+      if (lastURL) URL.revokeObjectURL(lastURL); lastURL = URL.createObjectURL(blob);
+      showResult(pages, PG, G, name, blob.size, skipped);
+      var a = document.createElement('a'); a.href = lastURL; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+      status('');
+    } catch (e) { status(''); $('filmResult').innerHTML = '<div class="warn"><b>Films</b> ' + esc(e && e.message || String(e)) + '</div>'; }
+    busy = false; $('filmExport').disabled = false; refresh(true);
+  }
+  function thumbOf(b, W, H, rb) {
+    var s = Math.ceil(W / 220), tw = Math.floor(W / s), th = Math.floor(H / s), cv = document.createElement('canvas'); cv.width = tw; cv.height = th; var cx = cv.getContext('2d'), im = cx.createImageData(tw, th), d = im.data;
+    for (var ty = 0; ty < th; ty++) for (var tx = 0; tx < tw; tx++) { var n = 0; for (var j = 0; j < s; j += 2) { var row = (ty * s + j) * rb; for (var i = 0; i < s; i += 2) { var px = tx * s + i; if (!(b[row + (px >> 3)] & (0x80 >> (px & 7)))) n++; } }
+      var v = 255 - Math.min(255, Math.round(255 * n / (Math.ceil(s / 2) * Math.ceil(s / 2)))), o = (ty * tw + tx) * 4; d[o] = d[o + 1] = d[o + 2] = v; d[o + 3] = 255; }
+    cx.putImageData(im, 0, 0); return cv.toDataURL('image/png');
+  }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function showResult(pages, PG, G, name, bytes, skipped) {
+    var inW = (PG.W / G.dpi).toFixed(1), inH = (PG.H / G.dpi).toFixed(1);
+    var h = '<p class="note"><a id="filmLink" href="' + lastURL + '" download="' + esc(name) + '">' + esc(name) + '</a> · ' + (bytes / 1048576).toFixed(1) + ' MB · ' + pages.length + ' pages of ' + inW + ' × ' + inH + ' in · ' + (pages.length * PG.H / G.dpi).toFixed(0) + ' in of film' + (F.mirror ? ' · mirrored' : '') + '</p>';
+    if (skipped.length) h += '<p class="note">Left out because nothing prints on them: ' + skipped.join(', ') + '.</p>';
+    h += '<div class="filmthumbs">' + pages.map(function (p) { return '<figure><img alt="Film ' + p.f + '" src="' + p.thumb + '"><figcaption><b>' + p.f + '</b> ' + FILMNAME[p.f] + '</figcaption></figure>'; }).join('') + '</div>';
+    h += '<p class="note">If the download did not start, use the link above. In a page embedded inside another app the download can be blocked; the standalone copy and the slopswap page are not.</p>';
+    $('filmResult').innerHTML = h;
+  }
+
+  // ---------- the panel ----------
+  var lastSig = '', lastZ = null;
+  var INK = { 0: [245, 245, 242], 1: [0, 174, 239], 2: [236, 0, 140], 3: [46, 48, 146], 4: [255, 242, 0], 5: [0, 166, 80], 6: [237, 28, 36], 7: [54, 54, 57] }; // by C | M<<1 | Y<<2
+  function drawProof(G) {
+    var cv = $('filmProof'), box = cv.parentNode.getBoundingClientRect(), cw = Math.max(200, Math.round(box.width)), chh = Math.round(Math.min(360, Math.max(190, cw * 0.56))), z = F.zoom;
+    if (cv.width !== cw || cv.height !== chh) { cv.width = cw; cv.height = chh; }
+    var cx = cv.getContext('2d'), rw = Math.ceil(cw / z), rh = Math.ceil(chh / z), x0 = Math.round(G.xc + (S.lu || 0) * G.ppmm - rw / 2), y0 = Math.round(G.Hf / 2 + (S.lv || 0) * G.ppmm - rh / 2);
+    var R = region(G, x0, y0, rw, rh), off = document.createElement('canvas'); off.width = rw; off.height = rh; var ox = off.getContext('2d'), im = ox.createImageData(rw, rh), d = im.data, mode = F.proof, i, o;
+    for (i = 0; i < rw * rh; i++) { o = i * 4; var r, g, b;
+      if (mode !== 'print') { var v = R[mode][i] ? 0 : 255; r = g = b = v; }
+      else { r = 42; g = 42; b = 46; // the shirt, drawn lighter than it is so black ink shows
+        var wOn = F.on.W && R.W[i], ci = (F.on.C && R.C[i] ? 1 : 0) | (F.on.M && R.M[i] ? 2 : 0) | (F.on.Y && R.Y[i] ? 4 : 0);
+        if (wOn || ci) { var col = INK[ci]; if (wOn) { r = col[0]; g = col[1]; b = col[2]; } else { r = 42 + (col[0] - 42) * 0.3; g = 42 + (col[1] - 42) * 0.3; b = 46 + (col[2] - 46) * 0.3; } } // colour with no white under it stays dim
+        if (F.on.K && R.K[i]) { r = g = b = 6; }
+        if (F.on.H && R.H[i]) { r = 96; g = 98; b = 110; } }
+      d[o] = r; d[o + 1] = g; d[o + 2] = b; d[o + 3] = 255; }
+    ox.putImageData(im, 0, 0); cx.imageSmoothingEnabled = false; cx.drawImage(off, 0, 0, rw * z, rh * z);
+    $('filmProofCap').textContent = (rw / G.ppmm).toFixed(1) + ' × ' + (rh / G.ppmm).toFixed(1) + ' mm of film at the loupe, ' + (z * 100) + '%. Click the shirt to move it.';
+  }
+  function row(k, v) { return '<div><dt>' + k + '</dt><dd>' + v + '</dd></div>'; }
+  function summary(G, PG) {
+    var mm = function (px) { return (px / G.ppmm).toFixed(3).replace(/0$/, ''); }, h = '', stripes, show;
+    if (G.mu) { stripes = G.edges.slice(1).map(function (e, i) { return e - G.edges[i]; }).join(' + ') + ' px'; show = Math.round(G.g / G.N) + ' px (' + mm(G.g / G.N) + ' mm) of each showing'; }
+    else { stripes = (G.edges[1] - G.edges[0]) + ' + ' + (G.edges[3] - G.edges[2]) + ' px' + (G.edges[2] > G.edges[1] ? ', ' + (G.edges[2] - G.edges[1]) + ' px bare between' : ''); show = (G.edges[1] - G.wr) + ' and ' + (G.edges[3] - G.edges[2] - G.wl) + ' px showing between ridges'; }
+    h += row('Pitch', G.P + ' px = ' + mm(G.P) + ' mm, ' + (25.4 / (G.P / G.ppmm)).toFixed(1) + ' LPI' + (Math.abs(G.P / G.ppmm - S.pitch) > 0.004 ? ' <span class="muted">(page: ' + S.pitch.toFixed(2) + ')</span>' : ''));
+    h += row('HD line', G.w + ' px = ' + mm(G.w) + ' mm' + (Math.abs(G.w / G.ppmm - S.ridge) > 0.012 ? ' <span class="muted">(page: ' + S.ridge.toFixed(2) + ')</span>' : ''));
+    h += row(G.mu ? G.N + ' views' : 'Stripes', stripes + '<br><span class="muted">' + show + '</span>');
+    h += row('Ridges', G.ridges + ', ' + (G.ridgeLen / G.dpi * 25.4 / 1000).toFixed(1) + ' m of line');
+    if (PG) h += row('Each film', (PG.W / G.dpi).toFixed(1) + ' × ' + (PG.H / G.dpi).toFixed(1) + ' in, art ' + (PG.bw / G.dpi).toFixed(1) + ' × ' + (PG.bh / G.dpi).toFixed(1) + ' in');
+    $('filmSummary').innerHTML = h;
+  }
+  function sourceNote(G) {
+    var W = [], ART = G.ART, low = G.used.filter(function (u) { return u.pl.W < G.Wf * 0.98; }), pending = G.used.filter(function (u) { return u.n.file && !u.full; }), noFile = G.used.filter(function (u) { return !u.n.file; });
+    if (noFile.length) W.push(['Art', (ART.psd ? 'The PSD’s layers are' : 'This artwork is') + ' only available at preview size, ' + Math.round(ART.W / S.printIn) + ' dpi at this print width. For films, export each layer from Photoshop as a PNG at 100% and link those files.']);
+    else if (pending.length) W.push(['Art', 'Showing the preview-size art. The full-size files are read when you export, or now with the button below.']);
+    else if (low.length) { var worst = Math.min.apply(null, low.map(function (u) { return u.pl.W; })); W.push(['Art', 'The linked files are ' + worst + ' px wide: ' + Math.round(worst / S.printIn) + ' dpi at ' + S.printIn + ' in. Films are ' + G.dpi + ' dpi, so the art will be blocky. Export at 100% (' + G.Wf + ' px wide) for the real films.']); }
+    var px = 0, off = 0, cmy = 0, n = {}; G.used.forEach(function (u) { px += u.pl.px; off += u.pl.off; for (var c = 1; c < 64; c++) if (u.pl.n[c]) n[c] = (n[c] || 0) + u.pl.n[c]; }); cmy = n[BA | BC | BM | BY] || 0;
+    if (px && off / px > 0.02) W.push(['Colours', (100 * off / px).toFixed(off / px < 0.1 ? 1 : 0) + '% of the art is not a solid process build and was put on the nearest one. Films carry no halftone of their own: screen the art in Photoshop first (a Hard Mix fill does it).']);
+    if (px && cmy / px > 0.005 && !F.cmyK) W.push(['Black', (100 * cmy / px).toFixed(1) + '% of the art is three-colour black (C+M+Y with no K). It will print as three inks over white unless you tick the box to print it as K.']);
+    if (S.reg) W.push(['Registration', 'The page’s registration error is a what-if. Films are made with the ridges exactly on the seams.']);
+    if (G.choke * 2 + 1 >= Math.min(G.edges[1] - G.edges[0], G.P)) W.push(['Choke', 'The underbase choke is as wide as a stripe, so stripes that stand alone will lose their white.']);
+    $('filmWarns').innerHTML = W.map(function (w) { return '<div class="warn"><b>' + w[0] + '</b> ' + w[1] + '</div>'; }).join('');
+    $('filmLoad').hidden = !pending.length || !!noFile.length;
+    var combos = Object.keys(n).map(function (c) { return [CLASSNAME[c] || c, n[c]]; }).sort(function (a, b) { return b[1] - a[1]; });
+    $('filmInks').textContent = px ? 'In the art: ' + combos.map(function (c) { return c[0] + ' ' + (100 * c[1] / px).toFixed(c[1] / px < 0.1 ? 1 : 0) + '%'; }).join(', ') + '.' : '';
+  }
+  function drawRaise(G) {
+    var h = ''; G.used.forEach(function (u) { var c = u.pl.n[BA | BK] + (F.cmyK ? u.pl.n[BA | BC | BM | BY] : 0); if (!c) return; var k = L.keyOf(u.n);
+      h += '<label class="check"><input type="checkbox" data-raise="' + esc(k) + '"' + (raiseOn(u.n) ? ' checked' : '') + '><span>' + esc(u.n.name) + '</span></label>'; });
+    $('filmRaise').innerHTML = h || '<p class="note">No layer has black in it.</p>';
+  }
+  function refresh(force) {
+    var ART = L.art(), card = $('filmCard'); if (!ART) return;
+    var ok = S.proc === 'barrier'; $('filmBody').hidden = !ok; $('filmOff').hidden = ok; if (!ok) return;
+    var r = card.getBoundingClientRect(), wide = Math.round(r.width);
+    var sig = [S.proc, S.views, S.pitch, S.ridge, S.split, S.guard, S.swap, S.printIn, S.zone, S.lu, S.lv, S.reg, wide, JSON.stringify(F)].join('|') + ART.nodes.map(function (n) { var d = L.d3Of(n); return L.keyOf(n) + n.assign + d.on + d.mm + (n.file ? fileId(n.file) : '') + isFull(n); }).join('|');
+    var same = !force && sig === lastSig && ART.Z === lastZ && ART.nodes.every(function (n) { var c = cache.get(L.keyOf(n)); return !n.rgba || !inScene(n) || (c && (c.full ? isFull(n) : c.id === n.rgba)); });
+    if (same) return; lastSig = sig; lastZ = ART.Z;
+    var G = scene(); if (!G) return; var PG = pageOf(G);
+    summary(G, PG); sourceNote(G); drawRaise(G);
+    if (PG && !PG.fits) $('filmWarns').innerHTML += '<div class="warn"><b>Film</b> The art is ' + (PG.bw / G.dpi).toFixed(1) + ' in wide and will not fit across ' + F.filmW + ' in film with its marks.</div>';
+    $('filmExport').disabled = busy || !PG || !PG.fits;
+    drawProof(G);
+  }
+  function syncInputs() {
+    $('fW').value = F.filmW; $('fDpi').value = F.dpi; $('fChoke').value = F.choke; $('fRaise').value = F.minRaise; $('fCmyK').checked = F.cmyK; $('fMirror').checked = F.mirror; $('fProof').value = F.proof; $('fZoom').value = F.zoom;
+    FILMS.forEach(function (f) { $('fOn' + f).checked = F.on[f]; });
+  }
+  function num(id, key, lo, hi) { $(id).addEventListener('change', function () { var v = parseFloat($(id).value); if (!isFinite(v)) v = F[key]; F[key] = Math.max(lo, Math.min(hi, v)); $(id).value = F[key]; save(); refresh(true); }); }
+  num('fW', 'filmW', 8, 60); num('fDpi', 'dpi', 150, 1440); num('fChoke', 'choke', 0, 1); num('fRaise', 'minRaise', 0, 3);
+  $('fCmyK').addEventListener('change', function () { F.cmyK = this.checked; save(); refresh(true); });
+  $('fMirror').addEventListener('change', function () { F.mirror = this.checked; save(); refresh(true); });
+  $('fProof').addEventListener('change', function () { F.proof = this.value; save(); refresh(true); });
+  $('fZoom').addEventListener('change', function () { F.zoom = parseInt(this.value, 10) || 2; save(); refresh(true); });
+  FILMS.forEach(function (f) { $('fOn' + f).addEventListener('change', function () { F.on[f] = this.checked; save(); refresh(true); }); });
+  $('filmRaise').addEventListener('change', function (e) { var k = e.target.dataset && e.target.dataset.raise; if (k === undefined) return; F.raise[k] = e.target.checked; save(); refresh(true); });
+  $('filmExport').addEventListener('click', exportFilms);
+  $('filmLoad').addEventListener('click', async function () { if (busy) return; busy = true; $('filmExport').disabled = true; try { await loadFull(status); } catch (e) { $('filmResult').innerHTML = '<div class="warn"><b>Art</b> ' + esc(e && e.message || String(e)) + '</div>'; } status(''); busy = false; refresh(true); });
+  window.addEventListener('resize', function () { refresh(); });
+  syncInputs(); L.hooks.push(function () { refresh(); }); refresh();
+  L.film = { F: F, scene: scene, region: region, pageOf: pageOf, exportFilms: exportFilms, loadFull: loadFull, readPNG: readPNG, refresh: refresh, last: function () { return lastURL; } };
 })();
 
 </script>
