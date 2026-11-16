@@ -2149,7 +2149,22 @@ var DEF_ART={s:'data:image/webp;base64,UklGRuTyAQBXRUJQVlA4WAoAAAAQAAAARQUARQUAQ
   }
 
   // ---------- export ----------
-  var busy = false, lastURL = null;
+  var busy = false, lastURL = null, lastBlob = null, lastName = '';
+  // Hand the PDF to the person. Inside a Claude artifact a page may not download by itself: the viewer's downloads capability asks them first.
+  // Anywhere else (the standalone copy, the slopswap page) an ordinary browser download does it.
+  async function saveFile() {
+    if (!lastBlob) return '';
+    if (window.claude && typeof window.claude.use === 'function') {
+      var dl = null; try { dl = await window.claude.use('downloads'); } catch (e) { }
+      if (!dl) return 'This view cannot save files. Export from the slopswap page or the standalone copy instead.';
+      try { await dl.save({ filename: lastName, data: lastBlob }); return 'Saved.'; }
+      catch (e) { var c = e && e.code;
+        return c === 'declined' ? 'Not saved: the save was declined. Press the button to try again.' : c === 'rate_limited' ? 'A save prompt is already open. Answer it, or wait a moment and press the button.'
+          : c === 'too_large' ? 'The file is too large to save from this view. Export from the slopswap page or the standalone copy.' : 'This view could not save the file. Export from the slopswap page or the standalone copy instead.'; }
+    }
+    if (lastURL) URL.revokeObjectURL(lastURL); lastURL = URL.createObjectURL(lastBlob);
+    var a = document.createElement('a'); a.href = lastURL; a.download = lastName; document.body.appendChild(a); a.click(); a.remove(); return 'Saved to your downloads.';
+  }
   function status(msg, frac) { $('filmStatus').textContent = msg || ''; var b = $('filmBar'); b.hidden = frac === undefined; if (frac !== undefined) b.value = Math.max(0, Math.min(1, frac)); }
   async function exportFilms() {
     if (busy) return; busy = true; $('filmExport').disabled = true; $('filmResult').innerHTML = '';
@@ -2173,9 +2188,9 @@ var DEF_ART={s:'data:image/webp;base64,UklGRuTyAQBXRUJQVlA4WAoAAAAQAAAARQUARQUAQ
       if (!pages.length) throw new Error('Every film came out empty.');
       var base = ((G.ART.src || 'shirt').replace(/\.[a-z]+$/i, '').replace(/[^\w-]+/g, '-').replace(/^-|-$/g, '') || 'shirt'), name = base + '-films-' + G.dpi + 'dpi.pdf';
       var blob = await buildPDF(pages, G.dpi, base + ' films: ' + pages.map(function (p) { return p.f; }).join(' '));
-      if (lastURL) URL.revokeObjectURL(lastURL); lastURL = URL.createObjectURL(blob);
+      lastBlob = blob; lastName = name;
       showResult(pages, PG, G, name, blob.size, skipped);
-      var a = document.createElement('a'); a.href = lastURL; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+      status('Saving'); $('filmSaveMsg').textContent = await saveFile();
       status('');
     } catch (e) { status(''); $('filmResult').innerHTML = '<div class="warn"><b>Films</b> ' + esc(e && e.message || String(e)) + '</div>'; }
     busy = false; $('filmExport').disabled = false; refresh(true);
@@ -2189,10 +2204,10 @@ var DEF_ART={s:'data:image/webp;base64,UklGRuTyAQBXRUJQVlA4WAoAAAAQAAAARQUARQUAQ
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function showResult(pages, PG, G, name, bytes, skipped) {
     var inW = (PG.W / G.dpi).toFixed(1), inH = (PG.H / G.dpi).toFixed(1);
-    var h = '<p class="note"><a id="filmLink" href="' + lastURL + '" download="' + esc(name) + '">' + esc(name) + '</a> · ' + (bytes / 1048576).toFixed(1) + ' MB · ' + pages.length + ' pages of ' + inW + ' × ' + inH + ' in · ' + (pages.length * PG.H / G.dpi).toFixed(0) + ' in of film' + (F.mirror ? ' · mirrored' : '') + '</p>';
+    var h = '<p class="note"><b>' + esc(name) + '</b> · ' + (bytes / 1048576).toFixed(1) + ' MB · ' + pages.length + ' pages of ' + inW + ' × ' + inH + ' in · ' + (pages.length * PG.H / G.dpi).toFixed(0) + ' in of film' + (F.mirror ? ' · mirrored' : '') + '</p>';
     if (skipped.length) h += '<p class="note">Left out because nothing prints on them: ' + skipped.join(', ') + '.</p>';
     h += '<div class="filmthumbs">' + pages.map(function (p) { return '<figure><img alt="Film ' + p.f + '" src="' + p.thumb + '"><figcaption><b>' + p.f + '</b> ' + FILMNAME[p.f] + '</figcaption></figure>'; }).join('') + '</div>';
-    h += '<p class="note">If the download did not start, use the link above. In a page embedded inside another app the download can be blocked; the standalone copy and the slopswap page are not.</p>';
+    h += '<div class="row"><button type="button" class="ghost" id="filmSave">Save the PDF again</button><span class="note" id="filmSaveMsg" aria-live="polite"></span></div>';
     $('filmResult').innerHTML = h;
   }
 
@@ -2273,10 +2288,11 @@ var DEF_ART={s:'data:image/webp;base64,UklGRuTyAQBXRUJQVlA4WAoAAAAQAAAARQUARQUAQ
   FILMS.forEach(function (f) { $('fOn' + f).addEventListener('change', function () { F.on[f] = this.checked; save(); refresh(true); }); });
   $('filmRaise').addEventListener('change', function (e) { var k = e.target.dataset && e.target.dataset.raise; if (k === undefined) return; F.raise[k] = e.target.checked; save(); refresh(true); });
   $('filmExport').addEventListener('click', exportFilms);
+  $('filmResult').addEventListener('click', async function (e) { if (!e.target || e.target.id !== 'filmSave' || busy) return; e.target.disabled = true; $('filmSaveMsg').textContent = await saveFile(); e.target.disabled = false; });
   $('filmLoad').addEventListener('click', async function () { if (busy) return; busy = true; $('filmExport').disabled = true; try { await loadFull(status); } catch (e) { $('filmResult').innerHTML = '<div class="warn"><b>Art</b> ' + esc(e && e.message || String(e)) + '</div>'; } status(''); busy = false; refresh(true); });
   window.addEventListener('resize', function () { refresh(); });
   syncInputs(); L.hooks.push(function () { refresh(); }); refresh();
-  L.film = { F: F, scene: scene, region: region, pageOf: pageOf, exportFilms: exportFilms, loadFull: loadFull, readPNG: readPNG, refresh: refresh, last: function () { return lastURL; } };
+  L.film = { F: F, scene: scene, region: region, pageOf: pageOf, exportFilms: exportFilms, loadFull: loadFull, readPNG: readPNG, refresh: refresh, last: function () { return lastBlob; } };
 })();
 
 </script>
