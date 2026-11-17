@@ -441,7 +441,7 @@
         <div id="filmResult"></div>
       </div>
     </div>
-    <p class="note">How the films are cut. Every pixel of the art is put on the nearest solid process build, so the art should already be screened (a Hard Mix fill in Photoshop does it). Black knocks out the colour and the white under it. W is everything that is not black, so there is white under every colour; the choke pulls it in only from the outline of the whole print, never from black and never between the stripes of two views. Where the page puts ridges, the stripe seen from the right runs from each ridge’s centre to the split and the other stripe from the split to the next centre, so the seams sit under the HD lines. H carries the ridges, plus any layer set to HD under Artwork exactly as drawn (anything in it that is not white or clear), plus the black of any layer ticked above where it is at least as wide as “Raise black wider than”. With an HD layer linked, nothing is ticked to begin with. The T’s stem is the artboard’s centre line; each film’s letter has its own place beside it, so stacked films read W C M Y K H. On one sheet the films are packed by their ink, a quarter inch apart, and each can be dragged anywhere: their boxes may overlap as long as their ink does not.</p>
+    <p class="note">How the films are cut. Every pixel of the art is put on the nearest solid process build, so the art should already be screened (a Hard Mix fill in Photoshop does it). Black knocks out the colour and the white under it. W is everything that is not black, so there is white under every colour; the choke pulls it in only from the outline of the whole print, never from black and never between the stripes of two views. Where the page puts ridges, the stripe seen from the right runs from each ridge’s centre to the split and the other stripe from the split to the next centre, so the seams sit under the HD lines. H carries the ridges, plus any layer set to HD under Artwork exactly as drawn (anything in it that is not white or clear), plus the black of any layer ticked above where it is at least as wide as “Raise black wider than”. With an HD layer linked, nothing is ticked to begin with. The T’s stem is the artboard’s centre line; each film’s letter sits right beside its T, two spaces away. On one sheet the films are packed by their ink, a quarter inch apart, and each can be dragged anywhere: their boxes may overlap as long as their ink does not.</p>
   </section>
 
   <section class="card" aria-label="HD ink builds">
@@ -2156,11 +2156,13 @@ var DEF_ART={fulltext:'data:image/webp;base64,UklGRiTmAQBXRUJQVlA4WAoAAAAQAAAARQ
     if (!G || !G.bb) return null; var d = G.dpi, inch = function (v) { return Math.round(v * d); };
     var pad = inch(0.15), bx0 = Math.max(0, G.bb[0] - pad), bx1 = Math.min(G.Wf, G.bb[1] + pad), by0 = Math.max(0, G.bb[2] - pad), by1 = Math.min(G.Hf, G.bb[3] + pad), bw = bx1 - bx0, bh = by1 - by0;
     var W = inch(F.filmW), th = inch(0.47), tw = inch(0.40), ts = inch(0.09), gap = inch(0.25), margin = inch(0.35), side = inch(0.25);
+    // The ink's letter sits right beside the T, two spaces away as if typed after it: a space is 0.278 em of the letter's font and its capitals 0.716 em high.
+    var sp = Math.round(2 * 0.278 * th / 0.716), letX = Math.round(tw / 2) + sp, letBox = inch(0.75);
     var offX = Math.round((W - bw) / 2) - bx0, offY = margin + th + gap - by0, H = margin + th + gap + bh + gap + th + margin, filmW = W;
-    if (tile) { var left = Math.min(bx0 - side, G.xc - Math.round(tw / 2) - side), right = Math.max(bx1 + side, G.xc + Math.round(tw / 2) + inch(0.3) + 6 * inch(0.75) + side); W = right - left; offX = -left; }
+    if (tile) { var left = Math.min(bx0 - side, G.xc - Math.round(tw / 2) - side), right = Math.max(bx1 + side, G.xc + letX + letBox + side); W = right - left; offX = -left; }
     var cx = G.xc + offX;
-    return { W: W, H: H, bx0: bx0, by0: by0, bw: bw, bh: bh, offX: offX, offY: offY, cx: cx, th: th, tw: tw, ts: ts, topT: margin, botT: margin + th + gap + bh + gap, slot0: Math.round(tw / 2) + inch(0.3), slot: inch(0.75),
-      fits: tile ? W <= filmW : bw + 2 * side <= W && cx - tw / 2 >= 0 && cx + tw / 2 + inch(0.3) + 6 * inch(0.75) <= W };
+    return { W: W, H: H, bx0: bx0, by0: by0, bw: bw, bh: bh, offX: offX, offY: offY, cx: cx, th: th, tw: tw, ts: ts, topT: margin, botT: margin + th + gap + bh + gap, letX: letX, letBox: letBox,
+      fits: tile ? W <= filmW : bw + 2 * side <= W && cx - tw / 2 >= 0 && cx + letX + letBox <= W };
   }
   var glyphs = {};
   function glyph(ch, capH) { // a bold sans capital, rasterised to ink / no ink
@@ -2170,11 +2172,11 @@ var DEF_ART={fulltext:'data:image/webp;base64,UklGRiTmAQBXRUJQVlA4WAoAAAAQAAAARQ
     var d = cx.getImageData(0, 0, gw, capH + 4).data, m = new Uint8Array(gw * (capH + 4)); for (var i = 0; i < m.length; i++) m[i] = d[i * 4 + 3] >= 128 ? 1 : 0;
     return (glyphs[key] = { w: gw, h: capH + 4, m: m });
   }
-  function drawMarks(put, PG, slotIndex, letter) {
+  function drawMarks(put, PG, letter) {
     function rect(x, y, w, h) { for (var j = 0; j < h; j++) for (var i = 0; i < w; i++) put(x + i, y + j); }
     [PG.topT, PG.botT].forEach(function (ty) {
       rect(PG.cx - Math.round(PG.tw / 2), ty, PG.tw, PG.ts); rect(PG.cx - Math.floor(PG.ts / 2), ty, PG.ts, PG.th); // bar, then the stem on the centre line
-      var gl = glyph(letter, PG.th), gx = PG.cx + PG.slot0 + slotIndex * PG.slot, gy = ty - 1;
+      var gl = glyph(letter, PG.th), gx = PG.cx + PG.letX - 2, gy = ty - 1; // the glyph is drawn 2 px into its own box
       for (var j = 0; j < gl.h; j++) for (var i = 0; i < gl.w; i++) if (gl.m[j * gl.w + i]) put(gx + i, gy + j);
     });
   }
@@ -2265,7 +2267,7 @@ var DEF_ART={fulltext:'data:image/webp;base64,UklGRiTmAQBXRUJQVlA4WAoAAAAQAAAARQ
       var m = new Uint8Array(PG.W * PG.H), src = R[f], i, j, x, y, o, n;
       function put(px, py) { if (px < 0 || py < 0 || px >= PG.W || py >= PG.H) return; m[py * PG.W + (F.mirror ? PG.W - 1 - px : px)] = 1; }
       for (j = 0; j < PG.bh; j++) for (i = 0; i < PG.bw; i++) if (src[j * PG.bw + i]) put(PG.bx0 + i + PG.offX, PG.by0 + j + PG.offY);
-      drawMarks(put, PG, FILMS.indexOf(f), f);
+      drawMarks(put, PG, f);
       var cv = document.createElement('canvas'); cv.width = tw; cv.height = th; var cx = cv.getContext('2d'), im = cx.createImageData(tw, th), d = im.data, ink = new Uint8Array(tw * th);
       for (y = 0; y < th; y++) for (x = 0; x < tw; x++) { n = m[2 * y * PG.W + 2 * x] + m[2 * y * PG.W + 2 * x + 1] + m[(2 * y + 1) * PG.W + 2 * x] + m[(2 * y + 1) * PG.W + 2 * x + 1]; o = (y * tw + x) * 4; d[o] = d[o + 1] = d[o + 2] = 18; d[o + 3] = Math.min(255, n * 64); if (n) ink[y * tw + x] = 1; }
       cx.putImageData(im, 0, 0); out[f] = { cv: cv, ink: ink, w: tw, h: th };
@@ -2352,7 +2354,7 @@ var DEF_ART={fulltext:'data:image/webp;base64,UklGRiTmAQBXRUJQVlA4WAoAAAAQAAAARQ
         if (Date.now() - t0 > 80) { status('Making films', 0.05 + 0.75 * (y - PG.by0) / PG.bh); await tick(); t0 = Date.now(); } }
       var pages = [], skipped = [];
       for (var i = 0; i < films.length; i++) { var f = films[i]; if (!ink[f]) { skipped.push(f); continue; }
-        drawMarks(put[f], PG, FILMS.indexOf(f), f); status('Packing film ' + f, 0.8 + 0.2 * i / films.length); await tick();
+        drawMarks(put[f], PG, f); status('Packing film ' + f, 0.8 + 0.2 * i / films.length); await tick();
         pages.push({ f: f, W: PG.W, H: PG.H, z: sheet ? null : await deflate(bufs[f]), buf: sheet ? bufs[f] : null, thumb: thumbOf(bufs[f], PG.W, PG.H, rb), ink: ink[f] }); bufs[f] = null; }
       if (!pages.length) throw new Error('Every film came out empty.');
       var base = ((G.ART.src || 'shirt').replace(/\.[a-z]+$/i, '').replace(/[^\w-]+/g, '-').replace(/^-|-$/g, '') || 'shirt'), name = base + '-films-' + G.dpi + 'dpi.pdf';
