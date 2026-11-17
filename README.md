@@ -46,6 +46,10 @@ Self-hosts any Google Fonts the page links (Google is blocked in China), links t
 - No Google Fonts, no CDN scripts (cdnjs usually works, nothing else does). Fonts live in `styles/fonts/`.
 - Inline the page's own CSS and JS. Chinese text renders in system CJK fonts; nothing to ship.
 
+## Art published from the lenticular shirt viewer
+
+`lenticular-shirt/art.json` lists the images the viewer opens on, and `art-<hash>.png` beside it are those images (preview size, plus full size when ticked). They are committed by the viewer's own **Publish these on the page** button, through the GitHub API with a token kept in Kevin's browser, in commits named `lenticular-shirt: art published from the viewer`. An `art.json` with no layers means the page opens on its built-in art. Do not edit these by hand; rebuilding `index.html` leaves them alone.
+
 ## Preview locally
 
 ```bash
