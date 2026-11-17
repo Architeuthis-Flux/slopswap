@@ -71,6 +71,10 @@
 #viewer .statebar{display:block;width:100%;height:9px;background:var(--stage)}
 #viewer .under{padding:8px 12px 10px;display:flex;flex-direction:column;gap:6px}
 #viewer .anglerow{display:flex;gap:10px;align-items:center}
+#viewer .brushrow{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+#viewer .brushrow .lab{font-size:12.5px;color:var(--muted);flex:none}
+#viewer .brushrow input[type=range]{flex:1 1 90px;min-width:70px;max-width:180px;accent-color:var(--ink);height:18px}
+#viewer .brushrow output{font-size:12.5px;min-width:5ch}
 #viewer .anglerow input{flex:1;min-width:0;accent-color:var(--ink)}
 #viewer .legend{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12.5px;color:var(--muted)}
 #viewer .key{display:inline-flex;gap:6px;align-items:center}
@@ -382,7 +386,7 @@
       <div class="stage">
         <canvas id="shirt" width="900" height="900" role="img" aria-label="Simulated shirt at the chosen viewing angle"></canvas>
         <div class="hud"><span class="big num" id="hudAngle">30° right</span><span class="small" id="hudState">—</span></div>
-        <div class="hint">Drag to walk around. Click to move the loupe.</div>
+        <div class="hint" id="stageHint">Drag to walk around. Click to move the loupe.</div>
       </div>
       <canvas class="statebar" id="statebar" width="900" height="9" aria-hidden="true"></canvas>
       <div class="under">
@@ -391,6 +395,10 @@
           <input id="angle" type="range" min="-80" max="80" step="0.5" value="30" aria-label="Viewing angle in degrees; negative is to the left">
           <button id="btnSweep" type="button" class="ghost" aria-pressed="false">Sweep</button>
         </div>
+        <div class="brushrow"><span class="lab" title="Where the two pictures happen to match the page leaves the ridges out. Paint them in, or paint ridges away, on the shirt.">Ridges by hand</span>
+          <div class="seg" role="radiogroup" aria-label="Brush for painting ridges on the shirt"><label><input type="radio" name="brush" id="brOff" value="off" checked>Off</label><label title="Paint ridges in"><input type="radio" name="brush" id="brAdd" value="add">Add</label><label title="Paint ridges away"><input type="radio" name="brush" id="brCut" value="cut">Remove</label><label title="Paint back to what the art asks for"><input type="radio" name="brush" id="brAuto" value="auto">Erase</label></div>
+          <label for="brSize" class="lab">Size</label><input id="brSize" type="range" min="0.5" max="15" step="0.5" value="3"><output id="brSizeOut" class="num">3 mm</output>
+          <button type="button" class="ghost mini" id="brUndo" disabled>Undo</button><button type="button" class="ghost mini" id="brClear" disabled>Clear</button></div>
         <div class="legend" aria-label="What the strip under the shirt shows, column by column">
           <span class="key"><span class="sw a"></span><span id="legA">View A clean</span></span>
           <span class="key"><span class="sw b"></span><span id="legB">View B clean</span></span>
@@ -526,6 +534,7 @@
           <li>If the picker is blocked where you are viewing this, drop the PSD on the box instead. If the chip stays grey after a drop, the browser gave a one-time copy; drop it again after saving.</li>
           <li>The files you loaded last are kept in this browser and are here on your next visit. The live link is not: press <b>Link artwork</b> again to follow saves.</li>
           <li>Each top-level layer or group is sent to view A, view B, both, or neither. The eye icon on top-level layers is ignored, so you can keep hiding one view while you draw the other.</li>
+          <li>Ridges go where the two pictures differ. Where they happen to match the page leaves them out; a patch narrower than 2.4 mm is ridged anyway. For anything else, <b>Ridges by hand</b> under the shirt paints them in or away.</li>
           <li><b>HD</b> is for art drawn for the HD screen alone, such as the outline to raise: it is in neither view and is added to the HD film as it is.</li>
           <li><b>W</b> is for white underbase of your own, such as a solid shape under the whole wordmark: it is in neither view, and white is added to the white film wherever the image has anything, whatever its colour. The white under the colours is still made for you.</li>
           <li>For 3D, set <b>Images per gap</b> to 3 or more. Each layer or group is one depth plane; <b>Split</b> lists a group’s layers separately so each can have its own depth.</li>
@@ -1238,8 +1247,8 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
   var S = Object.assign({}, DEF), saved = {};
   try { saved = JSON.parse(localStorage.getItem(LS) || '{}') || {}; } catch (e) { saved = {}; }
   if (saved.S) Object.keys(DEF).forEach(function (k) { if (saved.S[k] !== undefined && typeof saved.S[k] === typeof DEF[k]) S[k] = saved.S[k]; });
-  var assignMem = saved.assign || {}, procMem = saved.procMem || {}, d3Mem = saved.d3 || {}, splitMem = saved.split || {};
-  function persist() { try { localStorage.setItem(LS, JSON.stringify({ S: S, assign: assignMem, procMem: procMem, d3: d3Mem, split: splitMem })); } catch (e) { } }
+  var assignMem = saved.assign || {}, procMem = saved.procMem || {}, d3Mem = saved.d3 || {}, splitMem = saved.split || {}, ovMem = saved.ov && typeof saved.ov === 'object' ? saved.ov : {};
+  function persist() { try { localStorage.setItem(LS, JSON.stringify({ S: S, assign: assignMem, procMem: procMem, d3: d3Mem, split: splitMem, ov: ovMem })); } catch (e) { } }
 
   PSDLite.setLut(b64bytes(CMYK_LUT_B64));
   function b64bytes(s) { var bin = atob(s), u = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u; }
@@ -1361,21 +1370,97 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     for (y = 1; y < H - 1; y++) for (x = 1; x < W - 1; x++) { p = y * W + x; if (E[p]) { O[p] = O[p - 1] = O[p + 1] = O[p - W] = O[p + W] = O[p - W - 1] = O[p - W + 1] = O[p + W - 1] = O[p + W + 1] = 1; } }
     return O;
   }
+  var CLOSE = 2.4; // mm: a gap in the changing art narrower than this, where the two pictures happen to match, is ridged like the art round it
+  function grow(M, W, H, rx, ry) { // every pixel within rx across and ry down of a set one (a box), as 0 / 1
+    var n = W * H, T = new Uint8Array(n), O = new Uint8Array(n), x, y, run;
+    for (y = 0; y < H; y++) { run = -1e9; for (x = 0; x < W; x++) { if (M[y * W + x]) run = x; if (x - run <= rx) T[y * W + x] = 1; } run = 1e9; for (x = W - 1; x >= 0; x--) { if (M[y * W + x]) run = x; if (run - x <= rx) T[y * W + x] = 1; } }
+    for (x = 0; x < W; x++) { run = -1e9; for (y = 0; y < H; y++) { if (T[y * W + x]) run = y; if (y - run <= ry) O[y * W + x] = 1; } run = 1e9; for (y = H - 1; y >= 0; y--) { if (T[y * W + x]) run = y; if (run - y <= ry) O[y * W + x] = 1; } }
+    return O;
+  }
   function buildZone() {
-    var W = ART.W, H = ART.H, n = W * H, D = multi() ? ART.D : openMask(ART.D, W, H), Z = new Uint8Array(n), x, y, x0 = W, x1 = -1, y0 = H, y1 = -1;
+    var W = ART.W, H = ART.H, n = W * H, D = multi() ? ART.D : openMask(ART.D, W, H), Z = new Uint8Array(n), x, y, p, x0 = W, x1 = -1, y0 = H, y1 = -1;
     for (y = 0; y < H; y++) for (x = 0; x < W; x++) if (D[y * W + x]) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
-    if (x1 < 0) { ART.Z = Z; ART.zx0 = 0; ART.zx1 = W; ART.zy0 = 0; ART.zy1 = H; ART.empty = true; return; }
-    ART.empty = false;
-    if (S.zone === 'all') { Z.fill(255); }
-    else if (S.zone === 'box') { for (y = y0; y <= y1; y++) Z.fill(255, y * W + x0, y * W + x1 + 1); }
-    else { // the ridged area reaches past the changing art: sideways far enough that the stripe at each side edge has a ridge outside it (a ridge is
-      // printed where its centre line is inside this area), up and down only by how far the ridge screen can land off the colours
-      var rx = Math.max(0, Math.round(S.padX / mmPerArtPx())), ry = Math.max(0, Math.round(S.padY / mmPerArtPx())), T = new Uint8Array(n), run;
-      for (y = 0; y < H; y++) { run = -1e9; for (x = 0; x < W; x++) { if (D[y * W + x]) run = x; if (x - run <= rx) T[y * W + x] = 1; } run = 1e9; for (x = W - 1; x >= 0; x--) { if (D[y * W + x]) run = x; if (run - x <= rx) T[y * W + x] = 1; } }
-      for (x = 0; x < W; x++) { run = -1e9; for (y = 0; y < H; y++) { if (T[y * W + x]) run = y; if (y - run <= ry) Z[y * W + x] = 255; } run = 1e9; for (y = H - 1; y >= 0; y--) { if (T[y * W + x]) run = y; if (run - y <= ry) Z[y * W + x] = 255; } }
-      x0 = Math.max(0, x0 - rx); x1 = Math.min(W - 1, x1 + rx); y0 = Math.max(0, y0 - ry); y1 = Math.min(H - 1, y1 + ry);
+    if (x1 >= 0) {
+      if (S.zone === 'all') { Z.fill(255); x0 = 0; x1 = W - 1; }
+      else if (S.zone === 'box') { for (y = y0; y <= y1; y++) Z.fill(255, y * W + x0, y * W + x1 + 1); }
+      else { // Small gaps are closed first: grown by half the width and shrunk back again, which fills them and leaves the outline where it was.
+        // Then the ridged area reaches past the changing art: sideways far enough that the stripe at each side edge has a ridge outside it (a ridge
+        // is printed where its centre line is inside this area), up and down only by how far the ridge screen can land off the colours.
+        var rc = Math.round(CLOSE / 2 / mmPerArtPx()), rx = Math.max(0, Math.round(S.padX / mmPerArtPx())), ry = Math.max(0, Math.round(S.padY / mmPerArtPx())), C = D;
+        if (rc > 0) { var G = grow(D, W, H, rc, rc), N = new Uint8Array(n); for (p = 0; p < n; p++) N[p] = G[p] ? 0 : 1; var E = grow(N, W, H, rc, rc); C = new Uint8Array(n); for (p = 0; p < n; p++) C[p] = D[p] || !E[p] ? 1 : 0; }
+        var T = grow(C, W, H, rx, ry); for (p = 0; p < n; p++) if (T[p]) Z[p] = 255;
+        x0 = Math.max(0, x0 - rx); x1 = Math.min(W - 1, x1 + rx); y0 = Math.max(0, y0 - ry); y1 = Math.min(H - 1, y1 + ry);
+      }
     }
-    ART.Z = Z; ART.zx0 = S.zone === 'all' ? 0 : x0; ART.zx1 = S.zone === 'all' ? W : x1 + 1; ART.zy0 = y0; ART.zy1 = y1 + 1;
+    ART.ZA = Z; ART.zbox = [x0, x1, y0, y1]; // what the art alone asks for
+    ovBuild(); ovApply();
+  }
+  function ovApply() { // the ridged area: what the art asks for, with the strokes painted by hand on top
+    var W = ART.W, H = ART.H, n = W * H, Z = ART.ZA, M = OV.mask, b = ART.zbox, x0 = b[0], x1 = b[1], y0 = b[2], y1 = b[3], p, x, y;
+    if (OV.strokes.length) { Z = new Uint8Array(Z);
+      for (p = 0; p < n; p++) { if (M[p] === 2) Z[p] = 0; else if (M[p] === 1) { Z[p] = 255; x = p % W; y = (p - x) / W; if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; } } }
+    ART.Z = Z; ART.empty = x1 < 0; ART.cov = null;
+    if (x1 < 0) { ART.zx0 = 0; ART.zx1 = W; ART.zy0 = 0; ART.zy1 = H; } else { ART.zx0 = x0; ART.zx1 = x1 + 1; ART.zy0 = y0; ART.zy1 = y1 + 1; }
+  }
+
+  /* ---------- ridges by hand ---------- */
+  // Strokes painted on the shirt: ridges where the pictures happen to match, none where they are not wanted, or back to what the art asks for.
+  // Kept as strokes in fractions of the artboard, per set of layers, so they survive a reload and a change of artboard width.
+  var OV = { sig: null, strokes: [], mask: null, drawn: -1 }, BRUSH = { tool: 'off', mm: 3, at: null, live: null };
+  function ovSig() { return ART.nodes.map(function (n) { return keyOf(n); }).sort().join('|'); }
+  function cleanStrokes(a) { return Array.isArray(a) ? a.filter(function (st) { return st && (st.m === 0 || st.m === 1 || st.m === 2) && typeof st.r === 'number' && st.r > 0 && st.r < 0.5 && Array.isArray(st.p) && st.p.length >= 2 && st.p.length <= 40000 && st.p.every(function (v) { return typeof v === 'number' && v > -1 && v < 2; }); }).slice(-800) : []; }
+  function ovStamp(M, W, H, cx, cy, r, m, Z, ZA) { // one round dab: 1 ridges, 2 none, 0 back to what the art asks for
+    var xa = Math.max(0, Math.floor(cx - r)), xb = Math.min(W - 1, Math.ceil(cx + r)), ya = Math.max(0, Math.floor(cy - r)), yb = Math.min(H - 1, Math.ceil(cy + r)), r2 = r * r, x, y;
+    for (y = ya; y <= yb; y++) for (x = xa; x <= xb; x++) { var dx = x + 0.5 - cx, dy = y + 0.5 - cy; if (dx * dx + dy * dy > r2) continue; var p = y * W + x; M[p] = m; if (Z) Z[p] = m === 1 ? 255 : m === 2 ? 0 : ZA[p]; }
+  }
+  function ovLine(M, W, H, st, from, Z, ZA) { // dabs along a stroke from its from-th point on, close enough together to leave no gaps
+    var r = Math.max(0.6, st.r * W), q = st.p, i, k;
+    for (i = Math.max(0, from); i < q.length / 2; i++) { var x = q[2 * i] * W, y = q[2 * i + 1] * H;
+      if (i === 0) { ovStamp(M, W, H, x, y, r, st.m, Z, ZA); continue; }
+      var px = q[2 * i - 2] * W, py = q[2 * i - 1] * H, d = Math.sqrt((x - px) * (x - px) + (y - py) * (y - py)), nn = Math.max(1, Math.ceil(d / Math.max(0.5, r / 2)));
+      for (k = 1; k <= nn; k++) ovStamp(M, W, H, px + (x - px) * k / nn, py + (y - py) * k / nn, r, st.m, Z, ZA); }
+  }
+  function ovBuild() { // this set of layers' strokes, drawn into a mask the size of the art
+    var W = ART.W, H = ART.H, sig = ovSig();
+    if (OV.sig !== sig) { OV.sig = sig; OV.strokes = cleanStrokes(ovMem[sig]); OV.mask = null; }
+    if (OV.mask && OV.mask.length === W * H && OV.drawn === OV.strokes.length) return;
+    OV.mask = new Uint8Array(W * H); OV.strokes.forEach(function (st) { ovLine(OV.mask, W, H, st, 0); }); OV.drawn = OV.strokes.length; brushButtons();
+  }
+  function ovCommit(redraw) { // after a stroke, an undo or a clear: remember, and let everything that reads the ridged area see a new one
+    if (OV.strokes.length) ovMem[OV.sig] = OV.strokes; else delete ovMem[OV.sig];
+    var keys = Object.keys(ovMem); if (keys.length > 8) keys.slice(0, keys.length - 8).forEach(function (k) { if (k !== OV.sig) delete ovMem[k]; });
+    if (redraw) { OV.mask = null; ovBuild(); }
+    ovApply(); if (ART.Z === ART.ZA && OV.strokes.length) ART.Z = new Uint8Array(ART.Z);
+    buildSpot(); dirtyGeom = true; gcache.clear(); persist(); brushButtons(); schedule(); keepMeta();
+  }
+  function brushButtons() { var b = $('brUndo'); if (!b) return; b.disabled = $('brClear').disabled = !OV.strokes.length; }
+  function brushPoint(e) { // where on the art the pointer is, as fractions of the artboard; null off the print
+    var cv = $('shirt'), r = cv.getBoundingClientRect(), X = Math.floor((e.clientX - r.left) / r.width * cv.width), Y = (e.clientY - r.top) / r.height * cv.height, C = cache.m;
+    BRUSH.at = [X, Y]; if (!C || X < 0 || X >= cv.width || !C.ok[X]) return null;
+    var MW = mmW(), MH = MW * ART.H / ART.W, v = (Y - cv.height / 2) * (MW * 1.22 / cv.width);
+    return [C.ax[X] / ART.W, (v + MH / 2) / mmPerArtPx() / ART.H];
+  }
+  function brushAdd(pt) {
+    var st = BRUSH.live, W = ART.W, H = ART.H, k = st.p.length / 2; if (!pt) return;
+    if (k) { var dx = (pt[0] - st.p[2 * k - 2]) * W, dy = (pt[1] - st.p[2 * k - 1]) * H; if (dx * dx + dy * dy < Math.max(1, st.r * W / 4) * Math.max(1, st.r * W / 4)) return; }
+    st.p.push(Math.round(pt[0] * 1e4) / 1e4, Math.round(pt[1] * 1e4) / 1e4); ovLine(OV.mask, W, H, st, k, ART.Z, ART.ZA); // straight into the ridged area while the stroke is under way
+  }
+  function brushDown(e) {
+    if (!ART) return; stopSweep(); if (ART.Z === ART.ZA) ART.Z = new Uint8Array(ART.ZA);
+    BRUSH.live = { m: BRUSH.tool === 'add' ? 1 : BRUSH.tool === 'cut' ? 2 : 0, r: Math.round(BRUSH.mm / mmPerArtPx() / ART.W * 1e5) / 1e5, p: [] };
+    brushAdd(brushPoint(e)); schedule();
+  }
+  function brushMove(e) { var pt = brushPoint(e); if (BRUSH.live) brushAdd(pt); schedule(); }
+  function brushUp() { var st = BRUSH.live; BRUSH.live = null; if (!st) return; if (st.p.length) { OV.strokes.push(st); OV.drawn = OV.strokes.length; } ovCommit(false); }
+  function brushOverlay(cv, C) { // while a brush is in hand: what has been painted, tinted, and a ring the size of the brush
+    var ctx = cv.getContext('2d'), cw = cv.width, ch = cv.height, M = OV.mask, W = ART.W, H = ART.H, MW = mmW(), mmOut = MW * 1.22 / cw;
+    if (M && (OV.strokes.length || BRUSH.live)) { var im = ctx.getImageData(0, 0, cw, ch), d = im.data, mpp = mmPerArtPx(), MH = MW * H / W, X, Y;
+      for (Y = 0; Y < ch; Y++) { var j = Math.floor(((Y + 0.5 - ch / 2) * mmOut + MH / 2) / mpp); if (j < 0 || j >= H) continue;
+        for (X = 0; X < cw; X++) { if (!C.ok[X]) continue; var i = Math.floor(C.ax[X]); if (i < 0 || i >= W) continue; var m = M[j * W + i]; if (!m) continue; var o = (Y * cw + X) * 4;
+          if (m === 1) { d[o] = d[o] * 0.62 + 15; d[o + 1] = d[o + 1] * 0.62 + 88; d[o + 2] = d[o + 2] * 0.62 + 78; } else { d[o] = d[o] * 0.62 + 97; d[o + 1] = d[o + 1] * 0.62 + 44; d[o + 2] = d[o + 2] * 0.62 + 12; } } }
+      ctx.putImageData(im, 0, 0); }
+    if (BRUSH.at) { var rp = Math.max(2, BRUSH.mm / mmOut); ctx.save(); ctx.lineWidth = Math.max(1, cw / 600); ctx.strokeStyle = 'rgba(0,0,0,.7)'; ctx.beginPath(); ctx.arc(BRUSH.at[0], BRUSH.at[1], rp + ctx.lineWidth, 0, 6.2832); ctx.stroke();
+      ctx.strokeStyle = BRUSH.tool === 'add' ? '#5ff0d8' : BRUSH.tool === 'cut' ? '#ffa04d' : '#ffffff'; ctx.beginPath(); ctx.arc(BRUSH.at[0], BRUSH.at[1], rp, 0, 6.2832); ctx.stroke(); ctx.restore(); }
   }
   function hexLin(h) { var n = parseInt(String(h).replace('#', ''), 16) || 0; return [S2L[(n >> 16) & 255], S2L[(n >> 8) & 255], S2L[n & 255]]; }
   function buildSpot() { // each view reduced to one ink inside the ribbed area, for processes that put spot colour on the raised ink
@@ -1894,7 +1979,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     raf = 0; if (!ART) return;
     if (dirtyArt || composedKey !== (multi() ? S.views : 0)) { var modeChanged = composedKey !== (multi() ? S.views : 0); dirtyArt = false; compose(); if (modeChanged) { drawLayers(); drawDepths(); procChanged(); } dirtyGeom = true; gcache.clear(); }
     sizeCanvases();
-    var C = render($('shirt'), false); render($('loupe'), true); drawStateBar(C);
+    var C = render($('shirt'), false); if (BRUSH.tool !== 'off') brushOverlay($('shirt'), C); render($('loupe'), true); drawStateBar(C);
     var bar = $('loupeBar'), lc = $('loupe'), mmPx = lc.clientWidth / S.loupeSpan, unit = S.loupeSpan > 20 ? 5 : 1; bar.style.width = (unit * mmPx).toFixed(1) + 'px'; $('loupeLbl').textContent = unit + ' mm';
     if (dirtyGeom) { drawPlan(); readouts(); drawBuilds(); labels(); dirtyGeom = false; persistSoon(); } else drawPlanEye();
     for (var hk = 0; hk < hooks.length; hk++) { try { hooks[hk](); } catch (e) { if (window.console) console.error(e); } }
@@ -1953,11 +2038,18 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
   function setAngle(a) { S.angle = Math.max(-80, Math.min(80, Math.round(a * 2) / 2)); $('angle').value = S.angle; schedule(); persistSoon(); }
   (function () {
     var cv = $('shirt'), down = null;
-    cv.addEventListener('pointerdown', function (e) { down = { x: e.clientX, y: e.clientY, a: S.angle, moved: false }; cv.setPointerCapture(e.pointerId); stopSweep(); });
-    cv.addEventListener('pointermove', function (e) { if (!down) return; var dx = e.clientX - down.x; if (Math.abs(dx) > 4) down.moved = true; if (down.moved) setAngle(down.a + dx / cv.clientWidth * 150); });
-    cv.addEventListener('pointerup', function (e) { if (down && !down.moved) { var r = cv.getBoundingClientRect(), X = Math.floor((e.clientX - r.left) / r.width * cv.width), Y = (e.clientY - r.top) / r.height * cv.height, C = cache.m;
+    cv.addEventListener('pointerdown', function (e) { if (BRUSH.tool !== 'off') { e.preventDefault(); cv.setPointerCapture(e.pointerId); brushDown(e); return; } down = { x: e.clientX, y: e.clientY, a: S.angle, moved: false }; cv.setPointerCapture(e.pointerId); stopSweep(); });
+    cv.addEventListener('pointermove', function (e) { if (BRUSH.tool !== 'off') { brushMove(e); return; } if (!down) return; var dx = e.clientX - down.x; if (Math.abs(dx) > 4) down.moved = true; if (down.moved) setAngle(down.a + dx / cv.clientWidth * 150); });
+    cv.addEventListener('pointerup', function (e) { if (BRUSH.live) { brushUp(); return; } if (down && !down.moved) { var r = cv.getBoundingClientRect(), X = Math.floor((e.clientX - r.left) / r.width * cv.width), Y = (e.clientY - r.top) / r.height * cv.height, C = cache.m;
         if (C && C.ok[X]) { S.lu = C.u[X]; S.lv = (Y - cv.height / 2) * (mmW() * 1.22 / cv.width); schedule(); persistSoon(); } } down = null; });
-    cv.addEventListener('pointercancel', function () { down = null; });
+    cv.addEventListener('pointercancel', function () { down = null; if (BRUSH.live) brushUp(); });
+    cv.addEventListener('pointerleave', function () { if (BRUSH.at && !BRUSH.live) { BRUSH.at = null; schedule(); } });
+    ['brOff', 'brAdd', 'brCut', 'brAuto'].forEach(function (id) { $(id).addEventListener('change', function (e) { BRUSH.tool = e.target.value; BRUSH.at = null; cv.style.touchAction = BRUSH.tool === 'off' ? '' : 'none'; cv.style.cursor = BRUSH.tool === 'off' ? '' : 'crosshair';
+      $('stageHint').textContent = BRUSH.tool === 'off' ? 'Drag to walk around. Click to move the loupe.' : BRUSH.tool === 'add' ? 'Paint where ridges should be.' : BRUSH.tool === 'cut' ? 'Paint where ridges should not be.' : 'Paint to go back to what the art asks for.'; schedule(); }); });
+    $('brSize').addEventListener('input', function (e) { BRUSH.mm = parseFloat(e.target.value); $('brSizeOut').textContent = BRUSH.mm.toFixed(1).replace(/\.0$/, '') + ' mm'; });
+    $('brOff').checked = true; $('brSize').value = BRUSH.mm; // a reload can bring back the form as it was left; the brush always starts put away
+    $('brUndo').addEventListener('click', function () { if (!OV.strokes.length) return; OV.strokes.pop(); ovCommit(true); });
+    $('brClear').addEventListener('click', function () { if (!OV.strokes.length) return; OV.strokes = []; ovCommit(true); });
     var pl = $('plan'), pd = false;
     function fromEvent(e) { var r = pl.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * 360, y = (e.clientY - r.top) / r.height * 232; setAngle(Math.atan2(x - PL.ox, Math.max(1, y - PL.oy)) * 180 / Math.PI); }
     pl.addEventListener('pointerdown', function (e) { pd = true; pl.setPointerCapture(e.pointerId); stopSweep(); fromEvent(e); });
@@ -2163,6 +2255,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
         if (l.key && l.key !== l.name) n.key = l.key; if (l.file) n.file = l.file;
         if (far && l.full) n.remote = { id: l.full, url: base + l.full, site: where === 'site', fp: l.fp || '', type: l.type || 'image/png', size: +l.size || 0, lm: +l.lm || 0 }; else if (where === 'local' && l.remote && !l.file) n.remote = l.remote;
         if (far && l.d3 && !d3Mem[k]) d3Mem[k] = { on: !!l.d3.on, mm: +l.d3.mm || 0 }; return n; });
+      if (far && rec.ov) { var osig = nodes.map(function (n) { return keyOf(n); }).sort().join('|'); if (!ovMem[osig]) ovMem[osig] = cleanStrokes(rec.ov); } // ridges painted by whoever saved the set, unless this browser has its own
       if (watch) { clearInterval(watch.timer); watch = null; }
       ART = { W: W, H: H, docW: +rec.docW || imgs[0].naturalWidth, dpi: +rec.dpi || 0, src: String(rec.src || 'images'), nodes: nodes, imageSet: true };
       KEEP.t = rec.t; KEEP.from = where; if (where === 'local') KEEP.local = nodes.every(function (n) { return n.file || n.remote; }) ? 'full' : 'previews';
@@ -2216,7 +2309,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
         f = n.file; var o = f ? old[fpOf(f)] : n.remote && old[n.remote.fp]; // the same file as last time: the copy already stored stays
         if (o) { L.full = o.full; L.fp = o.fp; L.type = o.type || null; L.size = o.size || 0; L.lm = o.lm || 0; }
         layers.push(L); }
-      m = { v: 1, t: t, src: art.src, W: art.W, H: art.H, docW: art.docW, dpi: art.dpi || 0, layers: layers, done: false, skipped: [] };
+      m = { v: 1, t: t, src: art.src, W: art.W, H: art.H, docW: art.docW, dpi: art.dpi || 0, layers: layers, done: false, skipped: [], ov: ovOut() };
       await KEEP.db.doc(SHARED).set(JSON.parse(JSON.stringify(m))); KEEP.cur = m; mine = []; // from here the link opens on this art
       var keepIds = setIds(m); Object.keys(setIds(was)).forEach(function (id) { if (!keepIds[id]) drop(id); }); // the set this one replaces goes first, to make room
       for (i = 0; i < nodes.length; i++) { n = nodes[i]; f = n.file; L = layers[i]; if (!f || L.full) continue; var ty = fileType(f);
@@ -2236,14 +2329,16 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     KEEP.saving = false; keepNote();
     if (KEEP.t !== t) sharedSoon();
   }
-  function keepMeta() { // which view a layer is in, and its depth, follow the owner's changes
+  function ovOut() { var a = OV.strokes.length ? OV.strokes : null; return a && JSON.stringify(a).length < 150000 ? a : null; } // the hand-painted ridges go along with a saved set, unless there is a great deal of it
+  function keepMeta() { // which view a layer is in, its depth, and the ridges painted by hand follow the owner's changes
     if (!KEEP.assets || !KEEP.db) return; clearTimeout(metaTimer);
     metaTimer = setTimeout(async function () {
       var m = KEEP.cur; if (!m || m.t !== KEEP.t || KEEP.saving || !ART) return; var changed = false, by = {};
       ART.nodes.forEach(function (n) { by[keyOf(n)] = n; });
       var layers = m.layers.map(function (l) { var n = by[l.key || l.name]; if (!n) return l; var d = d3Mem[keyOf(n)], d3 = d ? { on: !!d.on, mm: +d.mm || 0 } : null;
         if (l.assign === n.assign && JSON.stringify(l.d3 || null) === JSON.stringify(d3)) return l; changed = true; return Object.assign({}, l, { assign: n.assign, d3: d3 }); });
-      if (!changed) return; var m2 = Object.assign({}, m, { layers: layers });
+      var ov = ovOut(); if (JSON.stringify(m.ov || null) !== JSON.stringify(ov)) changed = true;
+      if (!changed) return; var m2 = Object.assign({}, m, { layers: layers, ov: ov });
       try { await KEEP.db.doc(SHARED).set(JSON.parse(JSON.stringify(m2))); if (KEEP.cur === m) KEEP.cur = m2; } catch (e) { }
     }, 1500);
   }
@@ -2294,7 +2389,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
       (Array.isArray(ls) ? ls : []).forEach(function (e) { if (e.type === 'file') have[e.name] = e.sha; });
       layers.forEach(function (l) { if (l.full && files[l.full] && files[l.full].keep && !have[l.full]) { delete files[l.full]; l.full = null; l.type = null; l.size = 0; l.lm = 0; } }); // thought to be on the page, but gone
       names = Object.keys(files);
-      if (!off) { m = { v: 1, t: t, src: art.src, W: art.W, H: art.H, docW: art.docW, dpi: art.dpi || 0, layers: layers }; text = JSON.stringify(m, null, 1) + '\n'; }
+      if (!off) { m = { v: 1, t: t, src: art.src, W: art.W, H: art.H, docW: art.docW, dpi: art.dpi || 0, layers: layers, ov: ovOut() }; text = JSON.stringify(m, null, 1).replace(/\n\s+(-?[\d.e-]+,?)(?=\n)/g, ' $1') + '\n'; }
       for (i = 0; i < names.length; i++) { var nm = names[i], fl = files[nm]; if (fl.keep || have[nm] === fl.sha) continue; // there already, byte for byte
         say('Sending ' + (++sent) + ' of ' + names.filter(function (k) { return !files[k].keep && have[k] !== files[k].sha; }).length + ' (' + (fl.blob.size / 1048576).toFixed(1) + ' MB)…');
         var made = await gh(tok, 'POST', '/git/blobs', { content: await b64Of(fl.blob), encoding: 'base64' }); tree.push({ path: SITE.dir + '/' + nm, mode: '100644', type: 'blob', sha: made.sha }); }
@@ -2368,7 +2463,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     } finally { bt.disabled = false; }
   });
 
-  window.__lent = { S: S, known: function (name) { return KNOWN[name] || null; }, buildSegs: geom, geom: geom, classify: classify, ranges: ranges, loadFiles: loadFiles, startWatch: startWatch, fetchRemote: fetchRemote, keep: KEEP, sitePublish: SITE ? sitePublish : null, gitSha: gitSha, keepNow: keepNow, sharedSave: sharedSave, multi: multi, d3Of: d3Of, psdNodes: psdNodes, keyOf: keyOf, hooks: hooks, art: function () { return ART; } };
+  window.__lent = { S: S, known: function (name) { return KNOWN[name] || null; }, buildSegs: geom, geom: geom, classify: classify, ranges: ranges, loadFiles: loadFiles, startWatch: startWatch, fetchRemote: fetchRemote, keep: KEEP, ov: OV, brush: BRUSH, sitePublish: SITE ? sitePublish : null, gitSha: gitSha, keepNow: keepNow, sharedSave: sharedSave, multi: multi, d3Of: d3Of, psdNodes: psdNodes, keyOf: keyOf, hooks: hooks, art: function () { return ART; } };
 
   startArt().catch(function (e) { if (window.console) console.error(e); if (!ART) $('psdWarns').innerHTML = '<div class="warn"><b>Built-in artwork failed to load.</b> Drop your PSD below to continue.</div>'; });
 })();
