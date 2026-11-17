@@ -180,6 +180,15 @@
 #viewer .filmcol{display:flex;flex-direction:column;gap:9px;min-width:0}
 #viewer .fields{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 10px;align-items:center;font-size:13.5px}
 #viewer .fields span{white-space:nowrap;color:var(--muted);font-size:12.5px}
+#viewer .scrgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px 22px;margin:8px 0}
+#viewer .scrgrid .fields{margin-bottom:8px}
+#viewer .scrgrid ul.note,#viewer .scrgrid ol.note{margin:6px 0;padding-left:18px;display:grid;gap:4px;max-width:none}
+#viewer .scrgrid p.note{margin:6px 0;max-width:none}
+#viewer #screenCard .chk{font-size:12.5px}
+#viewer #screenCard a{color:inherit}
+@media (max-width:900px){
+#viewer .scrgrid{grid-template-columns:minmax(0,1fr)}
+}
 #viewer .fnum{font:500 13.5px var(--mono);color:var(--ink);background:var(--panel2);border:1px solid var(--line);border-radius:3px;padding:4px 6px;width:74px;text-align:right}
 #viewer .filmseg{align-self:flex-start}
 #viewer .filmseg label{padding:7px 12px;font-size:13px}
@@ -496,13 +505,37 @@
     <p class="note">How the films are cut. Every pixel of the art is put on the nearest solid process build, so the art should already be screened (a Hard Mix fill in Photoshop does it). Black knocks out the colour and the white under it. W is everything that is not black, so there is white under every colour; the choke pulls it in only from the outline of the whole print, never from black and never between the stripes of two views. Two ways to get more white: tick a layer under “White under the black too” and the white runs under its black as well; or set an image to W under Artwork and white is added wherever that image has anything, under both views, kept out of the bare band between stripes. Where the page puts ridges, the stripe seen from the right runs from each ridge’s centre to the split and the other stripe from the split to the next centre, so the seams sit under the HD lines. H carries the ridges, plus any layer set to HD under Artwork exactly as drawn (anything in it that is not white or clear), plus the black of any layer ticked above where it is at least as wide as “Raise black wider than”. With an HD layer linked, nothing is ticked to begin with. The T’s stem is the artboard’s centre line; each film’s letter sits right beside its T, two spaces away. On one sheet the films are packed by their ink, a quarter inch apart, and each can be dragged anywhere: their boxes may overlap as long as their ink does not.</p>
   </section>
 
+<section class="card" id="screenCard" aria-label="Screens">
+    <div class="row" style="justify-content:space-between"><h2>Screens</h2><span class="note">The same sizes in screen-making terms: what each mesh can hold, and how to build the HD stencil from coats of emulsion. Rules of thumb from mesh and emulsion makers, not tested on your press.</span></div>
+    <div class="scrgrid">
+      <div class="filmcol">
+        <div class="fields">
+          <label for="meshH">HD screen</label><span><select id="meshH" style="width:auto"></select></span>
+          <label for="meshC">Colour screens (C M Y K)</label><span><select id="meshC" style="width:auto"></select></span>
+          <label for="meshW">White screen</label><span><select id="meshW" style="width:auto"></select></span>
+          <label for="lpi" title="The line count of the halftone dots in the art">Halftone in the art</label><span><input id="lpi" class="fnum" type="number" min="10" max="100" step="1"> LPI</span>
+        </div>
+        <div id="screenTerms"></div>
+      </div>
+      <div class="filmcol">
+        <h3>The HD stencil from coats of emulsion</h3>
+        <div class="fields">
+          <label for="coat22" title="Dry thickness over the mesh after two coats on the print side and two on the squeegee side, wet on wet. 125 µm is Kiwo's figure for Polycol Thick-Coat on 83/70 mesh.">2 + 2 coats build, over the mesh</label><span><input id="coat22" class="fnum" type="number" min="10" max="400" step="5"> µm</span>
+          <label for="coatAdd" title="What each further squeegee-side coat adds, wet on wet. About 55 µm on Kiwo's table: 2 + 3 is 180, 2 + 4 is 235, 2 + 5 is 300 µm.">Each coat after that adds</label><span><input id="coatAdd" class="fnum" type="number" min="5" max="150" step="5"> µm</span>
+        </div>
+        <div id="coatGuide"></div>
+      </div>
+    </div>
+    <p class="note">Where the numbers come from. Mesh figures: a polyester mesh maker’s <a href="https://www.slideshare.net/slideshow/monofilament-polyester-screen-printing-mesh-datasheet/28894140" target="_blank" rel="noopener">data sheet</a>. Finest line and smallest dot: Screen Printing magazine, <a href="https://screenprintingmag.com/in-pursuit-of-the-perfect-stencil/" target="_blank" rel="noopener">In Pursuit of the Perfect Stencil</a>, and Kiwo’s Wolfgang Pfirrmann in the <a href="https://www.printing.org/docs/default-source/printing-technology-docs/screen-making-basics-stencil-selection-application.pdf?sfvrsn=b82c4033_2" target="_blank" rel="noopener">SGIA guidebook</a> (a stencil should be no thicker, mesh included, than the smallest detail). Mesh at four times the halftone line count: <a href="https://www.printablepress.com/screen-printing-mesh-count-guide/" target="_blank" rel="noopener">Printable Press</a>. Builds and exposure for coated thick stencils: the <a href="https://static1.squarespace.com/static/53306342e4b083dcd0603c96/t/577be8606a4963d30fb2a09a/1467738208486/Polycol+Thick-Coat.pdf" target="_blank" rel="noopener">Kiwo Polycol Thick-Coat sheet</a> (its table is for 83/70 mesh and does not say whether the mesh is counted in the thickness); adding print-side coats after drying: Ulano QTX, Chromaline UDC-HV and Saati Textil PHW sheets. Ninety seconds per 100 µm, squeegee and press settings: <a href="https://screenprintingmag.com/mastering-high-density-inks/" target="_blank" rel="noopener">Mastering High-Density Inks</a>.</p>
+  </section>
+
   <section class="card" aria-label="HD ink builds">
     <div class="row" style="justify-content:space-between"><h2>HD ink builds</h2><span class="note">Click a row to load it. Each row uses the narrowest ridge and gap that stencil can hold.</span></div>
     <div class="tablewrap"><table>
       <thead><tr><th>Capillary film</th><th class="n">Cured height</th><th class="n">Narrowest line / gap</th><th class="n">Tightest pitch</th><th class="n">Each stripe</th><th class="n">Clean view, each side</th><th class="n">Register within</th></tr></thead>
       <tbody id="builds"></tbody>
     </table></div>
-    <p class="note">Height is taken as 90% of the film thickness per pass. The narrowest line a thick stencil resolves is about the film thickness plus the mesh (0.12 mm for an 83 mesh with 70 µm thread). “Register within” is how far the HD screen can land off the colour print before one view loses half its window. With ridge and gap equal, a quarter of the surface is image at the angle where a view first turns clean, falling to none at the far end of the window.</p>
+    <p class="note">Height is taken as 90% of the film thickness per pass. The narrowest line a thick stencil resolves is about the film thickness plus the thickness of the HD mesh picked under Screens (0.12 mm for an 83 mesh with 70 µm thread). “Register within” is how far the HD screen can land off the colour print before one view loses half its window. With ridge and gap equal, a quarter of the surface is image at the angle where a view first turns clean, falling to none at the far end of the window.</p>
   </section>
 
   <section class="card" aria-label="Artwork">
@@ -535,6 +568,7 @@
           <li>The files you loaded last are kept in this browser and are here on your next visit. The live link is not: press <b>Link artwork</b> again to follow saves.</li>
           <li>Each top-level layer or group is sent to view A, view B, both, or neither. The eye icon on top-level layers is ignored, so you can keep hiding one view while you draw the other.</li>
           <li>Ridges go where the two pictures differ. Where they happen to match the page leaves them out; a patch narrower than 2.4 mm is ridged anyway. For anything else, <b>Ridges by hand</b> under the shirt paints them in or away.</li>
+          <li><b>Screens</b>, lower down, gives the same sizes in screen-making terms: mils, threads of the mesh you pick for each screen, what that mesh can hold, and how many coats of emulsion build the HD stencil. Its defaults (83, 230 and 156 mesh, and one maker’s figures for a thick-stencil emulsion) are placeholders: set your own.</li>
           <li><b>HD</b> is for art drawn for the HD screen alone, such as the outline to raise: it is in neither view and is added to the HD film as it is.</li>
           <li><b>W</b> is for white underbase of your own, such as a solid shape under the whole wordmark: it is in neither view, and white is added to the white film wherever the image has anything, whatever its colour. The white under the colours is still made for you.</li>
           <li>For 3D, set <b>Images per gap</b> to 3 or more. Each layer or group is one depth plane; <b>Split</b> lists a group’s layers separately so each can have its own depth.</li>
@@ -1207,8 +1241,13 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
 (function () {
   'use strict';
   var $ = function (id) { return document.getElementById(id); };
-  var LS = 'lenticular-shirt-viewer.v1', ARTW = 1350, FILMS = [100, 150, 200, 250, 300, 400, 700], MESH = 0.12, CURE = 0.9;
-  var DEF = { proc: 'barrier', views: 2, pitch: 1.27, ridge: 0.52, height: 0.72, passes: 2, split: 50, guard: 0, reg: 0, cap: 0, lensAngle: 49, spot: true, spotA: '#f04bcd', spotB: '#ffd400', swap: false, snap: true, lock: false, angle: 30, curve: 55, printIn: 18, zone: 'diff', padX: 1.2, padY: 1.2, loupeSpan: 10, lu: null, lv: null };
+  var LS = 'lenticular-shirt-viewer.v1', ARTW = 1350, FILMS = [100, 150, 200, 250, 300, 400, 700], CURE = 0.9;
+  // Monofilament polyester mesh as sold for garment work: threads per inch, thread µm, opening µm, open area %, fabric thickness µm, theoretical ink volume cm³/m² (the µm of wet ink it lays down)
+  var MESHES = { '60/120': [60, 120, 294, 49.7, 210, 104.3], '83/70': [83, 70, 240, 58.7, 117, 68.7], '83/100': [83, 100, 209, 44.5, 166, 72.1], '110/80': [110, 80, 149, 40.8, 130, 53.0], '137/64': [137, 64, 115, 38.7, 103, 39.8], '156/64': [156, 64, 90, 30.1, 101, 30.4],
+    '195/55': [195, 55, 67, 26.5, 87, 23.3], '195/48': [195, 48, 77, 35.0, 80, 28.0], '230/48': [230, 48, 55, 24.6, 78, 19.2], '230/40': [230, 40, 68, 37.6, 65, 24.4], '255/40': [255, 40, 57, 32.5, 64, 21.1], '305/40': [305, 40, 37, 20.1, 64, 13.0], '305/34': [305, 34, 45, 29.6, 55, 16.3] };
+  function meshOf(k) { var m = MESHES[k] || MESHES['83/70']; return { key: MESHES[k] ? k : '83/70', n: m[0], d: m[1] / 1000, o: m[2] / 1000, open: m[3], t: m[4] / 1000, vol: m[5], pitch: 25.4 / m[0] }; } // lengths in mm
+  function hdT() { return meshOf(S.meshH).t; } // thickness of the HD screen's mesh: a stencil cannot hold a line finer than itself plus this
+  var DEF = { proc: 'barrier', views: 2, pitch: 1.27, ridge: 0.52, height: 0.72, passes: 2, split: 50, guard: 0, reg: 0, cap: 0, lensAngle: 49, spot: true, spotA: '#f04bcd', spotB: '#ffd400', swap: false, snap: true, lock: false, angle: 30, curve: 55, printIn: 18, zone: 'diff', padX: 1.2, padY: 1.2, meshH: '83/70', meshC: '230/48', meshW: '156/64', lpi: 45, coat22: 125, coatAdd: 55, loupeSpan: 10, lu: null, lv: null };
   var KNOWN = { 'Layer 5 copy 2': { assign: 'both', mm: 0 }, 'Layer 2': { assign: 'b', label: 'Jump' }, 'ledgenew': { assign: 'a', label: 'Ledge', split: true, mm: 3 }, 'Layer 5 copy': { assign: 'a', label: 'Ledge', mm: 4 }, 'Layer 7': { assign: 'a', label: 'Ledge', mm: -3 },
     'lentV62guy.png': { assign: 'a', label: 'Guy', mm: -3, z: 4 }, 'lentV62oldlogo.png': { assign: 'b', label: 'Old logo', z: 3 }, 'lentV62fulltext.png': { assign: 'b', on3: true, mm: 0, z: 1, raise: true },
     'lentV62textcut.png': { assign: 'a', on3: false, z: 2, raise: true }, 'Screenshot 2026-11-12 at 12.10.36\u202fPM.png': { assign: 'a', on3: false, z: 2, raise: true }, 'Screenshot 2026-11-12 at 12.10.36 PM.png': { assign: 'a', on3: false, z: 2, raise: true },
@@ -1830,7 +1869,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     // warnings
     var listed = pr !== 'hidden' && pr !== 'lens'; // "Will it print" lists these rules with their margins, so they are not said twice
     if (pr !== 'lens') {
-      var per = S.height / CURE / S.passes, minLine = per + MESH, what = PROC[pr].wLabel.split(' ')[0];
+      var per = S.height / CURE / S.passes, minLine = per + hdT(), what = PROC[pr].wLabel.split(' ')[0];
       if (per * 1000 > 760 && !listed) W.push(['Height', 'needs a ' + Math.round(per * 1000) + ' µm stencil per pass. 700 µm is the thickest film sold; add a pass.']);
       if (pr === 'walls') { var gc = g - 2 * S.cap; if (S.cap > 0 && gc < 0.22) W.push(['Caps', 'leave only ' + Math.max(0, gc).toFixed(2) + ' mm between them. Even a thin cap stencil needs about 0.22 mm.']);
         if (w < 2 * minLine - 0.03 && !listed) W.push(['Rib', 'is two lines side by side, one per view. A ' + Math.round(per * 1000) + ' µm stencil holds each down to about ' + minLine.toFixed(2) + ' mm, so the rib needs about ' + (2 * minLine).toFixed(2) + ' mm.']); }
@@ -1849,7 +1888,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     if (!multi() && ART.weak > 0.03) W.push(['Views', 'A and B are nearly but not exactly the same colour over ' + Math.round(ART.weak * 100) + '% of the art, so the page counts that as changing and puts ridges on it. That is what two exports of one picture look like when they were not made the same way (shifted colours, soft edges). Export both from the same layer with the same settings.']);
     if (ART.empty) W.push(['Artwork', multi() ? 'No layer has any depth, so nothing moves. Give a layer some depth in the sidebar.' : 'Views A and B are identical, so there is nothing to flip between. Assign layers below.']);
     $('warns').innerHTML = W.map(function (x) { return '<div class="warn"><b>' + esc(x[0]) + '</b> ' + esc(x[1]) + '</div>'; }).join('');
-    drawBalance(rA, rB, g0);
+    drawBalance(rA, rB, g0); drawScreens();
   }
   function fx1(v) { return (Math.round(v * 10) / 10).toString(); }
 
@@ -1873,7 +1912,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
   }
   // The same rules of thumb as the warnings, as a list with how much room each has: [what, how it stands, ok | tight | no]
   function buildChecks() {
-    var pr = S.proc, P = S.pitch, w = S.ridge, g = P - w, per = S.height / CURE / S.passes, minLine = per + MESH, C = [], what = PROC[pr].wLabel.split(' ')[0], um = Math.round(per * 1000);
+    var pr = S.proc, P = S.pitch, w = S.ridge, g = P - w, per = S.height / CURE / S.passes, minLine = per + hdT(), C = [], what = PROC[pr].wLabel.split(' ')[0], um = Math.round(per * 1000);
     function st(have, need) { var r = have / need; return r >= 1.15 ? 'ok' : r >= 0.98 ? 'tight' : 'no'; }
     function of(have, need) { return Math.round(have / need * 100) + '% of it'; }
     var needW = pr === 'walls' ? 2 * minLine : minLine;
@@ -1885,6 +1924,52 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
       C.push(['Colour stripes', 'The narrowest is ' + printed.toFixed(2) + ' mm. A flat screen holds about 0.25 mm cleanly on fabric: ' + of(printed, 0.25) + '.', st(printed, 0.25)]);
       if (stripe < 0.56) C.push(['Halftones', 'A 45 LPI dot cell is 0.56 mm, wider than the ' + stripe.toFixed(2) + ' mm that shows of each stripe, so dots under the ridges get chopped. Solid fills are safe.', 'info']); }
     return C;
+  }
+  /* ---------- the same sizes in screen-making terms ---------- */
+  function mil(mm) { var v = mm / 0.0254; return (v < 10 ? v.toFixed(1) : Math.round(v)) + ' mil'; }
+  function mmil(mm) { return mm.toFixed(2) + ' mm (' + mil(mm) + ')'; }
+  function drawScreens() {
+    var el = $('screenTerms'); if (!el) return; var pr = S.proc, flat = pr === 'lens', H = meshOf(S.meshH), Cm = meshOf(S.meshC), Wm = meshOf(S.meshW), P = S.pitch, w = S.ridge, g = P - w, per = S.height / CURE / S.passes, um = Math.round(per * 1000), R = [], lpi = Math.max(10, S.lpi || 45), cell = 25.4 / lpi;
+    function st(have, need) { var r = have / need; return r >= 1.15 ? 'ok' : r >= 0.98 ? 'tight' : 'no'; }
+    function across(mm, m) { var k = mm / m.pitch; return (k < 10 ? k.toFixed(1) : Math.round(k)) + ' threads of the ' + m.key + ' mesh across'; }
+    function fine(m) { return m.o + 1.5 * m.d; } // narrower than one opening plus a thread and a half, a printing line can be blocked by the threads
+    function row(tag, what, text) { R.push('<div class="chk ' + tag + '"><span class="tag">' + (tag === 'ok' ? 'OK' : tag === 'tight' ? 'Tight' : tag === 'no' ? 'No' : '—') + '</span><span><b>' + what + '</b> ' + text + '</span></div>'); }
+    if (!flat) {
+      row('info', 'Pitch, ' + mmil(P) + '.', (25.4 / P).toFixed(1) + ' ridges to the inch, a ' + (25.4 / P).toFixed(1) + ' LPI line screen. Each ridge and gap takes ' + (P / H.pitch).toFixed(1) + ' threads of the ' + H.key + ' mesh.');
+      var needW = Math.max(per + H.t, fine(H)) * (pr === 'walls' ? 2 : 1), wl = PROC[pr].wLabel.split(' ')[0];
+      row(st(w, needW), wl + ', ' + mmil(w) + '.', 'An open line ' + across(w, H) + '. The threads can block a line under ' + fine(H).toFixed(2) + ' mm, and a ' + um + ' µm stencil on ' + Math.round(H.t * 1000) + ' µm of mesh does not resolve one finer than about ' + (per + H.t).toFixed(2) + ' mm (stencil plus mesh)' + (pr === 'walls' ? ', twice that for two side by side' : '') + '.');
+      row(st(g, per + H.t), 'Gap, ' + mmil(g) + '.', 'A bar of emulsion ' + across(g, H) + ', standing between the lines. It wants about ' + (per + H.t).toFixed(2) + ' mm, as wide as stencil plus mesh are tall, to stand through washout.');
+      row(um <= 300 ? 'ok' : um <= 700 ? 'tight' : 'no', 'HD stencil, ' + um + ' µm (' + mil(per) + ') a pass.', 'That is ' + (per / H.t).toFixed(1) + ' times the thickness of the ' + H.key + ' mesh; an ordinary flat stencil stands 10 to 25% of the mesh thickness above it (' + Math.round(H.t * 100) + ' to ' + Math.round(H.t * 250) + ' µm). Coats of emulsion are published up to about 300 µm, capillary film up to 700 µm.');
+    }
+    if (pr === 'barrier' || flat) { var a = g * S.split / 100, sa = Math.max(0, a - S.guard / 2), sb = Math.max(0, g - a - S.guard / 2), N = multi() ? S.views : 0, printed = flat ? P / Math.max(2, S.views) : N ? g / N : Math.min(sa, sb) + w / 2;
+      row(st(printed, fine(Cm)), 'Picture stripes, ' + mmil(printed) + ' at the narrowest.', across(printed, Cm).replace(/^./, function (c) { return c.toUpperCase(); }) + '. That mesh holds a printing line down to about ' + fine(Cm).toFixed(2) + ' mm (one opening plus a thread and a half), and lays down about ' + Math.round(Cm.vol) + ' µm of wet ink.');
+      if (!flat && !N && S.guard > 0) row(st(S.guard, Cm.o + Cm.d), 'Dead band, ' + mmil(S.guard) + '.', 'A line of emulsion between the two stripes, ' + across(S.guard, Cm) + '. The finest line a ' + Cm.key + ' resolves is about ' + (Cm.o + Cm.d).toFixed(2) + ' mm (one opening plus one thread).');
+      var ratio = Cm.n / lpi, dot = fine(Cm), speck = 2 * Cm.o + 1.5 * Cm.d, lo = Math.min(100, Math.PI * dot * dot / 4 / (cell * cell) * 100), hi = Math.max(0, 100 - Math.PI * speck * speck / 4 / (cell * cell) * 100);
+      row(ratio >= 4 ? 'ok' : ratio >= 3.5 ? 'tight' : 'no', 'Halftone, ' + lpi + ' LPI (a ' + cell.toFixed(2) + ' mm cell).', Cm.n + ' mesh is ' + ratio.toFixed(1) + ' times the line count; four times or more is the usual rule. Dots hold from about ' + Math.max(1, Math.round(lo)) + '% to ' + Math.round(hi) + '%: the smallest dot the threads leave open is ' + dot.toFixed(2) + ' mm, and a speck of stencil under ' + speck.toFixed(2) + ' mm has too few threads to hang on to.');
+      var dead = !flat && !N && S.guard > 0, wTag = st(printed, fine(Wm)), dTag = dead ? st(S.guard, Wm.o + Wm.d) : 'ok', choke = $('fChoke') ? +$('fChoke').value || 0 : 0.1;
+      row(wTag === 'no' || dTag === 'no' ? 'no' : wTag === 'tight' || dTag === 'tight' ? 'tight' : 'ok', 'White screen, ' + Wm.key + '.', 'The same stripes in white. This mesh holds a printing line down to about ' + fine(Wm).toFixed(2) + ' mm' + (dead ? ' and an unprinted one down to about ' + Math.round((Wm.o + Wm.d) * 1000) + ' µm, so the ' + Math.round(S.guard * 1000) + ' µm dead band is ' + (dTag === 'ok' ? 'inside' : dTag === 'tight' ? 'right at' : S.guard / (Wm.o + Wm.d) > 0.9 ? 'just under' : 'under') + ' what it resolves' : '') + '. It lays down about ' + Math.round(Wm.vol) + ' µm of wet ink. The ' + choke.toFixed(2) + ' mm choke is ' + (choke / Wm.pitch).toFixed(1) + ' of one thread spacing (' + Wm.pitch.toFixed(2) + ' mm).'); }
+    el.innerHTML = '<div class="checks">' + R.join('') + '</div>';
+    // the HD stencil from coats of emulsion
+    var cg = $('coatGuide'), c22 = Math.max(10, S.coat22), add = Math.max(5, S.coatAdd), top = c22 + 3 * add, h = '';
+    function sq(t) { return t <= c22 ? 2 : 2 + Math.ceil((t - c22) / add - 1e-9); } // squeegee-side coats, wet on wet, after two on the print side
+    function build(n) { return c22 + (n - 2) * add; }
+    if (flat) { cg.innerHTML = '<p class="note">A lens sheet has no HD screen.</p>'; return; }
+    var n1 = sq(um);
+    h += '<p class="note"><b>Needed: ' + um + ' µm (' + mil(per) + ') of stencil a pass</b> for ' + mmil(S.height) + ' cured in ' + S.passes + (S.passes > 1 ? ' passes' : ' pass') + ' (cured ink is about 90% of the stencil). ';
+    if (n1 <= 5) h += 'By the figures above that is <b>2 coats on the print side, then ' + n1 + ' on the squeegee side</b>, wet on wet: about ' + Math.round(build(n1)) + ' µm.</p>';
+    else { h += 'By the figures above that would be 2 + ' + n1 + ' wet on wet, past what is published for one build (2 + 5, about ' + Math.round(top) + ' µm). Ways there:</p><ul class="note">';
+      for (var k = S.passes + 1; k <= S.passes + 3 && k <= 6; k++) { var pk = S.height / CURE / k * 1000, nk = sq(pk); if (nk <= 5) { h += '<li><b>' + k + ' passes of ' + Math.round(pk) + ' µm</b>, the screen coated 2 + ' + nk + ' (about ' + Math.round(build(nk)) + ' µm). A stencil that thin also holds a line down to about ' + (pk / 1000 + H.t).toFixed(2) + ' mm, against ' + (per + H.t).toFixed(2) + ' mm now.</li>'; break; } }
+      h += '<li>Build 2 + 5, dry it right through, then add coats on the print side, drying after each, until it measures ' + um + ' µm over the mesh. The emulsion makers describe this for extra thickness, but give no figure for what a coat on a dry stencil adds.</li><li>Capillary film, sold up to 700 µm. Even thickness with no drying time, which is why film makers say coated builds this thick are hard to control.</li></ul>'; }
+    function mins(sec) { return sec >= 100 ? (sec / 60).toFixed(1).replace(/\.0$/, '') + ' minutes' : Math.round(sec / 5) * 5 + ' seconds'; }
+    h += '<ol class="note steps"><li><b>Mesh.</b> ' + H.key + ', degreased and dry. Coarse mesh with a thin thread (83/70 is the usual HD choice) lets thick ink through. Dyed yellow mesh keeps edges sharper through a long exposure, and needs 50 to 80% more of it.</li>' +
+      '<li><b>Emulsion.</b> One made for thick stencils: 42 to 51% solids and thick as honey (Kiwo Polycol Thick-Coat, Saati Textil PHW, Murakami Aquasol HV). An ordinary emulsion builds less with every coat and loses more of it as it dries.</li>' +
+      '<li><b>Coat.</b> The round edge of the trough, slowly. Two coats on the print side, until the squeegee side glistens; then the squeegee-side coats one after another without drying between. Each of those pushes more emulsion out to the print side, where the thickness is wanted.</li>' +
+      '<li><b>Dry.</b> Flat, print side down, 30 to 40 °C, 30 to 50% humidity, moving air, in the dark. A build this thick dries slowly, hours where a flat screen takes minutes; if in doubt leave it overnight. It has to be dry all the way through before more coats or exposure.</li>' +
+      '<li><b>Measure.</b> A thickness gauge or micrometer on the dry stencil, less ' + Math.round(H.t * 1000) + ' µm for the bare mesh (measure yours too). Put what you get into the two boxes above and the numbers here follow your emulsion and your hand.</li>' +
+      '<li><b>Expose.</b> Much longer than a flat screen. Kiwo gives about 2 minutes for a 2 + 4 build (235 µm) on yellow 83/70, against 40 seconds for a flat 2 + 1 on white mesh, with a 5 kW metal halide at 1 m; thick film is quoted at 90 seconds for each 100 µm on a 3 to 6 kW metal halide. For ' + um + ' µm those two rates give ' + mins(um * 120 / 235) + ' to ' + mins(um * 0.9) + '. LED units vary a lot: run a step test, and err toward over-exposure. The film positive has to be fully opaque.</li>' +
+      '<li><b>Wash out.</b> Soak 3 to 5 minutes first, then pressure-wash from the print side, 30 to 45 cm away. If the squeegee side comes away slimy it was under-exposed.</li>' +
+      '<li><b>On press.</b> HD screen last, off-contact raised by the stencil thickness on top of the usual gap, soft squeegee, light pressure, one stroke.</li></ol>';
+    cg.innerHTML = h;
   }
   function pc(v) { return Math.round(v * 100) + '%'; }
   function showsRow(label, where, parts) { // one bar that adds to the whole surface: [share, class, name]
@@ -1925,7 +2010,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
 
   /* ================= builds table ================= */
   var BUILDS = [[100, 1], [200, 1], [200, 2], [300, 1], [400, 1], [400, 2], [400, 3], [700, 1]];
-  function buildRow(b) { var h = CURE * b[0] * b[1] / 1000, line = b[0] / 1000 + MESH; return { film: b[0], passes: b[1], h: h, line: line, P: 2 * line, on: Math.atan(line * 4 / 9 / h) * 180 / Math.PI, off: Math.atan(0.92 * line / h) * 180 / Math.PI }; /* same test as classify(): other image <= 10%, print >= 4% */ }
+  function buildRow(b) { var h = CURE * b[0] * b[1] / 1000, line = b[0] / 1000 + hdT(); return { film: b[0], passes: b[1], h: h, line: line, P: 2 * line, on: Math.atan(line * 4 / 9 / h) * 180 / Math.PI, off: Math.atan(0.92 * line / h) * 180 / Math.PI }; /* same test as classify(): other image <= 10%, print >= 4% */ }
   function drawBuilds() {
     $('builds').innerHTML = BUILDS.map(function (b, i) { var r = buildRow(b), on = Math.abs(S.height - r.h) < 0.011 && Math.abs(S.ridge - r.line) < 0.011 && Math.abs(S.pitch - r.P) < 0.03 && S.passes === r.passes;
       return '<tr class="build' + (on ? ' on' : '') + '" data-i="' + i + '" tabindex="0"><td>' + r.film + ' µm × ' + r.passes + '</td><td class="n">' + r.h.toFixed(2) + ' mm</td><td class="n">' + r.line.toFixed(2) + ' mm · ' + thou(r.line) + ' thou</td><td class="n">' + r.P.toFixed(2) + ' mm · ' + fx1(25.4 / r.P) + ' LPI</td><td class="n">' + (r.line / 2).toFixed(2) + ' mm</td><td class="n">' + Math.round(r.on) + '°–' + Math.round(r.off) + '°</td><td class="n">±' + (r.line / 4).toFixed(2) + ' mm</td></tr>'; }).join('');
@@ -1936,6 +2021,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
   function snapPitch(P) { if (!S.snap || !ART || S.proc !== 'barrier') return P; var k = docPxPerMm(), n = Math.max(2, Math.round(P * k)); return n / k; }
   function syncControls() {
     ['pitch', 'ridge', 'height', 'split', 'guard', 'reg', 'cap', 'lensAngle', 'curve', 'printIn', 'padX', 'padY', 'angle', 'loupeSpan'].forEach(function (k) { $(k).value = S[k]; });
+    ['meshH', 'meshC', 'meshW', 'lpi', 'coat22', 'coatAdd'].forEach(function (k) { $(k).value = S[k]; });
     $('proc').value = S.proc; $('spot').checked = S.spot; $('spotA').value = S.spotA; $('spotB').value = S.spotB;
     $('swap').checked = S.swap; $('snap').checked = S.snap; $('lock').checked = S.lock; $('passes' + S.passes).checked = true; $('views' + S.views).checked = true;
     $('zone' + (S.zone === 'diff' ? 'Diff' : S.zone === 'box' ? 'Box' : 'All')).checked = true;
@@ -1956,7 +2042,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     $('pitchOut').textContent = P.toFixed(2) + ' mm · ' + fx1(25.4 / P) + ' LPI';
     $('pitchSub').textContent = S.proc === 'lens' ? 'One lenticule per pair of stripes' : 'Gap ' + g.toFixed(2) + ' mm' + (S.proc === 'barrier' ? ' · ' + fx1(P * k) + ' px in the artwork' : '');
     $('ridgeOut').textContent = w.toFixed(2) + ' mm · ' + thou(w) + ' thou';
-    $('ridgeSub').textContent = 'A ' + Math.round(per * 1000) + ' µm stencil holds ≥ ' + (per + MESH).toFixed(2) + ' mm';
+    $('ridgeSub').textContent = 'A ' + Math.round(per * 1000) + ' µm stencil holds ≥ ' + (per + hdT()).toFixed(2) + ' mm';
     $('heightOut').textContent = S.height.toFixed(2) + ' mm';
     $('heightSub').textContent = '≈ ' + S.passes + ' × ' + nearestFilm(per * 1000) + ' µm capillary film';
     $('splitOut').textContent = S.split + ' / ' + (100 - S.split);
@@ -2029,6 +2115,9 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
   ['passes1', 'passes2', 'passes3'].forEach(function (id) { bind(id, 'passes', function (t) { return parseInt(t.value, 10); }); });
   ['views2', 'views3', 'views4', 'views5'].forEach(function (id) { bind(id, 'views', function (t) { return parseInt(t.value, 10); }); });
   ['zoneDiff', 'zoneBox', 'zoneAll'].forEach(function (id) { bind(id, 'zone', function (t) { return t.value; }); });
+  ['meshH', 'meshC', 'meshW'].forEach(function (id) { var hd = id === 'meshH'; $(id).innerHTML = Object.keys(MESHES).filter(function (k) { return hd ? MESHES[k][0] <= 137 : MESHES[k][0] >= 110; }).map(function (k) { return '<option value="' + k + '">' + MESHES[k][0] + ' mesh, ' + MESHES[k][1] + ' µm thread</option>'; }).join('');
+    $(id).addEventListener('change', function (e) { S[id] = e.target.value; geometryChanged(); }); });
+  ['lpi', 'coat22', 'coatAdd'].forEach(function (id) { $(id).addEventListener('change', function (e) { var v = parseFloat(e.target.value); if (!(v > 0)) { e.target.value = S[id]; return; } S[id] = v; geometryChanged(); }); });
   Array.prototype.forEach.call(document.querySelectorAll('.aim'), function (b) { b.addEventListener('click', function () { var t = parseFloat(b.dataset.aim) * Math.PI / 180, g = 2 * S.height * Math.tan(t) + S.guard; S.split = 50; S.pitch = snapPitch(Math.min(3, Math.max(0.5, S.ridge + g))); syncControls(); geometryChanged(); }); });
   $('btnReset').addEventListener('click', function () { var keep = { angle: S.angle, lu: S.lu, lv: S.lv, proc: S.proc }; Object.assign(S, DEF, PROCDEF[S.proc], keep); S.pitch = snapPitch(S.pitch); buildZone(); buildSpot(); syncControls(); geometryChanged(); });
   $('builds').addEventListener('click', function (e) { var tr = e.target.closest('tr.build'); if (tr) applyBuild(+tr.dataset.i); });
