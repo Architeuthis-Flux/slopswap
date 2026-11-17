@@ -407,7 +407,10 @@
         <div class="seg filmseg" role="group" aria-label="Films to make"><label title="White underbase and white"><input type="checkbox" id="fOnW">W</label><label title="Cyan"><input type="checkbox" id="fOnC">C</label><label title="Magenta"><input type="checkbox" id="fOnM">M</label><label title="Yellow"><input type="checkbox" id="fOnY">Y</label><label title="Black"><input type="checkbox" id="fOnK">K</label><label title="HD: ridges and raised black"><input type="checkbox" id="fOnH">H</label></div>
         <h3>Lay them out as</h3>
         <div class="seg filmseg" role="radiogroup" aria-label="How the films are laid out"><label><input type="radio" name="fLayout" id="fLayPages" value="pages">A page each</label><label><input type="radio" name="fLayout" id="fLaySheet" value="sheet">One sheet</label></div>
+        <h3>HD layer</h3>
+        <div id="filmHD" class="raise"></div>
         <h3>Raise the black in HD on</h3>
+        <p class="note" id="filmRaiseNote"></p>
         <div id="filmRaise" class="raise"></div>
         <label class="check"><input type="checkbox" id="fCmyK"><span>Print three-colour black as K</span></label>
         <label class="check"><input type="checkbox" id="fMirror"><span>Mirror the films</span></label>
@@ -438,7 +441,7 @@
         <div id="filmResult"></div>
       </div>
     </div>
-    <p class="note">How the films are cut. Every pixel of the art is put on the nearest solid process build, so the art should already be screened (a Hard Mix fill in Photoshop does it). Black knocks out the colour and the white under it. W is everything that is not black, so there is white under every colour; the choke pulls it in only from the outline of the whole print, never from black and never between the stripes of two views. Where the page puts ridges, the stripe seen from the right runs from each ridge’s centre to the split and the other stripe from the split to the next centre, so the seams sit under the HD lines. H carries the ridges, plus the black of any layer ticked above where it is at least as wide as “Raise black wider than”: bold outlines are raised, halftone dots and thin lines stay flat. The T’s stem is the artboard’s centre line; each film’s letter has its own place beside it, so stacked films read W C M Y K H. On one sheet the films are packed by their ink, a quarter inch apart, and each can be dragged anywhere: their boxes may overlap as long as their ink does not.</p>
+    <p class="note">How the films are cut. Every pixel of the art is put on the nearest solid process build, so the art should already be screened (a Hard Mix fill in Photoshop does it). Black knocks out the colour and the white under it. W is everything that is not black, so there is white under every colour; the choke pulls it in only from the outline of the whole print, never from black and never between the stripes of two views. Where the page puts ridges, the stripe seen from the right runs from each ridge’s centre to the split and the other stripe from the split to the next centre, so the seams sit under the HD lines. H carries the ridges, plus any layer set to HD under Artwork exactly as drawn (anything in it that is not white or clear), plus the black of any layer ticked above where it is at least as wide as “Raise black wider than”. With an HD layer linked, nothing is ticked to begin with. The T’s stem is the artboard’s centre line; each film’s letter has its own place beside it, so stacked films read W C M Y K H. On one sheet the films are packed by their ink, a quarter inch apart, and each can be dragged anywhere: their boxes may overlap as long as their ink does not.</p>
   </section>
 
   <section class="card" aria-label="HD ink builds">
@@ -469,6 +472,7 @@
           <li>Press <b>Link artwork</b> and pick the PSD once. While this page stays open it re-reads the file every time you save, and the chip at the top turns green.</li>
           <li>If the picker is blocked where you are viewing this, drop the PSD on the box instead. If the chip stays grey after a drop, the browser gave a one-time copy; drop it again after saving.</li>
           <li>Each top-level layer or group is sent to view A, view B, both, or neither. The eye icon on top-level layers is ignored, so you can keep hiding one view while you draw the other.</li>
+          <li><b>HD</b> is for art drawn for the HD screen alone, such as the outline to raise: it is in neither view and is added to the HD film as it is.</li>
           <li>For 3D, set <b>Images per gap</b> to 3 or more. Each layer or group is one depth plane; <b>Split</b> lists a group’s layers separately so each can have its own depth.</li>
         </ol>
         <p class="note">Read straight from the PSD: pixel layers, groups, opacity, raster masks, solid colour fills, colour and gradient overlays, strokes, and CMYK colour through the SWOP v2 profile. Anything else is listed under the layers so you know when to drop exported PNGs instead.</p>
@@ -1142,7 +1146,11 @@ var DEF_ART={fulltext:'data:image/webp;base64,UklGRiTmAQBXRUJQVlA4WAoAAAAQAAAARQ
   var DEF = { proc: 'barrier', views: 2, pitch: 1.27, ridge: 0.52, height: 0.72, passes: 2, split: 50, guard: 0, reg: 0, cap: 0, lensAngle: 49, spot: true, spotA: '#f04bcd', spotB: '#ffd400', swap: false, snap: true, angle: 30, curve: 55, printIn: 18, zone: 'diff', loupeSpan: 10, lu: null, lv: null };
   var KNOWN = { 'Layer 5 copy 2': { assign: 'both', mm: 0 }, 'Layer 2': { assign: 'b', label: 'Jump' }, 'ledgenew': { assign: 'a', label: 'Ledge', split: true, mm: 3 }, 'Layer 5 copy': { assign: 'a', label: 'Ledge', mm: 4 }, 'Layer 7': { assign: 'a', label: 'Ledge', mm: -3 },
     'lentV62guy.png': { assign: 'a', label: 'Guy', mm: -3, z: 4 }, 'lentV62oldlogo.png': { assign: 'b', label: 'Old logo', z: 3 }, 'lentV62fulltext.png': { assign: 'b', on3: true, mm: 0, z: 1, raise: true },
-    'lentV62textcut.png': { assign: 'a', on3: false, z: 2, raise: true }, 'Screenshot 2026-11-12 at 12.10.36\u202fPM.png': { assign: 'a', on3: false, z: 2, raise: true }, 'Screenshot 2026-11-12 at 12.10.36 PM.png': { assign: 'a', on3: false, z: 2, raise: true } };
+    'lentV62textcut.png': { assign: 'a', on3: false, z: 2, raise: true }, 'Screenshot 2026-11-12 at 12.10.36\u202fPM.png': { assign: 'a', on3: false, z: 2, raise: true }, 'Screenshot 2026-11-12 at 12.10.36 PM.png': { assign: 'a', on3: false, z: 2, raise: true },
+    'lentV6text.png': { assign: 'b', on3: true, mm: 0, z: 1, raise: true }, 'lentV6textMaske.png': { assign: 'a', on3: false, z: 2, raise: true }, 'lentV6textMaske-clean.png': { assign: 'a', on3: false, z: 2, raise: true },
+    'lentV6old.png': { assign: 'b', label: 'Old logo', z: 3 }, 'lentV6guy.png': { assign: 'a', label: 'Guy', mm: -3, z: 4 }, 'lentV62stextpuff.png': { assign: 'hd', z: 9 } };
+  // A layer set to HD is not part of either view: it is art for the HD screen alone, added to the HD film as drawn. Files named puff or hd start there.
+  var HDNAME = /puff|(^|[^a-z0-9])hd([^a-z0-9]|$)/i;
   // raise: the wordmark is the same in both views apart from the notch for the head, so its black is raised in HD on the films like a layer set to Both
   var SHIRT = [17, 17, 19], TOPC = [30, 30, 33], WALLC = [8, 8, 9];
   // The eye averages fine stripes in linear light, so all mixing is done there (0..4095) and converted back for display.
@@ -1166,6 +1174,7 @@ var DEF_ART={fulltext:'data:image/webp;base64,UklGRiTmAQBXRUJQVlA4WAoAAAAQAAAARQ
     return guessByName(name, visible);
   }
   function guessByName(name, visible) {
+    if (HDNAME.test(name)) return 'hd';
     if (/ledge|stand|left|view ?a\b|^a$/i.test(name)) return 'a';
     if (/jump|leap|right|view ?b\b|^b$/i.test(name)) return 'b';
     return visible === false ? 'off' : 'both';
@@ -1202,6 +1211,7 @@ var DEF_ART={fulltext:'data:image/webp;base64,UklGRiTmAQBXRUJQVlA4WAoAAAAQAAAARQ
   // A layer's place in the 3D scene: shown or not, and how far it travels sideways over the whole sweep (mm; + is behind the shirt).
   function keyOf(n) { return n.key || n.name; } // memory is kept per layer: its name, or "name #2" for a second layer of the same name
   function d3Of(n) {
+    if (n.assign === 'hd') return { on: false, mm: 0 }; // HD-only art is in no view
     var m = d3Mem[keyOf(n)]; if (m) return m;
     var k = (keyOf(n) === n.name && KNOWN[n.name]) || {};
     return { on: typeof k.on3 === 'boolean' ? k.on3 && n.assign !== 'off' : n.assign !== 'off' && n.assign !== 'b', mm: typeof k.mm === 'number' ? k.mm : n.assign === 'a' ? 3 : 0 };
@@ -1238,7 +1248,7 @@ var DEF_ART={fulltext:'data:image/webp;base64,UklGRiTmAQBXRUJQVlA4WAoAAAAQAAAARQ
   function composeFlip() {
     var W = ART.W, H = ART.H, n = W * H, VA = new Float32Array(n * 4), VB = new Float32Array(n * 4);
     ART.nodes.forEach(function (nd) {
-      if (!nd.rgba || nd.assign === 'off') return;
+      if (!nd.rgba || nd.assign === 'off' || nd.assign === 'hd') return;
       var s = nd.rgba, toA = nd.assign === 'a' || nd.assign === 'both', toB = nd.assign === 'b' || nd.assign === 'both';
       for (var p = 0; p < n; p++) {
         var o = p * 4, sa = s[o + 3] / 255; if (sa <= 0) continue;
@@ -1247,12 +1257,14 @@ var DEF_ART={fulltext:'data:image/webp;base64,UklGRiTmAQBXRUJQVlA4WAoAAAAQAAAARQ
     });
     function ov(d, o, s, sa) { var da = d[o + 3], oa = sa + da * (1 - sa); d[o] = (s[o] * sa + d[o] * da * (1 - sa)) / oa; d[o + 1] = (s[o + 1] * sa + d[o + 1] * da * (1 - sa)) / oa; d[o + 2] = (s[o + 2] * sa + d[o + 2] * da * (1 - sa)) / oa; d[o + 3] = oa; }
     // differing-area mask, and the two views flattened onto the shirt colour
-    var D = new Uint8Array(n), A = new Uint16Array(n * 3), B = new Uint16Array(n * 3), MA = new Uint8Array(n), MB = new Uint8Array(n);
+    var D = new Uint8Array(n), A = new Uint16Array(n * 3), B = new Uint16Array(n * 3), MA = new Uint8Array(n), MB = new Uint8Array(n), nArt = 0, nWeak = 0;
     for (var p = 0; p < n; p++) {
       var o = p * 4, q = p * 3, aa = VA[o + 3], ba = VB[o + 3], dsum = 0, ia = 0, ib = 0;
       for (var c = 0; c < 3; c++) { var av = VA[o + c] * aa + SHIRT[c] * (1 - aa), bv = VB[o + c] * ba + SHIRT[c] * (1 - ba); A[q + c] = S2L[Math.round(av)]; B[q + c] = S2L[Math.round(bv)]; dsum += Math.abs(av - bv); ia += Math.abs(av - SHIRT[c]); ib += Math.abs(bv - SHIRT[c]); }
       if (dsum > 36) D[p] = 1; if (ia > 60) MA[p] = 1; if (ib > 60) MB[p] = 1; // where each view lays ink down, for the hidden-image process
+      if (aa > 0.5 || ba > 0.5) { nArt++; if (dsum > 36 && dsum <= 120 && aa > 0.5 && ba > 0.5) nWeak++; } // both views have art here and it is nearly, not exactly, the same colour
     }
+    ART.weak = nArt ? nWeak / nArt : 0;
     ART.V = null; ART.A = A; ART.B = B; ART.D = D; ART.MA = MA; ART.MB = MB; ART.labelA = labelFor('a'); ART.labelB = labelFor('b');
     buildZone(); buildSpot();
   }
@@ -1646,6 +1658,7 @@ var DEF_ART={fulltext:'data:image/webp;base64,UklGRiTmAQBXRUJQVlA4WAoAAAAQAAAARQ
       if (stripe < 0.3 && stripe > 0) W.push(['Stripes', 'are ' + stripe.toFixed(2) + ' mm wide. One view is lost completely if the HD screen lands ' + stripe.toFixed(2) + ' mm off, and half its window is gone at ' + (stripe / 2).toFixed(2) + ' mm.']);
       if (stripe < 0.56 && stripe >= 0.3) W.push(['Halftones', 'A 45 LPI dot cell is 0.56 mm, wider than these ' + stripe.toFixed(2) + ' mm stripes. Keep fills under the ridges solid, or the stripes will chop the dots.']); }
     if (pr !== 'hidden' && !multi() && !rA[0] && !rB[0]) W.push(['No clean view', 'at any angle with this build.' + (pr === 'domes' ? ' Round domes never fully hide the far flank; make them taller or narrower.' : ' Raise the ridges or narrow the gap.')]);
+    if (!multi() && ART.weak > 0.03) W.push(['Views', 'A and B are nearly but not exactly the same colour over ' + Math.round(ART.weak * 100) + '% of the art, so the page counts that as changing and puts ridges on it. That is what two exports of one picture look like when they were not made the same way (shifted colours, soft edges). Export both from the same layer with the same settings.']);
     if (ART.empty) W.push(['Artwork', multi() ? 'No layer has any depth, so nothing moves. Give a layer some depth in the sidebar.' : 'Views A and B are identical, so there is nothing to flip between. Assign layers below.']);
     $('warns').innerHTML = W.map(function (x) { return '<div class="warn"><b>' + esc(x[0]) + '</b> ' + esc(x[1]) + '</div>'; }).join('');
   }
@@ -1775,12 +1788,13 @@ var DEF_ART={fulltext:'data:image/webp;base64,UklGRiTmAQBXRUJQVlA4WAoAAAAQAAAARQ
   /* ================= layers list ================= */
   function drawLayers() {
     var h = '', mu = multi();
-    ART.nodes.slice().reverse().forEach(function (n) { var idx = ART.nodes.indexOf(n), d3 = d3Of(n), opts = mu ? [['on', 'In'], ['out', 'Out']] : [['a', 'A'], ['b', 'B'], ['both', 'Both'], ['off', 'Off']], cur = mu ? (d3.on ? 'on' : 'out') : n.assign;
+    ART.nodes.slice().reverse().forEach(function (n) { var idx = ART.nodes.indexOf(n), d3 = d3Of(n), hd = n.assign === 'hd', opts = mu ? [['on', 'In'], ['out', 'Out'], ['hd', 'HD']] : [['a', 'A'], ['b', 'B'], ['both', 'Both'], ['hd', 'HD'], ['off', 'Off']], cur = hd ? 'hd' : mu ? (d3.on ? 'on' : 'out') : n.assign;
       var tool = n.psdNode && n.kind === 'group' ? '<button type="button" class="ghost mini" data-split="' + esc(n.name) + '" title="List this group’s layers separately, so each can sit at its own depth or in its own view">Split</button>' : n.psdNode && n.parent ? '<button type="button" class="ghost mini" data-join="' + esc(n.parent) + '" title="Treat the group as one layer again">Join</button>' : '';
-      h += '<div class="layer"><div class="th" style="background-image:url(' + (n.thumb || '') + ')"></div><div class="nm">' + esc(n.name) + '<small>' + (n.kind === 'group' ? 'group' : n.kind === 'image' ? 'image' : 'layer') + (n.key && n.key !== n.name ? ', another with this name' : '') + (n.parent ? ' in ' + esc(n.parent) : '') + (n.visible === false ? ' · hidden in Photoshop' : '') + '</small></div>' + tool + '<div class="seg" role="radiogroup" aria-label="' + (mu ? 'In the 3D scene: ' : 'View for ') + esc(n.name) + '">' +
+      h += '<div class="layer"><div class="th" style="background-image:url(' + (n.thumb || '') + ')"></div><div class="nm">' + esc(n.name) + '<small>' + (n.kind === 'group' ? 'group' : n.kind === 'image' ? 'image' : 'layer') + (n.key && n.key !== n.name ? ', another with this name' : '') + (n.parent ? ' in ' + esc(n.parent) : '') + (n.visible === false ? ' · hidden in Photoshop' : '') + (hd ? ' · HD film only, in neither view' : '') + '</small></div>' + tool + '<div class="seg" role="radiogroup" aria-label="' + (mu ? 'In the 3D scene: ' : 'View for ') + esc(n.name) + '">' +
         opts.map(function (o) { return '<label><input type="radio" name="as' + idx + '" id="as' + idx + o[0] + '" value="' + o[0] + '"' + (cur === o[0] ? ' checked' : '') + ' data-idx="' + idx + '">' + o[1] + '</label>'; }).join('') + '</div></div>'; });
     $('layers').innerHTML = h || '<p class="note" style="padding:8px 0">No layers to show.</p>';
-    $('artNote').textContent = mu ? S.views + ' views, made by sliding each layer by its depth' : 'A = ' + ART.labelA + ', B = ' + ART.labelB;
+    var hds = ART.nodes.filter(function (n) { return n.assign === 'hd'; }).map(function (n) { return n.name; });
+    $('artNote').textContent = (mu ? S.views + ' views, made by sliding each layer by its depth' : 'A = ' + ART.labelA + ', B = ' + ART.labelB) + (hds.length ? ' · HD film: ' + hds.join(', ') : '');
     $('layersH').textContent = mu ? 'Which layers are in the 3D scene' : 'Which layers go to which view';
   }
   function depthText(mm) { return mm === 0 ? 'flat, in the shirt' : (mm > 0 ? '+' : '−') + Math.abs(mm).toFixed(2).replace(/0$/, '') + ' mm · ' + (mm > 0 ? 'behind' : 'in front'); }
@@ -1822,7 +1836,7 @@ var DEF_ART={fulltext:'data:image/webp;base64,UklGRiTmAQBXRUJQVlA4WAoAAAAQAAAARQ
   });
   $('layers').addEventListener('change', async function (e) {
     var t = e.target; if (!t.dataset || t.dataset.idx === undefined) return; var n = ART.nodes[+t.dataset.idx];
-    if (t.value === 'on' || t.value === 'out') d3Mem[keyOf(n)] = { on: t.value === 'on', mm: d3Of(n).mm }; else { n.assign = t.value; assignMem[keyOf(n)] = t.value; }
+    if (t.value === 'on' || t.value === 'out') { if (n.assign === 'hd') n.assign = assignMem[keyOf(n)] = 'both'; d3Mem[keyOf(n)] = { on: t.value === 'on', mm: d3Of(n).mm }; } else { n.assign = t.value; assignMem[keyOf(n)] = t.value; }
     if (!n.rgba && wanted(n) && n.psdNode && ART.psd) { setSource(ART.src, 'reading “' + n.name + '”…', !!watch); try { await renderPsdNode(ART.psd, ART.grid, n); } catch (err) { } setSource(ART.src, watch ? 'linked, re-reads on save' : 'loaded once', !!watch); showPsdWarnings(); }
     persist(); artChanged(false);
   });
@@ -1848,7 +1862,7 @@ var DEF_ART={fulltext:'data:image/webp;base64,UklGRiTmAQBXRUJQVlA4WAoAAAAQAAAARQ
     var slots = { a: nodes.some(function (n) { return n.assign === 'a'; }), b: nodes.some(function (n) { return n.assign === 'b'; }) };
     imgs.forEach(function (x) { var r = imgToRGBA(x.im, W, H), ex = nodes.filter(function (n) { return n.name === x.f.name; })[0];
       if (ex) { ex.rgba = r; ex.bb = null; ex.file = x.f; ex.thumb = thumbOf(r, W, H); return; }
-      var as = assignMem[x.f.name] || (KNOWN[x.f.name] && KNOWN[x.f.name].assign) || (/ledge|stand|left|guy|[-_ ]a\./i.test(x.f.name) ? 'a' : /jump|leap|right|logo|[-_ ]b\./i.test(x.f.name) ? 'b' : null);
+      var as = assignMem[x.f.name] || (KNOWN[x.f.name] && KNOWN[x.f.name].assign) || (HDNAME.test(x.f.name) ? 'hd' : /ledge|stand|left|guy|[-_ ]a\./i.test(x.f.name) ? 'a' : /jump|leap|right|logo|[-_ ]b\./i.test(x.f.name) ? 'b' : null);
       nodes.push({ name: x.f.name, assign: as, kind: 'image', rgba: r, thumb: thumbOf(r, W, H), file: x.f }); if (as) slots[as] = true; }); // file: the film exporter reads it again at full size
     nodes.forEach(function (n) { if (!n.assign) { n.assign = !slots.a ? 'a' : !slots.b ? 'b' : 'both'; slots[n.assign] = true; } });
     if (nodes.every(function (n) { return KNOWN[n.name] && KNOWN[n.name].z; })) nodes.sort(function (p, q) { return KNOWN[p.name].z - KNOWN[q.name].z; }); // the shirt's own exports stack the way the PSD does, whatever order they were picked in
@@ -1941,7 +1955,7 @@ var DEF_ART={fulltext:'data:image/webp;base64,UklGRiTmAQBXRUJQVlA4WAoAAAAQAAAARQ
 
   // ---------- options ----------
   var KEY = 'lenticular-shirt-films.v1';
-  var F = { filmW: 24, dpi: 600, choke: 0.1, minRaise: 1.5, v: 2, cmyK: false, mirror: false, on: { W: true, C: true, M: true, Y: true, K: true, H: true }, raise: {}, proof: 'print', zoom: 2, layout: 'pages', pos: {}, auto: true, sheetLen: 0, sheetZoom: 'fit' }; // pos: where each film sits on the single sheet, inches from its top left
+  var F = { filmW: 24, dpi: 600, choke: 0.1, minRaise: 1.5, v: 2, cmyK: false, mirror: false, on: { W: true, C: true, M: true, Y: true, K: true, H: true }, raise: {}, proof: 'print', zoom: 2, layout: 'pages', pos: {}, auto: true, sheetLen: 0, sheetZoom: 'fit', hdClip: true }; // hdClip: a layer set to HD is left off where the ridges are // pos: where each film sits on the single sheet, inches from its top left
   try { var sv = JSON.parse(localStorage.getItem(KEY) || '{}'); Object.keys(F).forEach(function (k) { if (sv[k] !== undefined && typeof sv[k] === typeof F[k]) F[k] = sv[k]; });
     if (sv.v === undefined && sv.minRaise === 0.5) F.minRaise = 1.5; // settings saved before 17 Nov carry the old 0.5 mm, which also raised halftone dots and thin lines
     F.v = 2; } catch (e) { }
@@ -2040,14 +2054,17 @@ var DEF_ART={fulltext:'data:image/webp;base64,UklGRiTmAQBXRUJQVlA4WAoAAAAQAAAARQ
     c = { id: n.rgba, plane: planeFromRGBA(n.rgba, ART.W, ART.H), full: false }; cache.set(k, c); return c.plane;
   }
   function isFull(n) { var c = cache.get(L.keyOf(n)); return !!(c && c.full && n.file && c.id === fileId(n.file)); }
-  function inScene(n) { return L.multi() ? L.d3Of(n).on : n.assign !== 'off'; }
+  function isHD(n) { return n.assign === 'hd'; } // art for the HD screen alone: in neither view, added to the HD film as drawn
+  function hasHD() { var ART = L.art(); return !!ART && ART.nodes.some(function (n) { return isHD(n) && (n.rgba || n.file); }); }
+  function inScene(n) { return isHD(n) ? false : L.multi() ? L.d3Of(n).on : n.assign !== 'off'; }
   function isStatic(n) { return L.multi() ? L.d3Of(n).mm === 0 : n.assign === 'both'; }
-  function raiseOn(n) { var v = F.raise[L.keyOf(n)], k = L.known(n.name); return v === undefined ? isStatic(n) || !!(k && k.raise) : v; }
+  // With an HD layer linked, the HD film is that layer and the ridges and nothing else: no black is raised unless its box is ticked by hand.
+  function raiseOn(n) { var v = F.raise[L.keyOf(n)], k = L.known(n.name); return v === undefined ? !hasHD() && (isStatic(n) || !!(k && k.raise)) : v; }
   var loadingFull = false;
   async function loadFull(status) {
     var ART = L.art(); if (!ART || loadingFull) return; loadingFull = true;
     try {
-      var todo = ART.nodes.filter(function (n) { return inScene(n) && n.file && !isFull(n); });
+      var todo = ART.nodes.filter(function (n) { return (inScene(n) || isHD(n)) && n.file && !isFull(n); });
       for (var i = 0; i < todo.length; i++) { var n = todo[i], f = n.file;
         var pl = await readFile(f, function (p) { if (status) status('Reading ' + f.name + ' (' + (i + 1) + ' of ' + todo.length + ')', (i + p) / todo.length); });
         cache.set(L.keyOf(n), { id: fileId(f), plane: pl, full: true }); }
@@ -2073,6 +2090,8 @@ var DEF_ART={fulltext:'data:image/webp;base64,UklGRiTmAQBXRUJQVlA4WAoAAAAQAAAARQ
       else { var e = { pl: pl, dx: 0, raise: raise }; if (n.assign !== 'b') views[0].push(e); if (n.assign !== 'a') views[1].push(e); grow(pl, 0); }
       used.push({ n: n, pl: pl, full: isFull(n) });
     });
+    var hd = [], hdUsed = []; // layers set to HD: their ink (anything opaque that is not white) goes on the HD film as drawn
+    ART.nodes.forEach(function (n) { if (!isHD(n)) return; var pl = planeFor(n); if (!pl) return; hd.push({ pl: pl, dx: 0, raise: false }); grow(pl, 0); hdUsed.push({ n: n, pl: pl, full: isFull(n) }); });
     // ridges: the page's zone, sampled down each ridge's centre line, with short breaks bridged and short pieces dropped
     var Z = ART.Z, ZW = ART.W, ZH = ART.H, zx = new Int32Array(Wf), zy = new Int32Array(Hf), x, y;
     for (x = 0; x < Wf; x++) zx[x] = Math.min(ZW - 1, Math.floor(x * ZW / Wf)); for (y = 0; y < Hf; y++) zy[y] = Math.min(ZH - 1, Math.floor(y * ZH / Hf));
@@ -2082,7 +2101,7 @@ var DEF_ART={fulltext:'data:image/webp;base64,UklGRiTmAQBXRUJQVlA4WAoAAAAQAAAARQ
       for (y = 0, y0 = -1; y <= Hf; y++) { var v = y < Hf && RUN[o + y]; if (!v && y0 < 0) y0 = y; if (v && y0 >= 0) { if (y0 > 0 && y - y0 < minGap) RUN.fill(1, o + y0, o + y); y0 = -1; } }
       for (y = 0, y0 = -1; y <= Hf; y++) { v = y < Hf && RUN[o + y]; if (v && y0 < 0) y0 = y; if (!v && y0 >= 0) { if (y - y0 < minLen) RUN.fill(0, o + y0, o + y); else { on = true; ridgeLen += y - y0; bx0 = Math.min(bx0, x - wl); bx1 = Math.max(bx1, x + wr); by0 = Math.min(by0, y0); by1 = Math.max(by1, y); } y0 = -1; } }
       if (on) ridges++; }
-    return { ART: ART, dpi: dpi, ppmm: ppmm, Wf: Wf, Hf: Hf, xc: xc, P: P, w: w, g: g, wl: wl, wr: wr, N: N, mu: mu, sel: sel, selDead: selDead, rid: rid, edges: edges, views: views, used: used,
+    return { ART: ART, dpi: dpi, ppmm: ppmm, Wf: Wf, Hf: Hf, xc: xc, P: P, w: w, g: g, wl: wl, wr: wr, N: N, mu: mu, sel: sel, selDead: selDead, rid: rid, edges: edges, views: views, used: used, hd: hd, hdUsed: hdUsed, hdClip: F.hdClip,
       Z: Z, ZW: ZW, zx: zx, zy: zy, nLo: nLo, RUN: RUN, ridges: ridges, ridgeLen: ridgeLen, choke: Math.max(0, Math.round(F.choke * ppmm)), rr: Math.max(0, Math.floor(Math.round(F.minRaise * ppmm) / 2)), cmyK: F.cmyK,
       bb: bx1 < 0 ? null : [Math.max(0, bx0), Math.min(Wf, bx1), Math.max(0, by0), Math.min(Hf, by1)] };
   }
@@ -2109,11 +2128,12 @@ var DEF_ART={fulltext:'data:image/webp;base64,UklGRiTmAQBXRUJQVlA4WAoAAAAQAAAARQ
     var halo = Math.max(G.choke, 2 * G.rr) + 1, X0 = x0 - halo, Y0 = y0 - halo, Wd = w + 2 * halo, Hd = h + 2 * halo, n = Wd * Hd, nv = G.views.length,
       cls = new Uint8Array(n), mU = new Uint8Array(n), vr = [], v, i, j, x, y, o, c, k, P = G.P; // mU: the print, any view's art
     for (v = 0; v < nv; v++) vr.push(new Uint8Array(Wd));
-    var colSel = new Uint8Array(Wd), colDead = new Uint8Array(Wd), colRid = new Int32Array(Wd), colIn = new Uint8Array(Wd);
+    var colSel = new Uint8Array(Wd), colDead = new Uint8Array(Wd), colRid = new Int32Array(Wd), colIn = new Uint8Array(Wd), mD = G.hd.length ? new Uint8Array(n) : null, hr = mD ? new Uint8Array(Wd) : null;
     for (i = 0; i < Wd; i++) { x = X0 + i; colRid[i] = -1; if (x < 0 || x >= G.Wf) continue; colIn[i] = 1; var q = x - G.xc, ph = ((q % P) + P) % P; colSel[i] = G.sel[ph]; colDead[i] = G.selDead[ph]; if (G.rid[ph]) colRid[i] = Math.floor((q + G.wl) / P) - G.nLo; }
     for (j = 0; j < Hd; j++) { y = Y0 + j; if (y < 0 || y >= G.Hf) continue;
       for (v = 0; v < nv; v++) { vr[v].fill(0); var es = G.views[v]; for (var e = 0; e < es.length; e++) paintRow(vr[v], X0, Wd, es[e], y, G); }
       o = j * Wd; var zr = G.zy[y] * G.ZW;
+      if (mD) for (var hk = 0; hk < G.hd.length; hk++) { hr.fill(0); paintRow(hr, X0, Wd, G.hd[hk], y, G); for (i = 0; i < Wd; i++) if (colIn[i] && (hr[i] & 15)) mD[o + i] = 1; } // 15: any of C M Y K, so white in the image is not ink
       for (i = 0; i < Wd; i++) { if (!colIn[i]) continue; for (v = 0; v < nv; v++) if (vr[v][i]) { mU[o + i] = 1; break; } v = colSel[i]; if (v === 255) { if (G.Z[zr + G.zx[X0 + i]] >= 128) continue; v = colDead[i]; } cls[o + i] = vr[v][i]; } }
     var mW = new Uint8Array(n), mC = new Uint8Array(n), mM = new Uint8Array(n), mY = new Uint8Array(n), mK = new Uint8Array(n), mR = new Uint8Array(n), mH = new Uint8Array(n), anyR = false;
     for (i = 0; i < n; i++) { c = cls[i]; if (!c) continue; k = (c & BK) || (G.cmyK && (c & 7) === 7);
@@ -2124,7 +2144,8 @@ var DEF_ART={fulltext:'data:image/webp;base64,UklGRiTmAQBXRUJQVlA4WAoAAAAQAAAARQ
     if (G.choke > 0) { var inU = morph(mU, Wd, Hd, G.choke, true); for (i = 0; i < n; i++) if (!inU[i]) mW[i] = 0; }
     if (anyR && G.rr > 0) mR = morph(morph(mR, Wd, Hd, G.rr, true), Wd, Hd, G.rr, false); // only bold black is raised: halftone dots, hatching and thin lines are narrower than the width set and stay flat
     for (j = 0; j < Hd; j++) { y = Y0 + j; if (y < 0 || y >= G.Hf) continue; o = j * Wd; zr = G.zy[y] * G.ZW;
-      for (i = 0; i < Wd; i++) { var ri = colRid[i]; if (ri >= 0 && G.RUN[ri * G.Hf + y]) mH[o + i] = 1; else if (anyR && mR[o + i] && G.Z[zr + G.zx[X0 + i]] < 128) mH[o + i] = 1; } }
+      for (i = 0; i < Wd; i++) { var ri = colRid[i]; if (ri >= 0 && G.RUN[ri * G.Hf + y]) mH[o + i] = 1; else if (anyR && mR[o + i] && G.Z[zr + G.zx[X0 + i]] < 128) mH[o + i] = 1;
+        else if (mD && mD[o + i] && (!G.hdClip || G.Z[zr + G.zx[X0 + i]] < 128)) mH[o + i] = 1; } } // the HD layer is added as drawn; kept off the ridged area unless told otherwise, or it would fill in between the ridges
     function crop(m) { var out = new Uint8Array(w * h); for (var jj = 0; jj < h; jj++) out.set(m.subarray((jj + halo) * Wd + halo, (jj + halo) * Wd + halo + w), jj * w); return out; }
     return { W: crop(mW), C: crop(mC), M: crop(mM), Y: crop(mY), K: crop(mK), H: crop(mH) };
   }
@@ -2233,7 +2254,7 @@ var DEF_ART={fulltext:'data:image/webp;base64,UklGRiTmAQBXRUJQVlA4WAoAAAAQAAAARQ
   function sheetLen(PG, dpi) { var m = 0; filmsOn().forEach(function (f) { if (F.pos[f]) m = Math.max(m, Math.round(F.pos[f][1] * dpi) + PG.H); }); return m; } // film pixels
   var thumbs = null, madeSig = null, thumbTimer = 0, zCount = 0, cur = null, sel = null, drag = null;
   function thumbKey() { var ART = L.art(); // everything the small films are made from
-    return [S.views, S.pitch, S.ridge, S.split, S.guard, S.swap, S.printIn, S.zone, F.filmW, F.choke, F.minRaise, F.cmyK, F.mirror, JSON.stringify(F.on), JSON.stringify(F.raise), zCount].join('|') + ART.nodes.map(function (n) { var d = L.d3Of(n); return L.keyOf(n) + n.assign + d.on + d.mm + isFull(n); }).join('|'); }
+    return [S.views, S.pitch, S.ridge, S.split, S.guard, S.swap, S.printIn, S.zone, F.filmW, F.choke, F.minRaise, F.cmyK, F.mirror, F.hdClip, JSON.stringify(F.on), JSON.stringify(F.raise), zCount].join('|') + ART.nodes.map(function (n) { var d = L.d3Of(n); return L.keyOf(n) + n.assign + d.on + d.mm + isFull(n); }).join('|'); }
   function ensureThumbs() { // draw the small films if anything they are made from has changed, and pack them again unless they were placed by hand
     var k = thumbKey(); if (k === madeSig) return false; try { makeThumbs(); } catch (e) { thumbs = null; } madeSig = k;
     if (F.auto && cur && cur.PG && pack(cur.PG, cur.G.dpi)) save(); return true; }
@@ -2385,6 +2406,13 @@ var DEF_ART={fulltext:'data:image/webp;base64,UklGRiTmAQBXRUJQVlA4WAoAAAAQAAAARQ
     $('filmProofCap').textContent = (rw / G.ppmm).toFixed(1) + ' × ' + (rh / G.ppmm).toFixed(1) + ' mm of film at the loupe, ' + (z * 100) + '%. Click the shirt to move it.';
   }
   function row(k, v) { return '<div><dt>' + k + '</dt><dd>' + v + '</dd></div>'; }
+  var hdZoneCache = new WeakMap();
+  function hdInZone(G, pl) { // share of an HD layer's ink that falls in the ridged area, from a sample of its rows
+    var c = hdZoneCache.get(pl); if (c && c.z === G.Z) return c.v; var st = Math.max(1, Math.round(pl.H / 1350)), tot = 0, inz = 0, y, x;
+    for (y = pl.bb[2]; y <= pl.bb[3]; y += st) { var r = pl.rows[y]; if (!r) continue; var zr = Math.min(G.ART.H - 1, Math.floor(y * G.ART.H / pl.H)) * G.ZW;
+      for (x = 0; x < r.d.length; x += st) if (r.d[x] & 15) { tot++; if (G.Z[zr + Math.min(G.ZW - 1, Math.floor((r.x0 + x) * G.ZW / pl.W))] >= 128) inz++; } }
+    var v = tot ? inz / tot : 0; hdZoneCache.set(pl, { z: G.Z, v: v }); return v;
+  }
   function summary(G, PG) {
     var mm = function (px) { return (px / G.ppmm).toFixed(3).replace(/0$/, ''); }, h = '', stripes, show;
     if (G.mu) { stripes = G.edges.slice(1).map(function (e, i) { return e - G.edges[i]; }).join(' + ') + ' px'; show = Math.round(G.g / G.N) + ' px (' + mm(G.g / G.N) + ' mm) of each showing'; }
@@ -2393,18 +2421,20 @@ var DEF_ART={fulltext:'data:image/webp;base64,UklGRiTmAQBXRUJQVlA4WAoAAAAQAAAARQ
     h += row('HD line', G.w + ' px = ' + mm(G.w) + ' mm' + (Math.abs(G.w / G.ppmm - S.ridge) > 0.012 ? ' <span class="muted">(page: ' + S.ridge.toFixed(2) + ')</span>' : ''));
     h += row(G.mu ? G.N + ' views' : 'Stripes', stripes + '<br><span class="muted">' + show + '</span>');
     h += row('Ridges', G.ridges + ', ' + (G.ridgeLen / G.dpi * 25.4 / 1000).toFixed(1) + ' m of line');
+    if (G.hdUsed.length) h += row('HD layer', G.hdUsed.map(function (u) { return esc(u.n.name); }).join(', '));
     if (PG && F.layout === 'sheet') h += row('Sheet', '<span data-sheet>' + F.filmW + ' × ' + (F.sheetLen > 0 ? F.sheetLen : sheetLen(PG, G.dpi) / G.dpi).toFixed(1) + ' in</span><br><span class="muted">' + filmsOn().length + ' films of ' + (PG.W / G.dpi).toFixed(1) + ' × ' + (PG.H / G.dpi).toFixed(1) + ' in</span>');
     else if (PG) h += row('Each film', (PG.W / G.dpi).toFixed(1) + ' × ' + (PG.H / G.dpi).toFixed(1) + ' in, art ' + (PG.bw / G.dpi).toFixed(1) + ' × ' + (PG.bh / G.dpi).toFixed(1) + ' in');
     $('filmSummary').innerHTML = h;
   }
   function sourceNote(G) {
-    var W = [], ART = G.ART, low = G.used.filter(function (u) { return u.pl.W < G.Wf * 0.98; }), pending = G.used.filter(function (u) { return u.n.file && !u.full; }), noFile = G.used.filter(function (u) { return !u.n.file; });
+    var W = [], ART = G.ART, all = G.used.concat(G.hdUsed), low = all.filter(function (u) { return u.pl.W < G.Wf * 0.98; }), pending = all.filter(function (u) { return u.n.file && !u.full; }), noFile = all.filter(function (u) { return !u.n.file; });
     if (noFile.length) W.push(['Art', (ART.psd ? 'The PSD’s layers are' : 'This artwork is') + ' only available at preview size, ' + Math.round(ART.W / S.printIn) + ' dpi at this print width. For films, export each layer from Photoshop as a PNG at 100% and link those files.']);
     else if (pending.length) W.push(['Art', 'Showing the preview-size art. The full-size files are read when you export, or now with the button below.']);
     else if (low.length) { var worst = Math.min.apply(null, low.map(function (u) { return u.pl.W; })); W.push(['Art', 'The linked files are ' + worst + ' px wide: ' + Math.round(worst / S.printIn) + ' dpi at ' + S.printIn + ' in. Films are ' + G.dpi + ' dpi, so the art will be blocky. Export at 100% (' + G.Wf + ' px wide) for the real films.']); }
     var px = 0, off = 0, cmy = 0, n = {}; G.used.forEach(function (u) { px += u.pl.px; off += u.pl.off; for (var c = 1; c < 64; c++) if (u.pl.n[c]) n[c] = (n[c] || 0) + u.pl.n[c]; }); cmy = n[BA | BC | BM | BY] || 0;
     if (px && off / px > 0.02 && !noFile.length && !pending.length) W.push(['Colours', (100 * off / px).toFixed(off / px < 0.1 ? 1 : 0) + '% of the art is not a solid process build and was put on the nearest one. Films carry no halftone of their own: screen the art in Photoshop first (a Hard Mix fill does it).']);
     if (px && cmy / px > 0.005 && !F.cmyK) W.push(['Black', (100 * cmy / px).toFixed(1) + '% of the art is three-colour black (C+M+Y with no K). It will print as three inks over white unless you tick the box to print it as K.']);
+    G.hdUsed.forEach(function (u) { var share = hdInZone(G, u.pl); if (share > 0.005) W.push(['HD layer', Math.round(share * 100) + '% of ' + esc(u.n.name) + ' lies where the ridges are. ' + (G.hdClip ? 'It is left off there, so the ridges stay open and each view keeps its own picture.' : 'It prints there too, filling in between the ridges, so it shows in both views.')]); });
     if (S.reg) W.push(['Registration', 'The page’s registration error is a what-if. Films are made with the ridges exactly on the seams.']);
     if (G.choke * 2 + 1 >= Math.min(G.edges[1] - G.edges[0], G.P)) W.push(['Choke', 'The underbase choke is as wide as a stripe, so stripes that stand alone will lose their white.']);
     $('filmWarns').innerHTML = W.map(function (w) { return '<div class="warn"><b>' + w[0] + '</b> ' + w[1] + '</div>'; }).join('');
@@ -2413,6 +2443,10 @@ var DEF_ART={fulltext:'data:image/webp;base64,UklGRiTmAQBXRUJQVlA4WAoAAAAQAAAARQ
     $('filmInks').textContent = px ? 'In the art: ' + combos.map(function (c) { return c[0] + ' ' + (100 * c[1] / px).toFixed(c[1] / px < 0.1 ? 1 : 0) + '%'; }).join(', ') + '.' : '';
   }
   function drawRaise(G) {
+    $('filmHD').innerHTML = G.hdUsed.length ? G.hdUsed.map(function (u) { return '<p class="note"><b>' + esc(u.n.name) + '</b> goes on the HD film exactly as drawn, added to the ridges.</p>'; }).join('') +
+      '<label class="check"><input type="checkbox" id="fHdClip"' + (F.hdClip ? ' checked' : '') + '><span>Leave it off where the ridges are</span></label>'
+      : '<p class="note">None. To put your own art on the HD film, link the image and set it to HD under Artwork.</p>';
+    $('filmRaiseNote').textContent = G.hdUsed.length ? 'With an HD layer linked nothing else is raised, unless you tick it here.' : '';
     var h = ''; G.used.forEach(function (u) { var c = u.pl.n[BA | BK] + (F.cmyK ? u.pl.n[BA | BC | BM | BY] : 0); if (!c) return; var k = L.keyOf(u.n);
       h += '<label class="check"><input type="checkbox" data-raise="' + esc(k) + '"' + (raiseOn(u.n) ? ' checked' : '') + '><span>' + esc(u.n.name) + '</span></label>'; });
     $('filmRaise').innerHTML = h || '<p class="note">No layer has black in it.</p>';
@@ -2453,6 +2487,7 @@ var DEF_ART={fulltext:'data:image/webp;base64,UklGRiTmAQBXRUJQVlA4WAoAAAAQAAAARQ
   $('fProof').addEventListener('change', function () { F.proof = this.value; save(); refresh(true); });
   $('fZoom').addEventListener('change', function () { F.zoom = parseInt(this.value, 10) || 2; save(); refresh(true); });
   FILMS.forEach(function (f) { $('fOn' + f).addEventListener('change', function () { F.on[f] = this.checked; save(); refresh(true); }); });
+  $('filmHD').addEventListener('change', function (e) { if (e.target.id !== 'fHdClip') return; F.hdClip = e.target.checked; save(); refresh(true); });
   $('filmRaise').addEventListener('change', function (e) { var k = e.target.dataset && e.target.dataset.raise; if (k === undefined) return; F.raise[k] = e.target.checked; save(); refresh(true); });
   ['fLayPages', 'fLaySheet'].forEach(function (id) { $(id).addEventListener('change', function () { F.layout = $('fLaySheet').checked ? 'sheet' : 'pages'; save(); refresh(true); }); });
   $('shTidy').addEventListener('click', function () { if (!cur || !cur.PG) return; F.auto = true; if (!pack(cur.PG, cur.G.dpi)) tidy(cur.PG, cur.G.dpi); save(); refresh(true); });
