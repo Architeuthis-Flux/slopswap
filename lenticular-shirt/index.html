@@ -118,6 +118,31 @@
 #viewer .stat .k{font:600 12px var(--display);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
 #viewer .stat .s{font-size:12px;color:var(--muted);line-height:1.3}
 #viewer .warns{display:flex;flex-direction:column;gap:5px}
+#viewer .balance h3{margin:12px 0 5px}
+#viewer .shows{display:grid;gap:7px}
+#viewer .showrow .lbl{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--muted)}
+#viewer .showrow .lbl b{color:var(--ink);font-weight:600}
+#viewer .showrow .bar{display:flex;height:13px;margin:2px 0;border-radius:2px;overflow:hidden;border:1px solid var(--line);background:#3a3b3f}
+#viewer .showrow .bar i{display:block;height:100%}
+#viewer .bar .oa{background:var(--a)}
+#viewer .bar .ob{background:var(--b)}
+#viewer .bar .o1{background:var(--a)}
+#viewer .bar .o2{background:var(--b)}
+#viewer .bar .k{background:#08080a}
+#viewer .bar .s{background:repeating-linear-gradient(135deg,#3a3b3f 0 3px,#55565c 3px 6px)}
+#viewer .showrow .nums{font:12px/1.3 var(--mono);color:var(--muted);font-variant-numeric:tabular-nums}
+#viewer .read.bal{grid-template-columns:minmax(0,1fr);margin-top:12px}
+#viewer .stat .v.no{color:var(--warn)}
+#viewer .stat .v.tight{color:var(--mix)}
+#viewer .stat .v.ok{color:var(--good)}
+#viewer .checks{display:grid;gap:3px;margin:4px 0}
+#viewer .chk{display:grid;grid-template-columns:38px minmax(0,1fr);gap:6px;font-size:12px;line-height:1.3;color:var(--muted)}
+#viewer .chk b{color:var(--ink);font-weight:600}
+#viewer .chk .tag{font:600 10.5px var(--display);letter-spacing:.06em;text-transform:uppercase;text-align:center;border:1px solid currentColor;border-radius:2px;align-self:start;padding:1px 0}
+#viewer .chk.ok .tag{color:var(--good)}
+#viewer .chk.tight .tag{color:var(--mix)}
+#viewer .chk.no .tag{color:var(--warn)}
+#viewer .chk.info .tag{color:var(--muted)}
 #viewer .warn{font-size:12.5px;line-height:1.35;border:1px solid color-mix(in srgb,var(--warn) 45%,transparent);border-left-width:3px;border-radius:3px;padding:5px 8px;color:var(--ink)}
 #viewer .warn b{color:var(--warn);font-weight:600}
 #viewer .tablewrap{overflow-x:auto}
@@ -177,6 +202,7 @@
 #viewer .side{grid-column:2;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start}
 #viewer .side .readcard{grid-column:1/-1}
 #viewer .read{grid-template-columns:repeat(4,minmax(0,1fr))}
+#viewer .read.bal,#viewer .shows{grid-template-columns:repeat(3,minmax(0,1fr));gap:9px 14px}
 }
 @media (max-width: 720px){
 #viewer .bench{grid-template-columns:minmax(0,1fr)}
@@ -185,6 +211,7 @@
 #viewer .sidebar{position:static;max-height:none;overflow:visible;order:2;grid-row:auto}
 #viewer .side{grid-column:1;order:3;grid-template-columns:minmax(0,1fr)}
 #viewer .read{grid-template-columns:repeat(2,minmax(0,1fr))}
+#viewer .read.bal,#viewer .shows{grid-template-columns:minmax(0,1fr)}
 #viewer .legend,#viewer .hint{display:none}
 #viewer .artgrid{grid-template-columns:minmax(0,1fr)}
 #viewer .filmgrid{grid-template-columns:minmax(0,1fr)}
@@ -305,6 +332,7 @@
       <div class="ctl"><label for="pitch">Pitch</label><output id="pitchOut"></output><input id="pitch" type="range" min="0.3" max="3" step="0.01"><small id="pitchSub"></small></div>
       <div class="ctl" data-procs="barrier walls domes hidden"><label for="ridge" id="ridgeLbl">Ridge width</label><output id="ridgeOut"></output><input id="ridge" type="range" min="0.15" max="1.5" step="0.01"><small id="ridgeSub"></small></div>
       <div class="ctl" data-procs="barrier walls domes hidden"><label for="height" id="heightLbl">Ridge height</label><output id="heightOut"></output><input id="height" type="range" min="0.05" max="1.6" step="0.01"><small id="heightSub"></small></div>
+      <label class="check" data-procs="barrier walls domes hidden" title="Pitch, width and height keep their proportions (the dead band goes with them), so every viewing angle stays where it is and only the scale changes."><input type="checkbox" id="lock"><span>Move pitch, width and height together</span></label>
       <div class="row" data-procs="barrier walls domes hidden">
         <div class="seg" role="radiogroup" aria-label="Number of stacked HD passes">
           <label><input type="radio" name="passes" id="passes1" value="1">1 pass</label><label><input type="radio" name="passes" id="passes2" value="2">2 passes</label><label><input type="radio" name="passes" id="passes3" value="3">3 passes</label>
@@ -387,6 +415,7 @@
           <div class="stat m"><div class="k">Straight on</div><div class="v" id="rd0">—</div><div class="s" id="rd0s"></div></div>
           <div class="stat"><div class="k" id="rd4k">Art tile, 600 dpi</div><div class="v" id="rdPx">—</div><div class="s" id="rdPxs"></div></div>
         </div>
+        <div id="balance" class="balance"></div>
         <div class="warns" id="warns"></div>
       </section>
     </div>
@@ -1143,7 +1172,7 @@ var DEF_ART={fulltext:'data:image/webp;base64,UklGRiTmAQBXRUJQVlA4WAoAAAAQAAAARQ
   'use strict';
   var $ = function (id) { return document.getElementById(id); };
   var LS = 'lenticular-shirt-viewer.v1', ARTW = 1350, FILMS = [100, 150, 200, 250, 300, 400, 700], MESH = 0.12, CURE = 0.9;
-  var DEF = { proc: 'barrier', views: 2, pitch: 1.27, ridge: 0.52, height: 0.72, passes: 2, split: 50, guard: 0, reg: 0, cap: 0, lensAngle: 49, spot: true, spotA: '#f04bcd', spotB: '#ffd400', swap: false, snap: true, angle: 30, curve: 55, printIn: 18, zone: 'diff', loupeSpan: 10, lu: null, lv: null };
+  var DEF = { proc: 'barrier', views: 2, pitch: 1.27, ridge: 0.52, height: 0.72, passes: 2, split: 50, guard: 0, reg: 0, cap: 0, lensAngle: 49, spot: true, spotA: '#f04bcd', spotB: '#ffd400', swap: false, snap: true, lock: false, angle: 30, curve: 55, printIn: 18, zone: 'diff', loupeSpan: 10, lu: null, lv: null };
   var KNOWN = { 'Layer 5 copy 2': { assign: 'both', mm: 0 }, 'Layer 2': { assign: 'b', label: 'Jump' }, 'ledgenew': { assign: 'a', label: 'Ledge', split: true, mm: 3 }, 'Layer 5 copy': { assign: 'a', label: 'Ledge', mm: 4 }, 'Layer 7': { assign: 'a', label: 'Ledge', mm: -3 },
     'lentV62guy.png': { assign: 'a', label: 'Guy', mm: -3, z: 4 }, 'lentV62oldlogo.png': { assign: 'b', label: 'Old logo', z: 3 }, 'lentV62fulltext.png': { assign: 'b', on3: true, mm: 0, z: 1, raise: true },
     'lentV62textcut.png': { assign: 'a', on3: false, z: 2, raise: true }, 'Screenshot 2026-11-12 at 12.10.36\u202fPM.png': { assign: 'a', on3: false, z: 2, raise: true }, 'Screenshot 2026-11-12 at 12.10.36 PM.png': { assign: 'a', on3: false, z: 2, raise: true },
@@ -1650,15 +1679,15 @@ var DEF_ART={fulltext:'data:image/webp;base64,UklGRiTmAQBXRUJQVlA4WAoAAAAQAAAARQ
   function thou(mm) { return Math.round(mm / 0.0254); }
   function readouts() {
     var P = S.pitch, w = S.ridge, g = P - w, a = g * S.split / 100, rA = ranges('a'), rB = ranges('b'), g0 = geom(0), W = [], nm = names(), pr = S.proc, cost = PROC[pr].cost;
-    function peak(rg) { if (!rg) return ''; var best = 0, at = 0; for (var x = rg[0]; x <= rg[1]; x += 0.25) { var q = geom(x * Math.PI / 180), v = q.a + q.b; if (v > best) { best = v; at = x; } } return 'Brightest at ' + Math.round(Math.abs(at)) + '°: ' + Math.round(best * 100) + '% of the surface is print'; }
+    function peak(rg, st) { if (!rg) return ''; if (st && !multi()) { var vs = viewStat(st); if (vs) return 'Brightest at ' + Math.round(Math.abs(vs.at)) + '°: ' + Math.round(vs.own * 100) + '% of the surface is this picture'; } var best = 0, at = 0; for (var x = rg[0]; x <= rg[1]; x += 0.25) { var q = geom(x * Math.PI / 180), v = q.a + q.b; if (v > best) { best = v; at = x; } } return 'Brightest at ' + Math.round(Math.abs(at)) + '°: ' + Math.round(best * 100) + '% of the surface is print'; }
     $('rdAk').textContent = nm.ka; $('rdBk').textContent = nm.kb;
     if (pr === 'hidden') {
       $('rdA').textContent = rA[0] ? 'within ' + Math.round(Math.min(-rA[0][0], rA[0][1])) + '° of straight on' : 'never'; $('rdAs').textContent = 'Shading under 15%, so only the flat print shows';
       $('rdB').textContent = rB[0] ? 'from ' + Math.round(Math.min(Math.abs(rB[0][0]), Math.abs(rB[0][1]))) + '° either side' : 'never'; $('rdBs').textContent = 'The raised lines hide at least half the print between them';
     } else {
       var never = multi() ? 'The next view never drops out, so the sweep stops short of this one' : 'The other image never drops under 10%';
-      $('rdA').textContent = fmtRange(rA[0]); $('rdAs').textContent = rA[0] ? peak(rA[0]) : never;
-      $('rdB').textContent = fmtRange(rB[0]); $('rdBs').textContent = rB[0] ? peak(rB[0]) : never;
+      $('rdA').textContent = fmtRange(rA[0]); $('rdAs').textContent = rA[0] ? peak(rA[0], 'a') : never;
+      $('rdB').textContent = fmtRange(rB[0]); $('rdBs').textContent = rB[0] ? peak(rB[0], 'b') : never;
       if (pr === 'lens') $('rdAs').textContent = $('rdBs').textContent = 'The views swap again past ' + Math.round(S.lensAngle / 2) + '°, then keep repeating';
     }
     if (multi()) { $('rd0').textContent = Math.round((g0.a + g0.b) * 100) + ' / ' + Math.round((g0.top + g0.wall) * 100); $('rd0s').textContent = '% print / black. All ' + S.views + ' views show at once, ' + Math.round((g0.a + g0.b) * 100 / S.views) + '% each'; }
@@ -1677,13 +1706,14 @@ var DEF_ART={fulltext:'data:image/webp;base64,UklGRiTmAQBXRUJQVlA4WAoAAAAQAAAARQ
       $('rdPxs').textContent = (S.spot ? 'Each layer: ' + (one ? 'the one ink' : 'left ink, right ink') + ', black behind it. ' : '') + 'Plus a black cap. The CMYK wordmark would be a second run.';
     } else { $('rd4k').textContent = cost[0]; $('rdPx').textContent = cost[1]; $('rdPxs').textContent = cost[2]; }
     // warnings
+    var listed = pr !== 'hidden' && pr !== 'lens'; // "Will it print" lists these rules with their margins, so they are not said twice
     if (pr !== 'lens') {
       var per = S.height / CURE / S.passes, minLine = per + MESH, what = PROC[pr].wLabel.split(' ')[0];
-      if (per * 1000 > 760) W.push(['Height', 'needs a ' + Math.round(per * 1000) + ' µm stencil per pass. 700 µm is the thickest film sold; add a pass.']);
+      if (per * 1000 > 760 && !listed) W.push(['Height', 'needs a ' + Math.round(per * 1000) + ' µm stencil per pass. 700 µm is the thickest film sold; add a pass.']);
       if (pr === 'walls') { var gc = g - 2 * S.cap; if (S.cap > 0 && gc < 0.22) W.push(['Caps', 'leave only ' + Math.max(0, gc).toFixed(2) + ' mm between them. Even a thin cap stencil needs about 0.22 mm.']);
-        if (w < 2 * minLine - 0.03) W.push(['Rib', 'is two lines side by side, one per view. A ' + Math.round(per * 1000) + ' µm stencil holds each down to about ' + minLine.toFixed(2) + ' mm, so the rib needs about ' + (2 * minLine).toFixed(2) + ' mm.']); }
-      else if (w < minLine - 0.015) W.push([what, w.toFixed(2) + ' mm is narrower than a ' + Math.round(per * 1000) + ' µm stencil resolves (about ' + minLine.toFixed(2) + ' mm). Widen it or build the height from more, thinner passes.']);
-      if (g < minLine - 0.015) W.push(['Gap', g.toFixed(2) + ' mm is a stencil wall thinner than it is tall; expect it to wash out or close up below about ' + minLine.toFixed(2) + ' mm.']);
+        if (w < 2 * minLine - 0.03 && !listed) W.push(['Rib', 'is two lines side by side, one per view. A ' + Math.round(per * 1000) + ' µm stencil holds each down to about ' + minLine.toFixed(2) + ' mm, so the rib needs about ' + (2 * minLine).toFixed(2) + ' mm.']); }
+      else if (w < minLine - 0.015 && !listed) W.push([what, w.toFixed(2) + ' mm is narrower than a ' + Math.round(per * 1000) + ' µm stencil resolves (about ' + minLine.toFixed(2) + ' mm). Widen it or build the height from more, thinner passes.']);
+      if (g < minLine - 0.015 && !listed) W.push(['Gap', g.toFixed(2) + ' mm is a stencil wall thinner than it is tall; expect it to wash out or close up below about ' + minLine.toFixed(2) + ' mm.']);
     }
     if (multi()) { var st3 = g / S.views, far = 0; ART.nodes.forEach(function (nd) { var d = d3Of(nd); if (d.on && nd.rgba) far = Math.max(far, Math.abs(d.mm)); });
       W.push(['Stripes', 'Each view gets ' + st3.toFixed(2) + ' mm between ridges. Halftone dots will not fit (a 45 LPI cell is 0.56 mm): use solid process builds, and hold the colours within about ' + (st3 / 3).toFixed(2) + ' mm of each other.']);
@@ -1691,14 +1721,85 @@ var DEF_ART={fulltext:'data:image/webp;base64,UklGRiTmAQBXRUJQVlA4WAoAAAAQAAAARQ
       if (far > 0) W.push(['Straight on', 'all ' + S.views + ' views show together, so the deepest layer appears as ' + S.views + ' copies ' + (far / (S.views - 1)).toFixed(1) + ' mm apart. Both eyes see the same mix; the depth only reads when the viewer or the shirt moves.']);
     }
     else if (pr === 'barrier') { var stripe = Math.min(sa, sb);
-      if (stripe < 0.3 && stripe > 0) W.push(['Stripes', 'are ' + stripe.toFixed(2) + ' mm wide. One view is lost completely if the HD screen lands ' + stripe.toFixed(2) + ' mm off, and half its window is gone at ' + (stripe / 2).toFixed(2) + ' mm.']);
-      if (stripe < 0.56 && stripe >= 0.3) W.push(['Halftones', 'A 45 LPI dot cell is 0.56 mm, wider than these ' + stripe.toFixed(2) + ' mm stripes. Keep fills under the ridges solid, or the stripes will chop the dots.']); }
+      if (stripe < 0.3 && stripe > 0 && !listed) W.push(['Stripes', 'are ' + stripe.toFixed(2) + ' mm wide. One view is lost completely if the HD screen lands ' + stripe.toFixed(2) + ' mm off, and half its window is gone at ' + (stripe / 2).toFixed(2) + ' mm.']);
+      if (stripe < 0.56 && stripe >= 0.3 && !listed) W.push(['Halftones', 'A 45 LPI dot cell is 0.56 mm, wider than these ' + stripe.toFixed(2) + ' mm stripes. Keep fills under the ridges solid, or the stripes will chop the dots.']); }
     if (pr !== 'hidden' && !multi() && !rA[0] && !rB[0]) W.push(['No clean view', 'at any angle with this build.' + (pr === 'domes' ? ' Round domes never fully hide the far flank; make them taller or narrower.' : ' Raise the ridges or narrow the gap.')]);
     if (!multi() && ART.weak > 0.03) W.push(['Views', 'A and B are nearly but not exactly the same colour over ' + Math.round(ART.weak * 100) + '% of the art, so the page counts that as changing and puts ridges on it. That is what two exports of one picture look like when they were not made the same way (shifted colours, soft edges). Export both from the same layer with the same settings.']);
     if (ART.empty) W.push(['Artwork', multi() ? 'No layer has any depth, so nothing moves. Give a layer some depth in the sidebar.' : 'Views A and B are identical, so there is nothing to flip between. Assign layers below.']);
     $('warns').innerHTML = W.map(function (x) { return '<div class="warn"><b>' + esc(x[0]) + '</b> ' + esc(x[1]) + '</div>'; }).join('');
+    drawBalance(rA, rB, g0);
   }
   function fx1(v) { return (Math.round(v * 10) / 10).toString(); }
+
+  /* ================= balance ================= */
+  // The widest clean window of one picture ('a' or 'b'): where it is, and what the eye gets at its best angle and on average across it.
+  var SEEN = 60; // past 60° a flat print is squeezed to under half its width
+  function viewStat(st) {
+    var rg = ranges(st)[0]; if (!rg) return null; var best = -1, least = 2, at = null, sum = 0, n = 0, gb = null, x, q, own, oth;
+    var lo = Math.max(rg[0], -SEEN), hi = Math.min(rg[1], SEEN); if (lo > hi) { lo = rg[0]; hi = rg[1]; } // judged over the angles a shirt is looked at from, where the window reaches them
+    function parts(x) { var q = geom(x * Math.PI / 180); return st === 'a' ? [q.a, q.b, q] : [q.b, q.a, q]; }
+    for (x = lo; x <= hi + 1e-9; x += 0.25) { q = parts(x); sum += q[0]; n++; if (q[0] > best) best = q[0]; }
+    for (x = lo; x <= hi + 1e-9; x += 0.25) { q = parts(x); if (q[0] >= best - 0.002 && q[1] < least) least = q[1]; } // its best angle: the most of this picture, then the least of the other,
+    for (x = lo; x <= hi + 1e-9; x += 0.25) { q = parts(x); if (q[0] >= best - 0.002 && q[1] <= least + 0.002 && (at === null || Math.abs(x) < Math.abs(at))) { at = x; gb = q[2]; } } // then the nearest to straight on
+    var other = least, black = gb.top + gb.wall;
+    return { rg: rg, at: at, own: best, mean: sum / n, other: other, black: black, bare: Math.max(0, 1 - best - other - black), width: rg[1] - rg[0], from: Math.min(Math.abs(rg[0]), Math.abs(rg[1])) };
+  }
+  function inkCover() { // how much of the ridged area each picture puts ink on
+    if (!ART || !ART.Z || !ART.MA || multi()) return null; if (ART.cov && ART.cov.z === ART.Z && ART.cov.ma === ART.MA) return ART.cov;
+    var Z = ART.Z, z = 0, a = 0, b = 0, i; for (i = 0; i < Z.length; i++) if (Z[i]) { z++; if (ART.MA[i]) a++; if (ART.MB[i]) b++; }
+    return (ART.cov = { z: Z, ma: ART.MA, a: z ? a / z : 0, b: z ? b / z : 0 });
+  }
+  // The same rules of thumb as the warnings, as a list with how much room each has: [what, how it stands, ok | tight | no]
+  function buildChecks() {
+    var pr = S.proc, P = S.pitch, w = S.ridge, g = P - w, per = S.height / CURE / S.passes, minLine = per + MESH, C = [], what = PROC[pr].wLabel.split(' ')[0], um = Math.round(per * 1000);
+    function st(have, need) { var r = have / need; return r >= 1.15 ? 'ok' : r >= 0.98 ? 'tight' : 'no'; }
+    function of(have, need) { return Math.round(have / need * 100) + '% of it'; }
+    var needW = pr === 'walls' ? 2 * minLine : minLine;
+    C.push([what + ' width', w.toFixed(2) + ' mm. A ' + um + ' µm stencil holds a line down to about ' + needW.toFixed(2) + ' mm' + (pr === 'walls' ? ' (two side by side)' : '') + ': ' + of(w, needW) + '.', st(w, needW)]);
+    C.push(['Gap', g.toFixed(2) + ' mm of stencil standing between the lines. It needs about ' + minLine.toFixed(2) + ' mm to survive washout: ' + of(g, minLine) + '.', st(g, minLine)]);
+    C.push(['Stencil', um + ' µm a pass (' + S.passes + (S.passes > 1 ? ' passes' : ' pass') + '). The thickest film sold is 700 µm.', um <= 700 ? 'ok' : um <= 760 ? 'tight' : 'no']);
+    if (pr === 'barrier') { var a = g * S.split / 100, sa = Math.max(0, a - S.guard / 2), sb = Math.max(0, g - a - S.guard / 2), N = multi() ? S.views : 0, stripe = N ? g / N : Math.min(sa, sb), printed = N ? g / N : stripe + w / 2;
+      C.push(['HD register', 'The HD screen can land ' + (stripe / 2).toFixed(2) + ' mm off before half of a clean window is gone, ' + stripe.toFixed(2) + ' mm before all of it.', stripe >= 0.3 ? 'ok' : 'tight']);
+      C.push(['Colour stripes', 'The narrowest is ' + printed.toFixed(2) + ' mm. A flat screen holds about 0.25 mm cleanly on fabric: ' + of(printed, 0.25) + '.', st(printed, 0.25)]);
+      if (stripe < 0.56) C.push(['Halftones', 'A 45 LPI dot cell is 0.56 mm, wider than the ' + stripe.toFixed(2) + ' mm that shows of each stripe, so dots under the ridges get chopped. Solid fills are safe.', 'info']); }
+    return C;
+  }
+  function pc(v) { return Math.round(v * 100) + '%'; }
+  function showsRow(label, where, parts) { // one bar that adds to the whole surface: [share, class, name]
+    var bar = '', txt = [];
+    parts.forEach(function (p) { if (p[0] > 0.004) { bar += '<i class="' + p[1] + '" style="width:' + (p[0] * 100).toFixed(2) + '%"></i>'; txt.push(pc(p[0]) + ' ' + p[2]); } });
+    return '<div class="showrow"><div class="lbl"><b>' + esc(label) + '</b><span>' + esc(where) + '</span></div><div class="bar" role="img" aria-label="' + esc(label + ', ' + where + ': ' + txt.join(', ')) + '">' + bar + '</div><div class="nums">' + esc(txt.join(' · ')) + '</div></div>';
+  }
+  function drawBalance(rA, rB, g0) {
+    var el = $('balance'), pr = S.proc; if (pr === 'hidden' || pr === 'lens' || !ART) { el.innerHTML = ''; el.hidden = true; return; } el.hidden = false;
+    var P = S.pitch, mu = multi(), A = mu ? null : viewStat('a'), B = mu ? null : viewStat('b'), la = ART.labelA, lb = ART.labelB, cov = inkCover(), h = '', black0 = g0.top + g0.wall, bare0 = Math.max(0, 1 - g0.a - g0.b - black0), dark = PROC[pr].wLabel.split(' ')[0].toLowerCase();
+    function side(x) { return Math.round(Math.abs(x)) + '° ' + (x > 0 ? 'right' : x < 0 ? 'left' : ''); }
+    h += '<h3>What shows</h3><div class="shows">';
+    if (mu) { var parts = g0.v.map(function (v, i) { return [v, i % 2 ? 'o2' : 'o1', 'view ' + (i + 1)]; }); parts.push([black0, 'k', dark], [Math.max(0, 1 - black0 - g0.v.reduce(function (x, y) { return x + y; }, 0)), 's', 'bare shirt']); h += showsRow('All ' + S.views + ' views', 'straight on', parts); }
+    else {
+      h += A ? showsRow(la, 'at its best, ' + side(A.at), [[A.own, 'oa', 'this picture'], [A.other, 'ob', 'the other'], [A.black, 'k', dark], [A.bare, 's', 'bare shirt']]) : '<div class="showrow"><div class="lbl"><b>' + esc(la) + '</b><span>never shows alone</span></div></div>';
+      h += B ? showsRow(lb, 'at its best, ' + side(B.at), [[B.own, 'ob', 'this picture'], [B.other, 'oa', 'the other'], [B.black, 'k', dark], [B.bare, 's', 'bare shirt']]) : '<div class="showrow"><div class="lbl"><b>' + esc(lb) + '</b><span>never shows alone</span></div></div>';
+      h += showsRow('Both', 'straight on', [[g0.a, 'oa', la], [g0.b, 'ob', lb], [black0, 'k', dark], [bare0, 's', 'bare shirt']]);
+    }
+    h += '</div><div class="read bal">';
+    // brightness
+    if (mu) h += '<div class="stat wide"><div class="k">Brightness</div><div class="v">' + pc((g0.a + g0.b) / S.views) + ' a view</div><div class="s">Share of the surface that is each view’s stripe, straight on; ' + pc(g0.a + g0.b) + ' is print in all. A flat print is 100%.</div></div>';
+    else { var two = function (f) { return (A ? f(A) : '—') + ' · ' + (B ? f(B) : '—'); };
+      h += '<div class="stat wide"><div class="k">Brightness</div><div class="v">' + two(function (v) { return pc(v.own); }) + '</div><div class="s">Share of the surface that is ' + esc(la) + ' · ' + esc(lb) + ' at its best angle; ' + two(function (v) { return pc(v.mean); }) + ' averaged across its clean angles, ' + pc(g0.a) + ' · ' + pc(g0.b) + ' straight on. A flat print is 100%.' +
+        (cov ? ' Their ink covers ' + pc(cov.a) + ' · ' + pc(cov.b) + ' of the ridged area, so at best ' + (A ? pc(A.own * cov.a) : '—') + ' · ' + (B ? pc(B.own * cov.b) : '—') + ' of it is ink you see.' : '') + '</div></div>'; }
+    // crispness
+    var cr = 'One strip of each picture every ' + P.toFixed(2) + ' mm across, so detail narrower than about ' + (2 * P).toFixed(1) + ' mm is lost; up and down it keeps the art’s full detail.';
+    if (!mu) { var same = A && B && Math.abs(A.width - B.width) < 1 && Math.abs(A.from - B.from) < 1;
+      if (A || B) cr += same ? ' Each picture is clean for ' + Math.round(A.width) + '° a side, starting ' + Math.round(A.from) + '° off straight on.' : ' ' + esc(la) + ' is clean ' + (A ? 'for ' + Math.round(A.width) + '° from ' + Math.round(A.from) + '°' : 'nowhere') + ', ' + esc(lb) + ' ' + (B ? 'for ' + Math.round(B.width) + '° from ' + Math.round(B.from) + '°' : 'nowhere') + '.';
+      var gh = function (v) { return pc(v.other / Math.max(1e-6, v.own + v.other)); }; if (A || B) cr += ' At the best angle the other picture is ' + two(gh) + ' of what shows.'; }
+    h += '<div class="stat wide"><div class="k">Crispness</div><div class="v">' + fx1(25.4 / P) + ' per inch' + (!mu && A ? ' · ' + Math.round(A.width) + '° clean' : '') + '</div><div class="s">' + cr + '</div></div>';
+    // will it print
+    var C = buildChecks(), worst = C.some(function (c) { return c[2] === 'no'; }) ? 'no' : C.some(function (c) { return c[2] === 'tight'; }) ? 'tight' : 'ok', first = C.filter(function (c) { return c[2] === worst; })[0];
+    h += '<div class="stat wide"><div class="k">Will it print</div><div class="v ' + worst + '">' + (worst === 'no' ? 'Unlikely as set' : worst === 'tight' ? 'Tight' : 'Inside the rules of thumb') + (worst !== 'ok' ? ': ' + esc(first[0].toLowerCase()) : '') + '</div><div class="checks">' +
+      C.map(function (c) { return '<div class="chk ' + c[2] + '"><span class="tag">' + (c[2] === 'ok' ? 'OK' : c[2] === 'tight' ? 'Tight' : c[2] === 'info' ? 'Note' : 'No') + '</span><span><b>' + esc(c[0]) + '</b> ' + esc(c[1]) + '</span></div>'; }).join('') +
+      '</div><div class="s">Rules of thumb for capillary-film HD and a flat screen on fabric, not tested on your press.</div></div>';
+    el.innerHTML = h + '</div>';
+  }
 
   /* ================= builds table ================= */
   var BUILDS = [[100, 1], [200, 1], [200, 2], [300, 1], [400, 1], [400, 2], [400, 3], [700, 1]];
@@ -1714,7 +1815,7 @@ var DEF_ART={fulltext:'data:image/webp;base64,UklGRiTmAQBXRUJQVlA4WAoAAAAQAAAARQ
   function syncControls() {
     ['pitch', 'ridge', 'height', 'split', 'guard', 'reg', 'cap', 'lensAngle', 'curve', 'printIn', 'angle', 'loupeSpan'].forEach(function (k) { $(k).value = S[k]; });
     $('proc').value = S.proc; $('spot').checked = S.spot; $('spotA').value = S.spotA; $('spotB').value = S.spotB;
-    $('swap').checked = S.swap; $('snap').checked = S.snap; $('passes' + S.passes).checked = true; $('views' + S.views).checked = true;
+    $('swap').checked = S.swap; $('snap').checked = S.snap; $('lock').checked = S.lock; $('passes' + S.passes).checked = true; $('views' + S.views).checked = true;
     $('zone' + (S.zone === 'diff' ? 'Diff' : S.zone === 'box' ? 'Box' : 'All')).checked = true;
     labels();
   }
@@ -1745,7 +1846,7 @@ var DEF_ART={fulltext:'data:image/webp;base64,UklGRiTmAQBXRUJQVlA4WAoAAAAQAAAARQ
     $('loupeSpanOut').textContent = S.loupeSpan + ' mm';
   }
   var raf = 0, dirtyGeom = false, dirtyArt = false, hooks = []; // hooks: called after every redraw (the Films panel listens)
-  function geometryChanged() { dirtyGeom = true; gcache.clear(); schedule(); }
+  function geometryChanged() { dirtyGeom = true; gcache.clear(); if (!lockBusy) lockNote(); schedule(); } // anything else that changes the ridges sets new proportions to hold
   function schedule() { if (!raf) raf = requestAnimationFrame(frame); }
   function frame() {
     raf = 0; if (!ART) return;
@@ -1766,6 +1867,18 @@ var DEF_ART={fulltext:'data:image/webp;base64,UklGRiTmAQBXRUJQVlA4WAoAAAAQAAAARQ
     var dpr = Math.min(2, window.devicePixelRatio || 1);
     [['shirt', 1350], ['loupe', 640]].forEach(function (k) { var c = $(k[0]), w = Math.max(160, Math.min(k[1], Math.round(c.clientWidth * dpr))); if (c.width !== w) { c.width = w; c.height = w; } });
   }
+  // Ticked, the ridge sliders move as one: pitch, width and height keep the proportions they had when the box was ticked (the dead band and the
+  // cap overhang go with them), so the cross-section only gets coarser or finer and every viewing angle stays where it was.
+  var lockR = null, LOCKLIM = { pitch: [0.3, 3], ridge: [0.15, 1.5], height: [0.05, 1.6] };
+  function lockNote() { lockR = S.lock && S.pitch > 0 ? { pitch: 1, ridge: S.ridge / S.pitch, height: S.height / S.pitch, guard: S.guard / S.pitch, cap: S.cap / S.pitch } : null; }
+  function lockMove(key, v) { // `key` was dragged to v: the pitch that goes with it, held inside every slider's range so the proportions survive
+    var P = v / lockR[key]; ['pitch', 'ridge', 'height'].forEach(function (k) { P = Math.max(LOCKLIM[k][0] / lockR[k], Math.min(LOCKLIM[k][1] / lockR[k], P)); });
+    P = snapPitch(P); S.pitch = P; S.ridge = P * lockR.ridge; S.height = P * lockR.height; S.guard = Math.min(0.6, P * lockR.guard); S.cap = Math.min(0.4, P * lockR.cap);
+    ['pitch', 'ridge', 'height', 'guard', 'cap'].forEach(function (k) { $(k).value = S[k]; });
+  }
+  function bindRidge(key) { $(key).addEventListener('input', function (e) { stopSweep(); var v = parseFloat(e.target.value);
+    if (S.lock && lockR && S.proc !== 'lens') { lockMove(key, v); lockBusy = true; geometryChanged(); lockBusy = false; } else { S[key] = v; after(key); geometryChanged(); } }); }
+  var lockBusy = false;
   function bind(id, key, parse, geom) { $(id).addEventListener('input', function (e) { stopSweep(); var v = parse ? parse(e.target) : parseFloat(e.target.value); S[key] = v; after(key); if (geom === false) { labels(); schedule(); persistSoon(); } else geometryChanged(); }); }
   function after(key) {
     if (key === 'pitch') { S.pitch = snapPitch(S.pitch); if (S.proc !== 'lens' && S.ridge > S.pitch - 0.1) { S.ridge = Math.max(0.15, S.pitch - 0.1); $('ridge').value = S.ridge; } }
@@ -1776,14 +1889,14 @@ var DEF_ART={fulltext:'data:image/webp;base64,UklGRiTmAQBXRUJQVlA4WAoAAAAQAAAARQ
     if (key === 'zone' || key === 'printIn' || key === 'spotA' || key === 'spotB' || key === 'spot') buildSpot();
     var gmax = Math.max(0, S.pitch - S.ridge - 0.05); if (S.guard > gmax) { S.guard = Math.round(gmax * 100) / 100; $('guard').value = S.guard; }
   }
-  bind('pitch', 'pitch'); bind('ridge', 'ridge'); bind('height', 'height'); bind('split', 'split'); bind('guard', 'guard'); bind('reg', 'reg'); bind('cap', 'cap'); bind('lensAngle', 'lensAngle'); bind('curve', 'curve'); bind('printIn', 'printIn');
+  bindRidge('pitch'); bindRidge('ridge'); bindRidge('height'); bind('split', 'split'); bind('guard', 'guard'); bind('reg', 'reg'); bind('cap', 'cap'); bind('lensAngle', 'lensAngle'); bind('curve', 'curve'); bind('printIn', 'printIn');
   $('proc').addEventListener('change', function (e) { // each process keeps its own slider settings
     stopSweep(); var old = S.proc, np = e.target.value; if (!PROC[np]) return;
     procMem[old] = {}; Object.keys(PROCDEF[old]).forEach(function (k) { procMem[old][k] = S[k]; });
     var src = procMem[np] || {}; S.proc = np; Object.keys(PROCDEF[np]).forEach(function (k) { S[k] = typeof src[k] === typeof PROCDEF[np][k] ? src[k] : PROCDEF[np][k]; });
     S.pitch = snapPitch(S.pitch); procChanged(); syncControls(); geometryChanged();
   });
-  bind('swap', 'swap', function (t) { return t.checked; }); bind('snap', 'snap', function (t) { return t.checked; }); bind('spot', 'spot', function (t) { return t.checked; });
+  bind('swap', 'swap', function (t) { return t.checked; }); bind('snap', 'snap', function (t) { return t.checked; }); bind('lock', 'lock', function (t) { return t.checked; }); bind('spot', 'spot', function (t) { return t.checked; });
   bind('spotA', 'spotA', function (t) { return t.value; }); bind('spotB', 'spotB', function (t) { return t.value; });
   bind('angle', 'angle', null, false); bind('loupeSpan', 'loupeSpan', null, false);
   ['passes1', 'passes2', 'passes3'].forEach(function (id) { bind(id, 'passes', function (t) { return parseInt(t.value, 10); }); });
