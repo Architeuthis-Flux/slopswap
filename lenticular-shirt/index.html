@@ -1152,11 +1152,32 @@ var DEF_ART={fulltext:'data:image/webp;base64,UklGRiTmAQBXRUJQVlA4WAoAAAAQAAAARQ
   // A layer set to HD is not part of either view: it is art for the HD screen alone, added to the HD film as drawn. Files named puff or hd start there.
   var HDNAME = /puff|(^|[^a-z0-9])hd([^a-z0-9]|$)/i;
   // raise: the wordmark is the same in both views apart from the notch for the head, so its black is raised in HD on the films like a layer set to Both
-  var SHIRT = [17, 17, 19], TOPC = [30, 30, 33], WALLC = [8, 8, 9];
+  var SHIRT = [58, 59, 63], TOPC = [30, 30, 33], WALLC = [8, 8, 9]; // a dark grey shirt; black HD ink on it, lit on top and in shadow on its walls
   // The eye averages fine stripes in linear light, so all mixing is done there (0..4095) and converted back for display.
   var S2L = new Uint16Array(256), L2S = new Uint8Array(4096);
   (function () { var i, v; for (i = 0; i < 256; i++) { v = i / 255; S2L[i] = Math.round(4095 * (v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4))); } for (i = 0; i < 4096; i++) { v = i / 4095; L2S[i] = Math.round(255 * (v <= 0.0031308 ? v * 12.92 : 1.055 * Math.pow(v, 1 / 2.4) - 0.055)); } })();
   var SHIRTL = SHIRT.map(function (v) { return S2L[v]; }), TOPL = TOPC.map(function (v) { return S2L[v]; }), WALLL = WALLC.map(function (v) { return S2L[v]; });
+  // The shirt's cloth: a grain that repeats every 64 mm, fixed to the fabric so it turns and bends with the shirt. Fibre noise, the ribs and
+  // stitches of a jersey knit about 1 mm across, a half-millimetre grain and slow mottling, kept at four sizes so it does not shimmer when small.
+  var TEXN = 512, TEXMM = 64, TEXAMP = 0.5, TEX = (function () {
+    var N = TEXN, seed = 20261116, t = new Float32Array(N * N), x, y, i;
+    function rnd() { seed = (seed + 0x6D2B79F5) | 0; var z = Math.imul(seed ^ (seed >>> 15), 1 | seed); z = (z + Math.imul(z ^ (z >>> 7), 61 | z)) ^ z; return ((z ^ (z >>> 14)) >>> 0) / 4294967296; }
+    function cells(n) { var g = new Float32Array(n * n), k; for (k = 0; k < g.length; k++) g[k] = rnd() * 2 - 1; // random values on an n by n lattice, read back smoothly and wrapping
+      return function (px, py) { var fx = px / N * n, fy = py / N * n, x0 = Math.floor(fx), y0 = Math.floor(fy), tx = fx - x0, ty = fy - y0; tx = tx * tx * (3 - 2 * tx); ty = ty * ty * (3 - 2 * ty);
+        var x1 = (x0 + 1) % n, y1 = (y0 + 1) % n; x0 %= n; y0 %= n; return (g[y0 * n + x0] * (1 - tx) + g[y0 * n + x1] * tx) * (1 - ty) + (g[y1 * n + x0] * (1 - tx) + g[y1 * n + x1] * tx) * ty; }; }
+    var fib = new Float32Array(N * N); for (i = 0; i < fib.length; i++) fib[i] = rnd() * 2 - 1;
+    var grain = cells(128), mott = cells(20), big = cells(5), sum = 0, sq = 0;
+    for (y = 0; y < N; y++) for (x = 0; x < N; x++) {
+      var fine = (fib[y * N + x] * 2 + fib[((y + 1) % N) * N + x] + fib[((y + N - 1) % N) * N + x]) / 4, // fibres run up the shirt
+        wx = (x % 8) / 8, wale = Math.cos(2 * Math.PI * wx), stitch = Math.cos(2 * Math.PI * 80 * y / N + Math.PI * 1.6 * Math.abs(wx - 0.5)),
+        v = 0.5 * fine + 0.35 * wale + 0.3 * stitch * (0.5 + 0.5 * wale) + 0.7 * grain(x, y) + 0.2 * mott(x, y) + 0.08 * big(x, y);
+      t[y * N + x] = v; sum += v; sq += v * v; }
+    function settle(a, sd) { var m = 0, q = 0, k; for (k = 0; k < a.length; k++) m += a[k]; m /= a.length; for (k = 0; k < a.length; k++) q += (a[k] - m) * (a[k] - m); q = Math.sqrt(q / a.length) || 1;
+      for (k = 0; k < a.length; k++) a[k] = Math.max(-1, Math.min(1, (a[k] - m) / q * sd)); return a; }
+    var out = [settle(t, 0.34)], n = N, sds = [0.31, 0.28, 0.25];
+    for (i = 0; i < 3; i++) { var a = out[i], h = n >> 1, b = new Float32Array(h * h); for (y = 0; y < h; y++) for (x = 0; x < h; x++) b[y * h + x] = (a[2 * y * n + 2 * x] + a[2 * y * n + 2 * x + 1] + a[(2 * y + 1) * n + 2 * x] + a[(2 * y + 1) * n + 2 * x + 1]) / 4; out.push(settle(b, sds[i])); n = h; }
+    return out;
+  })();
   var S = Object.assign({}, DEF), saved = {};
   try { saved = JSON.parse(localStorage.getItem(LS) || '{}') || {}; } catch (e) { saved = {}; }
   if (saved.S) Object.keys(DEF).forEach(function (k) { if (saved.S[k] !== undefined && typeof saved.S[k] === typeof DEF[k]) S[k] = saved.S[k]; });
@@ -1259,9 +1280,10 @@ var DEF_ART={fulltext:'data:image/webp;base64,UklGRiTmAQBXRUJQVlA4WAoAAAAQAAAARQ
     // differing-area mask, and the two views flattened onto the shirt colour
     var D = new Uint8Array(n), A = new Uint16Array(n * 3), B = new Uint16Array(n * 3), MA = new Uint8Array(n), MB = new Uint8Array(n), nArt = 0, nWeak = 0;
     for (var p = 0; p < n; p++) {
-      var o = p * 4, q = p * 3, aa = VA[o + 3], ba = VB[o + 3], dsum = 0, ia = 0, ib = 0;
-      for (var c = 0; c < 3; c++) { var av = VA[o + c] * aa + SHIRT[c] * (1 - aa), bv = VB[o + c] * ba + SHIRT[c] * (1 - ba); A[q + c] = S2L[Math.round(av)]; B[q + c] = S2L[Math.round(bv)]; dsum += Math.abs(av - bv); ia += Math.abs(av - SHIRT[c]); ib += Math.abs(bv - SHIRT[c]); }
-      if (dsum > 36) D[p] = 1; if (ia > 60) MA[p] = 1; if (ib > 60) MB[p] = 1; // where each view lays ink down, for the hidden-image process
+      var o = p * 4, q = p * 3, aa = VA[o + 3], ba = VB[o + 3], dsum = 0;
+      for (var c = 0; c < 3; c++) { var pa = VA[o + c] * aa, pb = VB[o + c] * ba, av = pa + SHIRT[c] * (1 - aa), bv = pb + SHIRT[c] * (1 - ba); A[q + c] = S2L[Math.round(av)]; B[q + c] = S2L[Math.round(bv)]; dsum += Math.abs(pa - pb); }
+      dsum += 255 * Math.abs(aa - ba); // the views differ where their ink does: its colour, or whether it is there at all. The colour the shirt is drawn in plays no part.
+      if (dsum > 36) D[p] = 1; if (aa > 0.24) MA[p] = 1; if (ba > 0.24) MB[p] = 1; // where each view lays ink down, for the hidden-image process
       if (aa > 0.5 || ba > 0.5) { nArt++; if (dsum > 36 && dsum <= 120 && aa > 0.5 && ba > 0.5) nWeak++; } // both views have art here and it is nearly, not exactly, the same colour
     }
     ART.weak = nArt ? nWeak / nArt : 0;
@@ -1440,7 +1462,7 @@ var DEF_ART={fulltext:'data:image/webp;base64,UklGRiTmAQBXRUJQVlA4WAoAAAAQAAAARQ
 
   /* ================= rendering ================= */
   var cache = {};
-  function colArrays(key, n) { var c = cache[key]; if (!c || c.n !== n) { c = cache[key] = { n: n, ax: new Float32Array(n), u: new Float32Array(n), wa: new Float32Array(n), wb: new Float32Array(n), kr: new Float32Array(n), kg: new Float32Array(n), kb: new Float32Array(n), wa2: new Float32Array(n), wb2: new Float32Array(n), kr2: new Float32Array(n), kg2: new Float32Array(n), kb2: new Float32Array(n), sh: new Float32Array(n), ok: new Uint8Array(n), st: new Uint8Array(n), wv: new Float32Array(n * 5), img: null }; } return c; }
+  function colArrays(key, n) { var c = cache[key]; if (!c || c.n !== n) { c = cache[key] = { n: n, ax: new Float32Array(n), u: new Float32Array(n), wa: new Float32Array(n), wb: new Float32Array(n), kr: new Float32Array(n), kg: new Float32Array(n), kb: new Float32Array(n), wa2: new Float32Array(n), wb2: new Float32Array(n), kr2: new Float32Array(n), kg2: new Float32Array(n), kb2: new Float32Array(n), sh: new Float32Array(n), ta: new Float32Array(n), tf: new Float32Array(n), tL: new Uint8Array(n), xa: new Int32Array(n), xb: new Int32Array(n), fx: new Float32Array(n), xa2: new Int32Array(n), xb2: new Int32Array(n), fx2: new Float32Array(n), ok: new Uint8Array(n), st: new Uint8Array(n), wv: new Float32Array(n * 5), img: null }; } return c; }
   function radius() { return S.curve > 0 ? 25000 / S.curve : Infinity; }
   function localAngle(u) { var R = radius(), th = S.angle * Math.PI / 180; return R === Infinity ? th : th - u / R; }
   function screenX(u) { var R = radius(), th = S.angle * Math.PI / 180; if (R === Infinity) return u * Math.cos(th); var d = u / R - th; if (Math.abs(d) >= Math.PI / 2) return null; return R * Math.sin(d) + R * Math.sin(th); }
@@ -1453,6 +1475,7 @@ var DEF_ART={fulltext:'data:image/webp;base64,UklGRiTmAQBXRUJQVlA4WAoAAAAQAAAARQ
     var d = C.img.data, W = ART.W, H = ART.H, mpp = mmPerArtPx(), MW = mmW(), MH = MW * H / W, th = S.angle * Math.PI / 180, R = radius();
     var viewMm = loupe ? S.loupeSpan : MW * 1.22, mmOut = viewMm / cw, TW = MW * 0.68, wts = [0, 0, 0, 0, 0, 0, 0, 0, 0], X, Y, hid = S.proc === 'hidden', HM = S.swap ? ART.MA : ART.MB, MVs = multi() && ART.V && ART.V.length === S.views ? ART.V : null, NV = MVs ? MVs.length : 0, kk;
     var thL0 = loupe ? localAngle(S.lu) : 0, gFlat = (R === Infinity || loupe) ? geom(loupe ? thL0 : th) : null;
+    var T0MM = TEXMM / TEXN, RA = new Int32Array(4), RB = new Int32Array(4), RF = new Float32Array(4), S0 = SHIRTL[0], S1 = SHIRTL[1], S2 = SHIRTL[2], SL = S0 + S1 + S2, ISL = 1 / SL, lk;
     for (X = 0; X < cw; X++) {
       var sx = (X + 0.5 - cw / 2) * mmOut, u, du, thl, g;
       C.ok[X] = 0;
@@ -1461,6 +1484,13 @@ var DEF_ART={fulltext:'data:image/webp;base64,UklGRiTmAQBXRUJQVlA4WAoAAAAQAAAARQ
       else { var q = sx / R - Math.sin(th); if (q <= -0.998 || q >= 0.998) continue; thl = -Math.asin(q); u = R * (th - thl); du = mmOut / Math.cos(thl); g = geom(thl); }
       if (!loupe && Math.abs(u) > TW) continue;
       C.ok[X] = 1; C.u[X] = u; C.ax[X] = (u + MW / 2) / mpp;
+      // The cloth is read at the size that matches what one screen pixel covers of it here: a column seen edge-on covers more, and past the coarsest
+      // size the grain fades out. Where the size changes, a narrow band is blended between the two so there is no seam.
+      var tlf = Math.log(Math.max(du, mmOut) * 0.6 / T0MM) / Math.LN2, tlc = tlf < 0 ? 0 : tlf > 3 ? 3 : tlf, tLv = tlc | 0, tbf = tLv < 3 ? Math.max(0, Math.min(1, (tlc - tLv - 0.35) / 0.3)) : 0, tc0 = u / T0MM, tpx, tx0, tnn;
+      if (tbf >= 1) { tLv++; tbf = 0; }
+      C.ta[X] = TEXAMP * (tlf <= 3 ? 1 : Math.max(0, 1 - (tlf - 3) / 1.5)); C.tL[X] = tLv; C.tf[X] = tbf;
+      tnn = TEXN >> tLv; tpx = tc0 / (1 << tLv) - 0.5; tx0 = Math.floor(tpx); C.fx[X] = tpx - tx0; C.xa[X] = tx0 & (tnn - 1); C.xb[X] = (tx0 + 1) & (tnn - 1);
+      if (tbf > 0) { tnn >>= 1; tpx = tc0 / (2 << tLv) - 0.5; tx0 = Math.floor(tpx); C.fx2[X] = tpx - tx0; C.xa2[X] = tx0 & (tnn - 1); C.xb2[X] = (tx0 + 1) & (tnn - 1); }
       colWeights(g, u - du / 2, u + du / 2, wts);
       var gd = Math.max(0, 1 - wts[0] - wts[1] - wts[2] - wts[3]);
       C.wa[X] = wts[0]; C.wb[X] = wts[1]; for (kk = 0; kk < NV; kk++) C.wv[X * 5 + kk] = wts[4 + kk];
@@ -1473,6 +1503,7 @@ var DEF_ART={fulltext:'data:image/webp;base64,UklGRiTmAQBXRUJQVlA4WAoAAAAQAAAARQ
     var spot = S.proc === 'walls' && S.spot && ART.As, A = spot ? ART.As : ART.A, B = spot ? ART.Bs : ART.B, Z = ART.Z, vc = loupe ? S.lv : 0, neckV = -MH / 2 - 58, bil = loupe;
     for (Y = 0; Y < ch; Y++) {
       var v = vc + (Y + 0.5 - ch / 2) * mmOut, fy = (v + MH / 2) / mpp, j = Math.floor(fy), rowIn = j >= 0 && j < H, nearNeck = !loupe && v < neckV + 64, o = Y * cw * 4;
+      for (lk = 0; lk < 4; lk++) { var tnk = TEXN >> lk, tyf = v / T0MM / (1 << lk) - 0.5, ty0 = Math.floor(tyf); RF[lk] = tyf - ty0; RA[lk] = (ty0 & (tnk - 1)) * tnk; RB[lk] = ((ty0 + 1) & (tnk - 1)) * tnk; }
       for (X = 0; X < cw; X++, o += 4) {
         if (!C.ok[X]) { d[o + 3] = 0; continue; }
         if (nearNeck) { var nu = C.u[X] / 92, nv = (v - neckV) / 64; if (nu * nu + nv * nv < 1) { d[o + 3] = 0; continue; } }
@@ -1496,7 +1527,12 @@ var DEF_ART={fulltext:'data:image/webp;base64,UklGRiTmAQBXRUJQVlA4WAoAAAAQAAAARQ
             if (hid && !HM[p]) { wa = C.wa2[X]; wb = C.wb2[X]; k0 = C.kr2[X]; k1 = C.kg2[X]; k2 = C.kb2[X]; } // flat lines where the hidden image is not
             r = wa * ar + wb * br + k0; gg = wa * ag + wb * bg + k1; b = wa * ab + wb * bb + k2;
             if (z < 255) { var t = z / 255; r = r * t + ar * (1 - t); gg = gg * t + ag * (1 - t); b = b * t + ab * (1 - t); } }
-        } else { r = SHIRTL[0]; gg = SHIRTL[1]; b = SHIRTL[2]; }
+        } else { r = S0; gg = S1; b = S2; }
+        var dd = Math.abs(r - S0) + Math.abs(gg - S1) + Math.abs(b - S2); // how far this pixel is from bare shirt: the cloth shows in what is left
+        if (dd < SL && C.ta[X] > 0) { var tL = C.tL[X], TT = TEX[tL], ra = RA[tL], rb = RB[tL], xa = C.xa[X], xb = C.xb[X], fxx = C.fx[X], t0 = TT[ra + xa], t1 = TT[rb + xa], tv, bf = C.tf[X];
+          t0 += (TT[ra + xb] - t0) * fxx; t1 += (TT[rb + xb] - t1) * fxx; tv = t0 + (t1 - t0) * RF[tL];
+          if (bf > 0) { TT = TEX[tL + 1]; ra = RA[tL + 1]; rb = RB[tL + 1]; xa = C.xa2[X]; xb = C.xb2[X]; fxx = C.fx2[X]; t0 = TT[ra + xa]; t1 = TT[rb + xa]; t0 += (TT[ra + xb] - t0) * fxx; t1 += (TT[rb + xb] - t1) * fxx; tv += (t0 + (t1 - t0) * RF[tL + 1] - tv) * bf; }
+          tv = 1 + C.ta[X] * (1 - dd * ISL) * tv; r *= tv; gg *= tv; b *= tv; }
         d[o] = L2S[(r * sh) | 0]; d[o + 1] = L2S[(gg * sh) | 0]; d[o + 2] = L2S[(b * sh) | 0]; d[o + 3] = 255;
       }
     }
@@ -2398,9 +2434,9 @@ var DEF_ART={fulltext:'data:image/webp;base64,UklGRiTmAQBXRUJQVlA4WAoAAAAQAAAARQ
     var R = region(G, x0, y0, rw, rh), off = document.createElement('canvas'); off.width = rw; off.height = rh; var ox = off.getContext('2d'), im = ox.createImageData(rw, rh), d = im.data, mode = F.proof, i, o;
     for (i = 0; i < rw * rh; i++) { o = i * 4; var r, g, b;
       if (mode !== 'print') { var v = R[mode][i] ? 0 : 255; r = g = b = v; }
-      else { r = 42; g = 42; b = 46; // the shirt, drawn lighter than it is so black ink shows
+      else { r = 58; g = 59; b = 63; // the shirt
         var wOn = F.on.W && R.W[i], ci = (F.on.C && R.C[i] ? 1 : 0) | (F.on.M && R.M[i] ? 2 : 0) | (F.on.Y && R.Y[i] ? 4 : 0);
-        if (wOn || ci) { var col = INK[ci]; if (wOn) { r = col[0]; g = col[1]; b = col[2]; } else { r = 42 + (col[0] - 42) * 0.3; g = 42 + (col[1] - 42) * 0.3; b = 46 + (col[2] - 46) * 0.3; } } // colour with no white under it stays dim
+        if (wOn || ci) { var col = INK[ci]; if (wOn) { r = col[0]; g = col[1]; b = col[2]; } else { r = 58 + (col[0] - 58) * 0.3; g = 59 + (col[1] - 59) * 0.3; b = 63 + (col[2] - 63) * 0.3; } } // colour with no white under it stays dim
         if (F.on.K && R.K[i]) { r = g = b = 6; }
         if (F.on.H && R.H[i]) { r = 96; g = 98; b = 110; } }
       d[o] = r; d[o + 1] = g; d[o + 2] = b; d[o + 3] = 255; }
