@@ -496,7 +496,8 @@
       <div class="filmcol">
         <dl class="filmsum" id="filmSummary"></dl>
         <div class="warns" id="filmWarns"></div>
-        <div class="row"><button type="button" id="filmExport">Export films (PDF)</button><button type="button" class="ghost" id="filmLoad" hidden>Read full-size art</button></div>
+        <div class="row"><button type="button" id="filmExport">Export films (PDF)</button><button type="button" class="ghost" id="filmPsd" title="A Photoshop document: every film a layer, black on clear, stacked in register with its marks, over every image you have loaded as layers of their own.">Save for Photoshop (.psd)</button><button type="button" class="ghost" id="filmLoad" hidden>Read full-size art</button></div>
+        <p class="note">The Photoshop document holds the same films, a layer each, stacked in register over every image loaded here, so a film can be edited against the art. It is always the stack, whichever layout is picked.</p>
         <progress id="filmBar" max="1" value="0" hidden></progress>
         <p class="note" id="filmStatus" aria-live="polite"></p>
         <div id="filmResult"></div>
@@ -571,6 +572,7 @@
           <li><b>Screens</b>, lower down, gives the same sizes in screen-making terms: mils, threads of the mesh you pick for each screen, what that mesh can hold, and how many coats of emulsion build the HD stencil. Its defaults (83, 230 and 156 mesh, and one maker’s figures for a thick-stencil emulsion) are placeholders: set your own.</li>
           <li><b>HD</b> is for art drawn for the HD screen alone, such as the outline to raise: it is in neither view and is added to the HD film as it is.</li>
           <li><b>W</b> is for white underbase of your own, such as a solid shape under the whole wordmark: it is in neither view, and white is added to the white film wherever the image has anything, whatever its colour. The white under the colours is still made for you.</li>
+          <li><b>Save for Photoshop</b>, under Films, gives a .psd with every film as its own layer (black on clear, with its marks, stacked in register) over every image you loaded, so a film can be touched up against the art. The films are switched off when it opens. It is RGB, with the images’ own numbers.</li>
           <li>For 3D, set <b>Images per gap</b> to 3 or more. Each layer or group is one depth plane; <b>Split</b> lists a group’s layers separately so each can have its own depth.</li>
         </ol>
         <p class="note">Read straight from the PSD: pixel layers, groups, opacity, raster masks, solid colour fills, colour and gradient overlays, strokes, and CMYK colour through the SWOP v2 profile. Anything else is listed under the layers so you know when to drop exported PNGs instead.</p>
@@ -2614,38 +2616,27 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     return pl;
   }
   // A PNG read straight from the file a row at a time, so a 10800 px layer never has to exist as one decoded bitmap.
-  async function readPNG(file, progress) {
+  // each(line, y, M) is handed every scanline, unfiltered, top to bottom. M: { W, H, depth, ct, pal, trns }.
+  async function scanPNG(file, each, progress) {
     var hd = new DataView(await file.slice(0, 33).arrayBuffer());
     if (hd.byteLength < 33 || hd.getUint32(0) !== 0x89504E47 || hd.getUint32(4) !== 0x0D0A1A0A) throw new Error('not a PNG');
     var W = hd.getUint32(16), H = hd.getUint32(20), depth = hd.getUint8(24), ct = hd.getUint8(25);
     if (hd.getUint8(28)) throw new Error('interlaced');
     var ch = { 0: 1, 2: 3, 3: 1, 4: 2, 6: 4 }[ct]; if (!ch) throw new Error('unknown PNG colour type');
-    var bits = ch * depth, bpp = Math.max(1, bits >> 3), rb = Math.ceil(W * bits / 8), pl = newPlane(W, H), pal = null, palC = null, trns = null, cls = new Uint8Array(W);
+    var bits = ch * depth, bpp = Math.max(1, bits >> 3), rb = Math.ceil(W * bits / 8), M = { W: W, H: H, depth: depth, ct: ct, pal: null, trns: null };
     var ds = new DecompressionStream('deflate'), wr = ds.writable.getWriter(), rd = ds.readable.getReader(), feedErr = null;
     var feeding = (async function () {
       try {
         for (var pos = 8; ;) { var h = new DataView(await file.slice(pos, pos + 8).arrayBuffer()); if (h.byteLength < 8) break;
           var len = h.getUint32(0), type = String.fromCharCode(h.getUint8(4), h.getUint8(5), h.getUint8(6), h.getUint8(7));
-          if (type === 'PLTE') pal = new Uint8Array(await file.slice(pos + 8, pos + 8 + len).arrayBuffer());
-          else if (type === 'tRNS') trns = new Uint8Array(await file.slice(pos + 8, pos + 8 + len).arrayBuffer());
+          if (type === 'PLTE') M.pal = new Uint8Array(await file.slice(pos + 8, pos + 8 + len).arrayBuffer());
+          else if (type === 'tRNS') M.trns = new Uint8Array(await file.slice(pos + 8, pos + 8 + len).arrayBuffer());
           else if (type === 'IDAT') { for (var o = 0; o < len; o += 1 << 20) await wr.write(new Uint8Array(await file.slice(pos + 8 + o, pos + 8 + Math.min(len, o + (1 << 20))).arrayBuffer())); }
           else if (type === 'IEND') break;
           pos += 12 + len; }
         await wr.close();
       } catch (e) { feedErr = e; try { await wr.abort(e); } catch (e2) { } }
     })();
-    function convert(line) {
-      var x, i, v, st, o;
-      if (ct === 3) {
-        if (!palC) { palC = new Uint8Array(256); if (!pal) throw new Error('PNG has no palette'); for (i = 0; i * 3 < pal.length; i++) palC[i] = (trns && i < trns.length && trns[i] < 128) ? 0 : classExact(pal[i * 3], pal[i * 3 + 1], pal[i * 3 + 2]); }
-        if (depth === 8) for (x = 0; x < W; x++) cls[x] = palC[line[x]];
-        else { var mask = (1 << depth) - 1; for (x = 0; x < W; x++) { i = x * depth; cls[x] = palC[(line[i >> 3] >> (8 - depth - (i & 7))) & mask]; } }
-      } else if (ct === 6) { st = depth === 16 ? 8 : 4; o = depth === 16 ? 2 : 1; for (x = 0, i = 0; x < W; x++, i += st) cls[x] = line[i + 3 * o] < 128 ? 0 : classOf(line[i], line[i + o], line[i + 2 * o]); }
-      else if (ct === 2) { st = depth === 16 ? 6 : 3; o = depth === 16 ? 2 : 1; var kr = -1, kg = -1, kb = -1; if (trns && trns.length >= 6) { kr = trns[depth === 16 ? 0 : 1]; kg = trns[depth === 16 ? 2 : 3]; kb = trns[depth === 16 ? 4 : 5]; }
-        for (x = 0, i = 0; x < W; x++, i += st) cls[x] = (line[i] === kr && line[i + o] === kg && line[i + 2 * o] === kb) ? 0 : classOf(line[i], line[i + o], line[i + 2 * o]); }
-      else if (ct === 4) { st = depth === 16 ? 4 : 2; o = depth === 16 ? 2 : 1; for (x = 0, i = 0; x < W; x++, i += st) { v = line[i]; cls[x] = line[i + o] < 128 ? 0 : classOf(v, v, v); } }
-      else { var mx = (1 << Math.min(depth, 8)) - 1; for (x = 0; x < W; x++) { if (depth >= 8) v = line[x * (depth >> 3)]; else { i = x * depth; v = Math.round(((line[i >> 3] >> (8 - depth - (i & 7))) & mx) * 255 / mx); } cls[x] = classOf(v, v, v); } }
-    }
     var cur = new Uint8Array(rb + 1), prev = new Uint8Array(rb), line = new Uint8Array(rb), fill = 0, y = 0, t0 = Date.now();
     for (; ;) {
       var r = await rd.read(); if (r.done) break; var buf = r.value, p = 0;
@@ -2659,13 +2650,46 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
           else if (ft === 3) { for (i = 0; i < rb; i++) line[i] = cur[i + 1] + (((i >= bpp ? line[i - bpp] : 0) + prev[i]) >> 1); }
           else if (ft === 4) { for (i = 0; i < rb; i++) { a = i >= bpp ? line[i - bpp] : 0; b = prev[i]; c = i >= bpp ? prev[i - bpp] : 0; q = a + b - c; pa = Math.abs(q - a); pb = Math.abs(q - b); pc = Math.abs(q - c); line[i] = cur[i + 1] + (pa <= pb && pa <= pc ? a : pb <= pc ? b : c); } }
           else throw new Error('bad PNG filter');
-          convert(line); putRow(pl, y, cls); var t = prev; prev = line; line = t; fill = 0; y++;
+          each(line, y, M); var t = prev; prev = line; line = t; fill = 0; y++;
           if ((y & 255) === 0 && Date.now() - t0 > 60) { if (progress) progress(y / H); await tick(); t0 = Date.now(); }
         }
       }
     }
     await feeding; if (feedErr) throw feedErr; if (y < H) throw new Error('the PNG ended early');
+    return M;
+  }
+  // The same file as a plane of class bytes: every pixel on its nearest solid build.
+  async function readPNG(file, progress) {
+    var pl = null, cls = null, palC = null;
+    await scanPNG(file, function (line, y, M) {
+      var W = M.W, depth = M.depth, ct = M.ct, pal = M.pal, trns = M.trns, x, i, v, st, o;
+      if (!pl) { pl = newPlane(W, M.H); cls = new Uint8Array(W); }
+      if (ct === 3) {
+        if (!palC) { palC = new Uint8Array(256); if (!pal) throw new Error('PNG has no palette'); for (i = 0; i * 3 < pal.length; i++) palC[i] = (trns && i < trns.length && trns[i] < 128) ? 0 : classExact(pal[i * 3], pal[i * 3 + 1], pal[i * 3 + 2]); }
+        if (depth === 8) for (x = 0; x < W; x++) cls[x] = palC[line[x]];
+        else { var mask = (1 << depth) - 1; for (x = 0; x < W; x++) { i = x * depth; cls[x] = palC[(line[i >> 3] >> (8 - depth - (i & 7))) & mask]; } }
+      } else if (ct === 6) { st = depth === 16 ? 8 : 4; o = depth === 16 ? 2 : 1; for (x = 0, i = 0; x < W; x++, i += st) cls[x] = line[i + 3 * o] < 128 ? 0 : classOf(line[i], line[i + o], line[i + 2 * o]); }
+      else if (ct === 2) { st = depth === 16 ? 6 : 3; o = depth === 16 ? 2 : 1; var kr = -1, kg = -1, kb = -1; if (trns && trns.length >= 6) { kr = trns[depth === 16 ? 0 : 1]; kg = trns[depth === 16 ? 2 : 3]; kb = trns[depth === 16 ? 4 : 5]; }
+        for (x = 0, i = 0; x < W; x++, i += st) cls[x] = (line[i] === kr && line[i + o] === kg && line[i + 2 * o] === kb) ? 0 : classOf(line[i], line[i + o], line[i + 2 * o]); }
+      else if (ct === 4) { st = depth === 16 ? 4 : 2; o = depth === 16 ? 2 : 1; for (x = 0, i = 0; x < W; x++, i += st) { v = line[i]; cls[x] = line[i + o] < 128 ? 0 : classOf(v, v, v); } }
+      else { var mx = (1 << Math.min(depth, 8)) - 1; for (x = 0; x < W; x++) { if (depth >= 8) v = line[x * (depth >> 3)]; else { i = x * depth; v = Math.round(((line[i >> 3] >> (8 - depth - (i & 7))) & mx) * 255 / mx); } cls[x] = classOf(v, v, v); } }
+      putRow(pl, y, cls);
+    }, progress);
     return pl;
+  }
+  // A scanline as 8-bit RGBA, whatever the PNG's colour type: the pixels themselves, for the Photoshop document.
+  function rgbaRow(line, M, out) {
+    var W = M.W, depth = M.depth, ct = M.ct, t = M.trns, x, i, o, v, s, q;
+    if (ct === 6) { if (depth === 8) out.set(line.subarray(0, W * 4)); else for (x = 0, i = 0, o = 0; x < W; x++, i += 8, o += 4) { out[o] = line[i]; out[o + 1] = line[i + 2]; out[o + 2] = line[i + 4]; out[o + 3] = line[i + 6]; } }
+    else if (ct === 2) { s = depth === 16 ? 6 : 3; q = depth === 16 ? 2 : 1; var kr = -1, kg = -1, kb = -1; if (t && t.length >= 6) { kr = t[depth === 16 ? 0 : 1]; kg = t[depth === 16 ? 2 : 3]; kb = t[depth === 16 ? 4 : 5]; }
+      for (x = 0, i = 0, o = 0; x < W; x++, i += s, o += 4) { out[o] = line[i]; out[o + 1] = line[i + q]; out[o + 2] = line[i + 2 * q]; out[o + 3] = (line[i] === kr && line[i + q] === kg && line[i + 2 * q] === kb) ? 0 : 255; } }
+    else if (ct === 3) { var P = M.palRGBA;
+      if (!P) { if (!M.pal) throw new Error('PNG has no palette'); P = M.palRGBA = new Uint8Array(1024); for (i = 0; i < 256; i++) { if (i * 3 + 2 < M.pal.length) { P[i * 4] = M.pal[i * 3]; P[i * 4 + 1] = M.pal[i * 3 + 1]; P[i * 4 + 2] = M.pal[i * 3 + 2]; } P[i * 4 + 3] = t && i < t.length ? t[i] : 255; } }
+      var mask = (1 << depth) - 1;
+      for (x = 0, o = 0; x < W; x++, o += 4) { if (depth === 8) v = line[x]; else { i = x * depth; v = (line[i >> 3] >> (8 - depth - (i & 7))) & mask; } v <<= 2; out[o] = P[v]; out[o + 1] = P[v + 1]; out[o + 2] = P[v + 2]; out[o + 3] = P[v + 3]; } }
+    else if (ct === 4) { s = depth === 16 ? 4 : 2; q = depth === 16 ? 2 : 1; for (x = 0, i = 0, o = 0; x < W; x++, i += s, o += 4) { v = line[i]; out[o] = out[o + 1] = out[o + 2] = v; out[o + 3] = line[i + q]; } }
+    else { var mx = (1 << Math.min(depth, 8)) - 1, key = t && t.length >= 2 ? (depth === 16 ? t[0] : t[1]) : -1;
+      for (x = 0, o = 0; x < W; x++, o += 4) { if (depth >= 8) { s = line[x * (depth >> 3)]; v = s; } else { i = x * depth; s = (line[i >> 3] >> (8 - depth - (i & 7))) & mx; v = Math.round(s * 255 / mx); } out[o] = out[o + 1] = out[o + 2] = v; out[o + 3] = s === key ? 0 : 255; } }
   }
   // Anything the row reader cannot take (interlaced PNG, JPEG, WebP) goes through the browser's own decoder in bands.
   async function readViaCanvas(file, progress) {
@@ -2966,7 +2990,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
   }
 
   // ---------- export ----------
-  var busy = false, lastURL = null, lastBlob = null, lastName = '';
+  var busy = false, lastURL = null, lastBlob = null, lastName = '', lastZip = null;
   // Hand the PDF to the person. Inside a Claude artifact a page may not download by itself: the viewer's downloads capability asks them first.
   // Anywhere else (the standalone copy, the slopswap page) an ordinary browser download does it.
   async function saveFile() {
@@ -2974,7 +2998,9 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     if (window.claude && typeof window.claude.use === 'function') {
       var dl = null; try { dl = await window.claude.use('downloads'); } catch (e) { }
       if (!dl) return 'This view cannot save files. Export from the slopswap page or the standalone copy instead.';
-      try { await dl.save({ filename: lastName, data: lastBlob }); return 'Saved.'; }
+      var name = lastName, data = lastBlob, zipped = /\.psd$/i.test(name); // the artifact's save takes a fixed list of file types, and .psd is not on it: the document goes out in a .zip, stored as it is
+      if (zipped) { try { if (!lastZip) lastZip = await zipOf(lastBlob, lastName, function (p) { status('Wrapping the document in a .zip', p); }); } catch (e) { status(''); return 'This view could not get the file ready. Export from the slopswap page or the standalone copy instead.'; } status(''); data = lastZip; name += '.zip'; }
+      try { await dl.save({ filename: name, data: data }); return zipped ? 'Saved as a .zip with the .psd in it (a page inside Claude cannot hand over a .psd itself). Unzip it and open the .psd.' : 'Saved.'; }
       catch (e) { var c = e && e.code;
         return c === 'declined' ? 'Not saved: the save was declined. Press the button to try again.' : c === 'rate_limited' ? 'A save prompt is already open. Answer it, or wait a moment and press the button.'
           : c === 'too_large' ? 'The file is too large to save from this view. Export from the slopswap page or the standalone copy.' : 'This view could not save the file. Export from the slopswap page or the standalone copy instead.'; }
@@ -2983,23 +3009,29 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     var a = document.createElement('a'); a.href = lastURL; a.download = lastName; document.body.appendChild(a); a.click(); a.remove(); return 'Saved to your downloads.';
   }
   function status(msg, frac) { $('filmStatus').textContent = msg || ''; var b = $('filmBar'); b.hidden = frac === undefined; if (frac !== undefined) b.value = Math.max(0, Math.min(1, frac)); }
+  // Every film that is on, as 1-bit pictures of one page (or of one piece of the sheet): 0 where there is ink. The marks are drawn by the caller.
+  async function makeFilms(tile, arrange, lo, hi) {
+    await loadFull(status);
+    var G = scene(), PG = pageOf(G, tile); if (!PG) throw new Error('There is no art to put on film.');
+    if (!PG.fits) throw new Error('The art is ' + (PG.bw / G.dpi).toFixed(1) + ' in wide and will not fit across ' + F.filmW + ' in film with its marks.');
+    if (arrange) { status('Arranging the sheet'); await tick(); cur = { G: G, PG: PG, over: [], past: 0 }; ensureThumbs(); placeAll(PG, G.dpi); // what is exported is what the sheet shows afterwards
+      var ov = overlaps(); if (ov.length) throw new Error('Films ' + ov.map(function (o) { return o.a + ' and ' + o.b; }).join(', ') + ' overlap on the sheet. Move them apart and export again.'); }
+    var films = FILMS.filter(function (f) { return F.on[f]; }), rb = Math.ceil(PG.W / 8), bufs = {}, ink = {}, put = {};
+    films.forEach(function (f) { var b = new Uint8Array(rb * PG.H); b.fill(255); bufs[f] = b; ink[f] = 0;
+      put[f] = function (px, py) { if (px < 0 || py < 0 || px >= PG.W || py >= PG.H) return; if (F.mirror) px = PG.W - 1 - px; b[py * rb + (px >> 3)] &= ~(0x80 >> (px & 7)); }; });
+    var band = 128, t0 = Date.now();
+    for (var y = PG.by0; y < PG.by0 + PG.bh; y += band) { var h = Math.min(band, PG.by0 + PG.bh - y), R = region(G, PG.bx0, y, PG.bw, h);
+      films.forEach(function (f) { var m = R[f], b = bufs[f], n = 0, i, j, o, px, row;
+        for (j = 0; j < h; j++) { o = j * PG.bw; row = (y + j + PG.offY) * rb; for (i = 0; i < PG.bw; i++) if (m[o + i]) { n++; px = PG.bx0 + i + PG.offX; if (F.mirror) px = PG.W - 1 - px; b[row + (px >> 3)] &= ~(0x80 >> (px & 7)); } }
+        ink[f] += n; });
+      if (Date.now() - t0 > 80) { status('Making films', lo + (hi - lo) * (y - PG.by0) / PG.bh); await tick(); t0 = Date.now(); } }
+    return { G: G, PG: PG, films: films, rb: rb, bufs: bufs, ink: ink, put: put };
+  }
+  function setBusy(on) { busy = on; $('filmExport').disabled = on; $('filmPsd').disabled = on; }
   async function exportFilms() {
-    if (busy) return; busy = true; $('filmExport').disabled = true; $('filmResult').innerHTML = '';
+    if (busy) return; setBusy(true); $('filmResult').innerHTML = '';
     try {
-      await loadFull(status);
-      var sheet = F.layout === 'sheet', G = scene(), PG = pageOf(G, sheet); if (!PG) throw new Error('There is no art to put on film.');
-      if (!PG.fits) throw new Error('The art is ' + (PG.bw / G.dpi).toFixed(1) + ' in wide and will not fit across ' + F.filmW + ' in film with its marks.');
-      if (sheet) { status('Arranging the sheet'); await tick(); cur = { G: G, PG: PG, over: [], past: 0 }; ensureThumbs(); placeAll(PG, G.dpi); // what is exported is what the sheet shows afterwards
-        var ov = overlaps(); if (ov.length) throw new Error('Films ' + ov.map(function (o) { return o.a + ' and ' + o.b; }).join(', ') + ' overlap on the sheet. Move them apart and export again.'); }
-      var films = FILMS.filter(function (f) { return F.on[f]; }), rb = Math.ceil(PG.W / 8), bufs = {}, ink = {}, put = {};
-      films.forEach(function (f) { var b = new Uint8Array(rb * PG.H); b.fill(255); bufs[f] = b; ink[f] = 0;
-        put[f] = function (px, py) { if (px < 0 || py < 0 || px >= PG.W || py >= PG.H) return; if (F.mirror) px = PG.W - 1 - px; b[py * rb + (px >> 3)] &= ~(0x80 >> (px & 7)); }; });
-      var band = 128, t0 = Date.now();
-      for (var y = PG.by0; y < PG.by0 + PG.bh; y += band) { var h = Math.min(band, PG.by0 + PG.bh - y), R = region(G, PG.bx0, y, PG.bw, h);
-        films.forEach(function (f) { var m = R[f], b = bufs[f], n = 0, i, j, o, px, row;
-          for (j = 0; j < h; j++) { o = j * PG.bw; row = (y + j + PG.offY) * rb; for (i = 0; i < PG.bw; i++) if (m[o + i]) { n++; px = PG.bx0 + i + PG.offX; if (F.mirror) px = PG.W - 1 - px; b[row + (px >> 3)] &= ~(0x80 >> (px & 7)); } }
-          ink[f] += n; });
-        if (Date.now() - t0 > 80) { status('Making films', 0.05 + 0.75 * (y - PG.by0) / PG.bh); await tick(); t0 = Date.now(); } }
+      var sheet = F.layout === 'sheet', mk = await makeFilms(sheet, sheet, 0.05, 0.8), G = mk.G, PG = mk.PG, films = mk.films, rb = mk.rb, bufs = mk.bufs, ink = mk.ink, put = mk.put;
       var pages = [], skipped = [];
       for (var i = 0; i < films.length; i++) { var f = films[i]; if (!ink[f]) { skipped.push(f); continue; }
         drawMarks(put[f], PG, f); status('Packing film ' + f, 0.8 + 0.2 * i / films.length); await tick();
@@ -3013,7 +3045,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
         if (made.clash.length) throw new Error('Film ' + made.clash.join(', ') + ' has ink on the same spot as another film. Move them apart and export again.');
         name = base + '-films-sheet-' + G.dpi + 'dpi.pdf'; blob = await buildPDF([{ W: sheetW, H: sheetH, z: made.z }], G.dpi, title + ' on one sheet'); }
       else blob = await buildPDF(pages, G.dpi, title);
-      lastBlob = blob; lastName = name;
+      lastBlob = blob; lastName = name; lastZip = null;
       showResult(pages, PG, G, name, blob.size, skipped, sheet ? sheetH : 0);
       status('Saving'); $('filmSaveMsg').textContent = await saveFile();
       status('');
@@ -3035,6 +3067,169 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     h += '<div class="row"><button type="button" class="ghost" id="filmSave">Save the PDF again</button><span class="note" id="filmSaveMsg" aria-live="polite"></span></div>';
     $('filmResult').innerHTML = h;
   }
+
+  // ---------- a Photoshop document: every film a layer, stacked in register over the images they were cut from ----------
+  // 8-bit RGB, layers packed row by row with PackBits (what Photoshop writes itself), built a row at a time so nothing is ever held unpacked.
+  var ICC_SRGB = 'AAACTGxjbXMEQAAAbW50clJHQiBYWVogB+oACwASABEAJgATYWNzcEFQUEwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPbWAAEAAAAA0y1sY21zAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALZGVzYwAAAQgAAAA2Y3BydAAAAUAAAABMd3RwdAAAAYwAAAAUY2hhZAAAAaAAAAAsclhZWgAAAcwAAAAUYlhZWgAAAeAAAAAUZ1hZWgAAAfQAAAAUclRSQwAAAggAAAAgZ1RSQwAAAggAAAAgYlRSQwAAAggAAAAgY2hybQAAAigAAAAkbWx1YwAAAAAAAAABAAAADGVuVVMAAAAaAAAAHABzAFIARwBCACAAYgB1AGkAbAB0AC0AaQBuAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAADAAAAAcAE4AbwAgAGMAbwBwAHkAcgBpAGcAaAB0ACwAIAB1AHMAZQAgAGYAcgBlAGUAbAB5WFlaIAAAAAAAAPbWAAEAAAAA0y1zZjMyAAAAAAABDEIAAAXe///zJQAAB5MAAP2Q///7of///aIAAAPcAADAblhZWiAAAAAAAABvoAAAOPUAAAOQWFlaIAAAAAAAACSfAAAPhAAAtsNYWVogAAAAAAAAYpcAALeHAAAY2XBhcmEAAAAAAAMAAAACZmYAAPKnAAANWQAAE9AAAApbY2hybQAAAAAAAwAAAACj1wAAVHsAAEzNAACZmgAAJmYAAA9c';
+  // PackBits: a run of equal bytes becomes two bytes, anything else is copied behind a count. Returns the new end of d.
+  function packBits(s, n, d, o) {
+    var i = 0, j, v, st;
+    while (i < n) {
+      v = s[i]; j = i + 1; while (j < n && j - i < 128 && s[j] === v) j++;
+      if (j - i >= 2) { d[o++] = 257 - (j - i); d[o++] = v; i = j; continue; }
+      st = i; i++;
+      while (i < n && i - st < 128 && !(i + 2 < n && s[i] === s[i + 1] && s[i] === s[i + 2])) i++;
+      d[o++] = i - st - 1; for (j = st; j < i; j++) d[o++] = s[j];
+    }
+    return o;
+  }
+  // One channel of one layer: its rows packed end to end, with the length of each. Full pieces are handed to the browser as Blobs so they need not stay in memory.
+  function newSink() { return { buf: new Uint8Array(1 << 22), n: 0, parts: [], total: 0, lens: [] }; }
+  function sinkRoom(sk, need) { if (sk.n + need > sk.buf.length) { if (sk.n) sk.parts.push(new Blob([sk.buf.subarray(0, sk.n)])); sk.n = 0; if (need > sk.buf.length) sk.buf = new Uint8Array(need); } }
+  function sinkRow(sk, s, n) { sinkRoom(sk, n + (n >> 7) + 2); var e = packBits(s, n, sk.buf, sk.n), len = e - sk.n; sk.n = e; sk.total += len; sk.lens.push(len); }
+  function sinkPacked(sk, u) { sinkRoom(sk, u.length); sk.buf.set(u, sk.n); sk.n += u.length; sk.total += u.length; sk.lens.push(u.length); } // a row packed already
+  function packedRow(v, w) { var s = new Uint8Array(w); if (v) s.fill(v); var d = new Uint8Array(w + (w >> 7) + 2); return d.slice(0, packBits(s, w, d, 0)); }
+  function sameRows(u, rows) { var all = new Uint8Array(u.length * rows), lens = new Array(rows); for (var i = 0; i < rows; i++) { all.set(u, i * u.length); lens[i] = u.length; } return { buf: new Uint8Array(0), n: 0, parts: [all], total: all.length, lens: lens }; } // a channel that is the same row all the way down
+  function sinkOut(sk) { var h = new Uint8Array(2 + 2 * sk.lens.length), i; h[1] = 1; for (i = 0; i < sk.lens.length; i++) { h[2 + 2 * i] = sk.lens[i] >> 8; h[3 + 2 * i] = sk.lens[i] & 255; } return { parts: [h].concat(sk.parts, sk.n ? [sk.buf.slice(0, sk.n)] : []), bytes: h.length + sk.total }; }
+
+  // Every row of a layer as RGBA, top to bottom: from its file at full size if it has one, else from the small copy the page draws with. Says which.
+  async function scanRGBA(n, each, progress) {
+    var f = n.file, ART = L.art();
+    if (f) {
+      if (/\.png$/i.test(f.name) || f.type === 'image/png') {
+        try { var out = null; await scanPNG(f, function (line, y, M) { if (!out) out = new Uint8Array(M.W * 4); rgbaRow(line, M, out); each(out, y, M.W, M.H); }, progress); return true; }
+        catch (e) { if (!/interlaced|not a PNG/.test(e.message)) throw e; }
+      }
+      var bm = await createImageBitmap(f), W = bm.width, H = bm.height, bh = 256, cv = document.createElement('canvas'); cv.width = W; cv.height = bh; var cx = cv.getContext('2d', { willReadFrequently: true });
+      for (var y0 = 0; y0 < H; y0 += bh) { var h = Math.min(bh, H - y0); cx.clearRect(0, 0, W, bh); cx.drawImage(bm, 0, y0, W, h, 0, 0, W, h); var d = cx.getImageData(0, 0, W, h).data;
+        for (var j = 0; j < h; j++) each(d.subarray(j * W * 4, (j + 1) * W * 4), y0 + j, W, H);
+        if (progress) progress((y0 + h) / H); await tick(); }
+      if (bm.close) bm.close(); return true;
+    }
+    if (!n.rgba) return false;
+    for (var y = 0, t0 = Date.now(); y < ART.H; y++) { each(n.rgba.subarray(y * ART.W * 4, (y + 1) * ART.W * 4), y, ART.W, ART.H); if (Date.now() - t0 > 60) { if (progress) progress(y / ART.H); await tick(); t0 = Date.now(); } }
+    return false;
+  }
+  function artShown(n) { return isHD(n) || isWL(n) ? false : L.multi() ? L.d3Of(n).on : n.assign === 'a' || n.assign === 'both'; } // the first view is what shows when the document opens
+  // One of the loaded images as a layer, on the film's own pixels: sampled exactly as the films sample it, so it lines up with them to the pixel.
+  async function artLayer(n, G, PG, progress) {
+    var ART = G.ART, Wf = G.Wf, Hf = G.Hf, mir = F.mirror, lay = { name: n.name.replace(/\.(png|jpe?g|webp|gif|bmp|tiff?)$/i, ''), hidden: !artShown(n), top: 0, left: 0, bottom: 0, right: 0, ch: null, full: false, srcW: 0, kind: '' };
+    var p0 = ART.W, p1 = -1, r = n.rgba, x, y, i; // across, the layer is as wide as the small copy has anything, and a little more; down, it is trimmed row by row as it is read
+    if (r) { for (y = 0; y < ART.H; y++) for (x = 0, i = y * ART.W * 4 + 3; x < ART.W; x++, i += 4) if (r[i]) { if (x < p0) p0 = x; if (x > p1) p1 = x; } } else { p0 = 0; p1 = ART.W - 1; }
+    if (p1 < 0) return lay;
+    var ax0 = Math.max(0, Math.floor((p0 - 2) * Wf / ART.W)), ax1 = Math.min(Wf, Math.ceil((p1 + 3) * Wf / ART.W)), w = ax1 - ax0;
+    var sk = [newSink(), newSink(), newSink(), newSink()], ra = new Uint8Array(w), rr = new Uint8Array(w), rg = new Uint8Array(w), rb = new Uint8Array(w), map = null, clear = packedRow(0, w), yNext = 0, first = -1, rows = 0, pend = 0, sW = 0, sH = 0;
+    function emit(line) {
+      var k, j, a, any = 0;
+      for (k = 0; k < w; k++) { j = map[k]; a = line[j + 3]; ra[k] = a; if (a) { any = 1; rr[k] = line[j]; rg[k] = line[j + 1]; rb[k] = line[j + 2]; } else rr[k] = rg[k] = rb[k] = 0; }
+      if (!any) { if (first >= 0) pend++; return; } // rows with nothing in them are kept only between rows that have something
+      if (first < 0) first = yNext;
+      for (; pend > 0; pend--) { for (k = 0; k < 4; k++) sinkPacked(sk[k], clear); rows++; }
+      sinkRow(sk[0], ra, w); sinkRow(sk[1], rr, w); sinkRow(sk[2], rg, w); sinkRow(sk[3], rb, w); rows++;
+    }
+    lay.full = await scanRGBA(n, function (line, sy, W0, H0) {
+      if (!map) { sW = W0; sH = H0; map = new Int32Array(w); var sc = W0 / Wf; for (var k = 0; k < w; k++) { var xx = mir ? ax1 - 1 - k : ax0 + k; map[k] = (W0 === Wf ? xx : Math.min(W0 - 1, Math.floor((xx + 0.5) * sc))) * 4; } }
+      while (yNext < Hf && (sH === Hf ? yNext : Math.min(sH - 1, Math.floor((yNext + 0.5) * sH / Hf))) === sy) { emit(line); yNext++; }
+    }, progress);
+    lay.srcW = sW; if (first < 0) return lay;
+    lay.left = mir ? PG.W - (ax1 + PG.offX) : ax0 + PG.offX; lay.right = lay.left + w; lay.top = first + PG.offY; lay.bottom = lay.top + rows; lay.ch = sk;
+    return lay;
+  }
+  // A film as a layer: black where the film is black, clear everywhere else, cut down to the box its ink and marks fill.
+  function filmLayer(f, b, PG) {
+    var rbs = Math.ceil(PG.W / 8), y, k, e, o, y0 = -1, y1 = -1, k0 = rbs, k1 = -1;
+    for (y = 0; y < PG.H; y++) { o = y * rbs; for (k = 0; k < rbs && b[o + k] === 255; k++) { } if (k === rbs) continue; if (y0 < 0) y0 = y; y1 = y; if (k < k0) k0 = k; for (e = rbs - 1; e > k1; e--) if (b[o + e] !== 255) { k1 = e; break; } }
+    var lay = { name: f + ' ' + FILMNAME[f], hidden: true, top: 0, left: 0, bottom: 0, right: 0, ch: null, kind: '' }; if (y0 < 0) return lay;
+    var left = k0 * 8, right = Math.min(PG.W, (k1 + 1) * 8), w = right - left, rows = y1 - y0 + 1, a = newSink(), ra = new Uint8Array(w), x, v, bit, zero = sameRows(packedRow(0, w), rows);
+    for (y = y0; y <= y1; y++) { o = y * rbs; for (k = k0, x = 0; k <= k1; k++) { v = b[o + k]; for (bit = 0x80; bit && x < w; bit >>= 1) ra[x++] = v & bit ? 0 : 255; } sinkRow(a, ra, w); }
+    lay.left = left; lay.right = right; lay.top = y0; lay.bottom = y1 + 1; lay.ch = [a, zero, zero, zero]; return lay;
+  }
+  // The flat picture every .psd carries beside its layers, which is what Finder and other programs show: the first view's art on white.
+  async function flatOf(G, PG, progress) {
+    var W = PG.W, H = PG.H, sk = [newSink(), newSink(), newSink()], r = new Uint8Array(W), g = new Uint8Array(W), b = new Uint8Array(W), cls = new Uint8Array(W), lut = new Uint8Array(96).fill(255), white = packedRow(255, W), es = G.views[G.mu ? G.N >> 1 : 0] || [], t0 = Date.now(), x, y, c, any, X;
+    SOLIDS.forEach(function (s) { lut[s[3] * 3] = s[0]; lut[s[3] * 3 + 1] = s[1]; lut[s[3] * 3 + 2] = s[2]; });
+    for (y = 0; y < H; y++) { var ay = y - PG.offY; any = false;
+      if (ay >= 0 && ay < G.Hf) { cls.fill(0); for (var e = 0; e < es.length; e++) paintRow(cls, -PG.offX, W, es[e], ay, G);
+        for (x = 0; x < W; x++) if (cls[x]) { any = true; break; } }
+      if (!any) { sinkPacked(sk[0], white); sinkPacked(sk[1], white); sinkPacked(sk[2], white); }
+      else { for (x = 0; x < W; x++) { c = (cls[x] & 31) * 3; X = F.mirror ? W - 1 - x : x; r[X] = lut[c]; g[X] = lut[c + 1]; b[X] = lut[c + 2]; } sinkRow(sk[0], r, W); sinkRow(sk[1], g, W); sinkRow(sk[2], b, W); }
+      if (Date.now() - t0 > 80) { if (progress) progress(y / H); await tick(); t0 = Date.now(); } }
+    return sk;
+  }
+  // The file itself. layers run bottom to top; kind 'end' and 'open' are the two markers Photoshop puts round a group.
+  function psdBlob(W, H, dpi, layers, flat) {
+    function u8(a, v) { a.push(v & 255); } function u16(a, v) { a.push((v >> 8) & 255, v & 255); } function u32(a, v) { a.push((v >>> 24) & 255, (v >>> 16) & 255, (v >>> 8) & 255, v & 255); }
+    function str(a, t) { for (var i = 0; i < t.length; i++) a.push(t.charCodeAt(i) & 255); } function bytes(a) { return new Uint8Array(a); }
+    var head = []; str(head, '8BPS'); u16(head, 1); u32(head, 0); u16(head, 0); u16(head, 3); u32(head, H); u32(head, W); u16(head, 8); u16(head, 3); u32(head, 0); // RGB, 8 bits, three channels; no colour table
+    var res = []; function block(id, d) { str(res, '8BIM'); u16(res, id); u16(res, 0); u32(res, d.length); for (var i = 0; i < d.length; i++) res.push(d[i]); if (d.length & 1) res.push(0); }
+    var ri = [], fx = Math.round(dpi * 65536); u32(ri, fx); u16(ri, 1); u16(ri, 1); u32(ri, fx); u16(ri, 1); u16(ri, 1); block(1005, ri); // pixels per inch, so it opens at the size it prints
+    var icc = atob(ICC_SRGB), ib = []; str(ib, icc); block(1039, ib); // the numbers are sRGB, as the page reads them
+    var rec = [], data = [], dataBytes = 0;
+    layers.forEach(function (ly) {
+      var ch = ly.ch ? ly.ch.map(sinkOut) : null, i, nm = ly.name.replace(/[^\x20-\x7e]/g, '?').slice(0, 255), un = ly.name.slice(0, 255);
+      u32(rec, ly.top); u32(rec, ly.left); u32(rec, ly.bottom); u32(rec, ly.right); u16(rec, 4);
+      [-1, 0, 1, 2].forEach(function (id, k) { u16(rec, id); u32(rec, ch ? ch[k].bytes : 2); });
+      str(rec, '8BIMnorm'); u8(rec, 255); u8(rec, 0); u8(rec, 8 | (ly.hidden ? 2 : 0) | (ly.kind ? 16 : 0)); u8(rec, 0); // a group's own blend (pass through) goes in its marker below, as Photoshop writes it
+      var ex = []; u32(ex, 0); u32(ex, 0); u8(ex, nm.length); str(ex, nm); while (ex.length & 3) ex.push(0); // no mask, no blending ranges, then the name in Latin letters
+      var ul = 4 + 2 * un.length, pad = (4 - (ul & 3)) & 3; str(ex, '8BIMluni'); u32(ex, ul + pad); u32(ex, un.length); for (i = 0; i < un.length; i++) u16(ex, un.charCodeAt(i)); for (i = 0; i < pad; i++) ex.push(0); // and as it really is
+      if (ly.kind === 'end') { str(ex, '8BIMlsct'); u32(ex, 4); u32(ex, 3); } else if (ly.kind === 'open') { str(ex, '8BIMlsct'); u32(ex, 16); u32(ex, 1); str(ex, '8BIMpass'); u32(ex, 0); }
+      u32(rec, ex.length); for (i = 0; i < ex.length; i++) rec.push(ex[i]);
+      if (ch) ch.forEach(function (c) { for (var q = 0; q < c.parts.length; q++) data.push(c.parts[q]); dataBytes += c.bytes; }); else for (i = 0; i < 4; i++) { data.push(new Uint8Array(2)); dataBytes += 2; }
+    });
+    var li = 2 + rec.length + dataBytes, liPad = (4 - (li & 3)) & 3, lm = 4 + li + liPad + 4, fo = flat.map(sinkOut), counts = new Uint8Array(2 + 6 * H), fparts = [counts], fbytes = counts.length, k, y;
+    counts[1] = 1; for (k = 0; k < 3; k++) { for (y = 0; y < H; y++) { counts[2 + 2 * (k * H + y)] = flat[k].lens[y] >> 8; counts[3 + 2 * (k * H + y)] = flat[k].lens[y] & 255; } fparts = fparts.concat(fo[k].parts.slice(1)); fbytes += fo[k].bytes - 2 - 2 * H; }
+    var total = head.length + 4 + res.length + 4 + lm + fbytes; if (total > 2147483647) throw new Error('The document would be ' + (total / 1073741824).toFixed(1) + ' GB, and a .psd holds 2 GB. Lower the resolution, or the print width.');
+    var a1 = []; u32(a1, res.length); var a2 = []; u32(a2, lm); u32(a2, li + liPad); u16(a2, layers.length);
+    return new Blob([bytes(head), bytes(a1), bytes(res), bytes(a2), bytes(rec)].concat(data, [new Uint8Array(liPad + 4)], fparts), { type: 'image/vnd.adobe.photoshop' });
+  }
+  // A .zip holding the one file as it is, not compressed.
+  var CRCT = null;
+  async function zipOf(blob, name, progress) {
+    if (!CRCT) { CRCT = new Int32Array(256); for (var n = 0; n < 256; n++) { var c = n; for (var k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; CRCT[n] = c; } }
+    var crc = -1, step = 1 << 23, T = CRCT; for (var p = 0; p < blob.size; p += step) { var u = new Uint8Array(await blob.slice(p, p + step).arrayBuffer()); for (var i = 0; i < u.length; i++) crc = T[(crc ^ u[i]) & 255] ^ (crc >>> 8); if (progress) progress(p / blob.size); }
+    crc = (crc ^ -1) >>> 0;
+    var nm = new TextEncoder().encode(name), d = new Date(), tm = d.getHours() << 11 | d.getMinutes() << 5 | d.getSeconds() >> 1, dt = (d.getFullYear() - 1980) << 9 | (d.getMonth() + 1) << 5 | d.getDate(), size = blob.size;
+    function rec(sig, extra) { var b = new Uint8Array((extra ? 46 : 30) + nm.length), v = new DataView(b.buffer), o = 4; v.setUint32(0, sig, true); if (extra) { v.setUint16(o, 20, true); o += 2; }
+      v.setUint16(o, 20, true); v.setUint16(o + 2, 0x0800, true); v.setUint16(o + 4, 0, true); v.setUint16(o + 6, tm, true); v.setUint16(o + 8, dt, true); v.setUint32(o + 10, crc, true); v.setUint32(o + 14, size, true); v.setUint32(o + 18, size, true); v.setUint16(o + 22, nm.length, true);
+      b.set(nm, extra ? 46 : 30); return b; }
+    var lh = rec(0x04034b50, false), cd = rec(0x02014b50, true), end = new Uint8Array(22), ev = new DataView(end.buffer);
+    ev.setUint32(0, 0x06054b50, true); ev.setUint16(8, 1, true); ev.setUint16(10, 1, true); ev.setUint32(12, cd.length, true); ev.setUint32(16, lh.length + size, true);
+    return new Blob([lh, blob, cd, end], { type: 'application/zip' });
+  }
+  async function exportPSD() {
+    if (busy) return; setBusy(true); $('filmResult').innerHTML = '';
+    try {
+      if (L.fetchRemote) await L.fetchRemote(null, function (name, i, n) { status('Fetching ' + name + ' (' + i + ' of ' + n + ')', 0); }); // every image goes in the document, the ones the films do not use as well
+      var mk = await makeFilms(true, false, 0.02, 0.3), G = mk.G, PG = mk.PG;
+      if (PG.W > 30000 || PG.H > 30000) throw new Error('The document would be ' + PG.W + ' × ' + PG.H + ' pixels, and a .psd stops at 30,000 a side. Lower the resolution.');
+      var nodes = G.ART.nodes.filter(function (n) { return n.rgba || n.file; }), layers = [{ name: '</Layer group>', kind: 'end', top: 0, left: 0, bottom: 0, right: 0, ch: null }], art = [], i;
+      for (i = 0; i < nodes.length; i++) { var ly = await (function (i) { return artLayer(nodes[i], G, PG, function (p) { status('Layer ' + (i + 1) + ' of ' + nodes.length + ': ' + nodes[i].name, 0.3 + 0.5 * (i + p) / nodes.length); }); })(i); layers.push(ly); art.push(ly); }
+      layers.push({ name: 'Art', kind: 'open', top: 0, left: 0, bottom: 0, right: 0, ch: null }, { name: '</Layer group>', kind: 'end', top: 0, left: 0, bottom: 0, right: 0, ch: null });
+      var made = [], skipped = [];
+      for (i = 0; i < mk.films.length; i++) { var f = mk.films[i]; if (!mk.ink[f]) { skipped.push(f); continue; }
+        drawMarks(mk.put[f], PG, f); status('Film ' + f + ' as a layer', 0.8 + 0.1 * i / mk.films.length); await tick();
+        var fl = filmLayer(f, mk.bufs[f], PG); fl.thumb = thumbOf(mk.bufs[f], PG.W, PG.H, mk.rb); fl.f = f; mk.bufs[f] = null; layers.push(fl); made.push(fl); }
+      if (!made.length) throw new Error('Every film came out empty.');
+      layers.push({ name: 'Films', kind: 'open', top: 0, left: 0, bottom: 0, right: 0, ch: null });
+      var flat = await flatOf(G, PG, function (p) { status('The flat preview', 0.9 + 0.08 * p); });
+      status('Putting the document together', 0.98); await tick();
+      var base = ((G.ART.src || 'shirt').replace(/\.[a-z]+$/i, '').replace(/[^\w-]+/g, '-').replace(/^-|-$/g, '') || 'shirt'), name = base + '-films-' + G.dpi + 'dpi.psd', blob = psdBlob(PG.W, PG.H, G.dpi, layers, flat);
+      lastBlob = blob; lastName = name; lastZip = null; lastPsd = { layers: layers, W: PG.W, H: PG.H };
+      var small = art.filter(function (a) { return a.ch && !a.full; }), low = art.filter(function (a) { return a.ch && a.full && a.srcW < G.Wf * 0.98; });
+      var h = '<p class="note"><b>' + esc(name) + '</b> · ' + (blob.size / 1048576).toFixed(blob.size < 10485760 ? 1 : 0) + ' MB · ' + (PG.W / G.dpi).toFixed(1) + ' × ' + (PG.H / G.dpi).toFixed(1) + ' in at ' + G.dpi + ' dpi (' + PG.W + ' × ' + PG.H + ' px)' + (F.mirror ? ' · mirrored' : '') + '</p>';
+      h += '<p class="note"><b>Films</b>, a layer each, black on clear, in register with their marks: ' + made.slice().reverse().map(function (m) { return m.f; }).join(', ') + '. They are switched off when it opens; turn on the one you want.' + (skipped.length ? ' Left out because nothing prints on them: ' + skipped.join(', ') + '.' : '') + '</p>';
+      h += '<p class="note"><b>Art</b>, under them: ' + art.slice().reverse().map(function (a) { return esc(a.name) + (a.ch ? '' : ' (empty)'); }).join(', ') + '. Each is on the film’s own pixels, lined up with the films. The first view’s layers are switched on.</p>';
+      if (small.length) h += '<div class="warn"><b>Art</b> ' + small.map(function (a) { return esc(a.name); }).join(', ') + (small.length > 1 ? ' are' : ' is') + ' in the document at preview size, scaled up, because no full-size file is linked.</div>';
+      else if (low.length) h += '<div class="warn"><b>Art</b> ' + low.map(function (a) { return esc(a.name); }).join(', ') + (low.length > 1 ? ' were' : ' was') + ' scaled up to the film’s resolution, so ' + (low.length > 1 ? 'they are' : 'it is') + ' blocky.</div>';
+      h += '<div class="filmthumbs">' + made.map(function (m) { return '<figure><img alt="Film ' + m.f + '" src="' + m.thumb + '"><figcaption><b>' + m.f + '</b> ' + FILMNAME[m.f] + '</figcaption></figure>'; }).join('') + '</div>';
+      h += '<div class="row"><button type="button" class="ghost" id="filmSave">Save the document again</button><span class="note" id="filmSaveMsg" aria-live="polite"></span></div>';
+      $('filmResult').innerHTML = h;
+      status('Saving'); $('filmSaveMsg').textContent = await saveFile();
+      status('');
+    } catch (e) { status(''); $('filmResult').innerHTML = '<div class="warn"><b>Photoshop document</b> ' + esc(e && e.message || String(e)) + '</div>'; }
+    busy = false; refresh(true);
+  }
+  var lastPsd = null;
 
   // ---------- the panel ----------
   var lastSig = '', lastZ = null;
@@ -3129,7 +3324,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     var on = cur && F.layout === 'sheet', over = on ? cur.over || [] : [], past = on ? cur.past || 0 : 0, h = '';
     if (over.length) h += '<div class="warn"><b>Sheet</b> Films ' + over.map(function (o) { return o.a + ' and ' + o.b; }).join(', ') + ' overlap. Move them apart before exporting.</div>';
     if (past) h += '<div class="warn"><b>Sheet</b> The films run ' + past.toFixed(1) + ' in past the end of the ' + F.sheetLen + ' in sheet. Move them up, or clear the length.</div>';
-    $('sheetWarn').innerHTML = h; $('filmExport').disabled = busy || !cur || !cur.PG || !cur.PG.fits || over.length > 0 || past > 0;
+    $('sheetWarn').innerHTML = h; $('filmExport').disabled = busy || !cur || !cur.PG || !cur.PG.fits || over.length > 0 || past > 0; $('filmPsd').disabled = busy || !cur || !cur.PG;
     if (on && cur.PG) { var dd = $('filmSummary').querySelector('[data-sheet]'); if (dd) dd.textContent = F.filmW + ' × ' + (F.sheetLen > 0 ? F.sheetLen : sheetLen(cur.PG, cur.G.dpi) / cur.G.dpi).toFixed(1) + ' in'; }
   }
   function syncInputs() {
@@ -3168,12 +3363,12 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     cv.addEventListener('pointerup', end); cv.addEventListener('pointercancel', end);
     cv.addEventListener('keydown', function (e) { var d = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key]; if (!d || !sel || !F.pos[sel]) return; var st = e.shiftKey ? 1 : SNAP; moveFilm(sel, F.pos[sel][0] + d[0] * st, F.pos[sel][1] + d[1] * st, false); save(); e.preventDefault(); });
   })();
-  $('filmExport').addEventListener('click', exportFilms);
+  $('filmExport').addEventListener('click', exportFilms); $('filmPsd').addEventListener('click', exportPSD);
   $('filmResult').addEventListener('click', async function (e) { if (!e.target || e.target.id !== 'filmSave' || busy) return; e.target.disabled = true; $('filmSaveMsg').textContent = await saveFile(); e.target.disabled = false; });
-  $('filmLoad').addEventListener('click', async function () { if (busy) return; busy = true; $('filmExport').disabled = true; try { await loadFull(status); } catch (e) { $('filmResult').innerHTML = '<div class="warn"><b>Art</b> ' + esc(e && e.message || String(e)) + '</div>'; } status(''); busy = false; refresh(true); });
+  $('filmLoad').addEventListener('click', async function () { if (busy) return; setBusy(true); try { await loadFull(status); } catch (e) { $('filmResult').innerHTML = '<div class="warn"><b>Art</b> ' + esc(e && e.message || String(e)) + '</div>'; } status(''); busy = false; refresh(true); });
   window.addEventListener('resize', function () { refresh(); });
   syncInputs(); L.hooks.push(function () { refresh(); }); refresh();
-  L.film = { F: F, scene: scene, region: region, pageOf: pageOf, sheet: function () { return cur; }, moveFilm: moveFilm, pack: pack, composeSheet: composeSheet, thumbs: function () { return thumbs; }, pending: function () { return F.layout === 'sheet' && thumbKey() !== madeSig; }, exportFilms: exportFilms, loadFull: loadFull, readPNG: readPNG, refresh: refresh, last: function () { return lastBlob; } };
+  L.film = { F: F, scene: scene, region: region, pageOf: pageOf, sheet: function () { return cur; }, moveFilm: moveFilm, pack: pack, composeSheet: composeSheet, thumbs: function () { return thumbs; }, pending: function () { return F.layout === 'sheet' && thumbKey() !== madeSig; }, exportFilms: exportFilms, exportPSD: exportPSD, loadFull: loadFull, readPNG: readPNG, scanPNG: scanPNG, packBits: packBits, zipOf: zipOf, refresh: refresh, last: function () { return lastBlob; }, lastName: function () { return lastName; }, lastPsd: function () { return lastPsd; } };
 })();
 
 </script>
