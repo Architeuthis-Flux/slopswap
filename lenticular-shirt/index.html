@@ -85,18 +85,32 @@
 #viewer .sw.m{background:repeating-linear-gradient(45deg,var(--mix) 0 3px,transparent 3px 6px);outline:1px solid var(--mix);outline-offset:-1px}
 #viewer .sw.d{background:var(--dead)}
 #viewer .side{display:flex;flex-direction:column;gap:12px;min-width:0}
-#viewer .two{display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:flex-start;gap:12px}
-#viewer .two>.card{flex:1 1 140px}
+#viewer .vrow{display:flex;flex-wrap:wrap;align-items:flex-start;gap:12px;min-width:0}
+#viewer .vcol{display:flex;flex-direction:column;gap:12px;min-width:0}
 #viewer .rz{position:relative}
-#viewer .side>.rz.sized{width:min(100%,var(--w));align-self:flex-end;justify-self:end}
-#viewer .two>.card.sized{flex:0 0 auto;width:min(100%,var(--w))}
+#viewer #planCard{--dw:318px;--db:280px}
+#viewer .view>h2{cursor:grab;touch-action:none;-webkit-user-select:none;user-select:none}
+#viewer .view.moving{opacity:.4}
+#viewer .view.sized{flex:0 0 auto;width:min(100%,var(--w));align-self:flex-start}
+#viewer .dropbar{position:fixed;z-index:30;background:var(--b);border-radius:2px;pointer-events:none;box-shadow:0 0 0 1px var(--panel)}
+#viewer body.viewdrag,#viewer body.viewdrag *{cursor:grabbing !important;-webkit-user-select:none;user-select:none}
 #viewer .grip{all:unset;box-sizing:border-box;position:absolute;bottom:0;width:20px;height:20px;touch-action:none;opacity:.5;z-index:3;color:var(--muted)}
 #viewer .grip:hover,#viewer .grip:focus-visible,#viewer .grip:active{opacity:1}
 #viewer .grip.br{right:0;cursor:nwse-resize;color:var(--stage-ink);background:linear-gradient(135deg,transparent 0 56%,currentColor 56% 62%,transparent 62% 72%,currentColor 72% 78%,transparent 78% 88%,currentColor 88% 94%,transparent 94%)}
 #viewer .grip.bl{left:0;cursor:nesw-resize;background:linear-gradient(225deg,transparent 0 56%,currentColor 56% 62%,transparent 62% 72%,currentColor 72% 78%,transparent 78% 88%,currentColor 88% 94%,transparent 94%)}
 @media (min-width:1161px){
-#viewer .side>#planCard:not(.sized){width:min(100%,318px);align-self:flex-end}
-#viewer .two>.card:not(.sized){max-width:153px}
+#viewer .vroot{width:100%}
+#viewer .vcol{align-items:flex-end}
+#viewer .vrow{justify-content:flex-end}
+#viewer .vrow:not(.vroot),#viewer .vcol:not(.vroot){flex:0 0 auto;width:min(100%,var(--nw,100%))}
+#viewer .view,#viewer .view.sized{flex:0 0 auto;width:min(100%,var(--w,var(--dw,153px)));align-self:flex-end}
+#viewer .vrow>.view,#viewer .vrow>.view.sized{align-self:flex-start}
+}
+@media (max-width:1160px){
+#viewer .vroot{flex-flow:row wrap;align-items:flex-start;grid-column:1/-1}
+#viewer .vroot>.vrow,#viewer .vroot>.vcol{flex:1 1 280px}
+#viewer .vrow>.vrow,#viewer .vrow>.vcol{flex:1 1 140px}
+#viewer .vroot>.view:not(.sized),#viewer .vrow>.view:not(.sized){flex:1 1 var(--db,140px)}
 }
 #viewer svg{display:block;width:100%;height:auto;max-width:100%}
 #viewer svg text{font-family:var(--mono);fill:var(--muted);font-size:11px}
@@ -437,24 +451,26 @@
     </section>
 
     <div class="side">
-      <section class="card rz" id="planCard" aria-label="Top-down view">
+      <div class="vcol vroot" id="views">
+      <section class="card rz view" id="planCard" data-view="plan" aria-label="Top-down view">
         <button type="button" class="grip bl" data-view="plan" aria-label="Resize the view from above. Drag, or use the up and down arrow keys; Home goes back to the usual size." title="Drag to resize. Double-click to go back."></button>
-        <h2>From above</h2>
+        <h2 title="Drag onto the side of another view to move this one there. Double-click to put the views back.">From above</h2>
         <svg id="plan" viewBox="0 0 360 232" role="slider" tabindex="0" aria-label="Viewer position around the shirt" aria-valuemin="-80" aria-valuemax="80" aria-valuenow="30"></svg>
       </section>
-      <div class="two">
-        <section class="card rz" id="loupeCard" aria-label="Loupe">
+      <div class="vrow">
+        <section class="card rz view" id="loupeCard" data-view="loupe" aria-label="Loupe">
           <button type="button" class="grip bl" data-view="loupe" aria-label="Resize the loupe. Drag, or use the up and down arrow keys; Home goes back to the usual size." title="Drag to resize. Double-click to go back."></button>
-          <h2>Loupe</h2>
+          <h2 title="Drag onto the side of another view to move this one there. Double-click to put the views back.">Loupe</h2>
           <div class="loupewrap"><canvas id="loupe" width="360" height="360" role="img" aria-label="Magnified patch of the print at the same viewing angle"></canvas><div class="scale"><i id="loupeBar"></i><span id="loupeLbl">1 mm</span></div></div>
           <div class="ctl"><label for="loupeSpan">Field</label><output id="loupeSpanOut">10 mm</output><input id="loupeSpan" type="range" min="4" max="40" step="1" value="10"></div>
         </section>
-        <section class="card rz" id="sectionCard" aria-label="Cross-section">
+        <section class="card rz view" id="sectionCard" data-view="section" aria-label="Cross-section">
           <button type="button" class="grip bl" data-view="section" aria-label="Resize the section, the view from the side. Drag, or use the up and down arrow keys; Home goes back to the usual size." title="Drag to resize. Double-click to go back."></button>
-          <h2>Section</h2>
+          <h2 title="Drag onto the side of another view to move this one there. Double-click to put the views back.">Section</h2>
           <svg id="section" viewBox="0 0 240 176" role="img" aria-label="Cross-section through the ridges with the current sight lines"></svg>
           <p class="note" id="sectionNote" style="font-size:12px">True proportions.</p>
         </section>
+      </div>
       </div>
       <section class="card readcard" aria-label="What this geometry gives you">
         <div class="read">
@@ -591,7 +607,7 @@
           <li>Each top-level layer or group is sent to view A, view B, both, or neither. The eye icon on top-level layers is ignored, so you can keep hiding one view while you draw the other.</li>
           <li>Ridges go where the two pictures differ. Where they happen to match the page leaves them out; a patch narrower than 2.4 mm is ridged anyway. For anything else, <b>Ridges by hand</b> under the shirt paints them in or away.</li>
           <li><b>Zoom</b>, under the shirt, closes the big view in on the loupe’s crosshair, up to 16 times; click the shirt to move the crosshair and the view follows. Pinch or Ctrl + wheel over the shirt does the same. It stays on that spot of the print while you walk round or sweep.</li>
-          <li>The shirt, the view from above, the loupe and the section can each be resized: drag the hatched corner, and double-click it to go back. <b>Sweep</b> keeps running while you move the sliders; taking hold of the viewer stops it.</li>
+          <li>The shirt, the view from above, the loupe and the section can each be resized: drag the hatched corner, and double-click it to go back. The three small ones can also be moved: drag one by its title onto the left, right, top or bottom of another, and double-click a title to put them back. Reloading the page puts the whole layout back. <b>Sweep</b> keeps running while you move the sliders; taking hold of the viewer stops it.</li>
           <li><b>Screens</b>, lower down, gives the same sizes in screen-making terms: mils, threads of the mesh you pick for each screen, what that mesh can hold, and how many coats of emulsion build the HD stencil. Its defaults (83, 230 and 156 mesh, and one maker’s figures for a thick-stencil emulsion) are placeholders: set your own.</li>
           <li><b>HD</b> is for art drawn for the HD screen alone, such as the outline to raise: it is in neither view and is added to the HD film as it is.</li>
           <li><b>W</b> is for white underbase of your own, such as a solid shape under the whole wordmark: it is in neither view, and white is added to the white film wherever the image has anything, whatever its colour. The white under the colours is still made for you.</li>
@@ -1311,8 +1327,8 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
   var S = Object.assign({}, DEF), saved = {};
   try { saved = JSON.parse(localStorage.getItem(LS) || '{}') || {}; } catch (e) { saved = {}; }
   if (saved.S) Object.keys(DEF).forEach(function (k) { if (saved.S[k] !== undefined && typeof saved.S[k] === typeof DEF[k]) S[k] = saved.S[k]; });
-  var assignMem = saved.assign || {}, procMem = saved.procMem || {}, d3Mem = saved.d3 || {}, splitMem = saved.split || {}, ovMem = saved.ov && typeof saved.ov === 'object' ? saved.ov : {}, SZ = saved.sz && typeof saved.sz === 'object' ? saved.sz : {}; // SZ: the width in px of each view whose corner has been dragged
-  function persist() { try { localStorage.setItem(LS, JSON.stringify({ S: S, assign: assignMem, procMem: procMem, d3: d3Mem, split: splitMem, ov: ovMem, sz: SZ })); } catch (e) { } }
+  var assignMem = saved.assign || {}, procMem = saved.procMem || {}, d3Mem = saved.d3 || {}, splitMem = saved.split || {}, ovMem = saved.ov && typeof saved.ov === 'object' ? saved.ov : {}, SZ = {}; // SZ: the width in px of each view whose corner has been dragged. Not saved: a reload puts the layout back
+  function persist() { try { localStorage.setItem(LS, JSON.stringify({ S: S, assign: assignMem, procMem: procMem, d3: d3Mem, split: splitMem, ov: ovMem })); } catch (e) { } }
 
   PSDLite.setLut(b64bytes(CMYK_LUT_B64));
   function b64bytes(s) { var bin = atob(s), u = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u; }
@@ -2207,28 +2223,80 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     var t0 = performance.now(), ph = Math.asin(Math.max(-1, Math.min(1, S.angle / 70))); sweep = { id: 0 }; $('btnSweep').setAttribute('aria-pressed', 'true'); $('btnSweep').textContent = 'Stop';
     (function tick(t) { if (!sweep) return; S.angle = Math.round(70 * Math.sin(ph + (t - t0) / 1000 * 0.7) * 2) / 2; $('angle').value = S.angle; schedule(); sweep.id = requestAnimationFrame(tick); })(t0);
   });
-  /* ---------- the views can be resized: drag a view's corner, double-click the corner to go back ---------- */
-  // The shirt is centred, so it grows both ways from its bottom-right corner. The three views in the right-hand column hang from the page's right edge,
-  // so they grow to the left from their bottom-left corners, and the column widens to hold them, at the shirt's expense.
-  var VIEWS = { shirt: { box: 'shirtBox', min: 200, k: 2 }, plan: { box: 'planCard', min: 170, k: -1 }, loupe: { box: 'loupeCard', min: 110, k: -1 }, section: { box: 'sectionCard', min: 110, k: -1 } };
+  /* ---------- the views can be resized and rearranged. None of it is kept: reloading the page puts the layout back ---------- */
+  // Resizing: drag a view's hatched corner; double-click the corner to go back. The shirt is centred, so it grows both ways from its bottom-right corner.
+  // The three small views hang from the page's right edge, so they grow to the left from their bottom-left corners, and the column widens to hold them.
+  // Rearranging: drag a small view by its title onto the left, right, top or bottom of another and it goes there. What they make is a tree of rows and
+  // stacks (LAY); double-click a title to put them back as they started.
+  var VIEWS = { shirt: { box: 'shirtBox', min: 200, k: 2 }, plan: { box: 'planCard', min: 170, k: -1, dw: 318 }, loupe: { box: 'loupeCard', min: 110, k: -1, dw: 153 }, section: { box: 'sectionCard', min: 110, k: -1, dw: 153 } };
+  var LAY0 = { d: 'c', k: ['plan', { d: 'r', k: ['loupe', 'section'] }] }, LAY = JSON.parse(JSON.stringify(LAY0)), GAP = 12;
+  function natW(t) { if (typeof t === 'string') return SZ[t] || VIEWS[t].dw; var w = t.k.map(natW); return t.d === 'r' ? w.reduce(function (a, b) { return a + b; }, 0) + GAP * (w.length - 1) : Math.max.apply(null, w); }
+  function layNorm(t) { // single-child rows and stacks go, a row inside a row (or a stack inside a stack) is folded into its parent; the top is always a row or a stack
+    if (typeof t === 'string') return t; var k = [];
+    t.k.forEach(function (c) { c = layNorm(c); if (c === null) return; if (typeof c !== 'string' && c.d === t.d) k = k.concat(c.k); else k.push(c); });
+    return !k.length ? null : k.length === 1 ? k[0] : { d: t.d, k: k };
+  }
+  function layWithout(t, v) { return typeof t === 'string' ? (t === v ? null : t) : { d: t.d, k: t.k.map(function (c) { return layWithout(c, v); }).filter(function (c) { return c !== null; }) }; }
+  function layPut(t, target, v, side) { // v goes beside (left, right) or above/below (top, bottom) the view `target`
+    if (typeof t === 'string') return t; var want = side === 'left' || side === 'right' ? 'r' : 'c', first = side === 'left' || side === 'top', k = [];
+    t.k.forEach(function (c) { if (c !== target) { k.push(layPut(c, target, v, side)); return; } if (t.d === want) { if (first) k.push(v, c); else k.push(c, v); } else k.push({ d: want, k: first ? [v, c] : [c, v] }); });
+    return { d: t.d, k: k };
+  }
+  function layMove(v, target, side) { var t = layNorm(layPut(layNorm(layWithout(LAY, v)) || target, target, v, side)); if (typeof t === 'string') t = { d: 'c', k: [t] };
+    if (JSON.stringify(t) === JSON.stringify(LAY)) return false; LAY = t; buildViews(); applySizes(); return true; }
+  function buildViews() { // the tree as nested boxes, with the three cards moved into place (they are never rebuilt, only moved)
+    var root = $('views'), cards = {}; ['plan', 'loupe', 'section'].forEach(function (v) { cards[v] = $(VIEWS[v].box); if (cards[v].parentNode) cards[v].parentNode.removeChild(cards[v]); });
+    while (root.firstChild) root.removeChild(root.firstChild);
+    (function make(t, el) { el.className = (t.d === 'r' ? 'vrow' : 'vcol') + (el === root ? ' vroot' : ''); el._lay = t; t.k.forEach(function (c) { el.appendChild(typeof c === 'string' ? cards[c] : make(c, document.createElement('div'))); }); return el; })(LAY, root);
+  }
   function applySizes() {
     Object.keys(VIEWS).forEach(function (v) { var el = $(VIEWS[v].box), w = +SZ[v]; if (w > 0) { el.style.setProperty('--w', w + 'px'); el.classList.add('sized'); } else { delete SZ[v]; el.style.removeProperty('--w'); el.classList.remove('sized'); } });
-    $('bench').style.setProperty('--sideW', Math.max(318, SZ.plan || 0, (SZ.loupe || 153) + 12 + (SZ.section || 153)) + 'px');
+    Array.prototype.forEach.call($('views').querySelectorAll('.vrow,.vcol'), function (el) { if (el._lay) el.style.setProperty('--nw', natW(el._lay) + 'px'); });
+    $('bench').style.setProperty('--sideW', Math.max(318, natW(LAY)) + 'px'); // in the wide layout the right-hand column is as wide as its views ask; the shirt takes the rest
     schedule();
   }
+  // A drag that follows the pointer wherever it goes, and cannot be left hanging: it ends when the button comes up anywhere, when the pointer is lost,
+  // or at the first move that arrives with no button held (a release that was never reported).
+  function dragOf(el, onStart, onMove, onEnd) {
+    var live = null;
+    function move(e) { if (!live || e.pointerId !== live.id) return; if (e.pointerType === 'mouse' && !(e.buttons & 1)) { stop(e, true); return; } e.preventDefault(); onMove(e, live); }
+    function up(e) { if (live && e.pointerId === live.id) stop(e, true); }
+    function cancel(e) { if (live && e.pointerId === live.id) stop(e, false); }
+    function key(e) { if (live && e.key === 'Escape') { e.preventDefault(); stop(e, false); } }
+    function away(e) { if (live && e.target === window) stop(e, false); } // the window itself losing focus, not something in it
+    function stop(e, done) { var l = live; live = null; ['pointermove', 'pointerup', 'pointercancel', 'keydown', 'blur'].forEach(function (n, i) { window.removeEventListener(n, [move, up, cancel, key, away][i], true); }); onEnd(e, l, done); }
+    el.addEventListener('pointerdown', function (e) { if (live || (e.pointerType === 'mouse' && e.button !== 0)) return; var l = onStart(e); if (!l) return; l.id = e.pointerId; live = l; try { el.setPointerCapture(e.pointerId); } catch (x) { }
+      ['pointermove', 'pointerup', 'pointercancel', 'keydown', 'blur'].forEach(function (n, i) { window.addEventListener(n, [move, up, cancel, key, away][i], true); }); });
+  }
   Array.prototype.forEach.call(document.querySelectorAll('.grip'), function (g) {
-    var v = g.dataset.view, V = VIEWS[v], el = $(V.box), st = null;
+    var v = g.dataset.view, V = VIEWS[v], el = $(V.box);
     function shown() { return el.getBoundingClientRect().width; }
-    function settle() { SZ[v] = Math.max(V.min, Math.round(shown())); applySizes(); persistSoon(); } // keep what the page could give it, not what was asked for
-    g.addEventListener('pointerdown', function (e) { e.preventDefault(); try { g.setPointerCapture(e.pointerId); } catch (x) { } st = { x: e.clientX, y: e.clientY, w: shown() }; });
-    g.addEventListener('pointermove', function (e) { if (!st) return; var dx = (e.clientX - st.x) * (V.k < 0 ? -1 : 1), dy = e.clientY - st.y, d = Math.abs(dx) >= Math.abs(dy) ? dx : dy; SZ[v] = Math.max(V.min, Math.round(st.w + d * Math.abs(V.k))); applySizes(); });
-    function end() { if (!st) return; st = null; settle(); }
-    g.addEventListener('pointerup', end); g.addEventListener('pointercancel', end);
-    g.addEventListener('dblclick', function () { st = null; delete SZ[v]; applySizes(); persistSoon(); });
+    function settle() { SZ[v] = Math.max(V.min, Math.round(shown())); applySizes(); } // keep what the page could give it, not what was asked for
+    dragOf(g, function (e) { e.preventDefault(); return { x: e.clientX, y: e.clientY, w: shown(), was: SZ[v], moved: false }; },
+      function (e, st) { var dx = (e.clientX - st.x) * (V.k < 0 ? -1 : 1), dy = e.clientY - st.y, d = Math.abs(dx) >= Math.abs(dy) ? dx : dy; if (!st.moved && Math.abs(d) < 2) return; st.moved = true; SZ[v] = Math.max(V.min, Math.round(st.w + d * Math.abs(V.k))); applySizes(); },
+      function (e, st, done) { if (!st.moved) return; if (done) settle(); else { if (st.was) SZ[v] = st.was; else delete SZ[v]; applySizes(); } }); // a click that did not move changes nothing
+    g.addEventListener('dblclick', function () { delete SZ[v]; applySizes(); });
     g.addEventListener('keydown', function (e) { var d = e.key === 'ArrowUp' || e.key === '+' || e.key === '=' ? 1 : e.key === 'ArrowDown' || e.key === '-' ? -1 : 0;
-      if (d) { e.preventDefault(); SZ[v] = Math.max(V.min, Math.round(shown() + d * 24)); applySizes(); settle(); } else if (e.key === 'Home' || e.key === 'Escape') { e.preventDefault(); delete SZ[v]; applySizes(); persistSoon(); } });
+      if (d) { e.preventDefault(); SZ[v] = Math.max(V.min, Math.round(shown() + d * 24)); applySizes(); settle(); } else if (e.key === 'Home') { e.preventDefault(); delete SZ[v]; applySizes(); } });
   });
-  applySizes();
+  (function () { // moving a small view: by its title, onto a side of another
+    var bar = null;
+    function place(x, y, skip) { // the view nearest the pointer, and which of its sides the pointer is at
+      var best = null; ['plan', 'loupe', 'section'].forEach(function (v) { if (v === skip) return; var r = $(VIEWS[v].box).getBoundingClientRect(), ox = x < r.left ? r.left - x : x > r.right ? x - r.right : 0, oy = y < r.top ? r.top - y : y > r.bottom ? y - r.bottom : 0, dist = Math.sqrt(ox * ox + oy * oy);
+        if (!best || dist < best.dist) { var fx = (x - (r.left + r.right) / 2) / Math.max(1, r.width), fy = (y - (r.top + r.bottom) / 2) / Math.max(1, r.height); best = { v: v, r: r, dist: dist, side: Math.abs(fx) >= Math.abs(fy) ? (fx < 0 ? 'left' : 'right') : (fy < 0 ? 'top' : 'bottom') }; } });
+      return best;
+    }
+    function show(t) { if (!bar) { bar = document.createElement('div'); bar.className = 'dropbar'; document.body.appendChild(bar); } var r = t.r, s = bar.style, w = 4, g = (GAP - w) / 2;
+      if (t.side === 'left' || t.side === 'right') { s.left = (t.side === 'left' ? r.left - g - w : r.right + g) + 'px'; s.top = r.top + 'px'; s.width = w + 'px'; s.height = r.height + 'px'; }
+      else { s.top = (t.side === 'top' ? r.top - g - w : r.bottom + g) + 'px'; s.left = r.left + 'px'; s.height = w + 'px'; s.width = r.width + 'px'; } }
+    function hide() { if (bar) { bar.parentNode.removeChild(bar); bar = null; } }
+    ['plan', 'loupe', 'section'].forEach(function (v) { var card = $(VIEWS[v].box), h = card.querySelector('h2');
+      dragOf(h, function (e) { return { x: e.clientX, y: e.clientY, on: false, to: null }; },
+        function (e, st) { if (!st.on) { if (Math.abs(e.clientX - st.x) + Math.abs(e.clientY - st.y) < 6) return; st.on = true; card.classList.add('moving'); document.body.classList.add('viewdrag'); } st.to = place(e.clientX, e.clientY, v); if (st.to) show(st.to); },
+        function (e, st, done) { hide(); card.classList.remove('moving'); document.body.classList.remove('viewdrag'); if (done && st.on && st.to) layMove(v, st.to.v, st.to.side); });
+      h.addEventListener('dblclick', function () { LAY = JSON.parse(JSON.stringify(LAY0)); buildViews(); applySizes(); }); });
+  })();
+  buildViews(); applySizes();
   window.addEventListener('resize', schedule);
   if (window.matchMedia) { try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', geometryChanged); } catch (e) { } }
   try { new MutationObserver(geometryChanged).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] }); } catch (e) { }
@@ -2628,7 +2696,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     } finally { bt.disabled = false; }
   });
 
-  window.__lent = { S: S, known: function (name) { return KNOWN[name] || null; }, buildSegs: geom, geom: geom, classify: classify, ranges: ranges, loadFiles: loadFiles, startWatch: startWatch, sizes: SZ, applySizes: applySizes, sweeping: function () { return !!sweep; }, setZoom: setZoom, view: function () { return MVIEW; }, fetchRemote: fetchRemote, keep: KEEP, ov: OV, brush: BRUSH, sitePublish: SITE ? sitePublish : null, gitSha: gitSha, keepNow: keepNow, sharedSave: sharedSave, multi: multi, d3Of: d3Of, psdNodes: psdNodes, keyOf: keyOf, hooks: hooks, art: function () { return ART; } };
+  window.__lent = { S: S, known: function (name) { return KNOWN[name] || null; }, buildSegs: geom, geom: geom, classify: classify, ranges: ranges, loadFiles: loadFiles, startWatch: startWatch, sizes: SZ, applySizes: applySizes, layout: function () { return LAY; }, layMove: layMove, sweeping: function () { return !!sweep; }, setZoom: setZoom, view: function () { return MVIEW; }, fetchRemote: fetchRemote, keep: KEEP, ov: OV, brush: BRUSH, sitePublish: SITE ? sitePublish : null, gitSha: gitSha, keepNow: keepNow, sharedSave: sharedSave, multi: multi, d3Of: d3Of, psdNodes: psdNodes, keyOf: keyOf, hooks: hooks, art: function () { return ART; } };
 
   startArt().catch(function (e) { if (window.console) console.error(e); if (!ART) $('psdWarns').innerHTML = '<div class="warn"><b>Built-in artwork failed to load.</b> Drop your PSD below to continue.</div>'; });
 })();
