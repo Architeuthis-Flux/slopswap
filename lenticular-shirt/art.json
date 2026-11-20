@@ -1,7 +1,7 @@
 {
  "v": 1,
- "t": 1794943627910,
- "src": "5 images",
+ "t": 1795213714150,
+ "src": "6 images",
  "W": 1350,
  "H": 1350,
  "docW": 10800,
@@ -64,6 +64,18 @@
    "type": null,
    "size": 0,
    "lm": 0
+  },
+  {
+   "name": "lentV62stickerwhite.png",
+   "key": null,
+   "assign": "w",
+   "d3": null,
+   "prev": "art-94da5efb44190d2d.png",
+   "full": null,
+   "type": null,
+   "size": 0,
+   "lm": 0
   }
- ]
+ ],
+ "ov": null
 }
