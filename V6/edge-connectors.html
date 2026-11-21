@@ -7,14 +7,15 @@
 <meta name="short-title" content="Edge connectors">
 <link rel="stylesheet" href="../styles/jumperless.css">
 <style>
-  .lede{color:var(--muted);max-width:70ch}
+  .lede{color:var(--muted);max-width:74ch}
   .ctl{display:flex;flex-wrap:wrap;gap:.6rem 1.4rem;align-items:flex-end;padding:.9rem 1rem;border:1px solid var(--line);border-radius:8px;background:var(--surface);margin:1rem 0 1.2rem}
   .ctl label{display:flex;flex-direction:column;gap:.3rem;font-family:var(--font-pixel);font-size:.5rem;color:var(--muted);letter-spacing:0}
-  .ctl input[type=number],.ctl select{font:14px var(--font-body);color:var(--fg);background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:.35rem .5rem;min-width:6.5rem}
+  .ctl input[type=number],.ctl select{font:14px var(--font-body);color:var(--fg);background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:.35rem .5rem;min-width:5.5rem}
+  .ctl input[type=number]{width:5.5rem}
   .seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
   .seg button{font:13px var(--font-body);color:var(--fg);background:var(--surface-2);border:0;padding:.4rem .8rem;cursor:pointer}
   .seg button+button{border-left:1px solid var(--line)}
-  .seg button[aria-pressed=true]{background:var(--accent);color:#111}
+  .seg button[aria-pressed=true]{background:var(--accent);color:#fff}
   .hint{font-size:.85rem;color:var(--muted);margin:.2rem 0 0}
   table.res{font-size:.86rem;border-collapse:collapse;width:100%}
   table.res th{cursor:pointer;white-space:nowrap;user-select:none}
@@ -22,57 +23,71 @@
   table.res td{vertical-align:middle}
   table.res td.num{font-family:var(--font-mono);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
   table.res tr.best td{background:color-mix(in srgb,var(--accent-2) 10%,transparent)}
-  .opt{display:flex;gap:.6rem;align-items:center;min-width:14rem}
-  .opt .th{width:44px;height:44px;flex:0 0 44px;border-radius:5px;background:var(--surface-2);object-fit:cover;border:1px solid var(--line)}
-  .opt .th.ph{display:grid;place-items:center;color:var(--muted);font-family:var(--font-pixel);font-size:.45rem}
+  table.res td.over{color:var(--r12);font-weight:700}
+  table.res small{color:var(--muted)}
+  .opt{display:flex;gap:.6rem;align-items:center;min-width:13rem}
+  .opt .th{width:44px;height:44px;flex:0 0 44px;border-radius:5px;background:#fff;object-fit:contain;border:1px solid var(--line)}
+  .opt .th.ph{display:grid;place-items:center;background:var(--surface-2);color:var(--muted);font-family:var(--font-pixel);font-size:.4rem}
   .opt b{display:block;font-weight:700}
   .opt small{display:block;color:var(--muted)}
-  .tag{display:inline-block;font-family:var(--font-pixel);font-size:.42rem;padding:.3em .55em;border-radius:999px;border:1px solid var(--line);margin-right:.25rem;color:var(--muted)}
+  .tag{display:inline-block;font-family:var(--font-pixel);font-size:.42rem;padding:.3em .55em;border-radius:999px;border:1px solid var(--line);margin:0 .25rem .2rem 0;color:var(--muted);white-space:nowrap}
   .tag.cop{border-color:var(--accent-2);color:var(--accent-2)}
   .tag.st{border-color:var(--r9);color:var(--r9)}
   .tag.vt{border-color:var(--r5);color:var(--r5)}
   .tag.cu{border-color:var(--accent);color:var(--accent)}
+  .tag.cn{border-color:var(--r11);color:var(--r11)}
   .sketch svg{display:block}
-  .bars{margin:1rem 0 1.5rem}
+  .bars{margin:1rem 0 .4rem}
   .bars svg{width:100%;height:auto;display:block}
+  .legend{display:flex;flex-wrap:wrap;gap:.3rem 1.1rem;font-size:.82rem;color:var(--muted);margin:0 0 1.2rem}
+  .legend i{display:inline-block;width:.8em;height:.8em;border-radius:2px;margin-right:.35em;vertical-align:-.05em}
   .cards{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(19rem,1fr));gap:1rem}
-  .card{display:flex;flex-direction:column;gap:.5rem;padding:1rem 1.1rem;border:1px solid var(--line);border-radius:8px;background:var(--surface);border-top:5px solid var(--c,var(--accent))}
+  .card{display:flex;flex-direction:column;gap:.5rem;padding:1rem 1.1rem;border:1px solid var(--line);border-radius:8px;background:var(--surface);border-top:5px solid var(--c,var(--accent));min-width:0}
   .card h3{margin:0;font-size:.95rem;line-height:1.3}
   .card .pic{width:100%;aspect-ratio:16/9;object-fit:contain;background:#fff;border-radius:5px;border:1px solid var(--line)}
-  .card .pic.ph{background:var(--surface-2);display:grid;place-items:center;color:var(--muted);font-family:var(--font-pixel);font-size:.5rem}
+  .card .pic.ph{background:var(--surface-2);display:grid;place-items:center;color:var(--muted);font-family:var(--font-pixel);font-size:.5rem;text-align:center;padding:0 1rem}
   .card dl{display:grid;grid-template-columns:auto 1fr;gap:.15rem .7rem;margin:0;font-size:.85rem}
-  .card dt{color:var(--muted)} .card dd{margin:0}
+  .card dt{color:var(--muted)} .card dd{margin:0;overflow-wrap:anywhere}
   .card .price{font-family:var(--font-mono);font-size:.9rem}
   .card .links{display:flex;flex-wrap:wrap;gap:.4rem .9rem;font-size:.85rem}
-  .card .note{font-size:.85rem;color:var(--muted)}
+  .card .note{font-size:.85rem;color:var(--muted);margin:0}
   figure{margin:1.2rem 0}
   figure img{width:100%;height:auto;border-radius:6px;border:1px solid var(--line);background:#fff}
   figcaption{font-size:.85rem;color:var(--muted);margin-top:.4rem}
   .two{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
-  @media (max-width:800px){.two{grid-template-columns:1fr}}
+  .three{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+  @media (max-width:800px){.two,.three{grid-template-columns:1fr}}
   .kv{font-size:.9rem}
-  .kv td{padding:.25rem .6rem .25rem 0;vertical-align:top}
+  .kv td,.kv th{padding:.3rem .8rem .3rem 0;vertical-align:top;text-align:left}
+  .kv td.p{font-family:var(--font-mono);font-size:.85em;min-width:11rem}
+  .kv td:nth-child(3){min-width:16rem}
   .srcs{font-size:.85rem;columns:2;column-gap:2rem}
+  .srcs div{break-inside:avoid;overflow-wrap:anywhere;margin-bottom:.2rem}
   @media (max-width:800px){.srcs{columns:1}}
+  .toc{display:flex;flex-wrap:wrap;gap:.3rem 1.2rem;font-size:.9rem;margin:.6rem 0 0}
 </style>
 </head>
 <body>
 <main class="page wide">
 <p class="eyebrow"><a href="../">slopswap</a> / <a href="./">V6</a></p>
 <h1>Edge connector options for V6 modules</h1>
-<p class="lede">Every way we have found to join a Jumperless module to the main board along an edge, with what each one costs in board area, height and money — one 70-way connector, or two or three smaller ones so half a breadboard can be swapped for something else. Includes the custom "kiss slot" coupler, the shorted-when-empty (normalling) type, and the off-LCSC Chinese parts. Numbers are from datasheets and listings as of 22 Nov 2026; custom-part numbers are estimates from the connector physics write-ups.</p>
+<p class="lede">Every way found so far to join a Jumperless module to the main board along an edge, with what each costs in board area, height and money: one 70-way connector, or two or three smaller ones so half a breadboard can be swapped for something else. Catalog parts, Chinese and Taiwanese makers that are not (or barely) on LCSC, the custom "kiss slot" coupler, the single-contact SMT plug-and-socket clips, and the shorted-when-empty type. Dimensions are read from the makers' drawings and prices from listings as of 22 Nov 2026; anything marked ≈ is an estimate. Yuan prices are converted at ¥7.2 to the dollar.</p>
+<p class="toc"><a href="#calc">Area calculator</a><a href="#options">Every option</a><a href="#ask">Makers to ask</a><a href="#clips">Single-contact clips</a><a href="#custom">Custom kiss slot</a><a href="#normalling">Shorted when empty</a><a href="#other">Not card edge</a></p>
 
-<h2>Pick a split, see the area</h2>
+<h2 id="calc">Pick a split, see the area</h2>
 <div class="ctl">
   <label>signals per module <input id="nsig" type="number" value="70" min="2" max="200" step="1"></label>
-  <label>connectors per edge <span class="seg" id="split"><button aria-pressed="true" data-k="1">1 × 70</button><button data-k="2">2 × 35</button><button data-k="3">3 × 24</button></span></label>
+  <label>connectors per edge <span class="seg" id="split"><button aria-pressed="true" data-k="1">1 × 70</button><button aria-pressed="false" data-k="2">2 × 35</button><button aria-pressed="false" data-k="3">3 × 24</button></span></label>
+  <label>edge available, mm <input id="edge" type="number" value="51" min="10" max="300" step="1"></label>
   <label>card thickness <select id="thk"><option value="any">any</option><option value="1.6">1.6 mm</option><option value="1.0">1.0 mm</option><option value="0.8">0.8 mm</option></select></label>
-  <label>geometry <select id="orient"><option value="any">any</option><option value="coplanar">coplanar (straddle / coupler)</option><option value="vertical">vertical (card stands up)</option><option value="stacked">stacked (card lies over host)</option></select></label>
-  <label>sort by <select id="sort"><option value="area">dead area</option><option value="edge">edge length</option><option value="height">height</option><option value="price">price per module</option><option value="pitch">pitch</option></select></label>
+  <label>geometry <select id="orient"><option value="any">any</option><option value="coplanar">coplanar (straddle / coupler)</option><option value="vertical">vertical (card stands up)</option><option value="stacked">parallel, raised (right-angle / M.2)</option></select></label>
+  <label>source <select id="fam"><option value="any">any</option><option value="cn">Chinese / Taiwanese makers</option><option value="brand">Samtec</option><option value="custom">custom + today's part</option></select></label>
+  <label>sort by <select id="sort"><option value="area">dead area</option><option value="edge">edge length</option><option value="z">Z height</option><option value="price">price per module</option><option value="pitch">pitch</option></select></label>
 </div>
 <p class="hint" id="hint"></p>
 
 <div class="bars" id="bars"></div>
+<p class="legend"><span><i style="background:var(--accent)"></i>custom</span><span><i style="background:var(--accent-2)"></i>coplanar</span><span><i style="background:var(--r5)"></i>vertical</span><span><i style="background:var(--r9)"></i>parallel, raised</span></p>
 
 <div class="table-wrap">
 <table class="res" id="res">
@@ -80,40 +95,87 @@
   <th data-s="name">option <span class="arr">↕</span></th>
   <th>geometry</th>
   <th data-s="pitch" class="num">pitch</th>
-  <th class="num">pos / conn.</th>
+  <th class="num">conn. × contacts</th>
   <th data-s="len" class="num">conn. length</th>
   <th data-s="edge" class="num">edge used</th>
-  <th data-s="host" class="num">host depth</th>
-  <th data-s="tongue" class="num">tongue</th>
-  <th data-s="gap" class="num">board gap</th>
+  <th data-s="depth" class="num">host + gap + tongue</th>
   <th data-s="area" class="num">dead area</th>
-  <th data-s="height" class="num">height</th>
+  <th data-s="z" class="num">Z height</th>
   <th data-s="price" class="num">price / module</th>
   <th>plan view (to scale)</th>
 </tr></thead>
 <tbody id="rows"></tbody>
 </table>
 </div>
-<p class="muted" style="font-size:.85rem">"Dead area" is the strip of PCB you cannot use for anything else: on a coplanar joint it is connector length × (host pad depth + air gap between the boards + module tongue); on a vertical or stacked joint it is the connector's footprint on the host plus the module's tongue. Prices are for the representative part listed in the card below, times the number of connectors; a shorter custom length scales roughly with contacts. Hover a row's name for the notes.</p>
+<p class="muted" style="font-size:.85rem"><b>Dead area</b> is PCB that can hold nothing else. On a coplanar joint it is connector length × the whole strip from the back of the host pads to the tip of the module's tongue (host depth + board gap + tongue). On a vertical or raised joint it is the connector's footprint on the host plus the module's tongue. <b>Host</b> depth is solder legs on a straddle part, body plus about 1.8 mm of SMT leads on a vertical one, and body plus tails on a right-angle one. <b>Gap</b> is the distance from the host's edge to the tip of the card on a coplanar joint; <b>tongue</b> is the depth of the module the connector takes. <b>Z height</b> is how far the part stands off the board: total thickness for a coplanar part. <b>Edge used</b> allows 2 mm between connectors and turns orange when it exceeds the edge available. A fixed-size part (PCIe, M.2) uses as many connectors as the signal count needs. <b>Price</b> is the listed price of the nearest size, scaled by contacts<sup>0.75</sup> to the size used. Hover a row for its notes.</p>
 
-<h2>The options, one by one</h2>
+<h3>What the numbers say</h3>
+<ul>
+  <li><b>At 1.27 mm the edge will not split.</b> Two 36-way housings need 59.9 mm and three 24-ways 68 mm, against the 50.5 mm one 70-way uses, because every housing brings its own 7.4 mm of end walls. A custom housing with one divider wall should carry 2 × 34 contacts in the same 50.5 mm (an estimate: 1.2 mm walls, today's 2.3 mm tongue margin).</li>
+  <li><b>Splitting with stock parts means 0.8 mm or finer.</b> Two 40-ways at 0.8 mm take 43–50 mm (Samtec HSEC8-DV, Oupiin 8206-2 and 8208-2, Solepin 61C1 at 2 × 36). Three only fit as HSEC8-DV 3 × 26 (49 mm) or Oupiin's 0.635 mm right-angle part.</li>
+  <li><b>Coplanar from stock means a straddle part</b>: a 12–13.5 mm strip with the boards about 2 mm apart at best, against 18.3 mm and 6.4 mm today. Samtec MEC8-EM is the only one that fits twice on the edge (2 × 40 in 49.6 mm, about $7.80 the pair). The XKB PCIe straddle is $0.57 but its screw ears make it 34.8 mm long.</li>
+  <li><b>The kiss slot is still the only option with the boards touching</b> and a strip under 10 mm, and it is 5 mm thick where the straddle parts are 7–9.</li>
+  <li><b>Cheapest per contact is M.2</b>: 67 contacts for $0.18, if a 0.8 mm card lying parallel to the host at 0.5 A a contact is acceptable.</li>
+</ul>
+
+<h2 id="options">The options, one by one</h2>
 <ul class="cards cycle" id="cards"></ul>
 
-<h2>The custom "kiss slot" coupler</h2>
-<p>The custom part designed for V6 (write-ups: <em>V6_edge_coupler_connector_design</em> and <em>V6_edge_coupler_v2_kiss_slot</em> in the project). Same 1.27 mm, 70-way, 45.47 mm tongue as today's board, but half the height, a third of the depth and the two boards touch inside the housing. The same contact strip in a shorter housing gives the 2-way and 3-way versions in the table above.</p>
-<figure><img src="edge-fig1-today-vs-proposed.png" alt="Section of today's WingTAT straddle connector next to the proposed coupler"><figcaption>Today's WingTAT HEE70LP03BK (18.3 mm end to end, boards 6.4 mm apart) and the proposed coupler (9.2 mm, boards touching). Each contact's two beams run the full housing height in opposite directions, side by side within the pitch, which is how a 9 mm part gets 6 mm springs.</figcaption></figure>
-<div class="two">
-<figure><img src="edge-chart1-force-stress.png" alt="Normal force and stress versus board thickness"><figcaption>Normal force and beam stress vs board thickness. Variant B (rest gap 0.30 mm) gives 1.6 mm boards 51–61 gf and a 0.8 mm board ~20 gf — "0.8 in a pinch".</figcaption></figure>
-<figure><img src="edge-chart2-insertion.png" alt="Insertion force versus bevel and bump radius"><figcaption>Insertion force vs bevel angle and bump radius. A square card edge is fine if the bump radius is ≥1 mm; with a 0.4 mm bump it jams.</figcaption></figure>
-</div>
-<div class="two">
-<figure><img src="edge-v2-sections.png" alt="Sections through the V2 kiss-slot STEP model"><figcaption>Sections cut from the V2 STEP: lane-1 beam, lane-2 beam, and the comb of channels at mid-height.</figcaption></figure>
-<figure><img src="edge-fig3-card-tongue.png" alt="Card tongue layout for the kiss slot"><figcaption>The module side: the existing 45.47 mm tongue shortened to 4.5 mm, 1.0 mm pads, 30° bevel optional.</figcaption></figure>
-</div>
-<p>Models: <a href="edge-coupler-variants-step.zip">all five variants side by side (STEP, 7 MB zip)</a> — today's WingTAT with cards, the 2.4 mm-web version, the kiss slot, a 7.8 mm short kiss slot and the 0.8 mm sister housing. Estimated cost at 10 k/yr: $2.7–4.2 in BeCu, $1.5–2.6 in phosphor bronze (which needs ~0.5 mm more height), against $2.15 for the WingTAT; tooling $13–25 k. The point is size and the touching boards, not price.</p>
+<h2 id="ask">Makers to ask: no full drawing or price yet</h2>
+<p>These turned up in the off-LCSC search but without enough numbers to put in the calculator. Solepin is the one to start with: it sells any even pin count in 0.8, 1.0 and 1.27 mm with a 10–20 day lead and sells singles on 1688. No Chinese maker lists a 0.8 mm straddle (edge-mount) part; Solepin, LXW and Shunyi make the vertical version and would be the ones to ask for it.</p>
+<div class="table-wrap"><table class="kv">
+<tr><th>maker</th><th>part</th><th>what it is</th><th>price</th></tr>
+<tr><td>Solepin 硕品 (Dongguan)</td><td><a href="https://www.solepin.com/Product/jinshouzhi/1-27mm-pitch-series/1219.html">61F9</a></td><td>1.27 mm SMT straddle, any 6–300 contacts, optional ears, PA9T, 3 A. Same idea as today's WingTAT at any length.</td><td class="p">¥40 ≈ $5.56 sample (<a href="https://detail.1688.com/offer/1052786187542.html">1688</a>)</td></tr>
+<tr><td>Solepin 硕品</td><td><a href="https://www.solepin.com/Product/jinshouzhi/1-00mm-pitch-series/813.html">61D3</a></td><td>1.0 mm vertical SMT, Samtec HSEC1-compatible, 10–200 contacts in any combination, keyed.</td><td class="p">¥30 ≈ $4.17 sample (<a href="https://detail.1688.com/offer/791960552133.html">1688</a>)</td></tr>
+<tr><td>Solepin 硕品</td><td><a href="https://www.solepin.com/Product/jinshouzhi/1-27mm-pitch-series/983.html">66F6 / 61F6</a></td><td>1.27 mm vertical SMT, Samtec MECF-compatible, any 4–200 contacts, 2 A.</td><td class="p">ask</td></tr>
+<tr><td>LXW 连兴旺 (Shenzhen)</td><td><a href="https://www.lxw-conn.com/product/0-8mm-pitch-20pin-200pin-high-speed-pcb-card-edge-connector/">HSEC8-compatible</a></td><td>0.8 mm vertical SMT, 20–200 contacts, 3 A. A Samtec-clone house.</td><td class="p">ask</td></tr>
+<tr><td>Dongguan Shunyi 顺宜</td><td><a href="https://detail.1688.com/offer/758975883985.html">HSEC8 replacement</a></td><td>0.8 mm vertical SMT, 10–200 contacts. Also 1.27 mm burn-in slots.</td><td class="p">¥25 ≈ $3.47 single</td></tr>
+<tr><td>Yueqing Beijie 倍杰 (Wenzhou)</td><td><a href="https://detail.1688.com/offer/978436559680.html">straddle</a> · <a href="https://detail.1688.com/offer/978979322481.html">vertical SMT</a></td><td>1.27 mm PCI-style slot in straddle and vertical SMT. Cheapest straddle found, no documentation.</td><td class="p">¥0.85 ≈ $0.12 listed</td></tr>
+<tr><td>Sunny Young 杉洋 (Taiwan)</td><td><a href="https://www.sunnyyoung.com.tw/zh-tw/product-704151/1-27mm-Straddle-Mount-Card-Edge-Connector-R6830-Series.html">R6830</a></td><td>1.27 mm in straddle, SMT and DIP. Same 8.88 × 14.0 mm geometry as the WingTAT (<a href="https://www.sunnyyoung.com.tw/files/R6830-xxxHS-PCB-A_Download.pdf">drawing</a>).</td><td class="p">ask</td></tr>
+<tr><td>Oupiin 歐品 (Kunshan)</td><td><a href="https://www.oupiin.com/product_3i.php?id=119">8206-2…RPT</a> · <a href="https://www.oupiin.com/product_3i.php?id=126">8236</a></td><td>0.8 mm right-angle (2 × 10, 2 × 20; a MEC8-RA look-alike, 12.05 mm deep) and a 1.27 mm vertical 80-way (54.9 mm long).</td><td class="p">ask</td></tr>
+<tr><td>Dongguan Youmao 友贸</td><td><a href="https://detail.1688.com/offer/639181657827.html">PCIe ×4 right-angle</a></td><td>1.0 mm, 64 contacts, right-angle. The only right-angle PCIe-style socket found.</td><td class="p">¥10.4 ≈ $1.44</td></tr>
+<tr><td>Shenzhen Dongfang Yutong 东方宇通</td><td><a href="http://www.szdfyt.com/product_view_511.html">1.0 mm straddle</a></td><td>Trader with a photo-only catalogue: 1.0 mm straddle, SMT and DIP, plus 0.8 mm SMT. Shows a 1.0 mm straddle exists in the Shenzhen market.</td><td class="p">ask</td></tr>
+</table></div>
 
-<h2>Shorted-when-empty ("normalling") connectors</h2>
-<p>A card-edge connector whose two rows of contacts touch each other when the slot is empty and are spread onto the two faces of the card when one is inserted. It exists as a technique — telecom DSX patch bays call it <em>normalling</em>, the patents say <em>make-before-break</em> or <em>switching</em> contacts — but not as a current catalog part at any fine pitch. Everything that covered it has expired:</p>
+<h2 id="clips">Single-contact SMT plug and socket (the Keystone 6100 / MAC8 KO-KC style)</h2>
+<p>A stamped tab soldered flat on one board slides into a stamped spring socket soldered flat on the other, joining two boards in the same plane with nothing but metal: about 1.2 mm tall, on one face only, with the boards almost touching. Keystone and MAC8 make the gold-plated originals. The Chinese LED-lighting trade makes the same thing in tin-plated phosphor copper for joining light-bar boards end to end, at roughly a tenth of the price. Both boards need a part soldered on, so the module is no longer a bare PCB, and at about 3 mm per contact a 51 mm edge holds 16 or 17 of them per face.</p>
+<div class="three">
+<figure><img src="edge-clip-mengjing-81013.jpg" alt="Mengjing MJT-81013 male and female SMT terminals" loading="lazy"><figcaption>Mengjing MJT-81013: the all-metal male and female pair (1688 listing photo).</figcaption></figure>
+<figure><img src="edge-clip-mengjing-81013-drawing.jpg" alt="Dimension drawings of the MJT-81013 female and male" loading="lazy"><figcaption>MJT-81013 drawings. Female 4.60 × 2.05 × 1.15 mm on a 4.30 × 2.60 mm pad; male 8.10 × 2.05 × 1.20 mm on a 4.00 × 2.60 mm pad, tab 0.20 mm thick.</figcaption></figure>
+<figure><img src="edge-clip-gaodi-i059.jpg" alt="Gaodi Gd-I059 male and female terminals" loading="lazy"><figcaption>Gaodi Gd-I059: a second tool set for the same idea, sold for T5/T8 lamp boards.</figcaption></figure>
+</div>
+<div class="table-wrap"><table class="kv">
+<tr><th>maker</th><th>part</th><th>what it is</th><th>price per mated pair</th></tr>
+<tr><td>Keystone (USA)</td><td><a href="https://www.digikey.co.uk/en/product-highlight/k/keystone/smt-low-profile-printed-circuit-board-edge-connectors">6100 male / 6102 female</a></td><td>Reference. Gold over phosphor bronze, 10 A, tab 2.8 × 0.3 mm.</td><td class="p">≈ $1.1–1.2 at 1 k (6102 alone $0.58 at 1 k, $0.53 at 10 k at Mouser)</td></tr>
+<tr><td>MAC8 (Japan)</td><td>KO-2-1 / KC-2-1, HDA / HDB strips (<a href="https://en.sekorm.com/doc/537115399.html">KEO series sheet</a>)</td><td>Reference. Gold SMT pin and socket singles, and 1.27 / 2.54 mm strips, "for PCB parallel connection".</td><td class="p">HDA-1-1 (1.27 mm, 40-way pin strip) ¥780 JPY ≈ $5 each in tens (Monotaro)</td></tr>
+<tr><td>Shenzhen Mengjing 孟京科技</td><td><a href="https://detail.1688.com/offer/911510152446.html">MJT-81013 / MJT-810132</a></td><td><b>All metal</b>, stamped phosphor copper, tin. 3 A / 250 V, −45 to +125 °C, 270 °C reflow, tape and reel. The closest match to the gold originals.</td><td class="p">¥0.62 ≈ $0.09, MOQ 5–10 sets</td></tr>
+<tr><td>Shenzhen Boruisen 铂瑞森 (BRSEN)</td><td><a href="https://detail.1688.com/offer/1067755811760.html">MJT-81013</a></td><td>Same part numbers and price as Mengjing: almost certainly one source under two shop names.</td><td class="p">¥0.62 ≈ $0.09</td></tr>
+<tr><td>Dongguan Gaodi 高迪电子 (KOSODSWITCH)</td><td><a href="https://detail.1688.com/offer/856479368135.html">Gd-I059</a></td><td><b>All metal</b>, 1-way male and female for T5/T8 lamp boards, brass with tin.</td><td class="p">¥1.61 ≈ $0.22</td></tr>
+<tr><td>Shenzhen Mingyun 明韵电子 (MYUNDZ)</td><td><a href="https://detail.1688.com/offer/737330272539.html">81014 / 81014L</a></td><td>Same contacts in an LCP housing, 1 to 4 ways at 1.8 mm pitch, pin lengths 4.2 / 5.8 / 7.5 mm, 1 A / 125 V.</td><td class="p">¥0.36–0.88 ≈ $0.05–0.12 (1-way ¥0.40)</td></tr>
+<tr><td>Mengjing · Boruisen</td><td><a href="https://detail.1688.com/offer/1024332646333.html">81014, 1 to 4 ways</a></td><td>Housed pair: female 4.9 mm deep, male 8.9 mm, 2.5 mm high, 1 A, tin.</td><td class="p">¥0.40–0.67 ≈ $0.06–0.09</td></tr>
+<tr><td>Wenzhou Dufu 都富 · Wenzhou Yijian 一键</td><td><a href="https://detail.1688.com/offer/860556333600.html">BB2005</a> · <a href="https://detail.1688.com/offer/1076915516898.html">BB2005</a></td><td>Housed LED-board plug and socket pairs.</td><td class="p">¥0.10–0.12 ≈ $0.014–0.017</td></tr>
+<tr><td>Shaoxing Qianrui 千睿</td><td><a href="https://detail.1688.com/offer/646047785891.html">G15</a></td><td>Housed pair, 1.5 mm pitch.</td><td class="p">¥0.30 ≈ $0.04 at 10 k</td></tr>
+<tr><td>Yueqing Hongsen 宏森 · Dongguan Handa 汉达 · Zhongshan Yangde 扬德</td><td><a href="https://detail.1688.com/offer/815520620273.html">LED-strip pair</a> · <a href="https://detail.1688.com/offer/676251824690.html">pair</a> · <a href="https://detail.1688.com/offer/796113274268.html">pair</a></td><td>Pin-header-style board-to-board pairs for LED strips.</td><td class="p">¥0.08–0.53 ≈ $0.01–0.07</td></tr>
+<tr><td>Mingyun · Mengjing</td><td><a href="https://detail.1688.com/offer/689380560829.html">2060-style link</a> · <a href="https://detail.1688.com/offer/1087704020351.html">3-way</a></td><td>WAGO 2060-style board-to-board link pins: a loose bridge pushed into SMT sockets on both boards.</td><td class="p">¥0.20–0.40 ≈ $0.03–0.06</td></tr>
+<tr><td>Shenzhen Jiahongsheng 嘉洪盛 · Dongguan Saisite 赛思特 · Dongguan Deyoushi 得优仕 · Shenzhen Weilianda 伟联达 · Shenzhen Guangshengxin 广胜鑫</td><td><a href="https://detail.1688.com/offer/962536159982.html">strip</a> · <a href="https://detail.1688.com/offer/912221675137.html">strip</a> · <a href="https://detail.1688.com/offer/1033399685985.html">strip</a> · <a href="https://detail.1688.com/offer/1061715395869.html">strip</a> · <a href="https://detail.1688.com/offer/901816735656.html">strip</a></td><td>1.27 mm horizontal SMT pin headers and sockets: the cheap equivalent of MAC8's HDA / HDB strips, and the only version of this idea that reaches 1.27 mm pitch.</td><td class="p">¥0.05–0.30 ≈ $0.007–0.04 per strip or per pin as listed</td></tr>
+</table></div>
+<p>Caveats. These are lighting parts: tin plating, no stated mating-cycle life, and tolerances of ±0.15 to ±0.30 mm on the stamped bodies. Only two distinct all-metal tool sets turned up (the 81013 and the Gd-I059). The recommended pad is 2.60 mm wide, so 3.0 mm is about the tightest pitch. Listed 1688 prices are for small lots and usually fall with quantity.</p>
+
+<h2 id="custom">The custom "kiss slot" coupler</h2>
+<p>The custom part designed for V6 (write-ups: <em>V6_edge_coupler_connector_design</em> and <em>V6_edge_coupler_v2_kiss_slot</em> in the project). Same 1.27 mm, 70-way, 45.47 mm tongue as today's board, but half the length end to end, 5.0 mm thick instead of 8.9, and the two boards touch inside the housing. The same contact strip in a shorter housing gives the 2-way and 3-way versions in the table above.</p>
+<figure><img src="edge-fig1-today-vs-proposed.png" alt="Section of today's WingTAT straddle connector next to the proposed coupler" loading="lazy"><figcaption>Today's WingTAT HEE70LP03BK (18.3 mm end to end, boards 6.4 mm apart) and the proposed coupler (9.2 mm, boards touching). Each contact's two beams run the full housing height in opposite directions, side by side within the pitch, which is how a 9 mm part gets 6 mm springs.</figcaption></figure>
+<div class="two">
+<figure><img src="edge-chart1-force-stress.png" alt="Normal force and stress versus board thickness" loading="lazy"><figcaption>Normal force and beam stress against board thickness. Variant B (rest gap 0.30 mm) gives 1.6 mm boards 51–61 gf and a 0.8 mm board about 20 gf: "0.8 in a pinch".</figcaption></figure>
+<figure><img src="edge-chart2-insertion.png" alt="Insertion force versus bevel and bump radius" loading="lazy"><figcaption>Insertion force against bevel angle and bump radius. A square card edge is fine if the bump radius is 1 mm or more; with a 0.4 mm bump it jams.</figcaption></figure>
+</div>
+<div class="two">
+<figure><img src="edge-v2-sections.png" alt="Sections through the V2 kiss-slot STEP model" loading="lazy"><figcaption>Sections cut from the V2 STEP: lane-1 beam, lane-2 beam, and the comb of channels at mid-height.</figcaption></figure>
+<figure><img src="edge-fig3-card-tongue.png" alt="Card tongue layout for the kiss slot" loading="lazy"><figcaption>The module side: the existing 45.47 mm tongue shortened to 4.5 mm, 1.0 mm pads, 30° bevel optional.</figcaption></figure>
+</div>
+<p>Models: <a href="edge-coupler-variants-step.zip">all five variants side by side (STEP, 7 MB zip)</a>: today's WingTAT with cards, the 2.4 mm-web version, the kiss slot, a 7.8 mm short kiss slot and the 0.8 mm sister housing. Estimated cost at 10 k a year: $2.7–4.2 in BeCu, $1.5–2.6 in phosphor bronze (which needs about 0.5 mm more height), against $2.15 for the WingTAT; tooling $13–25 k. The point is size and the touching boards, not price.</p>
+
+<h2 id="normalling">Shorted-when-empty ("normalling") connectors</h2>
+<p>A card-edge connector whose two rows of contacts touch each other when the slot is empty and are spread onto the two faces of the card when one is inserted. It exists as a technique (telecom DSX patch bays call it <em>normalling</em>, the patents say <em>make-before-break</em> or <em>switching</em> contacts) but not as a current catalog part at any fine pitch. Everything that covered it has expired:</p>
 <div class="table-wrap"><table class="kv">
 <tr><td><a href="https://patents.google.com/patent/US4087151">US 4,087,151</a></td><td>Magnetic Controls / ADC, 1977</td><td>second "normalling" hump on each contact rests against its opposite number; the card touches the first hump before spreading the second (make-before-break)</td></tr>
 <tr><td><a href="https://patents.google.com/patent/US4514030">US 4,514,030</a></td><td>Methode, 1983</td><td>three contact points per beam, the innermost shorts to the opposing contact</td></tr>
@@ -121,141 +183,311 @@
 <tr><td><a href="https://patents.google.com/patent/US5286215">US 5,286,215</a></td><td>ADC Telecommunications, 1992</td><td>normally-closed arms plus separate normally-open entrance springs</td></tr>
 <tr><td><a href="https://patents.google.com/patent/US6764345B1/en">US 6,764,345</a></td><td>Tyco, 2003</td><td>dual shorting contacts in BeCu, mate-before-break</td></tr>
 </table></div>
-<p>The only card-edge part with evidence of doing it is vintage: a <a href="https://synth-diy.org/pipermail/synth-diy/2022-March/170395.html">synth-diy thread</a> about a Buchla 208 built with an Amphenol <b>225-22821-110</b> (0.156" pitch, 2 × 28) whose opposing contacts touch when empty; the common 225-22821-<b>101</b> does not, so -110 may be the normalling variant — no datasheet surfaced. Surplus 225-series parts run <a href="https://www.tedss.com/2025009664">$30–50 each</a>. For the custom coupler: just letting the bumps touch gives a 2 gf "short" and 96 % of yield at 1.70 mm; a real 10–15 gf normalled path costs ~1.5 mm of height (7–7.5 mm beams), and the patents' third-spring approach is the only way to get 20 gf without paying in height. In the kiss slot an empty end would join a card's front pad n to its own back pad n — a loop-back, not a pass-through; pass-through-when-empty belongs on a single-slot connector on the main board.</p>
+<p>The only card-edge part with evidence of doing it is vintage: a <a href="https://synth-diy.org/pipermail/synth-diy/2022-March/170395.html">synth-diy thread</a> about a Buchla 208 built with an Amphenol <b>225-22821-110</b> (0.156" pitch, 2 × 28) whose opposing contacts touch when empty; the common 225-22821-<b>101</b> does not, so -110 may be the normalling variant, though no datasheet surfaced. Surplus 225-series parts run <a href="https://www.tedss.com/2025009664">$30–50 each</a>. For the custom coupler: just letting the bumps touch gives a 2 gf "short" and 96 % of yield at 1.70 mm; a real 10–15 gf normalled path costs about 1.5 mm of height (7–7.5 mm beams), and the patents' third-spring approach is the only way to get 20 gf without paying in height. In the kiss slot an empty end would join a card's front pad n to its own back pad n, which is a loop-back and not a pass-through; pass-through-when-empty belongs on a single-slot connector on the main board.</p>
 
-<h2>Not card edge, for reference</h2>
-<p>From the market survey (Oct 2026, LCSC/DigiKey/Alibaba listings): a 70-way link done with an FFC and two 0.5 mm flip-lock ZIFs costs about <b>$0.50–0.70</b> (XUNPU FPC-05FB-60PH20 $0.20 at 1.5 k, 60-way 50 mm FFC $0.10 at 5 k; ZIFs are rated for ~20 mating cycles); a 1.27 mm 2 × 40 header pair about $0.5–0.8; a gold-wire zebra strip plus clamp $0.05–1 for the strip (500-actuation spec); discrete Chinese pogo pins $0.10–0.28 each at 1 k, so $7+ per 70 contacts; Mill-Max pogos $0.56–0.92 each. Branded 1.0/1.27 mm card-edge sockets (Samtec MEC1 80-pos, TE) are $3.3–6.3 at 1 k. Resin in an LCP housing is ~$0.02; gold metal on 70 selectively plated contacts ~$0.2–0.4; a 2-cavity housing tool in China $8–15 k.</p>
+<h2 id="other">Not card edge, for reference</h2>
+<p>From the market survey (Oct 2026, LCSC / DigiKey / Alibaba listings): a 70-way link done with an FFC and two 0.5 mm flip-lock ZIFs costs about <b>$0.50–0.70</b> (XUNPU FPC-05FB-60PH20 $0.20 at 1.5 k, 60-way 50 mm FFC $0.10 at 5 k; ZIFs are rated for about 20 mating cycles); a 1.27 mm 2 × 40 header pair about $0.5–0.8; a gold-wire zebra strip plus clamp $0.05–1 for the strip (500-actuation spec); discrete Chinese pogo pins $0.10–0.28 each at 1 k, so $7 or more per 70 contacts; Mill-Max pogos $0.56–0.92 each. Resin in an LCP housing is about $0.02; gold on 70 selectively plated contacts about $0.2–0.4; a 2-cavity housing tool in China $8–15 k. Also looked at and set aside: Amphenol Mini Cool Edge (0.6 mm, caged, $3.01 at 2.8 k, 15-week lead), Hirose FX27 (floating, 22 mm tall), Samtec MEC5-RA (11.4 mm deep).</p>
 
 <h2>Sources</h2>
 <div class="srcs" id="srcs"></div>
 <hr>
-<p class="muted">Built 22 Nov 2026 from datasheets, distributor listings, the V6 connector write-ups and two market surveys. Product photos are loaded from the vendors' sites; where one does not load, the plan view is the picture.</p>
+<p class="muted">Built 22 Nov 2026 from makers' drawings, distributor and 1688 listings, the V6 connector write-ups and two market surveys. Most product photos load from the vendors' sites; where one does not, the plan view in the table is the picture.</p>
 </main>
 
 <script>
 // ---------------------------------------------------------------- data
-// orient: coplanar (straddle / coupler: boards in one plane), vertical (card stands up off the host), stacked (card lies over the host, M.2 style)
-// len(nPerSide): connector body length in mm for n contacts per side (dual-row) — end = body length minus (n-1)*pitch of the representative part
-// host: depth of the footprint / pad field on the host board (mm); gap: air between host edge and module edge on a coplanar joint; tongue: module insertion depth
-// price: USD for the representative part at the stated quantity
+// orient: coplanar (straddle / coupler: boards in one plane), vertical (card stands up off the host),
+//         stacked (card parallel to the host but raised: right-angle socket or M.2)
+// length: fixedLen, or len(nPerRow), or (nPerRow-1)*pitch + end
+// host: legs / footprint depth on the host board; gap: host edge to card tip (coplanar); tongue: module depth used; z: stand-off height
+// sizes: contacts per row the maker offers; fixedPos: the part comes in one size only
+// price: USD for repPos contacts at priceQty
+const S = "https://suddendocs.samtec.com/kineticimages/images/product/parts/";
 const OPTIONS = [
-  {id:"wingtat", name:"WingTAT HEE70LP03BK (today)", maker:"WingTAT 永达", family:"today", pitch:1.27, rows:2, repPos:70, posRange:"10–100", thk:[1.6],
-   orient:"coplanar", geomNote:"straddle: host edge in the solder-tail fork, card in the slot", end:50.55-34*1.27, host:4.3, gap:6.4, tongue:7.62, height:14.0+4.3, width:8.88,
-   cycles:"30 (3 µin Au)", plating:"3 µin Au flash", price:2.15, priceQty:"1,100", priceSrc:"https://www.lcsc.com/product-detail/C5448235.html",
-   links:[["LCSC C5448235","https://www.lcsc.com/product-detail/C5448235.html"],["datasheet","https://www.lcsc.com/datasheet/C5448235.pdf"]],
+  {id:"wingtat", name:"WingTAT HEE70LP03BK (today)", maker:"WingTAT 永達", family:"today", pitch:1.27, rows:2, repPos:70, posRange:"4–200, any even count", thk:["1.6"],
+   orient:"coplanar", geomNote:"straddle: host edge in the solder-tail fork, card in the slot", end:7.37, host:4.3, gap:6.38, tongue:7.62, z:8.88,
+   cycles:"about 30 (3 µin Au)", plating:"3 µin Au flash (up to 15 µin)", price:2.15, priceQty:"1,100 (LCSC)",
+   links:[["LCSC C5448235","https://www.lcsc.com/product-detail/C5448235.html"],["datasheet","https://www.lcsc.com/datasheet/C5448235.pdf"],["20-way, LCSC C5448210","https://www.lcsc.com/product-detail/C5448210.html"]],
    img:"https://assets.lcsc.com/images/lcsc/900x900/20230630_WingTAT-HEE70LP03BK_C5448235_front.jpg",
-   note:"What V5 uses as an unsoldered coupler, flipped either way. 18.3 mm end to end; the solder tails act as a second (very stiff) edge contact."},
-  {id:"kiss", name:"Custom kiss-slot coupler (V2)", maker:"Fulimei (custom)", family:"custom", pitch:1.27, rows:2, repPos:70, posRange:"any", thk:[1.6,"0.8 in a pinch"],
-   orient:"coplanar", geomNote:"symmetric through-slot coupler, both boards' tongues meet inside", end:50.55-34*1.27, host:4.5, gap:0.2, tongue:4.5, height:9.2, width:5.0,
-   cycles:"200+ (15–30 µin Au)", plating:"selective hard Au 0.38–0.76 µm", price:3.4, priceQty:"est. 10 k/yr, BeCu", priceSrc:"#custom",
-   links:[["design write-up (project)","#"],["STEP models","edge-coupler-variants-step.zip"]],
+   note:"What V5 uses as an unsoldered coupler, flipped either way. 18.3 mm end to end; the solder tails act as a second, very stiff edge contact. The 20-way is $0.74 in ones."},
+  {id:"kiss", name:"Custom kiss-slot coupler (V2)", maker:"Fulimei (custom)", family:"custom", pitch:1.27, rows:2, repPos:70, posRange:"any", thk:["1.6","0.8 in a pinch"],
+   orient:"coplanar", geomNote:"symmetric through-slot coupler, both boards' tongues meet inside", end:7.37, host:4.5, gap:0.2, tongue:4.5, z:5.0,
+   cycles:"200+ (15–30 µin Au)", plating:"selective hard Au 0.38–0.76 µm", price:3.4, priceQty:"est., 10 k a year, BeCu",
+   links:[["STEP models","edge-coupler-variants-step.zip"]],
    img:"edge-variants-iso.png",
-   note:"BeCu 0.25 mm crossed beams, 6 mm lever, rest gap 0.30: 51–61 gf on 1.6 mm boards, ~20 gf on 0.8 mm. Boards touch (0.2 mm). Same strip in a shorter housing for the 2- and 3-way splits (length = (n−1)×1.27 + 7.4)."},
-  {id:"kiss08", name:"Custom kiss-slot, 0.8 mm sister", maker:"Fulimei (custom)", family:"custom", pitch:1.27, rows:2, repPos:70, posRange:"any", thk:[0.8],
-   orient:"coplanar", geomNote:"same contacts, narrow slot core", end:50.55-34*1.27, host:4.5, gap:0.2, tongue:4.5, height:9.2, width:5.0,
-   cycles:"200+", plating:"selective hard Au", price:3.4, priceQty:"est.", priceSrc:"#custom", links:[["STEP models","edge-coupler-variants-step.zip"]], img:"edge-variants-iso.png",
-   note:"~30 gf on 0.8 mm boards; one slot-core insert change on the same mould."},
+   note:"BeCu 0.25 mm crossed beams, 6 mm lever, rest gap 0.30: 51–61 gf on 1.6 mm boards, about 20 gf on 0.8 mm. Boards 0.2 mm apart. Same strip in a shorter housing for the 2- and 3-way splits; one housing with a divider wall would fit 2 × 34 in the same length."},
+  {id:"kiss08", name:"Custom kiss-slot, 0.8 mm sister", maker:"Fulimei (custom)", family:"custom", pitch:1.27, rows:2, repPos:70, posRange:"any", thk:["0.8"],
+   orient:"coplanar", geomNote:"same contacts, narrow slot core", end:7.37, host:4.5, gap:0.2, tongue:4.5, z:5.0,
+   cycles:"200+", plating:"selective hard Au", price:3.4, priceQty:"est.", links:[["STEP models","edge-coupler-variants-step.zip"]], img:"edge-variants-iso.png",
+   note:"About 30 gf on 0.8 mm boards; one slot-core insert change on the same mould."},
 ];
-// filled from the two surveys (catalog brands; Chinese makers) — see the cards for sources
-const SURVEY = [];
-</script>
-<script id="survey-data">
-/* SURVEY_DATA_PLACEHOLDER */
-</script>
-<script>
+const SURVEY = [
+  // ---- coplanar (straddle / edge mount)
+  {id:"xkb3126", name:"XKB X3126WS-36 (PCIe ×1 straddle)", maker:"XKB 星坤 (Shenzhen)", family:"cn", pitch:1.0, rows:2, fixedPos:36, fixedLen:34.8, repPos:36, posRange:"36 / 64 / 98 / 164", thk:["1.6"],
+   orient:"coplanar", geomNote:"straddle: 4.4 mm legs on the host edge, 7.6 mm body hangs off it", host:4.4, gap:2.0, tongue:5.6, z:8.8, approx:"gap and tongue",
+   cycles:"50 (PCIe CEM spec)", plating:"selective Au: flash, 15 or 30 µin", price:0.565, priceQty:"1 (LCSC)", priceCny:"4.07",
+   links:[["LCSC C5711235","https://lcsc.com/product-detail/Card-Edge-Connectors_XKB-Connection-X3126WS-36-9TV01_C5711235.html"],["drawing","https://datasheet.lcsc.com/datasheet/pdf/5d257980edb4d0d17147cf4a83c0a0bd.pdf"],["UMAX 3126, LCSC C404097","https://www.lcsc.com/product-detail/C404097.html"],["Samtec PCIE-036 EMS2","https://www.samtec.com/products/pcie-036-02-f-d-ems2"]],
+   img:"https://assets.lcsc.com/images/lcsc/900x900/20230430_XKB-Connection-X3126WS-36-9TV01_C5711235_blank.jpg",
+   note:"Cheapest coplanar part found. PCIe ×1 pad pattern with its key (11 + 25 pads a side). The body is 25.0 mm; the stock part has Ø2.2 screw ears that take it to 34.8, so two do not fit a 51 mm edge unless XKB will supply it without ears (two bodies need 52 mm). UMAX 3126 is the same thing ($0.90 at 1 k for the 98-way); Samtec PCIE-036-02-F-D-EMS2 is the earless branded one, 25.0 mm, $2.09 at 1 k."},
+  {id:"hsec8em", name:"Samtec HSEC8-EM (0.8 mm edge mount)", maker:"Samtec", family:"brand", pitch:0.8, rows:2, repPos:40, sizes:[10,20,30,40,50,60], len:n=>n*0.8+(n>=40?18.4:15.2), posRange:"20–120", thk:["1.6"],
+   orient:"coplanar", geomNote:"straddle: 5.0 mm legs on both faces of the host edge, 7.8 mm body hangs off it", host:5.0, gap:2.0, tongue:5.8, z:7.0, approx:"gap and tongue",
+   cycles:"1,000 (extended-durability report)", plating:"10 µin Au", price:4.12, priceQty:"1,000 (40-way)",
+   links:[["Samtec HSEC8-EM","https://www.samtec.com/products/hsec8-120-01-l-d-em2"],["catalog page","https://suddendocs.samtec.com/catalog_english/hsec8_em.pdf"]],
+   img:S+"batch_04_mar_2025/23d-libs/samtec/modelling/hsec8_em/hsec8-120-01-l-d-em2.png",
+   note:"Shortest strip of the branded straddle parts (12.8 mm), but the clamp ears add 15–18 mm to the length."},
+  {id:"mec8em", name:"Samtec MEC8-EM (0.8 mm edge mount)", maker:"Samtec", family:"brand", pitch:0.8, rows:2, repPos:40, sizes:[10,20,30,40,50,60,70], len:n=>n*0.8+7.8, posRange:"20–140", thk:["1.6","1.0"],
+   orient:"coplanar", geomNote:"straddle: 5.0 mm legs on both faces of the host edge, 8.5 mm body hangs off it", host:5.0, gap:2.0, tongue:6.5, z:7.0, approx:"gap",
+   cycles:"100 (10 µin Au)", plating:"10 µin Au", price:3.90, priceQty:"1,000 (40-way)",
+   links:[["Samtec MEC8-EM","https://www.samtec.com/products/mec8-120-02-l-d-em2"],["catalog page","https://suddendocs.samtec.com/catalog_english/mec8_em.pdf"]],
+   img:"https://cms.samtec-cdn.net/series/mec8_em_thumb_c7b24528d7.png",
+   note:"The most compact branded coupler: the strip is 13.5 mm (legs + body), 70 contacts in 35.8 mm of edge. Where the card bottoms inside the body is not on the catalog page, so the 2 mm gap is an estimate. The -01 slot takes a 1.0 mm card."},
+  {id:"mec1em", name:"Samtec MEC1-EM (1.0 mm edge mount)", maker:"Samtec", family:"brand", pitch:1.0, rows:2, repPos:40, sizes:[5,8,20,30,40,50,60,70], len:n=>(n+2)*1.0+12.45, posRange:"10–140", thk:["1.6"],
+   orient:"coplanar", geomNote:"straddle: 4.7 mm legs on the host edge, 8.89 mm body hangs off it", host:4.7, gap:2.0, tongue:6.9, z:8.13, approx:"gap and tongue",
+   cycles:"500", plating:"10 µin Au or flash, phosphor bronze", price:4.00, priceQty:"1,000 (40-way)",
+   links:[["Samtec MEC1-EM","https://www.samtec.com/products/mec1-120-02-l-d-em2"],["catalog page","https://suddendocs.samtec.com/catalog_english/mec1_em.pdf"]],
+   img:S+"mec1_em/mec1-120-02-l-d-em2.png",
+   note:"-EM1 clamps a 0.8 mm host board and -EM2 a 1.6 mm one; the card is 1.6 mm either way. Clamp ears add 12.45 mm to the length."},
+  // ---- vertical
+  {id:"hsec8dv", name:"Samtec HSEC8-DV (0.8 mm vertical)", maker:"Samtec", family:"brand", pitch:0.8, rows:2, repPos:40, sizes:[10,13,20,25,30,37,40,49,50,60,70,80,100], len:n=>n*0.8+(n>=40?7.8:4.6), posRange:"18–200", thk:["1.6"],
+   orient:"vertical", geomNote:"vertical SMT, body 5.8 mm wide", host:7.6, tongue:6.4, z:7.98,
+   cycles:"1,000–2,500 by plating", plating:"10 µin Au (30 µin option)", price:2.36, priceQty:"924 (40-way)",
+   links:[["Samtec HSEC8-DV","https://www.samtec.com/products/hsec8-120-01-l-dv-a"],["catalog page","https://suddendocs.samtec.com/catalog_english/hsec8_dv.pdf"]],
+   img:S+"hsec8/hsec8-120-01-l-dv-a.png",
+   note:"Narrowest and cheapest Samtec 0.8 mm socket and the highest cycle rating. 13 a row (26 contacts, 15.0 mm) suits the 3-way split."},
+  {id:"solepin61c1", name:"Solepin 61C1 (0.8 mm vertical, any count)", maker:"Solepin 硕品 (Dongguan)", family:"cn", pitch:0.8, rows:2, repPos:40, end:8.6, posRange:"6–200, any even count", thk:["1.6"],
+   orient:"vertical", geomNote:"vertical SMT with posts, body 5.6 mm wide; Samtec HSEC8-compatible", host:7.4, tongue:6.4, z:7.8,
+   cycles:"not stated", plating:"Au 1–30 µin over Ni", price:null, priceQty:"ask; singles on 1688",
+   links:[["Solepin 61C1","https://www.solepin.com/Product/jinshouzhi/0-80mm-pitch-series/hsec8.html"],["drawing","https://www.solepin.com/uploads/soft/20211204/1-211204130I0504.pdf"]],
+   img:"https://www.solepin.com/uploads/allimg/20231202/1-231202143H3941.png",
+   note:"Not on LCSC. Any pin count is the point: 24 contacts in 17.4 mm, 36 in 22.2 mm. 3 A a pin, LCP, 10–15 day lead. Factory contact is on the product page."},
+  {id:"oupiin8208", name:"Oupiin 8208-2 (0.8 mm vertical, slim)", maker:"Oupiin 歐品 (Kunshan)", family:"cn", pitch:0.8, rows:2, repPos:40, sizes:[10,20,30,35], end:5.4, posRange:"20 / 40 / 60 / 70", thk:["1.6"],
+   orient:"vertical", geomNote:"vertical SMT, body 5.5 mm wide", host:7.3, tongue:5.66, z:8.65,
+   cycles:"not stated", plating:"Au flash to 30 µin, selective", price:null, priceQty:"ask",
+   links:[["Oupiin 8208-2","https://www.oupiin.com/product_3i.php?id=123"],["drawing","https://www.oupiin.com/upload/docDB/20250122145242RcMv.pdf"]],
+   img:"https://www.oupiin.com/upload/goodsClass1/20200317151651cZad.webp",
+   note:"Narrowest 0.8 mm vertical body found. 70 contacts in 32.6 mm. 1.8 A. Not on LCSC."},
+  {id:"oupiin8206", name:"Oupiin 8206-2 (0.8 mm vertical)", maker:"Oupiin 歐品 (Kunshan)", family:"cn", pitch:0.8, rows:2, repPos:20, sizes:[10,20,30,40], end:5.4, posRange:"20 / 40 / 60 / 80", thk:["1.6"],
+   orient:"vertical", geomNote:"vertical SMT, body 7.0 mm wide; a MEC8-DV look-alike", host:8.8, tongue:5.55, z:7.8,
+   cycles:"not stated", plating:"Au 10 or 30 µin", price:2.40, priceQty:"1,000 (20-way, DigiKey)", priceCny:"17.3",
+   links:[["Oupiin 8206-2","https://www.oupiin.com/product_3i.php?id=117"],["drawing","https://www.oupiin.com/upload/docDB/202504111409035B8a.pdf"]],
+   img:"https://mm.digikey.com/Volume0/opasdata/d220001/derivates/1/003/213/431/MFG_8206-2X10C30DPT-S_sml%28200x200%29.jpg",
+   note:"3.1 A a pin. DigiKey stocks the 2 × 10; the rest of the family is a factory quote, which should come in well under the price scaled here."},
+  {id:"mec8dv", name:"Samtec MEC8-DV (0.8 mm vertical)", maker:"Samtec", family:"brand", pitch:0.8, rows:2, repPos:40, sizes:[10,20,30,40,50,60,70], len:n=>n*0.8+(n>=40?7.8:4.6), posRange:"20–140", thk:["1.6","1.0"],
+   orient:"vertical", geomNote:"vertical SMT, body 7.0 mm wide", host:8.8, tongue:6.5, z:8.5,
+   cycles:"100 (10 µin Au)", plating:"10 µin Au", price:3.89, priceQty:"936 (40-way)",
+   links:[["Samtec MEC8-DV","https://www.samtec.com/products/mec8-120-02-l-dv-a"],["catalog page","https://suddendocs.samtec.com/catalog_english/mec8_dv.pdf"]],
+   img:S+"mec8_dv/mec8-120-02-l-dv-a.png",
+   note:"The -01 slot takes a 1.0 mm card."},
+  {id:"mec6dv", name:"Samtec MEC6-DV (0.635 mm vertical)", maker:"Samtec", family:"brand", pitch:0.635, rows:2, repPos:40, sizes:[10,20,30,40,50,60,70], len:n=>n*0.635+(n>=50?7.94:4.77), posRange:"20–140", thk:["1.6"],
+   orient:"vertical", geomNote:"vertical SMT, body 7.0 mm wide", host:8.8, tongue:6.5, z:8.5,
+   cycles:"100", plating:"10 µin Au", price:3.39, priceQty:"936 (40-way)",
+   links:[["Samtec MEC6-DV","https://www.samtec.com/products/mec6-120-02-l-dv-a"],["catalog page","https://suddendocs.samtec.com/catalog_english/mec6_dv.pdf"],["LCSC C4681103","https://www.lcsc.com/product-detail/C4681103.html"]],
+   img:S+"mec6_dv/mec6-120-02-l-dv-a.png",
+   note:"Shortest 40-contact vertical socket (17.5 mm). No size between 20 and 40 contacts, so a 3-way split wastes 16 a connector."},
+  {id:"mec5dv", name:"Samtec MEC5-DV (0.5 mm vertical)", maker:"Samtec", family:"brand", pitch:0.5, rows:2, repPos:80, sizes:[30,40,50,60,70,80,90,100], len:n=>({30:21.63,40:26.63,50:34.13})[n]??n*0.5+9.13, posRange:"60–200", thk:["1.6"],
+   orient:"vertical", geomNote:"vertical, SMT contacts with weld tabs, body 4.6 mm wide", host:6.4, tongue:5.5, z:10.25,
+   cycles:"100", plating:"10 µin Au", price:4.87, priceQty:"900 (80-way, LCSC)",
+   links:[["Samtec MEC5-DV","https://www.samtec.com/products/mec5-030-01-l-dv-w1-k"],["catalog page","https://suddendocs.samtec.com/catalog_english/mec5_dv.pdf"],["LCSC C6590951","https://www.lcsc.com/product-detail/C6590951.html"]],
+   img:"https://assets.lcsc.com/images/lcsc/900x900/20250705_Samtec-MEC5-040-01-L-DV-W1-K-TR_C6590951_front.jpg",
+   note:"Narrowest body of all, but 10.25 mm tall, 60 contacts minimum, 1.5 A, and 0.5 mm fingers need tight PCB tolerances."},
+  {id:"mec1dv", name:"Samtec MEC1 (1.0 mm vertical)", maker:"Samtec", family:"brand", pitch:1.0, rows:2, repPos:40, sizes:[5,8,10,20,30,40,50,60,70], len:n=>(n+2)*1.0, posRange:"10–140", thk:["1.6","0.8"],
+   orient:"vertical", geomNote:"vertical SMT, footprint 8.51 mm wide", host:8.51, tongue:8.89, z:9.04,
+   cycles:"500", plating:"10 µin Au or flash", price:3.43, priceQty:"1,000 (40-way)",
+   links:[["Samtec MEC1","https://www.samtec.com/products/mec1-120-02-l-d-a"],["catalog page","https://suddendocs.samtec.com/catalog_english/mec1.pdf"]],
+   img:S+"mec1/mec1-120-02-l-d-a.png",
+   note:"The -01 slot takes a 0.8 mm card. 2.2 A."},
+  {id:"mecf", name:"Samtec MECF-DV (1.27 mm vertical)", maker:"Samtec", family:"brand", pitch:1.27, rows:2, repPos:40, sizes:[5,8,20,30,40,50], len:n=>n*1.27+4.11, posRange:"10–100", thk:["1.6"],
+   orient:"vertical", geomNote:"vertical SMT with weld tabs, body 5.6 mm wide", host:7.4, tongue:7.0, z:8.5,
+   cycles:"100", plating:"10 µin Au", price:4.06, priceQty:"1,000 (40-way)",
+   links:[["Samtec MECF","https://www.samtec.com/products/mecf-20-01-l-dv-wt"],["catalog page","https://suddendocs.samtec.com/catalog_english/mecf.pdf"],["80-way, LCSC C4541130","https://www.lcsc.com/product-detail/C4541130.html"]],
+   img:S+"mecf/parts/mecf-20-01-l-dv-wt.png",
+   note:"Today's pitch in a body half as tall. 3.5 A contacts. LCSC has the 80-way at $2.68 (1 k). Solepin 66F6 is the Chinese compatible in any count."},
+  {id:"oupiin8406", name:"Oupiin 8406 (1.0 mm vertical, 38-way keyed)", maker:"Oupiin 歐品 (Kunshan)", family:"cn", pitch:1.0, rows:2, fixedPos:38, fixedLen:24.5, repPos:38, posRange:"38 only (2 × 19)", thk:["1.6"],
+   orient:"vertical", geomNote:"vertical SMT with posts, body 7.5 mm wide", host:9.3, tongue:8.5, z:8.8,
+   cycles:"not stated", plating:"Au flash", price:null, priceQty:"ask",
+   links:[["Oupiin 8406","https://www.oupiin.com/product_3i.php?id=127"],["drawing","https://www.oupiin.com/upload/docDB/202501221449272S1K.pdf"]],
+   img:"https://www.oupiin.com/upload/goodsClass1/20200317151651cZad.webp",
+   note:"One size only, keyed 7 + 12 a row so it cannot go in backwards. Two give 76 contacts in 51 mm. 1.1 A."},
+  {id:"pciex1v", name:"PCIe ×1 vertical socket (Amphenol / XKB / Fushu)", maker:"Amphenol ICC · XKB 星坤 · Dongguan Fushu 富庶", family:"cn", pitch:1.0, rows:2, fixedPos:36, fixedLen:27.0, repPos:36, posRange:"36 (×1); 64 / 98 / 164", thk:["1.6"],
+   orient:"vertical", geomNote:"vertical, through-hole or SMT, body 8.8 mm wide", host:8.8, tongue:8.0, z:11.25, approx:"tongue",
+   cycles:"50 (PCIe CEM spec)", plating:"Au flash, 15 or 30 µin", price:0.41, priceQty:"2,100 (Amphenol, DigiKey)",
+   links:[["Amphenol 10018783-10110TLF","https://www.digikey.com/en/products/detail/amphenol-cs-fci/10018783-10110TLF/1002287"],["XKB X1611WVS, LCSC C21263079","https://www.lcsc.com/product-detail/C21263079.html"],["Fushu, Made-in-China","https://fushuelectronic.en.made-in-china.com/product/sRZpVPouAAcS/China-1-0mm-Straight-DIP-to-PCB-PCI-Express-Card-Slot-Connector.html"]],
+   img:"https://assets.lcsc.com/images/lcsc/900x900/20240727_XKB-Connection-X1611WVS-36-9TV01_C21263079_front.jpg",
+   note:"An open standard, so the cheapest gold card-edge socket there is: Amphenol $0.41 (2.1 k), XKB's SMT clone $0.47 (1.4 k), Dongguan Fushu ¥0.72–5.4 ($0.10–0.75) at 1 k. 11 mm tall; the key splits the card into 11 + 25 pads a side."},
+  {id:"wingtathed", name:"WingTAT HED (1.27 mm vertical, through-hole)", maker:"WingTAT 永達", family:"cn", pitch:1.27, rows:2, repPos:40, end:7.37, posRange:"4–200, any even count", thk:["1.6"],
+   orient:"vertical", geomNote:"vertical through-hole, body 8.88 mm wide", host:8.88, tongue:7.62, z:14.0,
+   cycles:"about 30 (3 µin Au)", plating:"3 µin Au standard", price:1.13, priceQty:"850 (40-way, LCSC)",
+   links:[["LCSC C5448171","https://www.lcsc.com/product-detail/C5448171.html"],["drawing","https://datasheet.lcsc.com/datasheet/pdf/d99332832e1a1ebddb5d9069587ae4c4.pdf"],["EDAC 302","https://edac.net/series/302"],["Sullins ACB20DHHD, LCSC","https://www.lcsc.com/product-detail/C5000565.html"]],
+   img:"https://assets.lcsc.com/images/lcsc/900x900/20231103_WingTAT-HED40LP03BK_C5448171_front.jpg",
+   note:"Today's contact in a vertical body. Dimensionally an EDAC 302 at a quarter of the price (EDAC 302-040 $4.16, Sullins ACB20DHHD $4.84 at 1 k)."},
+  // ---- parallel, raised (right-angle sockets, M.2, mini PCIe)
+  {id:"oupiin8208b", name:"Oupiin 8208-B (0.635 mm right angle, 3.7 mm high)", maker:"Oupiin 歐品 (Kunshan)", family:"cn", pitch:0.635, rows:2, repPos:20, end:3.8, posRange:"2 × 10 documented; other counts by part number", thk:["1.6"],
+   orient:"stacked", geomNote:"right-angle SMT with post and lock; card parallel to the host", host:9.1, tongue:6.5, z:3.7, approx:"tongue; length beyond 2 × 10",
+   cycles:"not stated", plating:"Au 10 or 30 µin", price:null, priceQty:"ask",
+   links:[["Oupiin 8208-B","https://www.oupiin.com/product_3i.php?id=904"],["drawing","https://www.oupiin.com/upload/docDB/20250221113740A8RM.pdf"]],
+   img:"https://www.oupiin.com/upload/goodsClass1/20200317151651cZad.webp",
+   note:"Lowest profile and smallest body found: 9.5 × 9.1 × 3.7 mm for 20 contacts. 1.8 A. Only the 2 × 10 has a public drawing; longer lengths here follow the same formula."},
+  {id:"mec6ra", name:"Samtec MEC6-RA (0.635 mm right angle)", maker:"Samtec", family:"brand", pitch:0.635, rows:2, repPos:40, sizes:[10,20,30,40,50], len:n=>n*0.635+3.17, posRange:"20–100", thk:["1.6"],
+   orient:"stacked", geomNote:"right-angle SMT, 7.4 mm body, 9.1 mm with tails; card 1 mm above the host", host:9.1, tongue:6.5, z:5.78,
+   cycles:"100", plating:"10 µin Au", price:4.40, priceQty:"960 (40-way)",
+   links:[["Samtec MEC6-RA","https://www.samtec.com/products/mec6-120-02-l-d-ra1"],["catalog page","https://suddendocs.samtec.com/catalog_english/mec6_ra.pdf"]],
+   img:S+"mec6_ra/mec6-120-02-l-d-ra1.png",
+   note:"Smallest branded right-angle body: 15.9 × 7.4 mm for 40 contacts."},
+  {id:"mec8ra", name:"Samtec MEC8-RA (0.8 mm right angle)", maker:"Samtec", family:"brand", pitch:0.8, rows:2, repPos:40, sizes:[10,13,20,25,30,37,40,49,50], len:n=>n*0.8+6.2, posRange:"20–100", thk:["1.6","1.0"],
+   orient:"stacked", geomNote:"right-angle SMT, 7.4 mm body, 9.1 mm with tails", host:9.1, tongue:6.5, z:5.77,
+   cycles:"100", plating:"10 µin Au", price:3.81, priceQty:"936 (40-way)",
+   links:[["Samtec MEC8-RA","https://www.samtec.com/products/mec8-120-02-l-d-ra1"],["catalog page","https://suddendocs.samtec.com/catalog_english/mec8_ra.pdf"],["60-way, LCSC C5040736","https://www.lcsc.com/product-detail/C5040736.html"]],
+   img:"https://assets.lcsc.com/images/lcsc/900x900/20251128_Samtec-MEC8-130-02-L-D-RA1-TR_C5040736_front.jpg",
+   note:"13 a row (26 contacts) suits the 3-way split. Length includes the weld tabs."},
+  {id:"hsec8ra", name:"Samtec HSEC8-RA (0.8 mm right angle)", maker:"Samtec", family:"brand", pitch:0.8, rows:2, repPos:40, sizes:[10,13,20,25,30,40,49,50,60], len:n=>n*0.8+8.61, posRange:"18–120", thk:["1.6"],
+   orient:"stacked", geomNote:"right-angle SMT, 9.3 mm body, 12.05 mm with tails", host:12.05, tongue:6.4, z:5.2,
+   cycles:"1,000 (extended-durability report)", plating:"10 µin Au", price:3.72, priceQty:"1,000 (40-way)",
+   links:[["Samtec HSEC8-RA","https://www.samtec.com/products/hsec8-120-01-l-ra"],["catalog page","https://suddendocs.samtec.com/catalog_english/hsec8_ra.pdf"]],
+   img:S+"hsec8_ra/hsec8-120-01-l-ra.png",
+   note:"Lowest branded right-angle part at 5.2 mm, but deep."},
+  {id:"mec1ra", name:"Samtec MEC1-RA (1.0 mm right angle)", maker:"Samtec", family:"brand", pitch:1.0, rows:2, repPos:40, sizes:[5,8,20,30,40,50,60,70], len:n=>(n+2)*1.0+2.54, posRange:"10–140", thk:["1.6"],
+   orient:"stacked", geomNote:"right-angle through-hole, 8.89 mm body, 11.96 mm with tails", host:11.96, tongue:8.89, z:6.81,
+   cycles:"500", plating:"10 µin Au or flash", price:3.72, priceQty:"1,000 (40-way)",
+   links:[["Samtec MEC1-RA","https://www.samtec.com/products/mec1-120-02-l-d-ra1-sl"],["catalog page","https://suddendocs.samtec.com/catalog_english/mec1_ra.pdf"]],
+   img:S+"mec1_ra/mec1-120-02-l-d-ra1-sl.png",
+   note:"Card sits about 5 mm above the host."},
+  {id:"m2", name:"M.2 socket, 67 contacts (Foxconn / Lotes / Attend / TE)", maker:"Foxconn · Lotes 嘉澤 · Attend 鋐寶 · Oupiin · TE · JAE", family:"cn", pitch:0.5, rows:2, fixedPos:67, fixedLen:21.9, repPos:67, posRange:"67 (75 positions less the key)", thk:["0.8"],
+   orient:"stacked", geomNote:"right-angle SMT; module parallel to the host", host:8.7, tongue:3.5, z:3.2, approx:"tongue; host depth is 5.65 on the lowest Attend part",
+   cycles:"60 (M.2 spec)", plating:"Au flash to 15 µin", price:0.18, priceQty:"940 (Foxconn AS0BC21, LCSC)",
+   links:[["Foxconn AS0BC21, LCSC C410527","https://www.lcsc.com/product-detail/C410527.html"],["Lotes APCI0107, LCSC C841661","https://www.lcsc.com/product-detail/C841661.html"],["Attend 123A","https://www.attend.com.tw/en/product.php?act=view&id=416"],["Oupiin 8402-C","https://www.oupiin.com/product_ii.php?c2=31"],["TE 2199230-2, DigiKey","https://www.digikey.com/en/products/detail/te-connectivity-amp-connectors/2199230-2/22753092"],["Lotes vertical M.2","https://www.lotes.cc/en/product.php?act=view&id=401"]],
+   img:"https://assets.lcsc.com/images/lcsc/900x900/20230217_FOXCONN-AS0BC21-S40BE-7H_C410527_front.jpg",
+   note:"Most contacts per millimetre and per dollar by a wide margin: 67 in 22 mm for $0.18–0.25 (Foxconn, Lotes), $1.0–1.2 from TE or JAE. But it needs a 0.8 mm card, carries 0.5 A a contact, is rated 60 cycles, and one socket is 3 short of 70. Heights from 2.05 to 8.5 mm. Lotes APCI0490 / 0491 are vertical M.2 sockets."},
+  {id:"minipcie", name:"Mini PCIe socket, 52 contacts (Lian Xin / TE / Attend)", maker:"Lian Xin · TE · Attend 鋐寶 · Shenzhen clones", family:"cn", pitch:0.8, rows:2, fixedPos:52, fixedLen:30.0, repPos:52, posRange:"52", thk:["1.0"],
+   orient:"stacked", geomNote:"right-angle SMT; module parallel to the host", host:8.2, tongue:4.0, z:4.0, approx:"tongue",
+   cycles:"50 (spec)", plating:"Au flash", price:0.34, priceQty:"1,400 (Lian Xin XDMP-040-A02, LCSC)",
+   links:[["Lian Xin XDMP-040-A02, LCSC C18202142","https://www.lcsc.com/product-detail/C18202142.html"],["TE 1775862-2, LCSC C428486","https://www.lcsc.com/product-detail/C428486.html"],["Attend 119A","https://www.attend.com.tw/en/product.php?act=view&id=124"],["Shenzhen Tuozhi, Alibaba","https://www.alibaba.com/product-detail/52P-Mini-PCI-E-4-0H_1600428674015.html"]],
+   img:"https://assets.lcsc.com/images/lcsc/900x900/20231101_Lian-Xin-Technology-XDMP-040-A02_C18202142_front.jpg",
+   note:"1.0 mm card. Lian Xin $0.34, TE $0.53 (1.1 k), unbranded Shenzhen sockets ¥1.3–3.2 ($0.18–0.45) in tens to hundreds. Heights 4.0–9.9 mm."},
+];
+const EXTRA_SOURCES = [
+  ["Mengjing MJT-81013 (1688)","https://detail.1688.com/offer/911510152446.html"],
+  ["Boruisen MJT-81013 (1688)","https://detail.1688.com/offer/1067755811760.html"],
+  ["Gaodi Gd-I059 (1688)","https://detail.1688.com/offer/856479368135.html"],
+  ["Mingyun 81014 (1688)","https://detail.1688.com/offer/737330272539.html"],
+  ["Keystone SMT low-profile PCB edge connectors (DigiKey)","https://www.digikey.co.uk/en/product-highlight/k/keystone/smt-low-profile-printed-circuit-board-edge-connectors"],
+  ["Keystone launch note (Design World)","https://www.designworldonline.com/keystone-electronics-offers-smt-low-profile-pcb-edge-connectors/"],
+  ["MAC8 KEO parallel-connection connector (Sekorm)","https://en.sekorm.com/doc/537115399.html"],
+  ["Solepin 61F9 1.27 mm straddle","https://www.solepin.com/Product/jinshouzhi/1-27mm-pitch-series/1219.html"],
+  ["Solepin 61D3 1.0 mm","https://www.solepin.com/Product/jinshouzhi/1-00mm-pitch-series/813.html"],
+  ["LXW 0.8 mm card edge","https://www.lxw-conn.com/product/0-8mm-pitch-20pin-200pin-high-speed-pcb-card-edge-connector/"],
+  ["Sunny Young R6830","https://www.sunnyyoung.com.tw/zh-tw/product-704151/1-27mm-Straddle-Mount-Card-Edge-Connector-R6830-Series.html"],
+  ["US 4,087,151","https://patents.google.com/patent/US4087151"],["US 4,514,030","https://patents.google.com/patent/US4514030"],
+  ["US 5,286,215","https://patents.google.com/patent/US5286215"],["US 6,764,345","https://patents.google.com/patent/US6764345B1/en"],
+  ["synth-diy: Amphenol 225-22821-110","https://synth-diy.org/pipermail/synth-diy/2022-March/170395.html"],["TEDSS surplus 225 series","https://www.tedss.com/2025009664"],
+];
+
 // ---------------------------------------------------------------- model
 const ALL = OPTIONS.concat(SURVEY);
-const state = {k:1, n:70, thk:"any", orient:"any", sort:"area", dir:1};
+const BETWEEN = 2;   // mm between neighbouring connectors on one edge
+const state = {k:1, n:70, edge:51, thk:"any", orient:"any", fam:"any", sort:"area", dir:1};
 const $ = s => document.querySelector(s);
 const fmt = (v, d=1) => v==null||isNaN(v) ? "—" : Number(v).toFixed(d);
+const esc = s => String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");
 function calc(o, n, k){
-  const per = Math.ceil(n/k);
-  const nps = o.rows===1 ? per : Math.ceil(per/2);
-  const len = o.fixedLen ? o.fixedLen : (nps-1)*o.pitch + o.end;
-  const edge = k*len + (k-1)*2;
-  let area, dead;
-  if(o.orient==="coplanar"){ dead = o.host + o.gap + o.tongue; area = k*len*dead; }
-  else { dead = null; area = k*(len*o.host + len*o.tongue); }
-  const price = o.price==null ? null : o.price*k*Math.pow(per/o.repPos, 0.75);
-  return {per, nps, len, edge, dead, area, price};
+  let kk = k, per, nps;
+  if(o.fixedPos){ kk = Math.max(k, Math.ceil(n/o.fixedPos)); per = o.fixedPos; nps = per/o.rows; }
+  else {
+    nps = Math.ceil(Math.ceil(n/k)/o.rows);
+    if(o.sizes){ const s = o.sizes.find(x => x>=nps); if(s===undefined) return null; nps = s; }
+    per = nps*o.rows;
+  }
+  const len = o.fixedLen!=null ? o.fixedLen : o.len ? o.len(nps) : (nps-1)*o.pitch + o.end;
+  const edge = kk*len + (kk-1)*BETWEEN;
+  const strip = o.orient==="coplanar" ? o.host+o.gap+o.tongue : null;
+  const area = o.orient==="coplanar" ? kk*len*strip : kk*len*(o.host+o.tongue);
+  const price = o.price==null ? null : o.fixedPos ? o.price*kk : o.price*kk*Math.pow(per/o.repPos, 0.75);
+  return {k:kk, per, nps, len, edge, strip, area, price, spare:kk*per-n};
 }
 function visible(o){
   if(state.thk!=="any" && !o.thk.some(t=>String(t).startsWith(state.thk))) return false;
   if(state.orient!=="any" && o.orient!==state.orient) return false;
+  if(state.fam==="custom" && !(o.family==="custom"||o.family==="today")) return false;
+  if((state.fam==="cn"||state.fam==="brand") && o.family!==state.fam) return false;
   return true;
 }
-function sketch(o, c, k){
-  // plan view: host board along the bottom, module board above; 1 px = 0.25 mm; width capped at 180 px
-  const s = Math.min(0.9, 180/(k*c.len+12));
-  const W = Math.round((k*c.len + 8)*s) + 20, dep = o.orient==="coplanar" ? c.dead : o.host + o.tongue + 2;
-  const H = Math.round((dep + 8)*s) + 16;
-  let g = "";
-  const y0 = H - 8;            // host edge baseline
-  g += `<rect x="4" y="${y0}" width="${W-8}" height="6" fill="var(--surface-2)" stroke="var(--line)"/>`;   // host board
+const colour = o => o.family==="custom" ? "var(--accent)" : o.orient==="coplanar" ? "var(--accent-2)" : o.orient==="vertical" ? "var(--r5)" : "var(--r9)";
+function sketch(o, c){
+  // plan view: host board along the bottom, module board above; scale shared within a row only
+  const k = c.k, s = Math.min(0.9, 190/(c.edge+8));
+  const W = Math.round((c.edge + 8)*s) + 12, dep = o.orient==="coplanar" ? c.strip : o.host + o.tongue + 2;
+  const H = Math.round((dep + 6)*s) + 14, y0 = H - 7;
+  let g = `<rect x="2" y="${y0}" width="${W-4}" height="5" fill="var(--surface-2)" stroke="var(--line)"/>`;
   for(let i=0;i<k;i++){
-    const x = 10 + i*(c.len+2)*s, w = c.len*s;
+    const x = 6 + i*(c.len+BETWEEN)*s, w = c.len*s;
+    g += `<rect x="${x}" y="${y0-o.host*s}" width="${w}" height="${o.host*s}" fill="var(--r3)" opacity=".75"/>`;
     if(o.orient==="coplanar"){
-      g += `<rect x="${x}" y="${y0-o.host*s}" width="${w}" height="${o.host*s}" fill="var(--r3)" opacity=".7"/>`;        // host pads
-      g += `<rect x="${x}" y="${y0-(o.host+o.gap)*s}" width="${w}" height="${Math.max(1,o.gap*s)}" fill="var(--muted)" opacity=".5"/>`; // air gap / housing
-      g += `<rect x="${x}" y="${y0-(o.host+o.gap+o.tongue)*s}" width="${w}" height="${o.tongue*s}" fill="var(--accent-2)" opacity=".8"/>`; // tongue
+      g += `<rect x="${x}" y="${y0-(o.host+o.gap)*s}" width="${w}" height="${Math.max(1,o.gap*s)}" fill="var(--muted)" opacity=".5"/>`;
+      g += `<rect x="${x}" y="${y0-c.strip*s}" width="${w}" height="${o.tongue*s}" fill="var(--accent-2)" opacity=".85"/>`;
     } else {
-      g += `<rect x="${x}" y="${y0-o.host*s}" width="${w}" height="${o.host*s}" fill="var(--r3)" opacity=".7"/>`;
-      g += `<rect x="${x}" y="${y0-(o.host+2+o.tongue)*s}" width="${w}" height="${o.tongue*s}" fill="var(--accent-2)" opacity=".5" stroke-dasharray="2 2" stroke="var(--accent-2)"/>`;
+      g += `<rect x="${x}" y="${y0-(o.host+2+o.tongue)*s}" width="${w}" height="${o.tongue*s}" fill="var(--accent-2)" opacity=".45" stroke-dasharray="2 2" stroke="var(--accent-2)"/>`;
     }
   }
-  if(o.orient==="coplanar") g += `<rect x="4" y="2" width="${W-8}" height="${Math.max(2,(y0-(o.host+o.gap+o.tongue)*s)-2)}" fill="var(--surface-2)" stroke="var(--line)"/>`; // module board
-  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="plan view">${g}</svg>`;
+  if(o.orient==="coplanar") g += `<rect x="2" y="1" width="${W-4}" height="${Math.max(2,(y0-c.strip*s)-1)}" fill="var(--surface-2)" stroke="var(--line)"/>`;
+  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="plan view of ${esc(o.name)}">${g}</svg>`;
 }
-const tagFor = o => o.orient==="coplanar" ? '<span class="tag cop">coplanar</span>' : o.orient==="vertical" ? '<span class="tag vt">vertical</span>' : '<span class="tag st">stacked</span>';
+const tagFor = o => (o.orient==="coplanar" ? '<span class="tag cop">coplanar</span>' : o.orient==="vertical" ? '<span class="tag vt">vertical</span>' : '<span class="tag st">parallel</span>')
+  + (o.family==="custom" ? '<span class="tag cu">custom</span>' : o.family==="cn" ? '<span class="tag cn">CN / TW</span>' : '');
+const thumb = (o, cls, ph) => o.img ? `<img class="${cls}" src="${o.img}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=&quot;${cls} ph&quot;>${ph}</div>'">` : `<div class="${cls} ph">${ph}</div>`;
 function render(){
-  const rows = ALL.filter(visible).map(o => ({o, c:calc(o, state.n, state.k)}));
-  const key = {area:r=>r.c.area, edge:r=>r.c.edge, height:r=>r.o.height, price:r=>r.c.price??1e9, pitch:r=>r.o.pitch, name:r=>r.o.name, len:r=>r.c.len, host:r=>r.o.host, tongue:r=>r.o.tongue, gap:r=>r.o.gap??1e9}[state.sort];
+  const all = ALL.filter(visible).map(o => ({o, c:calc(o, state.n, state.k)}));
+  const rows = all.filter(r => r.c), dropped = all.length - rows.length;
+  const key = {area:r=>r.c.area, edge:r=>r.c.edge, z:r=>r.o.z, price:r=>r.c.price??1e9, pitch:r=>r.o.pitch, name:r=>r.o.name.toLowerCase(), len:r=>r.c.len, depth:r=>r.o.host+(r.o.gap||0)+r.o.tongue}[state.sort];
   rows.sort((a,b)=> (key(a)>key(b)?1:key(a)<key(b)?-1:0)*state.dir);
-  const best = rows.length ? Math.min(...rows.map(r=>r.c.area)) : 0;
-  $("#rows").innerHTML = rows.map(r => `<tr class="${r.c.area===best?'best':''}" title="${(r.o.note||'').replace(/"/g,'&quot;')}">
-    <td><div class="opt">${r.o.img?`<img class="th" src="${r.o.img}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=&quot;th ph&quot;>no img</div>'">`:'<div class="th ph">no img</div>'}<span><b>${r.o.name}</b><small>${r.o.maker}</small></span></div></td>
-    <td>${tagFor(r.o)}${r.o.family==='custom'?'<span class="tag cu">custom</span>':''}</td>
-    <td class="num">${fmt(r.o.pitch,2)}</td>
-    <td class="num">${r.c.per} (${r.c.nps}/side)</td>
-    <td class="num">${fmt(r.c.len)}</td>
-    <td class="num">${fmt(r.c.edge)}</td>
-    <td class="num">${fmt(r.o.host)}</td>
-    <td class="num">${fmt(r.o.tongue)}</td>
-    <td class="num">${r.o.orient==='coplanar'?fmt(r.o.gap):'—'}</td>
-    <td class="num"><b>${fmt(r.c.area,0)}</b> mm²</td>
-    <td class="num">${fmt(r.o.height)}</td>
-    <td class="num">${r.c.price==null?'—':'$'+fmt(r.c.price,2)}</td>
-    <td class="sketch">${sketch(r.o, r.c, state.k)}</td></tr>`).join("");
-  $("#hint").textContent = `${state.k} connector${state.k>1?'s':''} of ${Math.ceil(state.n/state.k)} contacts each (${rows.length} options shown). Lowest dead area is highlighted.`;
-  // bars
+  const fits = rows.filter(r => r.c.edge <= state.edge);
+  const best = fits.length ? Math.min(...fits.map(r=>r.c.area)) : null;
+  $("#rows").innerHTML = rows.map(r => { const o = r.o, c = r.c;
+    return `<tr class="${c.area===best && c.edge<=state.edge?'best':''}" title="${esc(o.note||'')}">
+    <td><div class="opt">${thumb(o,'th','no img')}<span><b>${o.name}</b><small>${o.maker}</small></span></div></td>
+    <td>${tagFor(o)}</td>
+    <td class="num">${fmt(o.pitch, o.pitch===0.635?3:2)}</td>
+    <td class="num">${c.k} × ${c.per}${c.k!==state.k?' <small>(fixed size)</small>':''}${c.spare?`<br><small>${c.spare} spare</small>`:''}</td>
+    <td class="num">${fmt(c.len)}</td>
+    <td class="num ${c.edge>state.edge?'over':''}">${fmt(c.edge)}</td>
+    <td class="num">${fmt(o.host)} + ${o.orient==='coplanar'?fmt(o.gap)+(/gap/.test(o.approx||'')?'≈':''):'<small>n/a</small>'} + ${fmt(o.tongue)}${/tongue/.test(o.approx||'')?'≈':''}<br><small>${o.orient==='coplanar'?fmt(c.strip)+' mm strip':'footprint + tongue'}</small></td>
+    <td class="num"><b>${fmt(c.area,0)}</b> mm²</td>
+    <td class="num">${fmt(o.z, 1)}</td>
+    <td class="num">${c.price==null?'ask':'$'+fmt(c.price,2)}</td>
+    <td class="sketch">${sketch(o, c)}</td></tr>`; }).join("");
+  const per = Math.ceil(state.n/state.k);
+  $("#hint").textContent = `${state.k} connector${state.k>1?'s':''} of at least ${per} contacts each. ${rows.length} options shown, ${fits.length} fit a ${state.edge} mm edge`
+    + (dropped ? `; ${dropped} hidden because they come in no size that large` : '') + `. The lowest dead area that fits is highlighted.`;
   const maxA = Math.max(1,...rows.map(r=>r.c.area));
-  const bh = 18, W = 900, lw = 250;
-  const svg = rows.map((r,i)=>{ const w = (W-lw-90)*r.c.area/maxA; const y = i*(bh+6);
-    return `<text x="${lw-8}" y="${y+bh-5}" text-anchor="end" font-size="11" fill="var(--fg)" font-family="var(--font-body)">${r.o.name.length>36?r.o.name.slice(0,34)+'…':r.o.name}</text>
-            <rect x="${lw}" y="${y}" width="${w}" height="${bh}" rx="3" fill="${r.o.family==='custom'?'var(--accent)':r.o.orient==='coplanar'?'var(--accent-2)':r.o.orient==='vertical'?'var(--r5)':'var(--r9)'}" opacity=".85"/>
-            <text x="${lw+w+6}" y="${y+bh-5}" font-size="11" fill="var(--muted)" font-family="var(--font-mono)">${fmt(r.c.area,0)} mm²${r.c.price!=null?' · $'+fmt(r.c.price,2):''}</text>`; }).join("");
-  $("#bars").innerHTML = `<svg viewBox="0 0 ${W} ${rows.length*(bh+6)}" xmlns="http://www.w3.org/2000/svg">${svg}</svg>`;
+  const bh = 18, W = 960, lw = 330;
+  const svg = rows.map((r,i)=>{ const w = (W-lw-150)*r.c.area/maxA, y = i*(bh+6), over = r.c.edge>state.edge;
+    return `<text x="${lw-8}" y="${y+bh-5}" text-anchor="end" font-size="12" fill="var(--fg)" font-family="var(--font-body)">${esc(r.o.name.length>48?r.o.name.slice(0,46)+'…':r.o.name)}</text>
+            <rect x="${lw}" y="${y}" width="${w}" height="${bh}" rx="3" fill="${colour(r.o)}" opacity="${over?.35:.9}"/>
+            <text x="${lw+w+6}" y="${y+bh-5}" font-size="11.5" fill="var(--muted)" font-family="var(--font-mono)">${fmt(r.c.area,0)} mm²${r.c.price!=null?' · $'+fmt(r.c.price,2):''}${over?' · too long':''}</text>`; }).join("");
+  $("#bars").innerHTML = `<svg viewBox="0 0 ${W} ${Math.max(1,rows.length*(bh+6))}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Dead board area by option">${svg}</svg>`;
 }
 function cards(){
-  $("#cards").innerHTML = ALL.map(o => `<li class="card">
-    ${o.img?`<img class="pic" src="${o.img}" alt="${o.name}" loading="lazy" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=&quot;pic ph&quot;>no photo — see plan view in the table</div>'">`:'<div class="pic ph">no photo</div>'}
+  $("#cards").innerHTML = ALL.map(o => { const c = calc(o, o.repPos, 1) || {};
+    return `<li class="card" id="${o.id}">
+    ${thumb(o,'pic','no photo: see the plan view in the table')}
     <h3>${o.name}</h3>
-    <div>${tagFor(o)}${o.family==='custom'?'<span class="tag cu">custom</span>':''}<span class="tag">${o.pitch} mm</span><span class="tag">${o.thk.join(' / ')} mm card</span></div>
-    <dl><dt>maker</dt><dd>${o.maker}</dd><dt>positions</dt><dd>${o.posRange} (rep. ${o.repPos})</dd><dt>geometry</dt><dd>${o.geomNote||''}</dd>
-    <dt>body</dt><dd>${o.fixedLen?fmt(o.fixedLen):fmt((Math.ceil(o.repPos/o.rows)-1)*o.pitch+o.end)} × ${fmt(o.width)} × ${fmt(o.height)} mm</dd>
-    <dt>tongue</dt><dd>${fmt(o.tongue)} mm</dd><dt>cycles</dt><dd>${o.cycles||'—'}</dd><dt>plating</dt><dd>${o.plating||'—'}</dd>
-    <dt>price</dt><dd class="price">${o.price==null?'—':'$'+fmt(o.price,2)} <small>@ ${o.priceQty||'?'}${o.priceCny?' · ¥'+o.priceCny:''}</small></dd></dl>
+    <div>${tagFor(o)}<span class="tag">${o.pitch} mm</span><span class="tag">${o.thk.join(' / ')} mm card</span></div>
+    <dl><dt>maker</dt><dd>${o.maker}</dd><dt>sizes</dt><dd>${o.posRange}</dd><dt>geometry</dt><dd>${o.geomNote||''}</dd>
+    <dt>${o.repPos}-way</dt><dd>${fmt(c.len)} long × ${o.orient==='coplanar'?fmt(c.strip)+' strip':fmt(o.host)+' on the host'} × ${fmt(o.z)} mm high</dd>
+    <dt>tongue</dt><dd>${fmt(o.tongue)} mm${o.approx?' <small>(≈ '+o.approx+')</small>':''}</dd><dt>cycles</dt><dd>${o.cycles||'—'}</dd><dt>plating</dt><dd>${o.plating||'—'}</dd>
+    <dt>price</dt><dd class="price">${o.price==null?'ask':'$'+fmt(o.price,2)+(o.priceCny?' (¥'+o.priceCny+')':'')} <small>${o.price==null?o.priceQty:'@ '+o.priceQty}</small></dd></dl>
     <p class="note">${o.note||''}</p>
-    <div class="links">${(o.links||[]).map(l=>`<a href="${l[1]}">${l[0]}</a>`).join('')}</div></li>`).join("");
+    <div class="links">${(o.links||[]).map(l=>`<a href="${l[1]}">${l[0]}</a>`).join('')}</div></li>`; }).join("");
   const srcs = new Map();
-  ALL.forEach(o => (o.links||[]).forEach(l => { if(l[1].startsWith('http')) srcs.set(l[1], `${o.name} — ${l[0]}`); }));
-  $("#srcs").innerHTML = [...srcs].map(([u,t]) => `<div><a href="${u}">${t}</a></div>`).join("") +
-    ['https://patents.google.com/patent/US4087151','https://patents.google.com/patent/US4514030','https://patents.google.com/patent/US5286215','https://patents.google.com/patent/US6764345B1/en','https://synth-diy.org/pipermail/synth-diy/2022-March/170395.html','https://www.tedss.com/2025009664'].map(u=>`<div><a href="${u}">${u.replace(/^https?:\/\//,'')}</a></div>`).join("");
+  ALL.forEach(o => (o.links||[]).forEach(l => { if(l[1].startsWith('http')) srcs.set(l[1], `${o.name}: ${l[0]}`); }));
+  EXTRA_SOURCES.forEach(([t,u]) => srcs.set(u, t));
+  $("#srcs").innerHTML = [...srcs].map(([u,t]) => `<div><a href="${u}">${t}</a></div>`).join("");
 }
-$("#split").addEventListener("click", e => { const b = e.target.closest("button"); if(!b) return; state.k = +b.dataset.k; [...$("#split").children].forEach(x=>x.setAttribute("aria-pressed", x===b)); render(); });
-$("#nsig").addEventListener("input", e => { state.n = Math.max(2, +e.target.value||70); [...$("#split").children].forEach((b,i)=>b.textContent = `${i+1} × ${Math.ceil(state.n/(i+1))}`); render(); });
+function labels(){ [...$("#split").children].forEach((b,i)=>b.textContent = `${i+1} × ${Math.ceil(state.n/(i+1))}`); }
+$("#split").addEventListener("click", e => { const b = e.target.closest("button"); if(!b) return; state.k = +b.dataset.k; [...$("#split").children].forEach(x=>x.setAttribute("aria-pressed", String(x===b))); render(); });
+$("#nsig").addEventListener("input", e => { state.n = Math.min(200, Math.max(2, Math.round(+e.target.value)||70)); labels(); render(); });
+$("#edge").addEventListener("input", e => { state.edge = Math.max(10, +e.target.value||51); render(); });
 $("#thk").addEventListener("change", e => { state.thk = e.target.value; render(); });
 $("#orient").addEventListener("change", e => { state.orient = e.target.value; render(); });
+$("#fam").addEventListener("change", e => { state.fam = e.target.value; render(); });
 $("#sort").addEventListener("change", e => { state.sort = e.target.value; state.dir = 1; render(); });
 document.querySelectorAll("#res th[data-s]").forEach(th => th.addEventListener("click", () => { const s = th.dataset.s; if(state.sort===s) state.dir*=-1; else {state.sort=s; state.dir=1;} render(); }));
 cards(); render();
