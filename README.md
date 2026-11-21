@@ -22,6 +22,13 @@ Start a new page from `styles/template.html`. Give it a `<title>` and, if the ti
 - Tool pages (dense UI with their own layout): `<body class="app">` turns off the document decorations.
 - Style guide: links and single highlights are pink (the J); a row of siblings cycles the rainbow (`.cycle`); backgrounds are layered greys, never black; on phones a control panel is capped at 40% of the screen and scrolls inside itself (`.capped`) and rows of chips or buttons scroll sideways (`.scroll-x`). The converter applies the phone rules to the usual `header`, `.filters`, `.frow`, `.seg`, `.chips`, `.tabs` and `.toc` patterns.
 
+## Dark Reader
+
+The Dark Reader browser extension re-colours a page by guessing what each CSS variable is used for. On pages that are dark already it guesses wrong often: rainbow bars, coloured borders and SVG fills come out grey. So `build.py` adds `<meta name="darkreader-lock">` to every built page that draws itself dark (it links `jumperless.css`, or has its own `prefers-color-scheme: dark` or `color-scheme: dark` palette), which makes Dark Reader leave the page alone. Nothing to do per page; `styles/template.html` carries the tag only as a reminder.
+
+- Light-only pages (the Del Mar theme, `data-theme="light"`) are not locked, so Dark Reader still darkens them. After changing colours on one, run `.tools/darkreader-audit.js` (usage at the top of the file): it loads every built page with Dark Reader's own engine and lists any colour that went grey. It should report 0 bad.
+- A page that follows the reader's system setting is locked too, so with Dark Reader on it shows its own dark palette in dark mode and its light one otherwise.
+
 ## Splash
 
 `styles/ddj-splash.svg` is the Dirty Deeds Jumperless artwork; `styles/splash.js` puts the newest pages' names in the eye boxes (and lists them below on phones). In a folder's `index.html`:

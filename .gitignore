@@ -1,2 +1,6 @@
 _site/
 .DS_Store
+.tools/node_modules/
+.tools/package*.json
+.tools/*.png
+.tools/audit.json

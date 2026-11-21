@@ -19,6 +19,7 @@ SKIP = {"_site", "styles"}          # dotfolders (.git, .github) are skipped too
 DEFAULT_THEME = "jumperless"
 RECENT = "recent.json"            # written per folder: newest pages first, read by styles/splash.js
 HEAD_BYTES = 8000                  # only the top of a file is scanned for <title> / stylesheet
+DR_LOCK = '<meta name="darkreader-lock">'   # tells the Dark Reader extension to leave a page alone
 
 
 def head(p: Path) -> str:
@@ -102,6 +103,41 @@ def bust(folder: Path, v: str) -> None:
             p.write_text(s2)
 
 
+def draws_itself_dark(s: str) -> bool:
+    """True when a page has its own dark look: the Jumperless theme (dark only) or a dark palette of its own."""
+    if re.search(r'<html[^>]*data-theme="light"', s):
+        return False                # the page asked for the light look; let Dark Reader darken it
+    if re.search(r"styles/jumperless\.css", s):
+        return True
+    return bool(re.search(r"prefers-color-scheme:\s*dark|color-scheme:\s*(?:light\s+)?dark", s))
+
+
+def lock_dark_reader(folder: Path) -> int:
+    """Add the Dark Reader lock to every built page that is already dark.
+
+    Dark Reader re-colours a page by guessing what each CSS variable is for. On pages that are dark
+    already it guesses wrong often enough to turn rainbow bars, coloured borders and SVG fills grey,
+    so those pages opt out and keep their own colours. Light-only pages (the Del Mar theme) are left
+    for Dark Reader to darken; check them with .tools/darkreader-audit.js after changing their colours.
+    """
+    n = 0
+    for p in folder.rglob("*.html"):
+        s = p.read_text(errors="replace")
+        if "darkreader-lock" in s or not draws_itself_dark(s):
+            continue
+        # after the charset declaration (which must stay first), else after <head>, else at the very top:
+        # some converted artifacts have no <head> tag and rely on the parser to imply one
+        for anchor in (r"<meta\s+charset[^>]*>", r"<head[^>]*>"):
+            s2 = re.sub(anchor, lambda m: m.group(0) + "\n" + DR_LOCK, s, count=1, flags=re.I)
+            if s2 != s:
+                break
+        else:
+            s2 = DR_LOCK + "\n" + s
+        p.write_text(s2)
+        n += 1
+    return n
+
+
 def main() -> None:
     if OUT.exists():
         shutil.rmtree(OUT)
@@ -129,7 +165,8 @@ def main() -> None:
     bust(OUT, version())
     (OUT / "index.html").write_text(page("slopswap", DEFAULT_THEME, "",
         '<img class="logo" src="styles/jumperless-wordmark.png" alt="Jumperless">\n<h1>slopswap</h1>\n' + "\n".join(sections)))
-    print(f"built {len(projects)} project folders into {OUT.relative_to(ROOT)}/")
+    locked = lock_dark_reader(OUT)
+    print(f"built {len(projects)} project folders into {OUT.relative_to(ROOT)}/ ({locked} pages locked against Dark Reader)")
 
 
 if __name__ == "__main__":

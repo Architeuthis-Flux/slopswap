@@ -25,7 +25,8 @@
   table.res tr.best td{background:color-mix(in srgb,var(--accent-2) 10%,transparent)}
   table.res td.over{color:var(--r12);font-weight:700}
   table.res small{color:var(--muted)}
-  .opt{display:flex;gap:.6rem;align-items:center;min-width:13rem}
+  .opt{display:flex;gap:.6rem;align-items:center;min-width:12rem}
+  .opt .tags{display:block;margin-top:.25rem}
   .opt .th{width:44px;height:44px;flex:0 0 44px;border-radius:5px;background:#fff;object-fit:contain;border:1px solid var(--line)}
   .opt .th.ph{display:grid;place-items:center;background:var(--surface-2);color:var(--muted);font-family:var(--font-pixel);font-size:.4rem}
   .opt b{display:block;font-weight:700}
@@ -64,7 +65,29 @@
   .srcs{font-size:.85rem;columns:2;column-gap:2rem}
   .srcs div{break-inside:avoid;overflow-wrap:anywhere;margin-bottom:.2rem}
   @media (max-width:800px){.srcs{columns:1}}
-  .toc{display:flex;flex-wrap:wrap;gap:.3rem 1.2rem;font-size:.9rem;margin:.6rem 0 0}
+  /* layout: filters in a sticky sidebar, results beside it; the reading sections below keep the normal column */
+  main.page.wide{max-width:100rem}
+  .doc{max-width:72rem}
+  .tool{display:grid;grid-template-columns:15.5rem minmax(0,1fr);gap:1.75rem;align-items:start;margin-top:1.5rem}
+  .side{position:sticky;top:1rem;max-height:calc(100vh - 2rem);overflow-y:auto;overscroll-behavior:contain;padding:.9rem 1rem;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+  .side h2{font-size:.9rem;margin:0 0 .8rem;border:0;padding:0}
+  .side .ctl{display:flex;flex-direction:column;align-items:stretch;gap:.75rem;padding:0;border:0;background:none;margin:0}
+  .side .ctl input[type=number],.side .ctl select{width:100%;min-width:0}
+  .side .seg{display:flex}.side .seg button{flex:1;padding:.4rem .2rem}
+  .side label.chk{flex-direction:row;align-items:center;gap:.5rem;font:13px var(--font-body);color:var(--fg)}
+  .side .hint{margin:.9rem 0 0}
+  .side .legend{margin:.8rem 0 0;gap:.25rem .9rem}
+  .side .toc{display:flex;flex-direction:column;gap:.25rem;font-size:.85rem;margin:.9rem 0 0;padding-top:.8rem;border-top:1px solid var(--line)}
+  .results>h2:first-child{margin-top:0}
+  @media (max-width:900px){.tool{grid-template-columns:minmax(0,1fr)}.side{position:static;max-height:none}.side .ctl{flex-direction:row;flex-wrap:wrap}.side .ctl label{flex:1 1 9rem}.side .toc{flex-direction:row;flex-wrap:wrap;gap:.3rem 1rem}}
+  .opt a{color:inherit;text-decoration:none}.opt a:hover b{color:var(--accent)}
+  .opt b i,.card h3 i{font-style:normal;color:var(--muted);font-size:.8em;margin-left:.25em}
+  .card h3 a{color:inherit;text-decoration:none}.card h3 a:hover{color:var(--accent)}
+  .opt .th,.card .pic,figure img{cursor:zoom-in}
+  /* hover an image to see it at nearly the full window */
+  #zoom{position:fixed;inset:0;z-index:50;display:none;place-items:center;background:rgba(24,24,28,.78);pointer-events:none}
+  #zoom.on{display:grid}
+  #zoom img{width:92vw;height:92vh;object-fit:contain;filter:drop-shadow(0 8px 30px rgba(0,0,0,.6))}
 </style>
 </head>
 <body>
@@ -72,42 +95,47 @@
 <p class="eyebrow"><a href="../">slopswap</a> / <a href="./">V6</a></p>
 <h1>Edge connector options for V6 modules</h1>
 <p class="lede">Every way found so far to join a Jumperless module to the main board along an edge, with what each costs in board area, height and money: one 70-way connector, or two or three smaller ones so half a breadboard can be swapped for something else. Catalog parts, Chinese and Taiwanese makers that are not (or barely) on LCSC, the custom "kiss slot" coupler, the single-contact SMT plug-and-socket clips, and the shorted-when-empty type. Dimensions are read from the makers' drawings and prices from listings as of 22 Nov 2026; anything marked ≈ is an estimate. Yuan prices are converted at ¥7.2 to the dollar.</p>
-<p class="toc"><a href="#calc">Area calculator</a><a href="#options">Every option</a><a href="#ask">Makers to ask</a><a href="#clips">Single-contact clips</a><a href="#custom">Custom kiss slot</a><a href="#normalling">Shorted when empty</a><a href="#other">Not card edge</a></p>
 
-<h2 id="calc">Pick a split, see the area</h2>
+<div class="tool">
+<aside class="side" aria-label="Filters">
+<h2>Filters</h2>
 <div class="ctl">
-  <label>signals per module <input id="nsig" type="number" value="70" min="2" max="200" step="1"></label>
+  <label>signals needed, at least <input id="nsig" type="number" value="70" min="2" max="200" step="1"></label>
   <label>connectors per edge <span class="seg" id="split"><button aria-pressed="true" data-k="1">1 × 70</button><button aria-pressed="false" data-k="2">2 × 35</button><button aria-pressed="false" data-k="3">3 × 24</button></span></label>
   <label>edge available, mm <input id="edge" type="number" value="51" min="10" max="300" step="1"></label>
+  <label class="chk"><input id="fitonly" type="checkbox"> only what fits the edge</label>
   <label>card thickness <select id="thk"><option value="any">any</option><option value="1.6">1.6 mm</option><option value="1.0">1.0 mm</option><option value="0.8">0.8 mm</option></select></label>
   <label>geometry <select id="orient"><option value="any">any</option><option value="coplanar">coplanar (straddle / coupler)</option><option value="vertical">vertical (card stands up)</option><option value="stacked">parallel, raised (right-angle / M.2)</option></select></label>
   <label>source <select id="fam"><option value="any">any</option><option value="cn">Chinese / Taiwanese makers</option><option value="brand">Samtec</option><option value="custom">custom + today's part</option></select></label>
-  <label>sort by <select id="sort"><option value="area">dead area</option><option value="edge">edge length</option><option value="z">Z height</option><option value="price">price per module</option><option value="pitch">pitch</option></select></label>
+  <label>sort by <select id="sort"><option value="area">dead area</option><option value="edge">edge length</option><option value="cap">most contacts that fit</option><option value="z">Z height</option><option value="price">price per module</option><option value="pitch">pitch</option></select></label>
 </div>
 <p class="hint" id="hint"></p>
-
-<div class="bars" id="bars"></div>
 <p class="legend"><span><i style="background:var(--accent)"></i>custom</span><span><i style="background:var(--accent-2)"></i>coplanar</span><span><i style="background:var(--r5)"></i>vertical</span><span><i style="background:var(--r9)"></i>parallel, raised</span></p>
+<nav class="toc" aria-label="On this page"><a href="#calc">Area calculator</a><a href="#options">Every option</a><a href="#ask">Makers to ask</a><a href="#clips">Single-contact clips</a><a href="#custom">Custom kiss slot</a><a href="#normalling">Shorted when empty</a><a href="#other">Not card edge</a></nav>
+</aside>
+
+<div class="results">
+<h2 id="calc">Pick a split, see the area</h2>
+<div class="bars" id="bars"></div>
 
 <div class="table-wrap">
 <table class="res" id="res">
 <thead><tr>
   <th data-s="name">option <span class="arr">↕</span></th>
-  <th>geometry</th>
   <th data-s="pitch" class="num">pitch</th>
-  <th class="num">conn. × contacts</th>
-  <th data-s="len" class="num">conn. length</th>
-  <th data-s="edge" class="num">edge used</th>
-  <th data-s="depth" class="num">host + gap + tongue</th>
+  <th class="num">contacts</th>
+  <th data-s="cap" class="num" title="most contacts this option could put on the edge with that many connectors">edge holds</th>
+  <th data-s="edge" class="num" title="edge length used, and the length of one connector">edge used</th>
+  <th data-s="depth" class="num" title="host depth + board gap + tongue">depth</th>
   <th data-s="area" class="num">dead area</th>
-  <th data-s="z" class="num">Z height</th>
-  <th data-s="price" class="num">price / module</th>
-  <th>plan view (to scale)</th>
+  <th data-s="z" class="num" title="height off the board">Z</th>
+  <th data-s="price" class="num" title="price per module">price</th>
+  <th>plan view</th>
 </tr></thead>
 <tbody id="rows"></tbody>
 </table>
 </div>
-<p class="muted" style="font-size:.85rem"><b>Dead area</b> is PCB that can hold nothing else. On a coplanar joint it is connector length × the whole strip from the back of the host pads to the tip of the module's tongue (host depth + board gap + tongue). On a vertical or raised joint it is the connector's footprint on the host plus the module's tongue. <b>Host</b> depth is solder legs on a straddle part, body plus about 1.8 mm of SMT leads on a vertical one, and body plus tails on a right-angle one. <b>Gap</b> is the distance from the host's edge to the tip of the card on a coplanar joint; <b>tongue</b> is the depth of the module the connector takes. <b>Z height</b> is how far the part stands off the board: total thickness for a coplanar part. <b>Edge used</b> allows 2 mm between connectors and turns orange when it exceeds the edge available. A fixed-size part (PCIe, M.2) uses as many connectors as the signal count needs. <b>Price</b> is the listed price of the nearest size, scaled by contacts<sup>0.75</sup> to the size used. Hover a row for its notes.</p>
+<p class="muted" style="font-size:.85rem"><b>Dead area</b> is PCB that can hold nothing else. On a coplanar joint it is connector length × the whole strip from the back of the host pads to the tip of the module's tongue (host depth + board gap + tongue). On a vertical or raised joint it is the connector's footprint on the host plus the module's tongue. <b>Host</b> depth is solder legs on a straddle part, body plus about 1.8 mm of SMT leads on a vertical one, and body plus tails on a right-angle one. <b>Gap</b> is the distance from the host's edge to the tip of the card on a coplanar joint; <b>tongue</b> is the depth of the module the connector takes. <b>Z height</b> is how far the part stands off the board: total thickness for a coplanar part. <b>Edge used</b> allows 2 mm between connectors and turns orange when it exceeds the edge available. The signal count is a minimum: a connector with more contacts than asked for is fine and its extras are listed as spare, and <b>edge holds</b> is the most contacts that option could put on the edge with that many connectors. <b>Depth</b> reads host + gap + tongue for a coplanar part and host + tongue otherwise. A fixed-size part (PCIe, M.2) uses as many connectors as the signal count needs. <b>Price</b> is the listed price of the nearest size, scaled by contacts<sup>0.75</sup> to the size used. Hover a row for its notes, hover a picture to enlarge it, and click a name for the maker or distributor page with the datasheet and price (opens in a new tab).</p>
 
 <h3>What the numbers say</h3>
 <ul>
@@ -120,6 +148,10 @@
 
 <h2 id="options">The options, one by one</h2>
 <ul class="cards cycle" id="cards"></ul>
+</div><!-- /results -->
+</div><!-- /tool -->
+
+<div class="doc">
 
 <h2 id="ask">Makers to ask: no full drawing or price yet</h2>
 <p>These turned up in the off-LCSC search but without enough numbers to put in the calculator. Solepin is the one to start with: it sells any even pin count in 0.8, 1.0 and 1.27 mm with a 10–20 day lead and sells singles on 1688. No Chinese maker lists a 0.8 mm straddle (edge-mount) part; Solepin, LXW and Shunyi make the vertical version and would be the ones to ask for it.</p>
@@ -192,6 +224,7 @@
 <div class="srcs" id="srcs"></div>
 <hr>
 <p class="muted">Built 22 Nov 2026 from makers' drawings, distributor and 1688 listings, the V6 connector write-ups and two market surveys. Most product photos load from the vendors' sites; where one does not, the plan view in the table is the picture.</p>
+</div><!-- /doc -->
 </main>
 
 <script>
@@ -212,13 +245,13 @@ const OPTIONS = [
    note:"What V5 uses as an unsoldered coupler, flipped either way. 18.3 mm end to end; the solder tails act as a second, very stiff edge contact. The 20-way is $0.74 in ones."},
   {id:"kiss", name:"Custom kiss-slot coupler (V2)", maker:"Fulimei (custom)", family:"custom", pitch:1.27, rows:2, repPos:70, posRange:"any", thk:["1.6","0.8 in a pinch"],
    orient:"coplanar", geomNote:"symmetric through-slot coupler, both boards' tongues meet inside", end:7.37, host:4.5, gap:0.2, tongue:4.5, z:5.0,
-   cycles:"200+ (15–30 µin Au)", plating:"selective hard Au 0.38–0.76 µm", price:3.4, priceQty:"est., 10 k a year, BeCu",
+   cycles:"200+ (15–30 µin Au)", plating:"selective hard Au 0.38–0.76 µm", price:3.4, priceQty:"est., 10 k a year, BeCu", page:"#custom",
    links:[["STEP models","edge-coupler-variants-step.zip"]],
    img:"edge-variants-iso.png",
    note:"BeCu 0.25 mm crossed beams, 6 mm lever, rest gap 0.30: 51–61 gf on 1.6 mm boards, about 20 gf on 0.8 mm. Boards 0.2 mm apart. Same strip in a shorter housing for the 2- and 3-way splits; one housing with a divider wall would fit 2 × 34 in the same length."},
   {id:"kiss08", name:"Custom kiss-slot, 0.8 mm sister", maker:"Fulimei (custom)", family:"custom", pitch:1.27, rows:2, repPos:70, posRange:"any", thk:["0.8"],
    orient:"coplanar", geomNote:"same contacts, narrow slot core", end:7.37, host:4.5, gap:0.2, tongue:4.5, z:5.0,
-   cycles:"200+", plating:"selective hard Au", price:3.4, priceQty:"est.", links:[["STEP models","edge-coupler-variants-step.zip"]], img:"edge-variants-iso.png",
+   cycles:"200+", plating:"selective hard Au", price:3.4, priceQty:"est.", page:"#custom", links:[["STEP models","edge-coupler-variants-step.zip"]], img:"edge-variants-iso.png",
    note:"About 30 gf on 0.8 mm boards; one slot-core insert change on the same mould."},
 ];
 const SURVEY = [
@@ -384,7 +417,7 @@ const EXTRA_SOURCES = [
 // ---------------------------------------------------------------- model
 const ALL = OPTIONS.concat(SURVEY);
 const BETWEEN = 2;   // mm between neighbouring connectors on one edge
-const state = {k:1, n:70, edge:51, thk:"any", orient:"any", fam:"any", sort:"area", dir:1};
+const state = {k:1, n:70, edge:51, fitonly:false, thk:"any", orient:"any", fam:"any", sort:"area", dir:1};
 const $ = s => document.querySelector(s);
 const fmt = (v, d=1) => v==null||isNaN(v) ? "—" : Number(v).toFixed(d);
 const esc = s => String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");
@@ -401,8 +434,19 @@ function calc(o, n, k){
   const strip = o.orient==="coplanar" ? o.host+o.gap+o.tongue : null;
   const area = o.orient==="coplanar" ? kk*len*strip : kk*len*(o.host+o.tongue);
   const price = o.price==null ? null : o.fixedPos ? o.price*kk : o.price*kk*Math.pow(per/o.repPos, 0.75);
-  return {k:kk, per, nps, len, edge, strip, area, price, spare:kk*per-n};
+  return {k:kk, per, nps, len, edge, strip, area, price, spare:kk*per-n, cap:capacity(o, kk)};
 }
+// most contacts this option can put on the available edge with kk connectors (0 if even the smallest does not fit)
+function capacity(o, kk){
+  const fits = len => kk*len + (kk-1)*BETWEEN <= state.edge + 1e-9;
+  if(o.fixedPos) return fits(o.fixedLen) ? kk*o.fixedPos : 0;
+  const lenOf = n => o.len ? o.len(n) : (n-1)*o.pitch + o.end;
+  const sizes = o.sizes || Array.from({length:150}, (_,i)=>i+1);
+  let best = 0; for(const n of sizes) if(fits(lenOf(n))) best = Math.max(best, n);
+  return kk*best*o.rows;
+}
+const primary = o => o.page || (o.links && o.links[0] ? o.links[0][1] : "#options");
+const blank = u => /^https?:/.test(u) ? ' target="_blank" rel="noopener"' : '';
 function visible(o){
   if(state.thk!=="any" && !o.thk.some(t=>String(t).startsWith(state.thk))) return false;
   if(state.orient!=="any" && o.orient!==state.orient) return false;
@@ -413,7 +457,7 @@ function visible(o){
 const colour = o => o.family==="custom" ? "var(--accent)" : o.orient==="coplanar" ? "var(--accent-2)" : o.orient==="vertical" ? "var(--r5)" : "var(--r9)";
 function sketch(o, c){
   // plan view: host board along the bottom, module board above; scale shared within a row only
-  const k = c.k, s = Math.min(0.9, 190/(c.edge+8));
+  const k = c.k, s = Math.min(0.9, 150/(c.edge+8));
   const W = Math.round((c.edge + 8)*s) + 12, dep = o.orient==="coplanar" ? c.strip : o.host + o.tongue + 2;
   const H = Math.round((dep + 6)*s) + 14, y0 = H - 7;
   let g = `<rect x="2" y="${y0}" width="${W-4}" height="5" fill="var(--surface-2)" stroke="var(--line)"/>`;
@@ -435,27 +479,28 @@ const tagFor = o => (o.orient==="coplanar" ? '<span class="tag cop">coplanar</sp
 const thumb = (o, cls, ph) => o.img ? `<img class="${cls}" src="${o.img}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=&quot;${cls} ph&quot;>${ph}</div>'">` : `<div class="${cls} ph">${ph}</div>`;
 function render(){
   const all = ALL.filter(visible).map(o => ({o, c:calc(o, state.n, state.k)}));
-  const rows = all.filter(r => r.c), dropped = all.length - rows.length;
-  const key = {area:r=>r.c.area, edge:r=>r.c.edge, z:r=>r.o.z, price:r=>r.c.price??1e9, pitch:r=>r.o.pitch, name:r=>r.o.name.toLowerCase(), len:r=>r.c.len, depth:r=>r.o.host+(r.o.gap||0)+r.o.tongue}[state.sort];
+  const sized = all.filter(r => r.c), dropped = all.length - sized.length;
+  const rows = state.fitonly ? sized.filter(r => r.c.edge <= state.edge) : sized;
+  const key = {cap:r=>-r.c.cap, area:r=>r.c.area, edge:r=>r.c.edge, z:r=>r.o.z, price:r=>r.c.price??1e9, pitch:r=>r.o.pitch, name:r=>r.o.name.toLowerCase(), len:r=>r.c.len, depth:r=>r.o.host+(r.o.gap||0)+r.o.tongue}[state.sort];
   rows.sort((a,b)=> (key(a)>key(b)?1:key(a)<key(b)?-1:0)*state.dir);
   const fits = rows.filter(r => r.c.edge <= state.edge);
   const best = fits.length ? Math.min(...fits.map(r=>r.c.area)) : null;
   $("#rows").innerHTML = rows.map(r => { const o = r.o, c = r.c;
     return `<tr class="${c.area===best && c.edge<=state.edge?'best':''}" title="${esc(o.note||'')}">
-    <td><div class="opt">${thumb(o,'th','no img')}<span><b>${o.name}</b><small>${o.maker}</small></span></div></td>
-    <td>${tagFor(o)}</td>
+    <td><div class="opt">${thumb(o,'th','no img')}<span><a href="${primary(o)}"${blank(primary(o))}><b>${o.name}<i>${blank(primary(o))?'↗':''}</i></b><small>${o.maker}</small></a><span class="tags">${tagFor(o)}</span></span></div></td>
     <td class="num">${fmt(o.pitch, o.pitch===0.635?3:2)}</td>
-    <td class="num">${c.k} × ${c.per}${c.k!==state.k?' <small>(fixed size)</small>':''}${c.spare?`<br><small>${c.spare} spare</small>`:''}</td>
-    <td class="num">${fmt(c.len)}</td>
-    <td class="num ${c.edge>state.edge?'over':''}">${fmt(c.edge)}</td>
-    <td class="num">${fmt(o.host)} + ${o.orient==='coplanar'?fmt(o.gap)+(/gap/.test(o.approx||'')?'≈':''):'<small>n/a</small>'} + ${fmt(o.tongue)}${/tongue/.test(o.approx||'')?'≈':''}<br><small>${o.orient==='coplanar'?fmt(c.strip)+' mm strip':'footprint + tongue'}</small></td>
+    <td class="num">${c.k} × ${c.per}<br><small>${c.k!==state.k?'fixed size · ':''}${c.spare?c.spare+' spare':'exact'}</small></td>
+    <td class="num">${c.cap||'—'}</td>
+    <td class="num ${c.edge>state.edge?'over':''}">${fmt(c.edge)}<br><small>${c.k>1?c.k+' × ':''}${fmt(c.len)} long</small></td>
+    <td class="num">${fmt(o.host)} + ${o.orient==='coplanar'?fmt(o.gap)+(/gap/.test(o.approx||'')?'≈':'')+' + ':''}${fmt(o.tongue)}${/tongue/.test(o.approx||'')?'≈':''}<br><small>${o.orient==='coplanar'?fmt(c.strip)+' mm strip':'footprint, tongue'}</small></td>
     <td class="num"><b>${fmt(c.area,0)}</b> mm²</td>
     <td class="num">${fmt(o.z, 1)}</td>
     <td class="num">${c.price==null?'ask':'$'+fmt(c.price,2)}</td>
     <td class="sketch">${sketch(o, c)}</td></tr>`; }).join("");
   const per = Math.ceil(state.n/state.k);
-  $("#hint").textContent = `${state.k} connector${state.k>1?'s':''} of at least ${per} contacts each. ${rows.length} options shown, ${fits.length} fit a ${state.edge} mm edge`
-    + (dropped ? `; ${dropped} hidden because they come in no size that large` : '') + `. The lowest dead area that fits is highlighted.`;
+  $("#hint").textContent = `${state.k} connector${state.k>1?'s':''} of at least ${per} contacts each; more is fine. ${rows.length} options shown, ${fits.length} fit a ${state.edge} mm edge`
+    + (dropped ? `; ${dropped} left out because they come in no size that large` : '') + `. The lowest dead area that fits is highlighted.`;
+  cards();
   const maxA = Math.max(1,...rows.map(r=>r.c.area));
   const bh = 18, W = 960, lw = 330;
   const svg = rows.map((r,i)=>{ const w = (W-lw-150)*r.c.area/maxA, y = i*(bh+6), over = r.c.edge>state.edge;
@@ -465,32 +510,45 @@ function render(){
   $("#bars").innerHTML = `<svg viewBox="0 0 ${W} ${Math.max(1,rows.length*(bh+6))}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Dead board area by option">${svg}</svg>`;
 }
 function cards(){
-  $("#cards").innerHTML = ALL.map(o => { const c = calc(o, o.repPos, 1) || {};
+  $("#cards").innerHTML = ALL.filter(visible).map(o => { const c = calc(o, o.repPos, 1) || {};
     return `<li class="card" id="${o.id}">
     ${thumb(o,'pic','no photo: see the plan view in the table')}
-    <h3>${o.name}</h3>
+    <h3><a href="${primary(o)}"${blank(primary(o))}>${o.name}<i>${blank(primary(o))?'↗':''}</i></a></h3>
     <div>${tagFor(o)}<span class="tag">${o.pitch} mm</span><span class="tag">${o.thk.join(' / ')} mm card</span></div>
     <dl><dt>maker</dt><dd>${o.maker}</dd><dt>sizes</dt><dd>${o.posRange}</dd><dt>geometry</dt><dd>${o.geomNote||''}</dd>
     <dt>${o.repPos}-way</dt><dd>${fmt(c.len)} long × ${o.orient==='coplanar'?fmt(c.strip)+' strip':fmt(o.host)+' on the host'} × ${fmt(o.z)} mm high</dd>
     <dt>tongue</dt><dd>${fmt(o.tongue)} mm${o.approx?' <small>(≈ '+o.approx+')</small>':''}</dd><dt>cycles</dt><dd>${o.cycles||'—'}</dd><dt>plating</dt><dd>${o.plating||'—'}</dd>
     <dt>price</dt><dd class="price">${o.price==null?'ask':'$'+fmt(o.price,2)+(o.priceCny?' (¥'+o.priceCny+')':'')} <small>${o.price==null?o.priceQty:'@ '+o.priceQty}</small></dd></dl>
     <p class="note">${o.note||''}</p>
-    <div class="links">${(o.links||[]).map(l=>`<a href="${l[1]}">${l[0]}</a>`).join('')}</div></li>`; }).join("");
+    <div class="links">${(o.links||[]).map(l=>`<a href="${l[1]}"${blank(l[1])}>${l[0]}</a>`).join('')}</div></li>`; }).join("");
+}
+function sources(){
   const srcs = new Map();
   ALL.forEach(o => (o.links||[]).forEach(l => { if(l[1].startsWith('http')) srcs.set(l[1], `${o.name}: ${l[0]}`); }));
   EXTRA_SOURCES.forEach(([t,u]) => srcs.set(u, t));
-  $("#srcs").innerHTML = [...srcs].map(([u,t]) => `<div><a href="${u}">${t}</a></div>`).join("");
+  $("#srcs").innerHTML = [...srcs].map(([u,t]) => `<div><a href="${u}"${blank(u)}>${t}</a></div>`).join("");
 }
 function labels(){ [...$("#split").children].forEach((b,i)=>b.textContent = `${i+1} × ${Math.ceil(state.n/(i+1))}`); }
 $("#split").addEventListener("click", e => { const b = e.target.closest("button"); if(!b) return; state.k = +b.dataset.k; [...$("#split").children].forEach(x=>x.setAttribute("aria-pressed", String(x===b))); render(); });
 $("#nsig").addEventListener("input", e => { state.n = Math.min(200, Math.max(2, Math.round(+e.target.value)||70)); labels(); render(); });
 $("#edge").addEventListener("input", e => { state.edge = Math.max(10, +e.target.value||51); render(); });
+$("#fitonly").addEventListener("change", e => { state.fitonly = e.target.checked; render(); });
 $("#thk").addEventListener("change", e => { state.thk = e.target.value; render(); });
 $("#orient").addEventListener("change", e => { state.orient = e.target.value; render(); });
 $("#fam").addEventListener("change", e => { state.fam = e.target.value; render(); });
 $("#sort").addEventListener("change", e => { state.sort = e.target.value; state.dir = 1; render(); });
 document.querySelectorAll("#res th[data-s]").forEach(th => th.addEventListener("click", () => { const s = th.dataset.s; if(state.sort===s) state.dir*=-1; else {state.sort=s; state.dir=1;} render(); }));
-cards(); render();
+sources(); render();
+// every outside link in the written sections opens in a new tab too
+document.querySelectorAll('.doc a[href^="http"]').forEach(a => { a.target = "_blank"; a.rel = "noopener"; });
+// hover (or tap) a picture to see it at nearly the full window
+const zoom = document.createElement("div"); zoom.id = "zoom"; zoom.innerHTML = '<img alt="" referrerpolicy="no-referrer">'; document.body.append(zoom);
+let zt = 0;
+const zoomable = t => t instanceof HTMLImageElement && t.closest(".opt,.card,figure") && !t.closest("#zoom");
+const zhide = () => { clearTimeout(zt); zoom.classList.remove("on"); };
+document.addEventListener("mouseover", e => { if(!zoomable(e.target)) return; const src = e.target.currentSrc || e.target.src; clearTimeout(zt); zt = setTimeout(() => { zoom.firstChild.src = src; zoom.classList.add("on"); }, 200); });
+document.addEventListener("mouseout", e => { if(zoomable(e.target)) zhide(); });
+addEventListener("scroll", zhide, {passive:true}); addEventListener("keydown", zhide);
 </script>
 </body>
 </html>
