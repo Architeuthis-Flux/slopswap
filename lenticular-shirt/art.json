@@ -1,12 +1,23 @@
 {
  "v": 1,
- "t": 1795213714150,
- "src": "6 images",
+ "t": 1795286641738,
+ "src": "7 images",
  "W": 1350,
  "H": 1350,
  "docW": 10800,
  "dpi": 0,
  "layers": [
+  {
+   "name": "lentV62stickerRidgeAdd.png",
+   "key": null,
+   "assign": "r",
+   "d3": null,
+   "prev": "art-fce05d8e5e4bda3b.png",
+   "full": "art-f8d2aa95554fbe9d.png",
+   "type": "image/png",
+   "size": 718828,
+   "lm": 1795286527981
+  },
   {
    "name": "lentV62sticker.png",
    "key": null,
@@ -16,10 +27,10 @@
     "mm": 8
    },
    "prev": "art-ee3488af53e89056.png",
-   "full": null,
-   "type": null,
-   "size": 0,
-   "lm": 0
+   "full": "art-3a23803e8de7231d.png",
+   "type": "image/png",
+   "size": 212747,
+   "lm": 1794938245176
   },
   {
    "name": "lentV62stickergit.png",
@@ -27,32 +38,38 @@
    "assign": "a",
    "d3": null,
    "prev": "art-86d93ed9ab3a2bd0.png",
-   "full": null,
-   "type": null,
-   "size": 0,
-   "lm": 0
+   "full": "art-1b6e8a4470f02900.png",
+   "type": "image/png",
+   "size": 531360,
+   "lm": 1794938311547
   },
   {
    "name": "lentV62stickerguy.png",
    "key": null,
    "assign": "b",
-   "d3": null,
+   "d3": {
+    "on": true,
+    "mm": 0
+   },
    "prev": "art-33c1102358037d71.png",
-   "full": null,
-   "type": null,
-   "size": 0,
-   "lm": 0
+   "full": "art-37fdd42fd2349763.png",
+   "type": "image/png",
+   "size": 929485,
+   "lm": 1794938279893
   },
   {
    "name": "lentV62stickerNoHeeead.png",
    "key": null,
    "assign": "b",
-   "d3": null,
+   "d3": {
+    "on": true,
+    "mm": 0
+   },
    "prev": "art-8381977b66743bfe.png",
-   "full": null,
-   "type": null,
-   "size": 0,
-   "lm": 0
+   "full": "art-298e8c5d4f06074b.png",
+   "type": "image/png",
+   "size": 996623,
+   "lm": 1794943591407
   },
   {
    "name": "lentV62stickertext.png",
@@ -60,10 +77,10 @@
    "assign": "a",
    "d3": null,
    "prev": "art-0678c5ee09ef4b42.png",
-   "full": null,
-   "type": null,
-   "size": 0,
-   "lm": 0
+   "full": "art-20b52a8f7e6dce81.png",
+   "type": "image/png",
+   "size": 1002968,
+   "lm": 1794938369573
   },
   {
    "name": "lentV62stickerwhite.png",
@@ -71,10 +88,10 @@
    "assign": "w",
    "d3": null,
    "prev": "art-94da5efb44190d2d.png",
-   "full": null,
-   "type": null,
-   "size": 0,
-   "lm": 0
+   "full": "art-fd2f690b226a3170.png",
+   "type": "image/png",
+   "size": 168202,
+   "lm": 1794946359313
   }
  ],
  "ov": null
