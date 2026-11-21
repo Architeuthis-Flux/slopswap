@@ -94,7 +94,7 @@
 <main class="page wide">
 <p class="eyebrow"><a href="../">slopswap</a> / <a href="./">V6</a></p>
 <h1>Edge connector options for V6 modules</h1>
-<p class="lede">Every way found so far to join a Jumperless module to the main board along an edge, with what each costs in board area, height and money: one 70-way connector, or two or three smaller ones so half a breadboard can be swapped for something else. Catalog parts, Chinese and Taiwanese makers that are not (or barely) on LCSC, the custom "kiss slot" coupler, the single-contact SMT plug-and-socket clips, and the shorted-when-empty type. Dimensions are read from the makers' drawings and prices from listings as of 22 Nov 2026; anything marked ≈ is an estimate. Yuan prices are converted at ¥7.2 to the dollar.</p>
+<p class="lede">Every way found so far to join a Jumperless module to the main board along an edge, with what each costs in board area, height and money: one 70-way connector, or two or three smaller ones so half a breadboard can be swapped for something else. Catalog parts, Chinese and Taiwanese makers that are not (or barely) on LCSC, the custom "kiss slot" coupler, the single-contact SMT plug-and-socket clips, and the shorted-when-empty type. Dimensions are read from the makers' drawings and prices from listings as of 22 Nov 2026; anything marked ≈ is an estimate. Yuan prices are converted at ¥6.7 to the dollar.</p>
 
 <div class="tool">
 <aside class="side" aria-label="Filters">
@@ -111,7 +111,7 @@
 </div>
 <p class="hint" id="hint"></p>
 <p class="legend"><span><i style="background:var(--accent)"></i>custom</span><span><i style="background:var(--accent-2)"></i>coplanar</span><span><i style="background:var(--r5)"></i>vertical</span><span><i style="background:var(--r9)"></i>parallel, raised</span></p>
-<nav class="toc" aria-label="On this page"><a href="#calc">Area calculator</a><a href="#options">Every option</a><a href="#ask">Makers to ask</a><a href="#clips">Single-contact clips</a><a href="#custom">Custom kiss slot</a><a href="#normalling">Shorted when empty</a><a href="#other">Not card edge</a></nav>
+<nav class="toc" aria-label="On this page"><a href="#calc">Area calculator</a><a href="#options">Every option</a><a href="#ask">Makers to ask</a><a href="#print">Printed pinout</a><a href="#clips">Single-contact clips</a><a href="#custom">Custom kiss slot</a><a href="#normalling">Shorted when empty</a><a href="#other">Not card edge</a></nav>
 </aside>
 
 <div class="results">
@@ -143,6 +143,7 @@
   <li><b>Splitting with stock parts means 0.8 mm or finer.</b> Two 40-ways at 0.8 mm take 43–50 mm (Samtec HSEC8-DV, Oupiin 8206-2 and 8208-2, Solepin 61C1 at 2 × 36). Three only fit as HSEC8-DV 3 × 26 (49 mm) or Oupiin's 0.635 mm right-angle part.</li>
   <li><b>Coplanar from stock means a straddle part</b>: a 12–13.5 mm strip with the boards about 2 mm apart at best, against 18.3 mm and 6.4 mm today. Samtec MEC8-EM is the only one that fits twice on the edge (2 × 40 in 49.6 mm, about $7.80 the pair). The XKB PCIe straddle is $0.57 but its screw ears make it 34.8 mm long.</li>
   <li><b>The kiss slot is still the only option with the boards touching</b> and a strip under 10 mm, and it is 5 mm thick where the straddle parts are 7–9.</li>
+  <li><b>Right-angle 1.27 mm headers are the cheap coplanar answer if the module may carry a part.</b> A socket on the host and a pin header on the module put 78 contacts on the edge for about $0.50, 3 mm tall on one face, with the boards touching. 2.54 mm fits only 38.</li>
   <li><b>Cheapest per contact is M.2</b>: 67 contacts for $0.18, if a 0.8 mm card lying parallel to the host at 0.5 A a contact is acceptable.</li>
 </ul>
 
@@ -157,17 +158,29 @@
 <p>These turned up in the off-LCSC search but without enough numbers to put in the calculator. Solepin is the one to start with: it sells any even pin count in 0.8, 1.0 and 1.27 mm with a 10–20 day lead and sells singles on 1688. No Chinese maker lists a 0.8 mm straddle (edge-mount) part; Solepin, LXW and Shunyi make the vertical version and would be the ones to ask for it.</p>
 <div class="table-wrap"><table class="kv">
 <tr><th>maker</th><th>part</th><th>what it is</th><th>price</th></tr>
-<tr><td>Solepin 硕品 (Dongguan)</td><td><a href="https://www.solepin.com/Product/jinshouzhi/1-27mm-pitch-series/1219.html">61F9</a></td><td>1.27 mm SMT straddle, any 6–300 contacts, optional ears, PA9T, 3 A. Same idea as today's WingTAT at any length.</td><td class="p">¥40 ≈ $5.56 sample (<a href="https://detail.1688.com/offer/1052786187542.html">1688</a>)</td></tr>
-<tr><td>Solepin 硕品</td><td><a href="https://www.solepin.com/Product/jinshouzhi/1-00mm-pitch-series/813.html">61D3</a></td><td>1.0 mm vertical SMT, Samtec HSEC1-compatible, 10–200 contacts in any combination, keyed.</td><td class="p">¥30 ≈ $4.17 sample (<a href="https://detail.1688.com/offer/791960552133.html">1688</a>)</td></tr>
+<tr><td>Solepin 硕品 (Dongguan)</td><td><a href="https://www.solepin.com/Product/jinshouzhi/1-27mm-pitch-series/1219.html">61F9</a></td><td>1.27 mm SMT straddle, any 6–300 contacts, optional ears, PA9T, 3 A. Same idea as today's WingTAT at any length.</td><td class="p">¥40 ≈ $5.97 sample (<a href="https://detail.1688.com/offer/1052786187542.html">1688</a>)</td></tr>
+<tr><td>Solepin 硕品</td><td><a href="https://www.solepin.com/Product/jinshouzhi/1-00mm-pitch-series/813.html">61D3</a></td><td>1.0 mm vertical SMT, Samtec HSEC1-compatible, 10–200 contacts in any combination, keyed.</td><td class="p">¥30 ≈ $4.48 sample (<a href="https://detail.1688.com/offer/791960552133.html">1688</a>)</td></tr>
 <tr><td>Solepin 硕品</td><td><a href="https://www.solepin.com/Product/jinshouzhi/1-27mm-pitch-series/983.html">66F6 / 61F6</a></td><td>1.27 mm vertical SMT, Samtec MECF-compatible, any 4–200 contacts, 2 A.</td><td class="p">ask</td></tr>
 <tr><td>LXW 连兴旺 (Shenzhen)</td><td><a href="https://www.lxw-conn.com/product/0-8mm-pitch-20pin-200pin-high-speed-pcb-card-edge-connector/">HSEC8-compatible</a></td><td>0.8 mm vertical SMT, 20–200 contacts, 3 A. A Samtec-clone house.</td><td class="p">ask</td></tr>
-<tr><td>Dongguan Shunyi 顺宜</td><td><a href="https://detail.1688.com/offer/758975883985.html">HSEC8 replacement</a></td><td>0.8 mm vertical SMT, 10–200 contacts. Also 1.27 mm burn-in slots.</td><td class="p">¥25 ≈ $3.47 single</td></tr>
-<tr><td>Yueqing Beijie 倍杰 (Wenzhou)</td><td><a href="https://detail.1688.com/offer/978436559680.html">straddle</a> · <a href="https://detail.1688.com/offer/978979322481.html">vertical SMT</a></td><td>1.27 mm PCI-style slot in straddle and vertical SMT. Cheapest straddle found, no documentation.</td><td class="p">¥0.85 ≈ $0.12 listed</td></tr>
+<tr><td>Dongguan Shunyi 顺宜</td><td><a href="https://detail.1688.com/offer/758975883985.html">HSEC8 replacement</a></td><td>0.8 mm vertical SMT, 10–200 contacts. Also 1.27 mm burn-in slots.</td><td class="p">¥25 ≈ $3.73 single</td></tr>
+<tr><td>Yueqing Beijie 倍杰 (Wenzhou)</td><td><a href="https://detail.1688.com/offer/978436559680.html">straddle</a> · <a href="https://detail.1688.com/offer/978979322481.html">vertical SMT</a></td><td>1.27 mm PCI-style slot in straddle and vertical SMT. Cheapest straddle found, no documentation.</td><td class="p">¥0.85 ≈ $0.13 listed</td></tr>
 <tr><td>Sunny Young 杉洋 (Taiwan)</td><td><a href="https://www.sunnyyoung.com.tw/zh-tw/product-704151/1-27mm-Straddle-Mount-Card-Edge-Connector-R6830-Series.html">R6830</a></td><td>1.27 mm in straddle, SMT and DIP. Same 8.88 × 14.0 mm geometry as the WingTAT (<a href="https://www.sunnyyoung.com.tw/files/R6830-xxxHS-PCB-A_Download.pdf">drawing</a>).</td><td class="p">ask</td></tr>
 <tr><td>Oupiin 歐品 (Kunshan)</td><td><a href="https://www.oupiin.com/product_3i.php?id=119">8206-2…RPT</a> · <a href="https://www.oupiin.com/product_3i.php?id=126">8236</a></td><td>0.8 mm right-angle (2 × 10, 2 × 20; a MEC8-RA look-alike, 12.05 mm deep) and a 1.27 mm vertical 80-way (54.9 mm long).</td><td class="p">ask</td></tr>
-<tr><td>Dongguan Youmao 友贸</td><td><a href="https://detail.1688.com/offer/639181657827.html">PCIe ×4 right-angle</a></td><td>1.0 mm, 64 contacts, right-angle. The only right-angle PCIe-style socket found.</td><td class="p">¥10.4 ≈ $1.44</td></tr>
+<tr><td>Dongguan Youmao 友贸</td><td><a href="https://detail.1688.com/offer/639181657827.html">PCIe ×4 right-angle</a></td><td>1.0 mm, 64 contacts, right-angle. The only right-angle PCIe-style socket found.</td><td class="p">¥10.4 ≈ $1.55</td></tr>
 <tr><td>Shenzhen Dongfang Yutong 东方宇通</td><td><a href="http://www.szdfyt.com/product_view_511.html">1.0 mm straddle</a></td><td>Trader with a photo-only catalogue: 1.0 mm straddle, SMT and DIP, plus 0.8 mm SMT. Shows a 1.0 mm straddle exists in the Shenzhen market.</td><td class="p">ask</td></tr>
 </table></div>
+
+<h2 id="print">Printing the pinout on the connector</h2>
+<p>Labelled headers already exist as products, so this is a known job for a header factory or a small print shop: Arduino sells <a href="https://store-usa.arduino.cc/products/female-headers-14-ways-arduino-mkr1000-printed">printed MKR headers</a> ($1.50 for a 14-way strip, retail), and Where Labs sells <a href="https://dirtypcbs.com/store/details/6637/raspberry-pi-pico-header-with-silkscreen-labels">Pico headers with a two-layer black-and-white silkscreen</a>, straight or right-angle, at $4.95 a pair retail, printed for them by a small silkscreen shop. None of the prices below is a quote for this job: they are 1688 listing prices for the same processes on other small plastic parts.</p>
+<div class="table-wrap"><table class="kv">
+<tr><th>route</th><th>set-up</th><th>per piece</th><th>what it suits</th></tr>
+<tr><td>Header factory prints it</td><td class="p">in the unit price</td><td class="p">¥1.31 ≈ $0.20 each from 10,000 (<a href="https://detail.1688.com/offer/560609649065.html">Yonglifeng 永丽丰</a>: coloured 2 × 40 pin-header bodies, 2.0 / 2.54 mm, "pad-printed to the customer's requirement")</td><td>The cheapest route at volume, and the part arrives finished. That listing is for pin headers with a 10 k minimum; it shows header factories take the job, so ask the socket makers above for the same on a smaller run.</td></tr>
+<tr><td>Pad printing (移印) at a print shop</td><td class="p">¥50–94 ≈ $7.5–14 per etched plate (<a href="https://detail.1688.com/offer/627484399936.html">plate</a>, <a href="https://detail.1688.com/offer/891789959213.html">plate with free artwork</a>)</td><td class="p">¥0.07–0.20 ≈ $0.01–0.03 (<a href="https://detail.1688.com/offer/853180420315.html">Yuyao Chengfeng</a>, <a href="https://detail.1688.com/offer/524534895284.html">Shanghai Jingshi</a>)</td><td>Opaque white (or any colour) on black plastic: the Arduino look. Comfortable at 2.54 mm pitch with characters around 1.5 mm; at 1.27 mm the text is at the edge of what pad printing holds.</td></tr>
+<tr><td>Laser marking (镭雕) at a shop</td><td class="p">none listed</td><td class="p">¥0.05–0.30 ≈ $0.007–0.045 (<a href="https://detail.1688.com/offer/1027617576130.html">Shajing Xiongdaxing</a> ¥0.05 from one piece, <a href="https://detail.1688.com/offer/887641558107.html">Dalingshan Baoyao</a> UV ¥0.10 from 100, <a href="https://detail.1688.com/offer/615751130979.html">Dingfu</a> ¥0.30)</td><td>No plate, so the artwork can change per batch, and the line is fine enough for 1.27 mm pitch. The mark is light grey or tan on black nylon or LCP, not white; a UV laser gives the best contrast.</td></tr>
+<tr><td>Your own UV laser marker</td><td class="p">¥6,800 ≈ $1,015 for a 3 W desktop machine (<a href="https://detail.1688.com/offer/694463394751.html">Dongguan Bowei</a>)</td><td class="p">time only</td><td>Pays for itself against shop marking at a few tens of thousands of parts, and marks anything else on the bench.</td></tr>
+<tr><td>Moulded in</td><td class="p">part of the housing tool</td><td class="p">nothing</td><td>Only for a custom housing such as the kiss slot: raised or sunk characters cut into the mould, optionally tipped with ink afterwards.</td></tr>
+</table></div>
+<p>What fits. A right-angle 1.27 mm socket shows a top face 4.3 mm deep with 1.27 mm of width per pin, so each label has to run front to back at about 0.9 mm character height, and the two rows share that strip: roughly two or three characters per pin. That is laser territory. A 2.54 mm socket has a top face 8.5 mm deep and twice the width per pin, which takes four or five characters per pin by pad printing. Stock catalog connectors (Samtec, Oupiin, the M.2 and PCIe sockets) can be marked the same way after purchase, but SMT parts come on tape and reel and would have to be unreeled, marked and re-reeled, which costs more than the marking; through-hole headers in tubes or bags do not have that problem. Expect a shop to add a minimum job charge and a fixture for parts this small.</p>
 
 <h2 id="clips">Single-contact SMT plug and socket (the Keystone 6100 / MAC8 KO-KC style)</h2>
 <p>A stamped tab soldered flat on one board slides into a stamped spring socket soldered flat on the other, joining two boards in the same plane with nothing but metal: about 1.2 mm tall, on one face only, with the boards almost touching. Keystone and MAC8 make the gold-plated originals. The Chinese LED-lighting trade makes the same thing in tin-plated phosphor copper for joining light-bar boards end to end, at roughly a tenth of the price. Both boards need a part soldered on, so the module is no longer a bare PCB, and at about 3 mm per contact a 51 mm edge holds 16 or 17 of them per face.</p>
@@ -182,14 +195,14 @@
 <tr><td>MAC8 (Japan)</td><td>KO-2-1 / KC-2-1, HDA / HDB strips (<a href="https://en.sekorm.com/doc/537115399.html">KEO series sheet</a>)</td><td>Reference. Gold SMT pin and socket singles, and 1.27 / 2.54 mm strips, "for PCB parallel connection".</td><td class="p">HDA-1-1 (1.27 mm, 40-way pin strip) ¥780 JPY ≈ $5 each in tens (Monotaro)</td></tr>
 <tr><td>Shenzhen Mengjing 孟京科技</td><td><a href="https://detail.1688.com/offer/911510152446.html">MJT-81013 / MJT-810132</a></td><td><b>All metal</b>, stamped phosphor copper, tin. 3 A / 250 V, −45 to +125 °C, 270 °C reflow, tape and reel. The closest match to the gold originals.</td><td class="p">¥0.62 ≈ $0.09, MOQ 5–10 sets</td></tr>
 <tr><td>Shenzhen Boruisen 铂瑞森 (BRSEN)</td><td><a href="https://detail.1688.com/offer/1067755811760.html">MJT-81013</a></td><td>Same part numbers and price as Mengjing: almost certainly one source under two shop names.</td><td class="p">¥0.62 ≈ $0.09</td></tr>
-<tr><td>Dongguan Gaodi 高迪电子 (KOSODSWITCH)</td><td><a href="https://detail.1688.com/offer/856479368135.html">Gd-I059</a></td><td><b>All metal</b>, 1-way male and female for T5/T8 lamp boards, brass with tin.</td><td class="p">¥1.61 ≈ $0.22</td></tr>
-<tr><td>Shenzhen Mingyun 明韵电子 (MYUNDZ)</td><td><a href="https://detail.1688.com/offer/737330272539.html">81014 / 81014L</a></td><td>Same contacts in an LCP housing, 1 to 4 ways at 1.8 mm pitch, pin lengths 4.2 / 5.8 / 7.5 mm, 1 A / 125 V.</td><td class="p">¥0.36–0.88 ≈ $0.05–0.12 (1-way ¥0.40)</td></tr>
-<tr><td>Mengjing · Boruisen</td><td><a href="https://detail.1688.com/offer/1024332646333.html">81014, 1 to 4 ways</a></td><td>Housed pair: female 4.9 mm deep, male 8.9 mm, 2.5 mm high, 1 A, tin.</td><td class="p">¥0.40–0.67 ≈ $0.06–0.09</td></tr>
-<tr><td>Wenzhou Dufu 都富 · Wenzhou Yijian 一键</td><td><a href="https://detail.1688.com/offer/860556333600.html">BB2005</a> · <a href="https://detail.1688.com/offer/1076915516898.html">BB2005</a></td><td>Housed LED-board plug and socket pairs.</td><td class="p">¥0.10–0.12 ≈ $0.014–0.017</td></tr>
-<tr><td>Shaoxing Qianrui 千睿</td><td><a href="https://detail.1688.com/offer/646047785891.html">G15</a></td><td>Housed pair, 1.5 mm pitch.</td><td class="p">¥0.30 ≈ $0.04 at 10 k</td></tr>
-<tr><td>Yueqing Hongsen 宏森 · Dongguan Handa 汉达 · Zhongshan Yangde 扬德</td><td><a href="https://detail.1688.com/offer/815520620273.html">LED-strip pair</a> · <a href="https://detail.1688.com/offer/676251824690.html">pair</a> · <a href="https://detail.1688.com/offer/796113274268.html">pair</a></td><td>Pin-header-style board-to-board pairs for LED strips.</td><td class="p">¥0.08–0.53 ≈ $0.01–0.07</td></tr>
+<tr><td>Dongguan Gaodi 高迪电子 (KOSODSWITCH)</td><td><a href="https://detail.1688.com/offer/856479368135.html">Gd-I059</a></td><td><b>All metal</b>, 1-way male and female for T5/T8 lamp boards, brass with tin.</td><td class="p">¥1.61 ≈ $0.24</td></tr>
+<tr><td>Shenzhen Mingyun 明韵电子 (MYUNDZ)</td><td><a href="https://detail.1688.com/offer/737330272539.html">81014 / 81014L</a></td><td>Same contacts in an LCP housing, 1 to 4 ways at 1.8 mm pitch, pin lengths 4.2 / 5.8 / 7.5 mm, 1 A / 125 V.</td><td class="p">¥0.36–0.88 ≈ $0.05–0.13 (1-way ¥0.40)</td></tr>
+<tr><td>Mengjing · Boruisen</td><td><a href="https://detail.1688.com/offer/1024332646333.html">81014, 1 to 4 ways</a></td><td>Housed pair: female 4.9 mm deep, male 8.9 mm, 2.5 mm high, 1 A, tin.</td><td class="p">¥0.40–0.67 ≈ $0.06–0.10</td></tr>
+<tr><td>Wenzhou Dufu 都富 · Wenzhou Yijian 一键</td><td><a href="https://detail.1688.com/offer/860556333600.html">BB2005</a> · <a href="https://detail.1688.com/offer/1076915516898.html">BB2005</a></td><td>Housed LED-board plug and socket pairs.</td><td class="p">¥0.10–0.12 ≈ $0.015–0.018</td></tr>
+<tr><td>Shaoxing Qianrui 千睿</td><td><a href="https://detail.1688.com/offer/646047785891.html">G15</a></td><td>Housed pair, 1.5 mm pitch.</td><td class="p">¥0.30 ≈ $0.045 at 10 k</td></tr>
+<tr><td>Yueqing Hongsen 宏森 · Dongguan Handa 汉达 · Zhongshan Yangde 扬德</td><td><a href="https://detail.1688.com/offer/815520620273.html">LED-strip pair</a> · <a href="https://detail.1688.com/offer/676251824690.html">pair</a> · <a href="https://detail.1688.com/offer/796113274268.html">pair</a></td><td>Pin-header-style board-to-board pairs for LED strips.</td><td class="p">¥0.08–0.53 ≈ $0.01–0.08</td></tr>
 <tr><td>Mingyun · Mengjing</td><td><a href="https://detail.1688.com/offer/689380560829.html">2060-style link</a> · <a href="https://detail.1688.com/offer/1087704020351.html">3-way</a></td><td>WAGO 2060-style board-to-board link pins: a loose bridge pushed into SMT sockets on both boards.</td><td class="p">¥0.20–0.40 ≈ $0.03–0.06</td></tr>
-<tr><td>Shenzhen Jiahongsheng 嘉洪盛 · Dongguan Saisite 赛思特 · Dongguan Deyoushi 得优仕 · Shenzhen Weilianda 伟联达 · Shenzhen Guangshengxin 广胜鑫</td><td><a href="https://detail.1688.com/offer/962536159982.html">strip</a> · <a href="https://detail.1688.com/offer/912221675137.html">strip</a> · <a href="https://detail.1688.com/offer/1033399685985.html">strip</a> · <a href="https://detail.1688.com/offer/1061715395869.html">strip</a> · <a href="https://detail.1688.com/offer/901816735656.html">strip</a></td><td>1.27 mm horizontal SMT pin headers and sockets: the cheap equivalent of MAC8's HDA / HDB strips, and the only version of this idea that reaches 1.27 mm pitch.</td><td class="p">¥0.05–0.30 ≈ $0.007–0.04 per strip or per pin as listed</td></tr>
+<tr><td>Shenzhen Jiahongsheng 嘉洪盛 · Dongguan Saisite 赛思特 · Dongguan Deyoushi 得优仕 · Shenzhen Weilianda 伟联达 · Shenzhen Guangshengxin 广胜鑫</td><td><a href="https://detail.1688.com/offer/962536159982.html">strip</a> · <a href="https://detail.1688.com/offer/912221675137.html">strip</a> · <a href="https://detail.1688.com/offer/1033399685985.html">strip</a> · <a href="https://detail.1688.com/offer/1061715395869.html">strip</a> · <a href="https://detail.1688.com/offer/901816735656.html">strip</a></td><td>1.27 mm horizontal SMT pin headers and sockets: the cheap equivalent of MAC8's HDA / HDB strips, and the only version of this idea that reaches 1.27 mm pitch.</td><td class="p">¥0.05–0.30 ≈ $0.007–0.045 per strip or per pin as listed</td></tr>
 </table></div>
 <p>Caveats. These are lighting parts: tin plating, no stated mating-cycle life, and tolerances of ±0.15 to ±0.30 mm on the stamped bodies. Only two distinct all-metal tool sets turned up (the 81013 and the Gd-I059). The recommended pad is 2.60 mm wide, so 3.0 mm is about the tightest pitch. Listed 1688 prices are for small lots and usually fall with quantity.</p>
 
@@ -258,7 +271,7 @@ const SURVEY = [
   // ---- coplanar (straddle / edge mount)
   {id:"xkb3126", name:"XKB X3126WS-36 (PCIe ×1 straddle)", maker:"XKB 星坤 (Shenzhen)", family:"cn", pitch:1.0, rows:2, fixedPos:36, fixedLen:34.8, repPos:36, posRange:"36 / 64 / 98 / 164", thk:["1.6"],
    orient:"coplanar", geomNote:"straddle: 4.4 mm legs on the host edge, 7.6 mm body hangs off it", host:4.4, gap:2.0, tongue:5.6, z:8.8, approx:"gap and tongue",
-   cycles:"50 (PCIe CEM spec)", plating:"selective Au: flash, 15 or 30 µin", price:0.565, priceQty:"1 (LCSC)", priceCny:"4.07",
+   cycles:"50 (PCIe CEM spec)", plating:"selective Au: flash, 15 or 30 µin", price:0.565, priceQty:"1 (LCSC)",
    links:[["LCSC C5711235","https://lcsc.com/product-detail/Card-Edge-Connectors_XKB-Connection-X3126WS-36-9TV01_C5711235.html"],["drawing","https://datasheet.lcsc.com/datasheet/pdf/5d257980edb4d0d17147cf4a83c0a0bd.pdf"],["UMAX 3126, LCSC C404097","https://www.lcsc.com/product-detail/C404097.html"],["Samtec PCIE-036 EMS2","https://www.samtec.com/products/pcie-036-02-f-d-ems2"]],
    img:"https://assets.lcsc.com/images/lcsc/900x900/20230430_XKB-Connection-X3126WS-36-9TV01_C5711235_blank.jpg",
    note:"Cheapest coplanar part found. PCIe ×1 pad pattern with its key (11 + 25 pads a side). The body is 25.0 mm; the stock part has Ø2.2 screw ears that take it to 34.8, so two do not fit a 51 mm edge unless XKB will supply it without ears (two bodies need 52 mm). UMAX 3126 is the same thing ($0.90 at 1 k for the 98-way); Samtec PCIE-036-02-F-D-EMS2 is the earless branded one, 25.0 mm, $2.09 at 1 k."},
@@ -280,6 +293,19 @@ const SURVEY = [
    links:[["Samtec MEC1-EM","https://www.samtec.com/products/mec1-120-02-l-d-em2"],["catalog page","https://suddendocs.samtec.com/catalog_english/mec1_em.pdf"]],
    img:S+"mec1_em/mec1-120-02-l-d-em2.png",
    note:"-EM1 clamps a 0.8 mm host board and -EM2 a 1.6 mm one; the card is 1.6 mm either way. Clamp ears add 12.45 mm to the length."},
+  // ---- right-angle pin header pairs: not card edge (the module needs a header soldered on), but coplanar
+  {id:"ra127", name:"1.27 mm right-angle socket + pin header pair", maker:"XKB 星坤 · Yinaxin 翊纳芯 · many Shenzhen makers", family:"cn", pitch:1.27, rows:2, repPos:80, end:1.67, posRange:"2 × 2 to 2 × 50, any count", thk:["1.6","1.0","0.8"], thkLabel:"any board thickness",
+   orient:"coplanar", geomNote:"right-angle female header on the host, right-angle pin header on the module; both through-hole, on one face only", host:5.8, gap:0, tongue:4.5, z:3.0, approx:"tongue (the depth the pin header takes on the module)",
+   cycles:"not stated", plating:"1 µin Au flash on brass (thicker to order)", price:0.53, priceQty:"1 (1688: socket $0.31 ≈ ¥2.1, pin header $0.22 ≈ ¥1.45, both 2 × 40)",
+   links:[["Yinaxin A127C socket (1688)","https://detail.1688.com/offer/720627455651.html"],["Yisheng 2 × 40 socket (1688)","https://detail.1688.com/offer/847458103608.html"],["XKB X1321FR, LCSC C2881906","https://www.lcsc.com/product-detail/C2881906.html"],["socket drawing","https://datasheet.lcsc.com/datasheet/pdf/283491d8a24e08857c68a58900fe76cb.pdf?productCode=C2881906"],["Tianlewei pin header (1688)","https://detail.1688.com/offer/1088653614031.html"]],
+   img:"https://assets.lcsc.com/images/lcsc/900x900/20230526_XKB-Connection-X1321FR-2x20-C43D24_C2881906_blank.jpg",
+   note:"Not a card edge: the module needs a pin header soldered on, so it is no longer a bare PCB. In return it is 3.0 mm tall, sits on one face, lets the boards touch, and costs about 50 cents a joint. 78 contacts fit a 51 mm edge (2 × 39, 49.9 mm); 2 × 40 is 51.2 mm. The socket is 1.27 × N + 0.4 long, 4.3 deep (5.8 with the bent tails) and 3.0 high, rated 1 A. No mating force or cycle life is published; header contacts are stiffer than card-edge beams, so 78 of them will want a firm push. Variant: a socket on both boards, joined by a loose double-ended pin strip, which then is the wear part."},
+  {id:"ra254", name:"2.54 mm right-angle socket + pin header pair", maker:"HCTL 华灿天禄 · many", family:"cn", pitch:2.54, rows:2, repPos:40, end:2.94, posRange:"2 × 2 to 2 × 40, any count", thk:["1.6","1.0","0.8"], thkLabel:"any board thickness",
+   orient:"coplanar", geomNote:"right-angle female header on the host, right-angle pin header on the module; through-hole", host:12.7, gap:0, tongue:6.5, z:5.0, approx:"tongue (the depth the pin header takes on the module)",
+   cycles:"not stated", plating:"Au flash or tin", price:0.46, priceQty:"1 (LCSC socket $0.36 for 2 × 20, pin header about $0.10)",
+   links:[["HCTL PM254-2-20-W-8.5, LCSC C2897440","https://www.lcsc.com/product-detail/C2897440.html"],["drawing","https://datasheet.lcsc.com/datasheet/pdf/861a2a3a23baf5e501a282998fccc77c.pdf?productCode=C2897440"]],
+   img:"https://assets.lcsc.com/images/lcsc/900x900/20230107_HCTL-PM254-2-20-W-8-5_C2897440_blank.jpg",
+   note:"The pitch every jumper wire and Dupont lead fits, and big enough to print on comfortably. But only 38 contacts fit a 51 mm edge in two rows (2 × 19, 48.7 mm), so it cannot carry 70 signals; three- and four-row right-angle sockets are not stock parts. Socket 2.54 × N + 0.4 long, 8.5 deep (12.7 with tails), 5.0 high, 3 A."},
   // ---- vertical
   {id:"hsec8dv", name:"Samtec HSEC8-DV (0.8 mm vertical)", maker:"Samtec", family:"brand", pitch:0.8, rows:2, repPos:40, sizes:[10,13,20,25,30,37,40,49,50,60,70,80,100], len:n=>n*0.8+(n>=40?7.8:4.6), posRange:"18–200", thk:["1.6"],
    orient:"vertical", geomNote:"vertical SMT, body 5.8 mm wide", host:7.6, tongue:6.4, z:7.98,
@@ -301,7 +327,7 @@ const SURVEY = [
    note:"Narrowest 0.8 mm vertical body found. 70 contacts in 32.6 mm. 1.8 A. Not on LCSC."},
   {id:"oupiin8206", name:"Oupiin 8206-2 (0.8 mm vertical)", maker:"Oupiin 歐品 (Kunshan)", family:"cn", pitch:0.8, rows:2, repPos:20, sizes:[10,20,30,40], end:5.4, posRange:"20 / 40 / 60 / 80", thk:["1.6"],
    orient:"vertical", geomNote:"vertical SMT, body 7.0 mm wide; a MEC8-DV look-alike", host:8.8, tongue:5.55, z:7.8,
-   cycles:"not stated", plating:"Au 10 or 30 µin", price:2.40, priceQty:"1,000 (20-way, DigiKey)", priceCny:"17.3",
+   cycles:"not stated", plating:"Au 10 or 30 µin", price:2.40, priceQty:"1,000 (20-way, DigiKey)",
    links:[["Oupiin 8206-2","https://www.oupiin.com/product_3i.php?id=117"],["drawing","https://www.oupiin.com/upload/docDB/202504111409035B8a.pdf"]],
    img:"https://mm.digikey.com/Volume0/opasdata/d220001/derivates/1/003/213/431/MFG_8206-2X10C30DPT-S_sml%28200x200%29.jpg",
    note:"3.1 A a pin. DigiKey stocks the 2 × 10; the rest of the family is a factory quote, which should come in well under the price scaled here."},
@@ -346,7 +372,7 @@ const SURVEY = [
    cycles:"50 (PCIe CEM spec)", plating:"Au flash, 15 or 30 µin", price:0.41, priceQty:"2,100 (Amphenol, DigiKey)",
    links:[["Amphenol 10018783-10110TLF","https://www.digikey.com/en/products/detail/amphenol-cs-fci/10018783-10110TLF/1002287"],["XKB X1611WVS, LCSC C21263079","https://www.lcsc.com/product-detail/C21263079.html"],["Fushu, Made-in-China","https://fushuelectronic.en.made-in-china.com/product/sRZpVPouAAcS/China-1-0mm-Straight-DIP-to-PCB-PCI-Express-Card-Slot-Connector.html"]],
    img:"https://assets.lcsc.com/images/lcsc/900x900/20240727_XKB-Connection-X1611WVS-36-9TV01_C21263079_front.jpg",
-   note:"An open standard, so the cheapest gold card-edge socket there is: Amphenol $0.41 (2.1 k), XKB's SMT clone $0.47 (1.4 k), Dongguan Fushu ¥0.72–5.4 ($0.10–0.75) at 1 k. 11 mm tall; the key splits the card into 11 + 25 pads a side."},
+   note:"An open standard, so the cheapest gold card-edge socket there is: Amphenol $0.41 (2.1 k), XKB's SMT clone $0.47 (1.4 k), Dongguan Fushu $0.10–0.75 at 1 k. 11 mm tall; the key splits the card into 11 + 25 pads a side."},
   {id:"wingtathed", name:"WingTAT HED (1.27 mm vertical, through-hole)", maker:"WingTAT 永達", family:"cn", pitch:1.27, rows:2, repPos:40, end:7.37, posRange:"4–200, any even count", thk:["1.6"],
    orient:"vertical", geomNote:"vertical through-hole, body 8.88 mm wide", host:8.88, tongue:7.62, z:14.0,
    cycles:"about 30 (3 µin Au)", plating:"3 µin Au standard", price:1.13, priceQty:"850 (40-way, LCSC)",
@@ -395,7 +421,7 @@ const SURVEY = [
    cycles:"50 (spec)", plating:"Au flash", price:0.34, priceQty:"1,400 (Lian Xin XDMP-040-A02, LCSC)",
    links:[["Lian Xin XDMP-040-A02, LCSC C18202142","https://www.lcsc.com/product-detail/C18202142.html"],["TE 1775862-2, LCSC C428486","https://www.lcsc.com/product-detail/C428486.html"],["Attend 119A","https://www.attend.com.tw/en/product.php?act=view&id=124"],["Shenzhen Tuozhi, Alibaba","https://www.alibaba.com/product-detail/52P-Mini-PCI-E-4-0H_1600428674015.html"]],
    img:"https://assets.lcsc.com/images/lcsc/900x900/20231101_Lian-Xin-Technology-XDMP-040-A02_C18202142_front.jpg",
-   note:"1.0 mm card. Lian Xin $0.34, TE $0.53 (1.1 k), unbranded Shenzhen sockets ¥1.3–3.2 ($0.18–0.45) in tens to hundreds. Heights 4.0–9.9 mm."},
+   note:"1.0 mm card. Lian Xin $0.34, TE $0.53 (1.1 k), unbranded Shenzhen sockets $0.18–0.45 in tens to hundreds. Heights 4.0–9.9 mm."},
 ];
 const EXTRA_SOURCES = [
   ["Mengjing MJT-81013 (1688)","https://detail.1688.com/offer/911510152446.html"],
@@ -405,6 +431,9 @@ const EXTRA_SOURCES = [
   ["Keystone SMT low-profile PCB edge connectors (DigiKey)","https://www.digikey.co.uk/en/product-highlight/k/keystone/smt-low-profile-printed-circuit-board-edge-connectors"],
   ["Keystone launch note (Design World)","https://www.designworldonline.com/keystone-electronics-offers-smt-low-profile-pcb-edge-connectors/"],
   ["MAC8 KEO parallel-connection connector (Sekorm)","https://en.sekorm.com/doc/537115399.html"],
+  ["Where Labs Pico headers with silkscreen labels","https://dirtypcbs.com/store/details/6637/raspberry-pi-pico-header-with-silkscreen-labels"],
+  ["Arduino printed MKR headers","https://store-usa.arduino.cc/products/female-headers-14-ways-arduino-mkr1000-printed"],
+  ["Yonglifeng pad-printed coloured headers (1688)","https://detail.1688.com/offer/560609649065.html"],
   ["Solepin 61F9 1.27 mm straddle","https://www.solepin.com/Product/jinshouzhi/1-27mm-pitch-series/1219.html"],
   ["Solepin 61D3 1.0 mm","https://www.solepin.com/Product/jinshouzhi/1-00mm-pitch-series/813.html"],
   ["LXW 0.8 mm card edge","https://www.lxw-conn.com/product/0-8mm-pitch-20pin-200pin-high-speed-pcb-card-edge-connector/"],
@@ -514,7 +543,7 @@ function cards(){
     return `<li class="card" id="${o.id}">
     ${thumb(o,'pic','no photo: see the plan view in the table')}
     <h3><a href="${primary(o)}"${blank(primary(o))}>${o.name}<i>${blank(primary(o))?'↗':''}</i></a></h3>
-    <div>${tagFor(o)}<span class="tag">${o.pitch} mm</span><span class="tag">${o.thk.join(' / ')} mm card</span></div>
+    <div>${tagFor(o)}<span class="tag">${o.pitch} mm</span><span class="tag">${o.thkLabel || o.thk.join(' / ')+' mm card'}</span></div>
     <dl><dt>maker</dt><dd>${o.maker}</dd><dt>sizes</dt><dd>${o.posRange}</dd><dt>geometry</dt><dd>${o.geomNote||''}</dd>
     <dt>${o.repPos}-way</dt><dd>${fmt(c.len)} long × ${o.orient==='coplanar'?fmt(c.strip)+' strip':fmt(o.host)+' on the host'} × ${fmt(o.z)} mm high</dd>
     <dt>tongue</dt><dd>${fmt(o.tongue)} mm${o.approx?' <small>(≈ '+o.approx+')</small>':''}</dd><dt>cycles</dt><dd>${o.cycles||'—'}</dd><dt>plating</dt><dd>${o.plating||'—'}</dd>
