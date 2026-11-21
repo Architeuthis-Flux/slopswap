@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>V6 Edge Connector Options</title>
+<meta name="short-title" content="Edge connectors">
+<link rel="stylesheet" href="../styles/jumperless.css">
+<style>
+  .lede{color:var(--muted);max-width:70ch}
+  .ctl{display:flex;flex-wrap:wrap;gap:.6rem 1.4rem;align-items:flex-end;padding:.9rem 1rem;border:1px solid var(--line);border-radius:8px;background:var(--surface);margin:1rem 0 1.2rem}
+  .ctl label{display:flex;flex-direction:column;gap:.3rem;font-family:var(--font-pixel);font-size:.5rem;color:var(--muted);letter-spacing:0}
+  .ctl input[type=number],.ctl select{font:14px var(--font-body);color:var(--fg);background:var(--surface-2);border:1px solid var(--line);border-radius:6px;padding:.35rem .5rem;min-width:6.5rem}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+  .seg button{font:13px var(--font-body);color:var(--fg);background:var(--surface-2);border:0;padding:.4rem .8rem;cursor:pointer}
+  .seg button+button{border-left:1px solid var(--line)}
+  .seg button[aria-pressed=true]{background:var(--accent);color:#111}
+  .hint{font-size:.85rem;color:var(--muted);margin:.2rem 0 0}
+  table.res{font-size:.86rem;border-collapse:collapse;width:100%}
+  table.res th{cursor:pointer;white-space:nowrap;user-select:none}
+  table.res th .arr{opacity:.5;font-size:.7em}
+  table.res td{vertical-align:middle}
+  table.res td.num{font-family:var(--font-mono);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+  table.res tr.best td{background:color-mix(in srgb,var(--accent-2) 10%,transparent)}
+  .opt{display:flex;gap:.6rem;align-items:center;min-width:14rem}
+  .opt .th{width:44px;height:44px;flex:0 0 44px;border-radius:5px;background:var(--surface-2);object-fit:cover;border:1px solid var(--line)}
+  .opt .th.ph{display:grid;place-items:center;color:var(--muted);font-family:var(--font-pixel);font-size:.45rem}
+  .opt b{display:block;font-weight:700}
+  .opt small{display:block;color:var(--muted)}
+  .tag{display:inline-block;font-family:var(--font-pixel);font-size:.42rem;padding:.3em .55em;border-radius:999px;border:1px solid var(--line);margin-right:.25rem;color:var(--muted)}
+  .tag.cop{border-color:var(--accent-2);color:var(--accent-2)}
+  .tag.st{border-color:var(--r9);color:var(--r9)}
+  .tag.vt{border-color:var(--r5);color:var(--r5)}
+  .tag.cu{border-color:var(--accent);color:var(--accent)}
+  .sketch svg{display:block}
+  .bars{margin:1rem 0 1.5rem}
+  .bars svg{width:100%;height:auto;display:block}
+  .cards{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(19rem,1fr));gap:1rem}
+  .card{display:flex;flex-direction:column;gap:.5rem;padding:1rem 1.1rem;border:1px solid var(--line);border-radius:8px;background:var(--surface);border-top:5px solid var(--c,var(--accent))}
+  .card h3{margin:0;font-size:.95rem;line-height:1.3}
+  .card .pic{width:100%;aspect-ratio:16/9;object-fit:contain;background:#fff;border-radius:5px;border:1px solid var(--line)}
+  .card .pic.ph{background:var(--surface-2);display:grid;place-items:center;color:var(--muted);font-family:var(--font-pixel);font-size:.5rem}
+  .card dl{display:grid;grid-template-columns:auto 1fr;gap:.15rem .7rem;margin:0;font-size:.85rem}
+  .card dt{color:var(--muted)} .card dd{margin:0}
+  .card .price{font-family:var(--font-mono);font-size:.9rem}
+  .card .links{display:flex;flex-wrap:wrap;gap:.4rem .9rem;font-size:.85rem}
+  .card .note{font-size:.85rem;color:var(--muted)}
+  figure{margin:1.2rem 0}
+  figure img{width:100%;height:auto;border-radius:6px;border:1px solid var(--line);background:#fff}
+  figcaption{font-size:.85rem;color:var(--muted);margin-top:.4rem}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+  @media (max-width:800px){.two{grid-template-columns:1fr}}
+  .kv{font-size:.9rem}
+  .kv td{padding:.25rem .6rem .25rem 0;vertical-align:top}
+  .srcs{font-size:.85rem;columns:2;column-gap:2rem}
+  @media (max-width:800px){.srcs{columns:1}}
+</style>
+</head>
+<body>
+<main class="page wide">
+<p class="eyebrow"><a href="../">slopswap</a> / <a href="./">V6</a></p>
+<h1>Edge connector options for V6 modules</h1>
+<p class="lede">Every way we have found to join a Jumperless module to the main board along an edge, with what each one costs in board area, height and money — one 70-way connector, or two or three smaller ones so half a breadboard can be swapped for something else. Includes the custom "kiss slot" coupler, the shorted-when-empty (normalling) type, and the off-LCSC Chinese parts. Numbers are from datasheets and listings as of 22 Nov 2026; custom-part numbers are estimates from the connector physics write-ups.</p>
+
+<h2>Pick a split, see the area</h2>
+<div class="ctl">
+  <label>signals per module <input id="nsig" type="number" value="70" min="2" max="200" step="1"></label>
+  <label>connectors per edge <span class="seg" id="split"><button aria-pressed="true" data-k="1">1 × 70</button><button data-k="2">2 × 35</button><button data-k="3">3 × 24</button></span></label>
+  <label>card thickness <select id="thk"><option value="any">any</option><option value="1.6">1.6 mm</option><option value="1.0">1.0 mm</option><option value="0.8">0.8 mm</option></select></label>
+  <label>geometry <select id="orient"><option value="any">any</option><option value="coplanar">coplanar (straddle / coupler)</option><option value="vertical">vertical (card stands up)</option><option value="stacked">stacked (card lies over host)</option></select></label>
+  <label>sort by <select id="sort"><option value="area">dead area</option><option value="edge">edge length</option><option value="height">height</option><option value="price">price per module</option><option value="pitch">pitch</option></select></label>
+</div>
+<p class="hint" id="hint"></p>
+
+<div class="bars" id="bars"></div>
+
+<div class="table-wrap">
+<table class="res" id="res">
+<thead><tr>
+  <th data-s="name">option <span class="arr">↕</span></th>
+  <th>geometry</th>
+  <th data-s="pitch" class="num">pitch</th>
+  <th class="num">pos / conn.</th>
+  <th data-s="len" class="num">conn. length</th>
+  <th data-s="edge" class="num">edge used</th>
+  <th data-s="host" class="num">host depth</th>
+  <th data-s="tongue" class="num">tongue</th>
+  <th data-s="gap" class="num">board gap</th>
+  <th data-s="area" class="num">dead area</th>
+  <th data-s="height" class="num">height</th>
+  <th data-s="price" class="num">price / module</th>
+  <th>plan view (to scale)</th>
+</tr></thead>
+<tbody id="rows"></tbody>
+</table>
+</div>
+<p class="muted" style="font-size:.85rem">"Dead area" is the strip of PCB you cannot use for anything else: on a coplanar joint it is connector length × (host pad depth + air gap between the boards + module tongue); on a vertical or stacked joint it is the connector's footprint on the host plus the module's tongue. Prices are for the representative part listed in the card below, times the number of connectors; a shorter custom length scales roughly with contacts. Hover a row's name for the notes.</p>
+
+<h2>The options, one by one</h2>
+<ul class="cards cycle" id="cards"></ul>
+
+<h2>The custom "kiss slot" coupler</h2>
+<p>The custom part designed for V6 (write-ups: <em>V6_edge_coupler_connector_design</em> and <em>V6_edge_coupler_v2_kiss_slot</em> in the project). Same 1.27 mm, 70-way, 45.47 mm tongue as today's board, but half the height, a third of the depth and the two boards touch inside the housing. The same contact strip in a shorter housing gives the 2-way and 3-way versions in the table above.</p>
+<figure><img src="edge-fig1-today-vs-proposed.png" alt="Section of today's WingTAT straddle connector next to the proposed coupler"><figcaption>Today's WingTAT HEE70LP03BK (18.3 mm end to end, boards 6.4 mm apart) and the proposed coupler (9.2 mm, boards touching). Each contact's two beams run the full housing height in opposite directions, side by side within the pitch, which is how a 9 mm part gets 6 mm springs.</figcaption></figure>
+<div class="two">
+<figure><img src="edge-chart1-force-stress.png" alt="Normal force and stress versus board thickness"><figcaption>Normal force and beam stress vs board thickness. Variant B (rest gap 0.30 mm) gives 1.6 mm boards 51–61 gf and a 0.8 mm board ~20 gf — "0.8 in a pinch".</figcaption></figure>
+<figure><img src="edge-chart2-insertion.png" alt="Insertion force versus bevel and bump radius"><figcaption>Insertion force vs bevel angle and bump radius. A square card edge is fine if the bump radius is ≥1 mm; with a 0.4 mm bump it jams.</figcaption></figure>
+</div>
+<div class="two">
+<figure><img src="edge-v2-sections.png" alt="Sections through the V2 kiss-slot STEP model"><figcaption>Sections cut from the V2 STEP: lane-1 beam, lane-2 beam, and the comb of channels at mid-height.</figcaption></figure>
+<figure><img src="edge-fig3-card-tongue.png" alt="Card tongue layout for the kiss slot"><figcaption>The module side: the existing 45.47 mm tongue shortened to 4.5 mm, 1.0 mm pads, 30° bevel optional.</figcaption></figure>
+</div>
+<p>Models: <a href="edge-coupler-variants-step.zip">all five variants side by side (STEP, 7 MB zip)</a> — today's WingTAT with cards, the 2.4 mm-web version, the kiss slot, a 7.8 mm short kiss slot and the 0.8 mm sister housing. Estimated cost at 10 k/yr: $2.7–4.2 in BeCu, $1.5–2.6 in phosphor bronze (which needs ~0.5 mm more height), against $2.15 for the WingTAT; tooling $13–25 k. The point is size and the touching boards, not price.</p>
+
+<h2>Shorted-when-empty ("normalling") connectors</h2>
+<p>A card-edge connector whose two rows of contacts touch each other when the slot is empty and are spread onto the two faces of the card when one is inserted. It exists as a technique — telecom DSX patch bays call it <em>normalling</em>, the patents say <em>make-before-break</em> or <em>switching</em> contacts — but not as a current catalog part at any fine pitch. Everything that covered it has expired:</p>
+<div class="table-wrap"><table class="kv">
+<tr><td><a href="https://patents.google.com/patent/US4087151">US 4,087,151</a></td><td>Magnetic Controls / ADC, 1977</td><td>second "normalling" hump on each contact rests against its opposite number; the card touches the first hump before spreading the second (make-before-break)</td></tr>
+<tr><td><a href="https://patents.google.com/patent/US4514030">US 4,514,030</a></td><td>Methode, 1983</td><td>three contact points per beam, the innermost shorts to the opposing contact</td></tr>
+<tr><td><a href="https://uspto.report/patent/grant/5098306">US 5,098,306</a></td><td>Burndy, 1992</td><td>card edge connector with switching contacts</td></tr>
+<tr><td><a href="https://patents.google.com/patent/US5286215">US 5,286,215</a></td><td>ADC Telecommunications, 1992</td><td>normally-closed arms plus separate normally-open entrance springs</td></tr>
+<tr><td><a href="https://patents.google.com/patent/US6764345B1/en">US 6,764,345</a></td><td>Tyco, 2003</td><td>dual shorting contacts in BeCu, mate-before-break</td></tr>
+</table></div>
+<p>The only card-edge part with evidence of doing it is vintage: a <a href="https://synth-diy.org/pipermail/synth-diy/2022-March/170395.html">synth-diy thread</a> about a Buchla 208 built with an Amphenol <b>225-22821-110</b> (0.156" pitch, 2 × 28) whose opposing contacts touch when empty; the common 225-22821-<b>101</b> does not, so -110 may be the normalling variant — no datasheet surfaced. Surplus 225-series parts run <a href="https://www.tedss.com/2025009664">$30–50 each</a>. For the custom coupler: just letting the bumps touch gives a 2 gf "short" and 96 % of yield at 1.70 mm; a real 10–15 gf normalled path costs ~1.5 mm of height (7–7.5 mm beams), and the patents' third-spring approach is the only way to get 20 gf without paying in height. In the kiss slot an empty end would join a card's front pad n to its own back pad n — a loop-back, not a pass-through; pass-through-when-empty belongs on a single-slot connector on the main board.</p>
+
+<h2>Not card edge, for reference</h2>
+<p>From the market survey (Oct 2026, LCSC/DigiKey/Alibaba listings): a 70-way link done with an FFC and two 0.5 mm flip-lock ZIFs costs about <b>$0.50–0.70</b> (XUNPU FPC-05FB-60PH20 $0.20 at 1.5 k, 60-way 50 mm FFC $0.10 at 5 k; ZIFs are rated for ~20 mating cycles); a 1.27 mm 2 × 40 header pair about $0.5–0.8; a gold-wire zebra strip plus clamp $0.05–1 for the strip (500-actuation spec); discrete Chinese pogo pins $0.10–0.28 each at 1 k, so $7+ per 70 contacts; Mill-Max pogos $0.56–0.92 each. Branded 1.0/1.27 mm card-edge sockets (Samtec MEC1 80-pos, TE) are $3.3–6.3 at 1 k. Resin in an LCP housing is ~$0.02; gold metal on 70 selectively plated contacts ~$0.2–0.4; a 2-cavity housing tool in China $8–15 k.</p>
+
+<h2>Sources</h2>
+<div class="srcs" id="srcs"></div>
+<hr>
+<p class="muted">Built 22 Nov 2026 from datasheets, distributor listings, the V6 connector write-ups and two market surveys. Product photos are loaded from the vendors' sites; where one does not load, the plan view is the picture.</p>
+</main>
+
+<script>
+// ---------------------------------------------------------------- data
+// orient: coplanar (straddle / coupler: boards in one plane), vertical (card stands up off the host), stacked (card lies over the host, M.2 style)
+// len(nPerSide): connector body length in mm for n contacts per side (dual-row) — end = body length minus (n-1)*pitch of the representative part
+// host: depth of the footprint / pad field on the host board (mm); gap: air between host edge and module edge on a coplanar joint; tongue: module insertion depth
+// price: USD for the representative part at the stated quantity
+const OPTIONS = [
+  {id:"wingtat", name:"WingTAT HEE70LP03BK (today)", maker:"WingTAT 永达", family:"today", pitch:1.27, rows:2, repPos:70, posRange:"10–100", thk:[1.6],
+   orient:"coplanar", geomNote:"straddle: host edge in the solder-tail fork, card in the slot", end:50.55-34*1.27, host:4.3, gap:6.4, tongue:7.62, height:14.0+4.3, width:8.88,
+   cycles:"30 (3 µin Au)", plating:"3 µin Au flash", price:2.15, priceQty:"1,100", priceSrc:"https://www.lcsc.com/product-detail/C5448235.html",
+   links:[["LCSC C5448235","https://www.lcsc.com/product-detail/C5448235.html"],["datasheet","https://www.lcsc.com/datasheet/C5448235.pdf"]],
+   img:"https://assets.lcsc.com/images/lcsc/900x900/20230630_WingTAT-HEE70LP03BK_C5448235_front.jpg",
+   note:"What V5 uses as an unsoldered coupler, flipped either way. 18.3 mm end to end; the solder tails act as a second (very stiff) edge contact."},
+  {id:"kiss", name:"Custom kiss-slot coupler (V2)", maker:"Fulimei (custom)", family:"custom", pitch:1.27, rows:2, repPos:70, posRange:"any", thk:[1.6,"0.8 in a pinch"],
+   orient:"coplanar", geomNote:"symmetric through-slot coupler, both boards' tongues meet inside", end:50.55-34*1.27, host:4.5, gap:0.2, tongue:4.5, height:9.2, width:5.0,
+   cycles:"200+ (15–30 µin Au)", plating:"selective hard Au 0.38–0.76 µm", price:3.4, priceQty:"est. 10 k/yr, BeCu", priceSrc:"#custom",
+   links:[["design write-up (project)","#"],["STEP models","edge-coupler-variants-step.zip"]],
+   img:"edge-variants-iso.png",
+   note:"BeCu 0.25 mm crossed beams, 6 mm lever, rest gap 0.30: 51–61 gf on 1.6 mm boards, ~20 gf on 0.8 mm. Boards touch (0.2 mm). Same strip in a shorter housing for the 2- and 3-way splits (length = (n−1)×1.27 + 7.4)."},
+  {id:"kiss08", name:"Custom kiss-slot, 0.8 mm sister", maker:"Fulimei (custom)", family:"custom", pitch:1.27, rows:2, repPos:70, posRange:"any", thk:[0.8],
+   orient:"coplanar", geomNote:"same contacts, narrow slot core", end:50.55-34*1.27, host:4.5, gap:0.2, tongue:4.5, height:9.2, width:5.0,
+   cycles:"200+", plating:"selective hard Au", price:3.4, priceQty:"est.", priceSrc:"#custom", links:[["STEP models","edge-coupler-variants-step.zip"]], img:"edge-variants-iso.png",
+   note:"~30 gf on 0.8 mm boards; one slot-core insert change on the same mould."},
+];
+// filled from the two surveys (catalog brands; Chinese makers) — see the cards for sources
+const SURVEY = [];
+</script>
+<script id="survey-data">
+/* SURVEY_DATA_PLACEHOLDER */
+</script>
+<script>
+// ---------------------------------------------------------------- model
+const ALL = OPTIONS.concat(SURVEY);
+const state = {k:1, n:70, thk:"any", orient:"any", sort:"area", dir:1};
+const $ = s => document.querySelector(s);
+const fmt = (v, d=1) => v==null||isNaN(v) ? "—" : Number(v).toFixed(d);
+function calc(o, n, k){
+  const per = Math.ceil(n/k);
+  const nps = o.rows===1 ? per : Math.ceil(per/2);
+  const len = o.fixedLen ? o.fixedLen : (nps-1)*o.pitch + o.end;
+  const edge = k*len + (k-1)*2;
+  let area, dead;
+  if(o.orient==="coplanar"){ dead = o.host + o.gap + o.tongue; area = k*len*dead; }
+  else { dead = null; area = k*(len*o.host + len*o.tongue); }
+  const price = o.price==null ? null : o.price*k*Math.pow(per/o.repPos, 0.75);
+  return {per, nps, len, edge, dead, area, price};
+}
+function visible(o){
+  if(state.thk!=="any" && !o.thk.some(t=>String(t).startsWith(state.thk))) return false;
+  if(state.orient!=="any" && o.orient!==state.orient) return false;
+  return true;
+}
+function sketch(o, c, k){
+  // plan view: host board along the bottom, module board above; 1 px = 0.25 mm; width capped at 180 px
+  const s = Math.min(0.9, 180/(k*c.len+12));
+  const W = Math.round((k*c.len + 8)*s) + 20, dep = o.orient==="coplanar" ? c.dead : o.host + o.tongue + 2;
+  const H = Math.round((dep + 8)*s) + 16;
+  let g = "";
+  const y0 = H - 8;            // host edge baseline
+  g += `<rect x="4" y="${y0}" width="${W-8}" height="6" fill="var(--surface-2)" stroke="var(--line)"/>`;   // host board
+  for(let i=0;i<k;i++){
+    const x = 10 + i*(c.len+2)*s, w = c.len*s;
+    if(o.orient==="coplanar"){
+      g += `<rect x="${x}" y="${y0-o.host*s}" width="${w}" height="${o.host*s}" fill="var(--r3)" opacity=".7"/>`;        // host pads
+      g += `<rect x="${x}" y="${y0-(o.host+o.gap)*s}" width="${w}" height="${Math.max(1,o.gap*s)}" fill="var(--muted)" opacity=".5"/>`; // air gap / housing
+      g += `<rect x="${x}" y="${y0-(o.host+o.gap+o.tongue)*s}" width="${w}" height="${o.tongue*s}" fill="var(--accent-2)" opacity=".8"/>`; // tongue
+    } else {
+      g += `<rect x="${x}" y="${y0-o.host*s}" width="${w}" height="${o.host*s}" fill="var(--r3)" opacity=".7"/>`;
+      g += `<rect x="${x}" y="${y0-(o.host+2+o.tongue)*s}" width="${w}" height="${o.tongue*s}" fill="var(--accent-2)" opacity=".5" stroke-dasharray="2 2" stroke="var(--accent-2)"/>`;
+    }
+  }
+  if(o.orient==="coplanar") g += `<rect x="4" y="2" width="${W-8}" height="${Math.max(2,(y0-(o.host+o.gap+o.tongue)*s)-2)}" fill="var(--surface-2)" stroke="var(--line)"/>`; // module board
+  return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="plan view">${g}</svg>`;
+}
+const tagFor = o => o.orient==="coplanar" ? '<span class="tag cop">coplanar</span>' : o.orient==="vertical" ? '<span class="tag vt">vertical</span>' : '<span class="tag st">stacked</span>';
+function render(){
+  const rows = ALL.filter(visible).map(o => ({o, c:calc(o, state.n, state.k)}));
+  const key = {area:r=>r.c.area, edge:r=>r.c.edge, height:r=>r.o.height, price:r=>r.c.price??1e9, pitch:r=>r.o.pitch, name:r=>r.o.name, len:r=>r.c.len, host:r=>r.o.host, tongue:r=>r.o.tongue, gap:r=>r.o.gap??1e9}[state.sort];
+  rows.sort((a,b)=> (key(a)>key(b)?1:key(a)<key(b)?-1:0)*state.dir);
+  const best = rows.length ? Math.min(...rows.map(r=>r.c.area)) : 0;
+  $("#rows").innerHTML = rows.map(r => `<tr class="${r.c.area===best?'best':''}" title="${(r.o.note||'').replace(/"/g,'&quot;')}">
+    <td><div class="opt">${r.o.img?`<img class="th" src="${r.o.img}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=&quot;th ph&quot;>no img</div>'">`:'<div class="th ph">no img</div>'}<span><b>${r.o.name}</b><small>${r.o.maker}</small></span></div></td>
+    <td>${tagFor(r.o)}${r.o.family==='custom'?'<span class="tag cu">custom</span>':''}</td>
+    <td class="num">${fmt(r.o.pitch,2)}</td>
+    <td class="num">${r.c.per} (${r.c.nps}/side)</td>
+    <td class="num">${fmt(r.c.len)}</td>
+    <td class="num">${fmt(r.c.edge)}</td>
+    <td class="num">${fmt(r.o.host)}</td>
+    <td class="num">${fmt(r.o.tongue)}</td>
+    <td class="num">${r.o.orient==='coplanar'?fmt(r.o.gap):'—'}</td>
+    <td class="num"><b>${fmt(r.c.area,0)}</b> mm²</td>
+    <td class="num">${fmt(r.o.height)}</td>
+    <td class="num">${r.c.price==null?'—':'$'+fmt(r.c.price,2)}</td>
+    <td class="sketch">${sketch(r.o, r.c, state.k)}</td></tr>`).join("");
+  $("#hint").textContent = `${state.k} connector${state.k>1?'s':''} of ${Math.ceil(state.n/state.k)} contacts each (${rows.length} options shown). Lowest dead area is highlighted.`;
+  // bars
+  const maxA = Math.max(1,...rows.map(r=>r.c.area));
+  const bh = 18, W = 900, lw = 250;
+  const svg = rows.map((r,i)=>{ const w = (W-lw-90)*r.c.area/maxA; const y = i*(bh+6);
+    return `<text x="${lw-8}" y="${y+bh-5}" text-anchor="end" font-size="11" fill="var(--fg)" font-family="var(--font-body)">${r.o.name.length>36?r.o.name.slice(0,34)+'…':r.o.name}</text>
+            <rect x="${lw}" y="${y}" width="${w}" height="${bh}" rx="3" fill="${r.o.family==='custom'?'var(--accent)':r.o.orient==='coplanar'?'var(--accent-2)':r.o.orient==='vertical'?'var(--r5)':'var(--r9)'}" opacity=".85"/>
+            <text x="${lw+w+6}" y="${y+bh-5}" font-size="11" fill="var(--muted)" font-family="var(--font-mono)">${fmt(r.c.area,0)} mm²${r.c.price!=null?' · $'+fmt(r.c.price,2):''}</text>`; }).join("");
+  $("#bars").innerHTML = `<svg viewBox="0 0 ${W} ${rows.length*(bh+6)}" xmlns="http://www.w3.org/2000/svg">${svg}</svg>`;
+}
+function cards(){
+  $("#cards").innerHTML = ALL.map(o => `<li class="card">
+    ${o.img?`<img class="pic" src="${o.img}" alt="${o.name}" loading="lazy" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=&quot;pic ph&quot;>no photo — see plan view in the table</div>'">`:'<div class="pic ph">no photo</div>'}
+    <h3>${o.name}</h3>
+    <div>${tagFor(o)}${o.family==='custom'?'<span class="tag cu">custom</span>':''}<span class="tag">${o.pitch} mm</span><span class="tag">${o.thk.join(' / ')} mm card</span></div>
+    <dl><dt>maker</dt><dd>${o.maker}</dd><dt>positions</dt><dd>${o.posRange} (rep. ${o.repPos})</dd><dt>geometry</dt><dd>${o.geomNote||''}</dd>
+    <dt>body</dt><dd>${o.fixedLen?fmt(o.fixedLen):fmt((Math.ceil(o.repPos/o.rows)-1)*o.pitch+o.end)} × ${fmt(o.width)} × ${fmt(o.height)} mm</dd>
+    <dt>tongue</dt><dd>${fmt(o.tongue)} mm</dd><dt>cycles</dt><dd>${o.cycles||'—'}</dd><dt>plating</dt><dd>${o.plating||'—'}</dd>
+    <dt>price</dt><dd class="price">${o.price==null?'—':'$'+fmt(o.price,2)} <small>@ ${o.priceQty||'?'}${o.priceCny?' · ¥'+o.priceCny:''}</small></dd></dl>
+    <p class="note">${o.note||''}</p>
+    <div class="links">${(o.links||[]).map(l=>`<a href="${l[1]}">${l[0]}</a>`).join('')}</div></li>`).join("");
+  const srcs = new Map();
+  ALL.forEach(o => (o.links||[]).forEach(l => { if(l[1].startsWith('http')) srcs.set(l[1], `${o.name} — ${l[0]}`); }));
+  $("#srcs").innerHTML = [...srcs].map(([u,t]) => `<div><a href="${u}">${t}</a></div>`).join("") +
+    ['https://patents.google.com/patent/US4087151','https://patents.google.com/patent/US4514030','https://patents.google.com/patent/US5286215','https://patents.google.com/patent/US6764345B1/en','https://synth-diy.org/pipermail/synth-diy/2022-March/170395.html','https://www.tedss.com/2025009664'].map(u=>`<div><a href="${u}">${u.replace(/^https?:\/\//,'')}</a></div>`).join("");
+}
+$("#split").addEventListener("click", e => { const b = e.target.closest("button"); if(!b) return; state.k = +b.dataset.k; [...$("#split").children].forEach(x=>x.setAttribute("aria-pressed", x===b)); render(); });
+$("#nsig").addEventListener("input", e => { state.n = Math.max(2, +e.target.value||70); [...$("#split").children].forEach((b,i)=>b.textContent = `${i+1} × ${Math.ceil(state.n/(i+1))}`); render(); });
+$("#thk").addEventListener("change", e => { state.thk = e.target.value; render(); });
+$("#orient").addEventListener("change", e => { state.orient = e.target.value; render(); });
+$("#sort").addEventListener("change", e => { state.sort = e.target.value; state.dir = 1; render(); });
+document.querySelectorAll("#res th[data-s]").forEach(th => th.addEventListener("click", () => { const s = th.dataset.s; if(state.sort===s) state.dir*=-1; else {state.sort=s; state.dir=1;} render(); }));
+cards(); render();
+</script>
+</body>
+</html>
