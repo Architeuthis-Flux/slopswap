@@ -610,6 +610,7 @@
           <li>The shirt, the view from above, the loupe and the section can each be resized: drag the hatched corner, and double-click it to go back. The three small ones can also be moved: drag one by its title onto the left, right, top or bottom of another, and double-click a title to put them back. Reloading the page puts the whole layout back. <b>Sweep</b> keeps running while you move the sliders; taking hold of the viewer stops it.</li>
           <li><b>Screens</b>, lower down, gives the same sizes in screen-making terms: mils, threads of the mesh you pick for each screen, what that mesh can hold, and how many coats of emulsion build the HD stencil. Its defaults (83, 230 and 156 mesh, and one maker’s figures for a thick-stencil emulsion) are placeholders: set your own.</li>
           <li><b>HD</b> is for art drawn for the HD screen alone, such as the outline to raise: it is in neither view and is added to the HD film as it is.</li>
+          <li><b>Ridge</b> is for saying where ridges go yourself: wherever that image has anything, whatever its colour, the area is ridged, even where both pictures are the same. Draw a filled shape, export it like the other layers and set it to Ridge (a file with “ridge” in its name is set that way for you). It is in neither view and on no film itself; the ridge brush still works on top of it.</li>
           <li><b>W</b> is for white underbase of your own, such as a solid shape under the whole wordmark: it is in neither view, and white is added to the white film wherever the image has anything, whatever its colour. The white under the colours is still made for you.</li>
           <li><b>Save for Photoshop</b>, under Films, gives a .psd with every film as its own layer (black on clear, with its marks, stacked in register) over every image you loaded, so a film can be touched up against the art. The films are switched off when it opens. It is RGB, with the images’ own numbers.</li>
           <li>For 3D, set <b>Images per gap</b> to 3 or more. Each layer or group is one depth plane; <b>Split</b> lists a group’s layers separately so each can have its own depth.</li>
@@ -1297,6 +1298,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
   // A layer set to HD is not part of either view: it is art for the HD screen alone, added to the HD film as drawn. Files named puff or hd start there.
   var HDNAME = /puff|(^|[^a-z])hd/i; // hd at the start of a word: lentV6hdtext, text-HD, hd_outline
   var WNAME = /underbase|white ?(base|under)|base ?white/i; // a layer that is only white underbase: lentV6underbase, text-whitebase
+  var RNAME = /ridge/i; // a layer that only says where ridges go: lentV6ridges, ridge-fill
   // raise: the wordmark is the same in both views apart from the notch for the head, so its black is raised in HD on the films like a layer set to Both
   var SHIRT = [58, 59, 63], TOPC = [30, 30, 33], WALLC = [8, 8, 9]; // a dark grey shirt; black HD ink on it, lit on top and in shadow on its walls
   // The eye averages fine stripes in linear light, so all mixing is done there (0..4095) and converted back for display.
@@ -1341,6 +1343,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     return guessByName(name, visible);
   }
   function guessByName(name, visible) {
+    if (RNAME.test(name)) return 'r';
     if (HDNAME.test(name)) return 'hd';
     if (WNAME.test(name)) return 'w';
     if (/ledge|stand|left|view ?a\b|^a$/i.test(name)) return 'a';
@@ -1380,7 +1383,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
   // A layer's place in the 3D scene: shown or not, and how far it travels sideways over the whole sweep (mm; + is behind the shirt).
   function keyOf(n) { return n.key || n.name; } // memory is kept per layer: its name, or "name #2" for a second layer of the same name
   function d3Of(n) {
-    if (n.assign === 'hd' || n.assign === 'w') return { on: false, mm: 0 }; // art for the HD film or the white film alone is in no view
+    if (n.assign === 'hd' || n.assign === 'w' || n.assign === 'r') return { on: false, mm: 0 }; // art for the HD film or the white film alone, or that only says where ridges go, is in no view
     var m = d3Mem[keyOf(n)]; if (m) return m;
     var k = (keyOf(n) === n.name && KNOWN[n.name]) || {};
     return { on: typeof k.on3 === 'boolean' ? k.on3 && n.assign !== 'off' : n.assign !== 'off' && n.assign !== 'b', mm: typeof k.mm === 'number' ? k.mm : n.assign === 'a' ? 3 : 0 };
@@ -1423,7 +1426,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     var W = ART.W, H = ART.H, n = W * H, VA = new Float32Array(n * 4), VB = new Float32Array(n * 4);
     underWhite(VA, n); underWhite(VB, n);
     ART.nodes.forEach(function (nd) {
-      if (!nd.rgba || nd.assign === 'off' || nd.assign === 'hd' || nd.assign === 'w') return;
+      if (!nd.rgba || nd.assign === 'off' || nd.assign === 'hd' || nd.assign === 'w' || nd.assign === 'r') return;
       var s = nd.rgba, toA = nd.assign === 'a' || nd.assign === 'both', toB = nd.assign === 'b' || nd.assign === 'both';
       for (var p = 0; p < n; p++) {
         var o = p * 4, sa = s[o + 3] / 255; if (sa <= 0) continue;
@@ -1472,7 +1475,9 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
         x0 = Math.max(0, x0 - rx); x1 = Math.min(W - 1, x1 + rx); y0 = Math.max(0, y0 - ry); y1 = Math.min(H - 1, y1 + ry);
       }
     }
-    ART.ZA = Z; ART.zbox = [x0, x1, y0, y1]; // what the art alone asks for
+    // A layer set to Ridge says where ridges go, whatever the two pictures do there: wherever it has anything the area is ridged, exactly as drawn (no margin is added).
+    ART.nodes.forEach(function (nd) { if (nd.assign !== 'r' || !nd.rgba) return; var s = nd.rgba; for (y = 0; y < H; y++) for (x = 0, p = y * W; x < W; x++, p++) if (s[p * 4 + 3] >= 128) { Z[p] = 255; if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; } });
+    ART.ZA = Z; ART.zbox = [x0, x1, y0, y1]; // what the art asks for, before anything painted by hand
     ovBuild(); ovApply();
   }
   function ovApply() { // the ridged area: what the art asks for, with the strokes painted by hand on top
@@ -2304,13 +2309,13 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
   /* ================= layers list ================= */
   function drawLayers() {
     var h = '', mu = multi();
-    ART.nodes.slice().reverse().forEach(function (n) { var idx = ART.nodes.indexOf(n), d3 = d3Of(n), hd = n.assign === 'hd', wl = n.assign === 'w', HT = 'HD film only: added to the ridges as drawn, in neither view', WT = 'White film only: added to the white under the colours, in neither view', opts = mu ? [['on', 'In'], ['out', 'Out'], ['hd', 'HD', HT], ['w', 'W', WT]] : [['a', 'A'], ['b', 'B'], ['both', 'Both'], ['hd', 'HD', HT], ['w', 'W', WT], ['off', 'Off']], cur = hd ? 'hd' : wl ? 'w' : mu ? (d3.on ? 'on' : 'out') : n.assign;
+    ART.nodes.slice().reverse().forEach(function (n) { var idx = ART.nodes.indexOf(n), d3 = d3Of(n), hd = n.assign === 'hd', wl = n.assign === 'w', rz = n.assign === 'r', HT = 'HD film only: added to the ridges as drawn, in neither view', WT = 'White film only: added to the white under the colours, in neither view', RT = 'Where ridges go: the area is ridged wherever this image has anything, whatever the two pictures do there. In neither view', opts = mu ? [['on', 'In'], ['out', 'Out'], ['hd', 'HD', HT], ['r', 'Ridge', RT], ['w', 'W', WT]] : [['a', 'A'], ['b', 'B'], ['both', 'Both'], ['hd', 'HD', HT], ['r', 'Ridge', RT], ['w', 'W', WT], ['off', 'Off']], cur = hd ? 'hd' : wl ? 'w' : rz ? 'r' : mu ? (d3.on ? 'on' : 'out') : n.assign;
       var tool = n.psdNode && n.kind === 'group' ? '<button type="button" class="ghost mini" data-split="' + esc(n.name) + '" title="List this group’s layers separately, so each can sit at its own depth or in its own view">Split</button>' : n.psdNode && n.parent ? '<button type="button" class="ghost mini" data-join="' + esc(n.parent) + '" title="Treat the group as one layer again">Join</button>' : '';
-      h += '<div class="layer"><div class="th" style="background-image:url(' + (n.thumb || '') + ')"></div><div class="nm">' + esc(n.name) + '<small>' + (n.kind === 'group' ? 'group' : n.kind === 'image' ? 'image' : 'layer') + (n.key && n.key !== n.name ? ', another with this name' : '') + (n.parent ? ' in ' + esc(n.parent) : '') + (n.visible === false ? ' · hidden in Photoshop' : '') + (hd ? ' · HD film only, in neither view' : wl ? ' · white film only, under both views' : '') + '</small></div>' + tool + '<div class="seg" role="radiogroup" aria-label="' + (mu ? 'In the 3D scene: ' : 'View for ') + esc(n.name) + '">' +
+      h += '<div class="layer"><div class="th" style="background-image:url(' + (n.thumb || '') + ')"></div><div class="nm">' + esc(n.name) + '<small>' + (n.kind === 'group' ? 'group' : n.kind === 'image' ? 'image' : 'layer') + (n.key && n.key !== n.name ? ', another with this name' : '') + (n.parent ? ' in ' + esc(n.parent) : '') + (n.visible === false ? ' · hidden in Photoshop' : '') + (hd ? ' · HD film only, in neither view' : wl ? ' · white film only, under both views' : rz ? ' · ridges wherever it has anything, in neither view' : '') + '</small></div>' + tool + '<div class="seg" role="radiogroup" aria-label="' + (mu ? 'In the 3D scene: ' : 'View for ') + esc(n.name) + '">' +
         opts.map(function (o) { return '<label' + (o[2] ? ' title="' + o[2] + '"' : '') + '><input type="radio" name="as' + idx + '" id="as' + idx + o[0] + '" value="' + o[0] + '"' + (cur === o[0] ? ' checked' : '') + ' data-idx="' + idx + '">' + o[1] + '</label>'; }).join('') + '</div></div>'; });
     $('layers').innerHTML = h || '<p class="note" style="padding:8px 0">No layers to show.</p>';
-    var hds = ART.nodes.filter(function (n) { return n.assign === 'hd'; }).map(function (n) { return n.name; }), wls = ART.nodes.filter(function (n) { return n.assign === 'w'; }).map(function (n) { return n.name; });
-    $('artNote').textContent = (mu ? S.views + ' views, made by sliding each layer by its depth' : 'A = ' + ART.labelA + ', B = ' + ART.labelB) + (hds.length ? ' · HD film: ' + hds.join(', ') : '') + (wls.length ? ' · White film: ' + wls.join(', ') : '');
+    var hds = ART.nodes.filter(function (n) { return n.assign === 'hd'; }).map(function (n) { return n.name; }), wls = ART.nodes.filter(function (n) { return n.assign === 'w'; }).map(function (n) { return n.name; }), rzs = ART.nodes.filter(function (n) { return n.assign === 'r'; }).map(function (n) { return n.name; });
+    $('artNote').textContent = (mu ? S.views + ' views, made by sliding each layer by its depth' : 'A = ' + ART.labelA + ', B = ' + ART.labelB) + (hds.length ? ' · HD film: ' + hds.join(', ') : '') + (rzs.length ? ' · Ridges where: ' + rzs.join(', ') : '') + (wls.length ? ' · White film: ' + wls.join(', ') : '');
     $('layersH').textContent = mu ? 'Which layers are in the 3D scene' : 'Which layers go to which view';
   }
   function depthText(mm) { return mm === 0 ? 'flat, in the shirt' : (mm > 0 ? '+' : '−') + Math.abs(mm).toFixed(2).replace(/0$/, '') + ' mm · ' + (mm > 0 ? 'behind' : 'in front'); }
@@ -2352,7 +2357,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
   });
   $('layers').addEventListener('change', async function (e) {
     var t = e.target; if (!t.dataset || t.dataset.idx === undefined) return; var n = ART.nodes[+t.dataset.idx];
-    if (t.value === 'on' || t.value === 'out') { if (n.assign === 'hd' || n.assign === 'w') n.assign = assignMem[keyOf(n)] = 'both'; d3Mem[keyOf(n)] = { on: t.value === 'on', mm: d3Of(n).mm }; } else { n.assign = t.value; assignMem[keyOf(n)] = t.value; }
+    if (t.value === 'on' || t.value === 'out') { if (n.assign === 'hd' || n.assign === 'w' || n.assign === 'r') n.assign = assignMem[keyOf(n)] = 'both'; d3Mem[keyOf(n)] = { on: t.value === 'on', mm: d3Of(n).mm }; } else { n.assign = t.value; assignMem[keyOf(n)] = t.value; }
     if (!n.rgba && wanted(n) && n.psdNode && ART.psd) { setSource(ART.src, 'reading “' + n.name + '”…', !!watch); try { await renderPsdNode(ART.psd, ART.grid, n); } catch (err) { } setSource(ART.src, watch ? 'linked, re-reads on save' : 'loaded once', !!watch); showPsdWarnings(); }
     persist(); artChanged(false); keepMeta();
   });
@@ -2378,7 +2383,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     var slots = { a: nodes.some(function (n) { return n.assign === 'a'; }), b: nodes.some(function (n) { return n.assign === 'b'; }) };
     imgs.forEach(function (x) { var r = imgToRGBA(x.im, W, H), ex = nodes.filter(function (n) { return n.name === x.f.name; })[0];
       if (ex) { ex.rgba = r; ex.bb = null; ex.file = x.f; ex.thumb = thumbOf(r, W, H); return; }
-      var as = assignMem[x.f.name] || (KNOWN[x.f.name] && KNOWN[x.f.name].assign) || (HDNAME.test(x.f.name) ? 'hd' : WNAME.test(x.f.name) ? 'w' : /ledge|stand|left|guy|[-_ ]a\./i.test(x.f.name) ? 'a' : /jump|leap|right|logo|[-_ ]b\./i.test(x.f.name) ? 'b' : null);
+      var as = assignMem[x.f.name] || (KNOWN[x.f.name] && KNOWN[x.f.name].assign) || (RNAME.test(x.f.name) ? 'r' : HDNAME.test(x.f.name) ? 'hd' : WNAME.test(x.f.name) ? 'w' : /ledge|stand|left|guy|[-_ ]a\./i.test(x.f.name) ? 'a' : /jump|leap|right|logo|[-_ ]b\./i.test(x.f.name) ? 'b' : null);
       nodes.push({ name: x.f.name, assign: as, kind: 'image', rgba: r, thumb: thumbOf(r, W, H), file: x.f }); if (as) slots[as] = true; }); // file: the film exporter reads it again at full size
     nodes.forEach(function (n) { if (!n.assign) { n.assign = !slots.a ? 'a' : !slots.b ? 'b' : 'both'; slots[n.assign] = true; } });
     if (nodes.every(function (n) { return KNOWN[n.name] && KNOWN[n.name].z; })) nodes.sort(function (p, q) { return KNOWN[p.name].z - KNOWN[q.name].z; }); // the shirt's own exports stack the way the PSD does, whatever order they were picked in
@@ -2484,7 +2489,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
       try { imgs = await Promise.all(rec.layers.map(function (l) { var u; if (where === 'local') { u = URL.createObjectURL(l.prev); urls.push(u); } else u = base + l.prev; return loadImg(u); })); }
       finally { urls.forEach(function (u) { URL.revokeObjectURL(u); }); }
       var W = ARTW, H = Math.round(ARTW * imgs[0].naturalHeight / imgs[0].naturalWidth);
-      var nodes = rec.layers.map(function (l, i) { var r = imgToRGBA(imgs[i], W, H), k = l.key || l.name, n = { name: l.name, assign: assignMem[k] || (/^(a|b|both|hd|w|off)$/.test(l.assign) ? l.assign : guessAssign(l.name, true)), kind: 'image', rgba: r, thumb: thumbOf(r, W, H) };
+      var nodes = rec.layers.map(function (l, i) { var r = imgToRGBA(imgs[i], W, H), k = l.key || l.name, n = { name: l.name, assign: assignMem[k] || (/^(a|b|both|hd|w|r|off)$/.test(l.assign) ? l.assign : guessAssign(l.name, true)), kind: 'image', rgba: r, thumb: thumbOf(r, W, H) };
         if (l.key && l.key !== l.name) n.key = l.key; if (l.file) n.file = l.file;
         if (far && l.full) n.remote = { id: l.full, url: base + l.full, site: where === 'site', fp: l.fp || '', type: l.type || 'image/png', size: +l.size || 0, lm: +l.lm || 0 }; else if (where === 'local' && l.remote && !l.file) n.remote = l.remote;
         if (far && l.d3 && !d3Mem[k]) d3Mem[k] = { on: !!l.d3.on, mm: +l.d3.mm || 0 }; return n; });
@@ -2859,8 +2864,9 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
   function isFull(n) { var c = cache.get(L.keyOf(n)); return !!(c && c.full && n.file && c.id === fileId(n.file)); }
   function isHD(n) { return n.assign === 'hd'; } // art for the HD screen alone: in neither view, added to the HD film as drawn
   function isWL(n) { return n.assign === 'w'; } // art for the white screen alone: wherever the layer has anything, white is added to the white film
+  function isRZ(n) { return n.assign === 'r'; } // says only where ridges go: it is in the ridged area the page hands over, and on no film itself
   function hasHD() { var ART = L.art(); return !!ART && ART.nodes.some(function (n) { return isHD(n) && (n.rgba || n.file); }); }
-  function inScene(n) { return isHD(n) || isWL(n) ? false : L.multi() ? L.d3Of(n).on : n.assign !== 'off'; }
+  function inScene(n) { return isHD(n) || isWL(n) || isRZ(n) ? false : L.multi() ? L.d3Of(n).on : n.assign !== 'off'; }
   function isStatic(n) { return L.multi() ? L.d3Of(n).mm === 0 : n.assign === 'both'; }
   // With an HD layer linked, the HD film is that layer and the ridges and nothing else: no black is raised unless its box is ticked by hand.
   function raiseOn(n) { var v = F.raise[L.keyOf(n)], k = L.known(n.name); return v === undefined ? !hasHD() && (isStatic(n) || !!(k && k.raise)) : v; }
@@ -3252,7 +3258,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     for (var y = 0, t0 = Date.now(); y < ART.H; y++) { each(n.rgba.subarray(y * ART.W * 4, (y + 1) * ART.W * 4), y, ART.W, ART.H); if (Date.now() - t0 > 60) { if (progress) progress(y / ART.H); await tick(); t0 = Date.now(); } }
     return false;
   }
-  function artShown(n) { return isHD(n) || isWL(n) ? false : L.multi() ? L.d3Of(n).on : n.assign === 'a' || n.assign === 'both'; } // the first view is what shows when the document opens
+  function artShown(n) { return isHD(n) || isWL(n) || isRZ(n) ? false : L.multi() ? L.d3Of(n).on : n.assign === 'a' || n.assign === 'both'; } // the first view is what shows when the document opens
   // One of the loaded images as a layer, on the film's own pixels: sampled exactly as the films sample it, so it lines up with them to the pixel.
   async function artLayer(n, G, PG, progress) {
     var ART = G.ART, Wf = G.Wf, Hf = G.Hf, mir = F.mirror, lay = { name: n.name.replace(/\.(png|jpe?g|webp|gif|bmp|tiff?)$/i, ''), hidden: !artShown(n), top: 0, left: 0, bottom: 0, right: 0, ch: null, full: false, srcW: 0, kind: '' };
