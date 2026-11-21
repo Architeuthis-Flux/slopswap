@@ -131,6 +131,7 @@
 #viewer .seg label:first-child{border-left:0}
 #viewer .seg input{position:absolute;opacity:0;pointer-events:none}
 #viewer .seg label:has(input:checked){background:var(--ink);color:var(--bg)}
+#viewer .seg label:has(input:disabled){opacity:.32;cursor:default}
 #viewer .check{display:inline-flex;gap:7px;align-items:center;font-size:13.5px}
 #viewer .check input{accent-color:var(--ink);width:15px;height:15px;margin:0;flex:none}
 #viewer .aim{padding:5px 8px}
@@ -195,9 +196,10 @@
 #viewer .siterow label{font-size:13.5px}
 #viewer .ftxt{font:500 13.5px var(--mono);color:var(--ink);background:var(--panel2);border:1px solid var(--line);border-radius:3px;padding:5px 7px;width:min(100%,250px)}
 #viewer .layers{display:flex;flex-direction:column;border-top:1px solid var(--line)}
-#viewer .layer{display:flex;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);min-width:0}
+#viewer .layer{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);min-width:0}
 #viewer .layer .th{width:44px;height:44px;flex:none;border-radius:2px;background:var(--stage) center/contain no-repeat}
-#viewer .layer .nm{flex:1;min-width:0;overflow-wrap:anywhere}
+#viewer .layer .nm{flex:1 1 130px;min-width:0;overflow-wrap:anywhere}
+#viewer .layer .seg{margin-left:auto}
 #viewer .layer .nm small{display:block;color:var(--muted);font-size:12.5px}
 #viewer button.mini{font-size:11.5px;padding:5px 7px;flex:none}
 #viewer .depths{display:flex;flex-direction:column;gap:7px}
@@ -385,6 +387,14 @@
         <div class="seg" role="radiogroup" aria-label="Number of stacked HD passes">
           <label><input type="radio" name="passes" id="passes1" value="1">1 pass</label><label><input type="radio" name="passes" id="passes2" value="2">2 passes</label><label><input type="radio" name="passes" id="passes3" value="3">3 passes</label>
         </div></div>
+      <div data-procs="barrier">
+        <label class="check" title="A second HD screen prints a second, narrower layer on top of each ridge. The ridge stands taller, so each view turns clean at a shallower angle with the stripes left as wide as they are."><input type="checkbox" id="hd2"><span>Second HD layer on top (a second HD screen)</span></label>
+        <div id="hd2Box" hidden>
+          <div class="ctl"><label for="ridge2">Second layer width</label><output id="ridge2Out"></output><input id="ridge2" type="range" min="0.1" max="1.5" step="0.01"><small id="ridge2Sub"></small></div>
+          <div class="ctl"><label for="height2">Second layer height</label><output id="height2Out"></output><input id="height2" type="range" min="0.05" max="0.8" step="0.01"><small id="height2Sub"></small></div>
+          <div class="row" style="gap:14px"><label class="swatch"><input type="color" id="ink2" aria-label="Ink of the second HD layer"><span>Its ink</span></label></div>
+        </div>
+      </div>
       <div class="row" data-procs="barrier" data-flip><span class="note" style="flex:none;font-size:12.5px">Clean view from</span>
         <button type="button" class="ghost aim" data-aim="20">20°</button><button type="button" class="ghost aim" data-aim="30">30°</button><button type="button" class="ghost aim" data-aim="40">40°</button></div>
       <div class="ctl" data-procs="lens"><label for="lensAngle">Viewing angle</label><output id="lensAngleOut"></output><input id="lensAngle" type="range" min="20" max="70" step="1"><small>Total sweep before the views repeat.</small></div>
@@ -497,13 +507,15 @@
           <label for="fRaise" title="Black narrower than this stays flat, so the HD goes on bold black only: halftone dots, hatching and thin lines are left out. 0.5 mm is about the least an HD stencil holds.">Raise black wider than</label><span><input id="fRaise" class="fnum" type="number" min="0" max="6" step="0.05"> mm</span>
         </div>
         <h3>Films to make</h3>
-        <div class="seg filmseg" role="group" aria-label="Films to make"><label title="White underbase and white"><input type="checkbox" id="fOnW">W</label><label title="Cyan"><input type="checkbox" id="fOnC">C</label><label title="Magenta"><input type="checkbox" id="fOnM">M</label><label title="Yellow"><input type="checkbox" id="fOnY">Y</label><label title="Black"><input type="checkbox" id="fOnK">K</label><label title="HD: ridges and raised black"><input type="checkbox" id="fOnH">H</label></div>
+        <div class="seg filmseg" role="group" aria-label="Films to make"><label title="White underbase and white"><input type="checkbox" id="fOnW">W</label><label title="Cyan"><input type="checkbox" id="fOnC">C</label><label title="Magenta"><input type="checkbox" id="fOnM">M</label><label title="Yellow"><input type="checkbox" id="fOnY">Y</label><label title="Black"><input type="checkbox" id="fOnK">K</label><label title="HD: ridges and raised black"><input type="checkbox" id="fOnH">H</label><label title="Second HD screen: the second layer of the ridges, and layers set to HD2"><input type="checkbox" id="fOnH2">H2</label></div>
         <h3>Lay them out as</h3>
         <div class="seg filmseg" role="radiogroup" aria-label="How the films are laid out"><label><input type="radio" name="fLayout" id="fLayPages" value="pages">A page each</label><label><input type="radio" name="fLayout" id="fLaySheet" value="sheet">One sheet</label></div>
         <h3>HD layer</h3>
         <div id="filmHD" class="raise"></div>
         <h3>White layer</h3>
         <div id="filmWL" class="raise"></div>
+        <h3>Second HD screen</h3>
+        <div id="filmH2" class="raise"></div>
         <h3>Raise the black in HD on</h3>
         <p class="note" id="filmRaiseNote"></p>
         <div id="filmRaise" class="raise"></div>
@@ -511,11 +523,12 @@
         <p class="note">Black prints straight onto the shirt unless its layer is ticked here. Ticked, the white runs under the whole of that layer, outline and shadows included, pulled in from the outside edge by the choke.</p>
         <div id="filmUnder" class="raise"></div>
         <label class="check"><input type="checkbox" id="fCmyK"><span>Print three-colour black as K</span></label>
+        <label class="check" title="Frees the black screen for a second HD screen. Black is printed as cyan, magenta and yellow together, and the black that is raised still goes on the HD film."><input type="checkbox" id="fNoK"><span>No K screen: print black as C + M + Y</span></label>
         <label class="check"><input type="checkbox" id="fMirror"><span>Mirror the films</span></label>
       </div>
       <div class="filmcol">
         <div class="row" style="justify-content:space-between"><h3>Proof</h3>
-          <span class="row"><select id="fProof" aria-label="What the proof shows" style="width:auto"><option value="print">All inks as printed</option><option value="W">Film W</option><option value="C">Film C</option><option value="M">Film M</option><option value="Y">Film Y</option><option value="K">Film K</option><option value="H">Film H</option></select>
+          <span class="row"><select id="fProof" aria-label="What the proof shows" style="width:auto"><option value="print">All inks as printed</option><option value="W">Film W</option><option value="C">Film C</option><option value="M">Film M</option><option value="Y">Film Y</option><option value="K">Film K</option><option value="H">Film H</option><option value="H2">Film H2</option></select>
           <select id="fZoom" aria-label="Proof zoom" style="width:auto"><option value="1">100%</option><option value="2">200%</option><option value="4">400%</option></select></span></div>
         <div class="proofbox"><canvas id="filmProof" role="img" aria-label="The films at the loupe, drawn film pixel for film pixel"></canvas></div>
         <p class="note" id="filmProofCap"></p>
@@ -610,6 +623,7 @@
           <li>The shirt, the view from above, the loupe and the section can each be resized: drag the hatched corner, and double-click it to go back. The three small ones can also be moved: drag one by its title onto the left, right, top or bottom of another, and double-click a title to put them back. Reloading the page puts the whole layout back. <b>Sweep</b> keeps running while you move the sliders; taking hold of the viewer stops it.</li>
           <li><b>Screens</b>, lower down, gives the same sizes in screen-making terms: mils, threads of the mesh you pick for each screen, what that mesh can hold, and how many coats of emulsion build the HD stencil. Its defaults (83, 230 and 156 mesh, and one maker’s figures for a thick-stencil emulsion) are placeholders: set your own.</li>
           <li><b>HD</b> is for art drawn for the HD screen alone, such as the outline to raise: it is in neither view and is added to the HD film as it is.</li>
+          <li><b>HD2</b> is art for a second HD screen, printed as drawn and in neither view: a gloss, a second raised colour (a file with “hd2” or “gloss” in its name starts there). The same screen can print a second layer on top of the ridges: tick <b>Second HD layer on top</b> under HD ridges. Six screens is then W, C, M, Y, HD and HD2, with <b>No K screen</b> ticked in the film panel so black prints as C + M + Y.</li>
           <li><b>Ridge</b> is for saying where ridges go yourself: wherever that image has anything, whatever its colour, the area is ridged, even where both pictures are the same. Draw a filled shape, export it like the other layers and set it to Ridge (a file with “ridge” in its name is set that way for you). It is in neither view and on no film itself; the ridge brush still works on top of it.</li>
           <li><b>W</b> is for white underbase of your own, such as a solid shape under the whole wordmark: it is in neither view, and white is added to the white film wherever the image has anything, whatever its colour. The white under the colours is still made for you.</li>
           <li><b>Save for Photoshop</b>, under Films, gives a .psd with every film as its own layer (black on clear, with its marks, stacked in register) over every image you loaded, so a film can be touched up against the art. The films are switched off when it opens. It is RGB, with the images’ own numbers.</li>
@@ -1289,7 +1303,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     '195/55': [195, 55, 67, 26.5, 87, 23.3], '195/48': [195, 48, 77, 35.0, 80, 28.0], '230/48': [230, 48, 55, 24.6, 78, 19.2], '230/40': [230, 40, 68, 37.6, 65, 24.4], '255/40': [255, 40, 57, 32.5, 64, 21.1], '305/40': [305, 40, 37, 20.1, 64, 13.0], '305/34': [305, 34, 45, 29.6, 55, 16.3] };
   function meshOf(k) { var m = MESHES[k] || MESHES['83/70']; return { key: MESHES[k] ? k : '83/70', n: m[0], d: m[1] / 1000, o: m[2] / 1000, open: m[3], t: m[4] / 1000, vol: m[5], pitch: 25.4 / m[0] }; } // lengths in mm
   function hdT() { return meshOf(S.meshH).t; } // thickness of the HD screen's mesh: a stencil cannot hold a line finer than itself plus this
-  var DEF = { proc: 'barrier', views: 2, pitch: 1.27, ridge: 0.52, height: 0.72, passes: 2, split: 50, guard: 0, reg: 0, cap: 0, lensAngle: 49, spot: true, spotA: '#f04bcd', spotB: '#ffd400', swap: false, snap: true, lock: false, angle: 30, curve: 55, printIn: 18, zone: 'diff', padX: 1.2, padY: 1.2, meshH: '83/70', meshC: '230/48', meshW: '156/64', lpi: 45, coat22: 125, coatAdd: 55, loupeSpan: 10, lu: null, lv: null, zoom: 1 };
+  var DEF = { proc: 'barrier', views: 2, pitch: 1.27, ridge: 0.52, height: 0.72, passes: 2, split: 50, guard: 0, reg: 0, cap: 0, lensAngle: 49, spot: true, spotA: '#f04bcd', spotB: '#ffd400', swap: false, snap: true, lock: false, angle: 30, curve: 55, printIn: 18, zone: 'diff', padX: 1.2, padY: 1.2, meshH: '83/70', meshC: '230/48', meshW: '156/64', lpi: 45, coat22: 125, coatAdd: 55, loupeSpan: 10, lu: null, lv: null, zoom: 1, hd2: false, ridge2: 0.36, height2: 0.36, ink2: '#0b0b0c' }; // hd2: a second, narrower HD layer printed on top of the ridges by a second HD screen
   var KNOWN = { 'Layer 5 copy 2': { assign: 'both', mm: 0 }, 'Layer 2': { assign: 'b', label: 'Jump' }, 'ledgenew': { assign: 'a', label: 'Ledge', split: true, mm: 3 }, 'Layer 5 copy': { assign: 'a', label: 'Ledge', mm: 4 }, 'Layer 7': { assign: 'a', label: 'Ledge', mm: -3 },
     'lentV62guy.png': { assign: 'a', label: 'Guy', mm: -3, z: 4 }, 'lentV62oldlogo.png': { assign: 'b', label: 'Old logo', z: 3 }, 'lentV62fulltext.png': { assign: 'b', on3: true, mm: 0, z: 1, raise: true },
     'lentV62textcut.png': { assign: 'a', on3: false, z: 2, raise: true }, 'Screenshot 2026-11-12 at 12.10.36\u202fPM.png': { assign: 'a', on3: false, z: 2, raise: true }, 'Screenshot 2026-11-12 at 12.10.36 PM.png': { assign: 'a', on3: false, z: 2, raise: true },
@@ -1298,6 +1312,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
   // A layer set to HD is not part of either view: it is art for the HD screen alone, added to the HD film as drawn. Files named puff or hd start there.
   var HDNAME = /puff|(^|[^a-z])hd/i; // hd at the start of a word: lentV6hdtext, text-HD, hd_outline
   var WNAME = /underbase|white ?(base|under)|base ?white/i; // a layer that is only white underbase: lentV6underbase, text-whitebase
+  var H2NAME = /hd[ _-]?2|second[ _-]?hd|gloss/i; // art for the second HD screen: text-hd2, lentV62gloss
   var RNAME = /ridge/i; // a layer that only says where ridges go: lentV6ridges, ridge-fill
   // raise: the wordmark is the same in both views apart from the notch for the head, so its black is raised in HD on the films like a layer set to Both
   var SHIRT = [58, 59, 63], TOPC = [30, 30, 33], WALLC = [8, 8, 9]; // a dark grey shirt; black HD ink on it, lit on top and in shadow on its walls
@@ -1344,6 +1359,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
   }
   function guessByName(name, visible) {
     if (RNAME.test(name)) return 'r';
+    if (H2NAME.test(name)) return 'h2';
     if (HDNAME.test(name)) return 'hd';
     if (WNAME.test(name)) return 'w';
     if (/ledge|stand|left|view ?a\b|^a$/i.test(name)) return 'a';
@@ -1383,7 +1399,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
   // A layer's place in the 3D scene: shown or not, and how far it travels sideways over the whole sweep (mm; + is behind the shirt).
   function keyOf(n) { return n.key || n.name; } // memory is kept per layer: its name, or "name #2" for a second layer of the same name
   function d3Of(n) {
-    if (n.assign === 'hd' || n.assign === 'w' || n.assign === 'r') return { on: false, mm: 0 }; // art for the HD film or the white film alone, or that only says where ridges go, is in no view
+    if (n.assign === 'hd' || n.assign === 'h2' || n.assign === 'w' || n.assign === 'r') return { on: false, mm: 0 }; // art for an HD film or the white film alone, or that only says where ridges go, is in no view
     var m = d3Mem[keyOf(n)]; if (m) return m;
     var k = (keyOf(n) === n.name && KNOWN[n.name]) || {};
     return { on: typeof k.on3 === 'boolean' ? k.on3 && n.assign !== 'off' : n.assign !== 'off' && n.assign !== 'b', mm: typeof k.mm === 'number' ? k.mm : n.assign === 'a' ? 3 : 0 };
@@ -1426,7 +1442,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     var W = ART.W, H = ART.H, n = W * H, VA = new Float32Array(n * 4), VB = new Float32Array(n * 4);
     underWhite(VA, n); underWhite(VB, n);
     ART.nodes.forEach(function (nd) {
-      if (!nd.rgba || nd.assign === 'off' || nd.assign === 'hd' || nd.assign === 'w' || nd.assign === 'r') return;
+      if (!nd.rgba || nd.assign === 'off' || nd.assign === 'hd' || nd.assign === 'h2' || nd.assign === 'w' || nd.assign === 'r') return;
       var s = nd.rgba, toA = nd.assign === 'a' || nd.assign === 'both', toB = nd.assign === 'b' || nd.assign === 'both';
       for (var p = 0; p < n; p++) {
         var o = p * 4, sa = s[o + 3] / 255; if (sa <= 0) continue;
@@ -1588,6 +1604,14 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
   // Rectangular ridge, analytically. One period, ridge centred on 0; coordinates are where each sight line meets the print plane.
   // Colour on the rib walls. The cap may be wider than the rib (S.cap each side) and may land off it (S.reg):
   // an overhang hides the top of the wall below it, and a cap that misses uncovers a strip of that line's ink.
+  // A second HD screen can print a second, narrower layer on top of each ridge. It is centred, so the ridge is a step: d mm of the first layer
+  // is left showing each side of it. TOP2 and WALL2 are that layer's top and wall, in its own ink.
+  var TOP2 = 20, WALL2 = 21, TOP2L = TOPL.slice(), WALL2L = WALLL.slice();
+  function top2() { if (S.proc !== 'barrier' || !S.hd2 || !(S.height2 > 0)) return null; var w = Math.min(S.ridge, S.pitch - 0.02), w2 = Math.max(0.05, Math.min(w, S.ridge2)); return { w: w2, h: S.height2, d: (w - w2) / 2 }; }
+  function reach(ta) { var T = top2(); return T ? Math.max(S.height * ta, (S.height + T.h) * ta - T.d) : S.height * ta; } // how far past its foot a ridge hides the print, along a sight line of slope ta
+  function inkCols() { var c = /^#[0-9a-f]{6}$/i.test(S.ink2 || '') ? S.ink2 : '#0b0b0c'; for (var i = 0; i < 3; i++) { var v = S2L[parseInt(c.substr(1 + 2 * i, 2), 16)]; TOP2L[i] = Math.max(TOPL[i], Math.round(v * 0.9)); WALL2L[i] = Math.max(WALLL[i], Math.round(v * 0.35)); } } // lit on top, in shadow on the wall, and never darker than the black ink
+  function blk(g) { return g.top + g.wall + (g.top2 || 0) + (g.wall2 || 0); } // all the raised ink in sight
+  inkCols();
   function capOver() { var w = Math.min(S.ridge, S.pitch - 0.02), g = S.pitch - w, c = Math.min(S.cap, g / 2 - 0.01), e = Math.max(-w / 2, Math.min(w / 2, S.reg)); return [c - e, c + e]; }
   function wallSegs(th) {
     var P = S.pitch, w = Math.min(S.ridge, P - 0.02), g = P - w, s = S.height * Math.tan(th), o = capOver(), oL = o[0], oR = o[1], pL = Math.max(oL, 0), pR = Math.max(oR, 0),
@@ -1606,6 +1630,16 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     if (mode === 'walls') wt = ((s >= 0) !== S.swap) ? FA : FB; // the wall that faces the viewer carries that side's image
     if (s >= 0) { out.push([r0 - s, r0 + w - s, TOP]); lw = Math.min(s, g); if (lw > 0) out.push([r0 + w - s, r0 + w - s + lw, wt]); f0 = r0 + w; f1 = r0 + P - s; }
     else { var t = -s; out.push([r0 + t, r0 + w + t, TOP]); lw = Math.min(t, g); if (lw > 0) out.push([r0 + P + t - lw, r0 + P + t, wt]); f0 = r0 + w + t; f1 = r0 + P; }
+    var T2 = mode === 'barrier' ? top2() : null, tl = null;
+    if (T2) { // a stepped ridge, worked out as seen from the right and mirrored for the left: what shows of each face before the next ridge stands in front of it
+      var ta = Math.abs(Math.tan(th)), h1 = S.height, H2 = h1 + T2.h, d2 = T2.d, sh = Math.max(h1 * ta, H2 * ta - d2), lim = r0 + P - sh, neg = s < 0; tl = [0, 0, 0, 0]; out = [];
+      var put = function (x0, x1, m, q) { if (x1 > lim) x1 = lim; if (x1 > x0 + 1e-9) { out.push(neg ? [-x1, -x0, m] : [x0, x1, m]); tl[q] += x1 - x0; } };
+      if (d2 > T2.h * ta) put(r0 - h1 * ta, r0 + d2 - H2 * ta, TOP, 0); // the far ledge of the first layer, until the second layer hides it
+      put(r0 + d2 - H2 * ta, r0 + w - d2 - H2 * ta, TOP2, 2); put(r0 + w - d2 - H2 * ta, r0 + w - d2 - h1 * ta, WALL2, 3); // the second layer's top, then its wall
+      put(r0 + w - d2 - h1 * ta, r0 + w - h1 * ta, TOP, 0); put(r0 + w - h1 * ta, r0 + w, WALL, 1); // the near ledge, then the first layer's wall
+      if (neg) { f0 = r0 + w + sh; f1 = r0 + P; } else { f0 = r0 + w; f1 = r0 + P - sh; }
+      lw = tl[1]; s = neg ? -sh : sh;
+    }
     if (mode === 'walls') { if (wt === FA) ia = lw; else ib = lw; }
     else if (f1 > f0) {
       if (mode === 'hidden') { out.push([f0, f1, S.swap ? FB : FA]); if (S.swap) ib = f1 - f0; else ia = f1 - f0; }
@@ -1623,7 +1657,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
           x0 = Math.max(f0, B0 + n * P); x1 = Math.min(f1, B1 + n * P); if (x1 > x0) { out.push([x0, x1, tB]); if (tB === FA) ia += x1 - x0; else ib += x1 - x0; }
         } }
     }
-    return { segs: out, a: ia / P, b: ib / P, top: w / P, wall: mode === 'walls' ? 0 : lw / P, floor: Math.max(0, f1 - f0) / P, s: s, v: vv };
+    return { segs: out, a: ia / P, b: ib / P, top: tl ? tl[0] / P : w / P, wall: mode === 'walls' ? 0 : lw / P, top2: tl ? tl[2] / P : 0, wall2: tl ? tl[3] / P : 0, floor: Math.max(0, f1 - f0) / P, s: s, v: vv };
   }
   function hiddenGeom(th) { // lines everywhere, raised only where the hidden image is
     var R = ridgeSegs(th, 'hidden'), P = S.pitch, w = Math.min(S.ridge, P - 0.02), g = P - w;
@@ -1641,7 +1675,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
       if (oL > 0) V.push([-w / 2, h - lip, TOP], [-w / 2 - oL, h - lip, TOP], [-w / 2 - oL, h, TOP]); else { V.push([-w / 2, h, oL < 0 ? sB : TOP]); if (oL < 0) V.push([-w / 2 - oL, h, TOP]); }
       if (oR > 0) V.push([w / 2 + oR, h, TOP], [w / 2 + oR, h - lip, TOP], [w / 2, h - lip, sA]); else { if (oR < 0) V.push([w / 2 + oR, h, sA]); V.push([w / 2, h, sA]); }
       V.push([w / 2, 0, BARE]);
-    } else V.push([-w / 2, 0, WALL], [-w / 2, h, TOP], [w / 2, h, WALL], [w / 2, 0, BARE]);
+    } else { var T2 = top2(); if (T2) V.push([-w / 2, 0, WALL], [-w / 2, h, TOP], [-w / 2 + T2.d, h, WALL2], [-w / 2 + T2.d, h + T2.h, TOP2], [w / 2 - T2.d, h + T2.h, WALL2], [w / 2 - T2.d, h, TOP], [w / 2, h, WALL], [w / 2, 0, BARE]); else V.push([-w / 2, 0, WALL], [-w / 2, h, TOP], [w / 2, h, WALL], [w / 2, 0, BARE]); }
     V.push([P - w / 2, 0, BARE]); return V;
   }
   // What each sight line meets first: a depth buffer along the projected axis p = x - z*tan(th), over neighbouring periods
@@ -1688,11 +1722,12 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
   function ovl(p0, p1, a, b, P) { var L = b - a; var k1 = Math.floor((p1 - a) / P), k0 = Math.floor((p0 - a) / P); return (k1 * L + Math.min(p1 - a - k1 * P, L)) - (k0 * L + Math.min(p0 - a - k0 * P, L)); }
   function colWeights(g, p0, p1, out) { // fractions of the footprint [p0,p1] showing A, B, ridge top, ridge wall
     var P = S.pitch, span = p1 - p0, k, nv = g.v ? g.v.length : 0;
-    for (k = 4; k < 9; k++) out[k] = 0; // out[4+i]: view i of a 3D set
-    if (g.uniform || span > 5 * P) { out[0] = g.a; out[1] = g.b; out[2] = g.top; out[3] = g.wall; for (k = 0; k < nv; k++) out[4 + k] = g.v[k]; return; }
+    for (k = 4; k < 11; k++) out[k] = 0; // out[4+i]: view i of a 3D set; out[9], out[10]: the top and the wall of a second HD layer
+    if (g.uniform || span > 5 * P) { out[0] = g.a; out[1] = g.b; out[2] = g.top; out[3] = g.wall; out[9] = g.top2 || 0; out[10] = g.wall2 || 0; for (k = 0; k < nv; k++) out[4 + k] = g.v[k]; return; }
     out[0] = out[1] = out[2] = out[3] = 0;
     for (var i = 0; i < g.segs.length; i++) { var sg = g.segs[i], v = ovl(p0, p1, sg[0], sg[1], P) / span, m = sg[2];
-      if (m >= VW) { var tv = (m - VW) / (nv - 1); out[4 + m - VW] += v; out[0] += v * (1 - tv); out[1] += v * tv; }
+      if (m === TOP2) out[9] += v; else if (m === WALL2) out[10] += v;
+      else if (m >= VW) { var tv = (m - VW) / (nv - 1); out[4 + m - VW] += v; out[0] += v * (1 - tv); out[1] += v * tv; }
       else if (m === FA) out[0] += v; else if (m === FB) out[1] += v; else if (m === TOP) out[2] += v; else out[3] += v; }
   }
 
@@ -1725,7 +1760,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     var cw = cv.width, ch = cv.height, ctx = cv.getContext('2d'), C = colArrays(loupe ? 'l' : 'm', cw);
     if (!C.img || C.img.width !== cw || C.img.height !== ch) C.img = ctx.createImageData(cw, ch);
     var d = C.img.data, W = ART.W, H = ART.H, mpp = mmPerArtPx(), MW = mmW(), MH = MW * H / W, th = S.angle * Math.PI / 180, R = radius();
-    var MV = loupe ? null : mainView(), viewMm = loupe ? S.loupeSpan : MV.span, mmOut = viewMm / cw, sx0 = loupe ? 0 : MV.sx, TW = MW * 0.68, wts = [0, 0, 0, 0, 0, 0, 0, 0, 0], X, Y, hid = S.proc === 'hidden', HM = S.swap ? ART.MA : ART.MB, MVs = multi() && ART.V && ART.V.length === S.views ? ART.V : null, NV = MVs ? MVs.length : 0, kk;
+    var MV = loupe ? null : mainView(), viewMm = loupe ? S.loupeSpan : MV.span, mmOut = viewMm / cw, sx0 = loupe ? 0 : MV.sx, TW = MW * 0.68, wts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], X, Y, hid = S.proc === 'hidden', HM = S.swap ? ART.MA : ART.MB, MVs = multi() && ART.V && ART.V.length === S.views ? ART.V : null, NV = MVs ? MVs.length : 0, kk;
     var thL0 = loupe ? localAngle(S.lu) : 0, gFlat = (R === Infinity || loupe) ? geom(loupe ? thL0 : th) : null;
     var T0MM = TEXMM / TEXN, RA = new Int32Array(4), RB = new Int32Array(4), RF = new Float32Array(4), S0 = SHIRTL[0], S1 = SHIRTL[1], S2 = SHIRTL[2], SL = S0 + S1 + S2, ISL = 1 / SL, lk;
     for (X = 0; X < cw; X++) {
@@ -1744,9 +1779,9 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
       tnn = TEXN >> tLv; tpx = tc0 / (1 << tLv) - 0.5; tx0 = Math.floor(tpx); C.fx[X] = tpx - tx0; C.xa[X] = tx0 & (tnn - 1); C.xb[X] = (tx0 + 1) & (tnn - 1);
       if (tbf > 0) { tnn >>= 1; tpx = tc0 / (2 << tLv) - 0.5; tx0 = Math.floor(tpx); C.fx2[X] = tpx - tx0; C.xa2[X] = tx0 & (tnn - 1); C.xb2[X] = (tx0 + 1) & (tnn - 1); }
       colWeights(g, u - du / 2, u + du / 2, wts);
-      var gd = Math.max(0, 1 - wts[0] - wts[1] - wts[2] - wts[3]);
+      var gd = Math.max(0, 1 - wts[0] - wts[1] - wts[2] - wts[3] - wts[9] - wts[10]);
       C.wa[X] = wts[0]; C.wb[X] = wts[1]; for (kk = 0; kk < NV; kk++) C.wv[X * 5 + kk] = wts[4 + kk];
-      C.kr[X] = wts[2] * TOPL[0] + wts[3] * WALLL[0] + gd * SHIRTL[0]; C.kg[X] = wts[2] * TOPL[1] + wts[3] * WALLL[1] + gd * SHIRTL[1]; C.kb[X] = wts[2] * TOPL[2] + wts[3] * WALLL[2] + gd * SHIRTL[2];
+      C.kr[X] = wts[2] * TOPL[0] + wts[3] * WALLL[0] + wts[9] * TOP2L[0] + wts[10] * WALL2L[0] + gd * SHIRTL[0]; C.kg[X] = wts[2] * TOPL[1] + wts[3] * WALLL[1] + wts[9] * TOP2L[1] + wts[10] * WALL2L[1] + gd * SHIRTL[1]; C.kb[X] = wts[2] * TOPL[2] + wts[3] * WALLL[2] + wts[9] * TOP2L[2] + wts[10] * WALL2L[2] + gd * SHIRTL[2];
       if (g.flat) { colWeights(g.flat, u - du / 2, u + du / 2, wts); gd = Math.max(0, 1 - wts[0] - wts[1] - wts[2] - wts[3]); C.wa2[X] = wts[0]; C.wb2[X] = wts[1];
         C.kr2[X] = wts[2] * TOPL[0] + gd * SHIRTL[0]; C.kg2[X] = wts[2] * TOPL[1] + gd * SHIRTL[1]; C.kb2[X] = wts[2] * TOPL[2] + gd * SHIRTL[2]; }
       C.sh[X] = loupe ? 1 : 0.5 + 0.5 * Math.pow(Math.max(0, Math.cos(thl + 0.3)), 1.5);
@@ -1860,7 +1895,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
       hh += '<text class="lab" x="8" y="15">' + esc(angleText(thl * 180 / Math.PI)) + ' at the loupe</text>';
       $('section').innerHTML = hh; $('sectionNote').textContent = 'In mm. Each lenticule shows only the strip of print its dashed ray lands on.'; return;
     }
-    var V = profile(), w = Math.min(S.ridge, P - 0.02), g = P - w, hgt = S.height, sc = Math.min(212 / (3.1 * P), 92 / Math.max(hgt, 0.05)), x0 = 120 - 1.5 * P * sc + w / 2 * sc, printed = S.proc === 'barrier' || S.proc === 'hidden', yb2 = printed ? y0 - 5 : y0;
+    var V = profile(), w = Math.min(S.ridge, P - 0.02), g = P - w, T2s = top2(), hgt = S.height + (T2s ? T2s.h : 0), sc = Math.min(212 / (3.1 * P), 92 / Math.max(hgt, 0.05)), x0 = 120 - 1.5 * P * sc + w / 2 * sc, printed = S.proc === 'barrier' || S.proc === 'hidden', yb2 = printed ? y0 - 5 : y0;
     function X(mm) { return (x0 + mm * sc).toFixed(1); } function Y(mm) { return (yb2 - mm * sc).toFixed(1); }
     far = 400 / sc;
     for (n = -8; n <= 12; n++) { // the flat print under the raised ink
@@ -1885,6 +1920,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
       var d = '', k2;
       for (k2 = 0; k2 < V.length - 1; k2++) d += (k2 ? 'L' : 'M') + X(V[k2][0] + n * P) + ' ' + Y(V[k2][1]);
       hh += '<path d="' + d + 'Z" fill="#0b0b0c" stroke="var(--muted)" stroke-width="1" stroke-linejoin="round"/>';
+      if (T2s) hh += '<rect x="' + X(n * P - T2s.w / 2) + '" y="' + Y(hgt) + '" width="' + (T2s.w * sc).toFixed(1) + '" height="' + (T2s.h * sc).toFixed(1) + '" fill="' + esc(S.ink2) + '" stroke="var(--muted)" stroke-width="1" stroke-linejoin="round"/>'; // the second layer, in its own ink
       for (k2 = 0; k2 < V.length - 2; k2++) if (V[k2][2] === FA || V[k2][2] === FB) hh += '<path d="M' + X(V[k2][0] + n * P) + ' ' + Y(V[k2][1]) + 'L' + X(V[k2 + 1][0] + n * P) + ' ' + Y(V[k2 + 1][1]) + '" stroke="' + (V[k2][2] === FA ? ca : cb) + '" stroke-width="3.4" stroke-linecap="round" fill="none"/>';
     }
     hh += '</g>';
@@ -1894,7 +1930,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     hh += '<path d="M' + (parseFloat(X(xr)) - 7) + ' ' + yb2 + 'V' + yh.toFixed(1) + 'm-3 0h6m-6 ' + (hgt * sc).toFixed(1) + 'h6" stroke="var(--ink)" stroke-width="1" fill="none"/><text x="' + (parseFloat(X(xr)) - 11) + '" y="' + ((yb2 + yh) / 2 + 4).toFixed(1) + '" text-anchor="end">' + hgt.toFixed(2) + '</text>';
     hh += '<text class="lab" x="8" y="15">' + esc(angleText(thl * 180 / Math.PI)) + ' at the loupe</text>';
     $('section').innerHTML = hh;
-    $('sectionNote').textContent = 'True proportions, in mm. Each dashed sight line ends on the first thing it meets' + (S.proc === 'hidden' ? '. Drawn where the hidden image is; elsewhere the lines are flat.' : '.');
+    $('sectionNote').textContent = 'True proportions, in mm. Each dashed sight line ends on the first thing it meets' + (S.proc === 'hidden' ? '. Drawn where the hidden image is; elsewhere the lines are flat.' : T2s ? '. The ridge is ' + S.height.toFixed(2) + ' mm with a second layer of ' + T2s.h.toFixed(2) + ' mm on top, ' + T2s.w.toFixed(2) + ' wide.' : '.');
   }
 
   /* ================= readouts ================= */
@@ -1915,8 +1951,8 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
       $('rdB').textContent = fmtRange(rB[0]); $('rdBs').textContent = rB[0] ? peak(rB[0], 'b') : never;
       if (pr === 'lens') $('rdAs').textContent = $('rdBs').textContent = 'The views swap again past ' + Math.round(S.lensAngle / 2) + '°, then keep repeating';
     }
-    if (multi()) { $('rd0').textContent = Math.round((g0.a + g0.b) * 100) + ' / ' + Math.round((g0.top + g0.wall) * 100); $('rd0s').textContent = '% print / black. All ' + S.views + ' views show at once, ' + Math.round((g0.a + g0.b) * 100 / S.views) + '% each'; }
-    else { $('rd0').textContent = Math.round(g0.a * 100) + ' / ' + Math.round(g0.b * 100) + ' / ' + Math.round((g0.top + g0.wall) * 100);
+    if (multi()) { $('rd0').textContent = Math.round((g0.a + g0.b) * 100) + ' / ' + Math.round(blk(g0) * 100); $('rd0s').textContent = '% print / black. All ' + S.views + ' views show at once, ' + Math.round((g0.a + g0.b) * 100 / S.views) + '% each'; }
+    else { $('rd0').textContent = Math.round(g0.a * 100) + ' / ' + Math.round(g0.b * 100) + ' / ' + Math.round(blk(g0) * 100);
       $('rd0s').textContent = '% ' + ART.labelA + ' / ' + ART.labelB + ' / black'; }
     var k = docPxPerMm(), pp = P * k, sa = Math.max(0, a - S.guard / 2), sb = Math.max(0, g - a - S.guard / 2);
     if (!cost && multi()) { var swp = g / S.views;
@@ -1966,7 +2002,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     for (x = lo; x <= hi + 1e-9; x += 0.25) { q = parts(x); sum += q[0]; n++; if (q[0] > best) best = q[0]; }
     for (x = lo; x <= hi + 1e-9; x += 0.25) { q = parts(x); if (q[0] >= best - 0.002 && q[1] < least) least = q[1]; } // its best angle: the most of this picture, then the least of the other,
     for (x = lo; x <= hi + 1e-9; x += 0.25) { q = parts(x); if (q[0] >= best - 0.002 && q[1] <= least + 0.002 && (at === null || Math.abs(x) < Math.abs(at))) { at = x; gb = q[2]; } } // then the nearest to straight on
-    var other = least, black = gb.top + gb.wall;
+    var other = least, black = blk(gb);
     return { rg: rg, at: at, own: best, mean: sum / n, other: other, black: black, bare: Math.max(0, 1 - best - other - black), width: rg[1] - rg[0], from: Math.min(Math.abs(rg[0]), Math.abs(rg[1])) };
   }
   function inkCover() { // how much of the ridged area each picture puts ink on
@@ -1983,6 +2019,9 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     C.push([what + ' width', w.toFixed(2) + ' mm. A ' + um + ' µm stencil holds a line down to about ' + needW.toFixed(2) + ' mm' + (pr === 'walls' ? ' (two side by side)' : '') + ': ' + of(w, needW) + '.', st(w, needW)]);
     C.push(['Gap', g.toFixed(2) + ' mm of stencil standing between the lines. It needs about ' + minLine.toFixed(2) + ' mm to survive washout: ' + of(g, minLine) + '.', st(g, minLine)]);
     C.push(['Stencil', um + ' µm a pass (' + S.passes + (S.passes > 1 ? ' passes' : ' pass') + '). The thickest film sold is 700 µm.', um <= 700 ? 'ok' : um <= 760 ? 'tight' : 'no']);
+    var T2 = top2(); if (T2) { var per2 = T2.h / CURE, min2 = per2 + hdT(), um2 = Math.round(per2 * 1000);
+      C.push(['Second layer', T2.w.toFixed(2) + ' mm wide and ' + T2.h.toFixed(2) + ' mm high, from a ' + um2 + ' µm stencil in one pass on the second HD screen. That stencil holds a line down to about ' + min2.toFixed(2) + ' mm: ' + of(T2.w, min2) + '.', um2 > 760 ? 'no' : st(T2.w, min2)]);
+      C.push(['Second register', T2.d >= 0.005 ? 'It sits ' + T2.d.toFixed(2) + ' mm in from each edge of the ridge under it, so the second HD screen can land that far off before it hangs over an edge.' : 'It is as wide as the ridge under it, so any error in register hangs it over an edge.', T2.d >= 0.1 ? 'ok' : 'tight']); }
     if (pr === 'barrier') { var a = g * S.split / 100, sa = Math.max(0, a - S.guard / 2), sb = Math.max(0, g - a - S.guard / 2), N = multi() ? S.views : 0, stripe = N ? g / N : Math.min(sa, sb), printed = N ? g / N : stripe + w / 2;
       C.push(['HD register', 'The HD screen can land ' + (stripe / 2).toFixed(2) + ' mm off before half of a clean window is gone, ' + stripe.toFixed(2) + ' mm before all of it.', stripe >= 0.3 ? 'ok' : 'tight']);
       C.push(['Colour stripes', 'The narrowest is ' + printed.toFixed(2) + ' mm. A flat screen holds about 0.25 mm cleanly on fabric: ' + of(printed, 0.25) + '.', st(printed, 0.25)]);
@@ -2003,6 +2042,8 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
       var needW = Math.max(per + H.t, fine(H)) * (pr === 'walls' ? 2 : 1), wl = PROC[pr].wLabel.split(' ')[0];
       row(st(w, needW), wl + ', ' + mmil(w) + '.', 'An open line ' + across(w, H) + '. The threads can block a line under ' + fine(H).toFixed(2) + ' mm, and a ' + um + ' µm stencil on ' + Math.round(H.t * 1000) + ' µm of mesh does not resolve one finer than about ' + (per + H.t).toFixed(2) + ' mm (stencil plus mesh)' + (pr === 'walls' ? ', twice that for two side by side' : '') + '.');
       row(st(g, per + H.t), 'Gap, ' + mmil(g) + '.', 'A bar of emulsion ' + across(g, H) + ', standing between the lines. It wants about ' + (per + H.t).toFixed(2) + ' mm, as wide as stencil plus mesh are tall, to stand through washout.');
+      var T2 = top2(); if (T2) { var per2 = T2.h / CURE, um2 = Math.round(per2 * 1000), need2 = Math.max(per2 + H.t, fine(H));
+        row(um2 > 700 ? 'no' : st(T2.w, need2), 'Second HD screen, ' + mmil(T2.w) + ' lines.', 'The second layer of the ridges, on a screen of its own: a ' + um2 + ' µm (' + mil(per2) + ') stencil for ' + mmil(T2.h) + ' cured in one pass, here on the same ' + H.key + ' mesh, which resolves a line down to about ' + need2.toFixed(2) + ' mm. It prints after the first HD layer has been flashed, with the off-contact raised by the ' + S.height.toFixed(2) + ' mm already standing.'); }
       row(um <= 300 ? 'ok' : um <= 700 ? 'tight' : 'no', 'HD stencil, ' + um + ' µm (' + mil(per) + ') a pass.', 'That is ' + (per / H.t).toFixed(1) + ' times the thickness of the ' + H.key + ' mesh; an ordinary flat stencil stands 10 to 25% of the mesh thickness above it (' + Math.round(H.t * 100) + ' to ' + Math.round(H.t * 250) + ' µm). Coats of emulsion are published up to about 300 µm, capillary film up to 700 µm.');
     }
     if (pr === 'barrier' || flat) { var a = g * S.split / 100, sa = Math.max(0, a - S.guard / 2), sb = Math.max(0, g - a - S.guard / 2), N = multi() ? S.views : 0, printed = flat ? P / Math.max(2, S.views) : N ? g / N : Math.min(sa, sb) + w / 2;
@@ -2043,7 +2084,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
   }
   function drawBalance(rA, rB, g0) {
     var el = $('balance'), pr = S.proc; if (pr === 'hidden' || pr === 'lens' || !ART) { el.innerHTML = ''; el.hidden = true; return; } el.hidden = false;
-    var P = S.pitch, mu = multi(), A = mu ? null : viewStat('a'), B = mu ? null : viewStat('b'), la = ART.labelA, lb = ART.labelB, cov = inkCover(), h = '', black0 = g0.top + g0.wall, bare0 = Math.max(0, 1 - g0.a - g0.b - black0), dark = PROC[pr].wLabel.split(' ')[0].toLowerCase();
+    var P = S.pitch, mu = multi(), A = mu ? null : viewStat('a'), B = mu ? null : viewStat('b'), la = ART.labelA, lb = ART.labelB, cov = inkCover(), h = '', black0 = blk(g0), bare0 = Math.max(0, 1 - g0.a - g0.b - black0), dark = PROC[pr].wLabel.split(' ')[0].toLowerCase();
     function side(x) { return Math.round(Math.abs(x)) + '° ' + (x > 0 ? 'right' : x < 0 ? 'left' : ''); }
     h += '<h3>What shows</h3><div class="shows">';
     if (mu) { var parts = g0.v.map(function (v, i) { return [v, i % 2 ? 'o2' : 'o1', 'view ' + (i + 1)]; }); parts.push([black0, 'k', dark], [Math.max(0, 1 - black0 - g0.v.reduce(function (x, y) { return x + y; }, 0)), 's', 'bare shirt']); h += showsRow('All ' + S.views + ' views', 'straight on', parts); }
@@ -2087,6 +2128,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     ['pitch', 'ridge', 'height', 'split', 'guard', 'reg', 'cap', 'lensAngle', 'curve', 'printIn', 'padX', 'padY', 'angle', 'loupeSpan'].forEach(function (k) { $(k).value = S[k]; });
     ['meshH', 'meshC', 'meshW', 'lpi', 'coat22', 'coatAdd'].forEach(function (k) { $(k).value = S[k]; });
     $('zoom').value = Math.log(Math.max(1, +S.zoom || 1)) / Math.LN2; $('zoomOut').textContent = zoomText(Math.max(1, +S.zoom || 1)); stageHint();
+    $('hd2').checked = !!S.hd2; $('ridge2').value = S.ridge2; $('height2').value = S.height2; $('ink2').value = /^#[0-9a-f]{6}$/i.test(S.ink2 || '') ? S.ink2 : '#0b0b0c';
     $('proc').value = S.proc; $('spot').checked = S.spot; $('spotA').value = S.spotA; $('spotB').value = S.spotB;
     $('swap').checked = S.swap; $('snap').checked = S.snap; $('lock').checked = S.lock; $('passes' + S.passes).checked = true; $('views' + S.views).checked = true;
     $('zone' + (S.zone === 'diff' ? 'Diff' : S.zone === 'box' ? 'Box' : 'All')).checked = true;
@@ -2110,6 +2152,9 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     $('ridgeSub').textContent = 'A ' + Math.round(per * 1000) + ' µm stencil holds ≥ ' + (per + hdT()).toFixed(2) + ' mm';
     $('heightOut').textContent = S.height.toFixed(2) + ' mm';
     $('heightSub').textContent = '≈ ' + S.passes + ' × ' + nearestFilm(per * 1000) + ' µm capillary film';
+    var T2 = top2(), w2 = Math.max(0.05, Math.min(w, S.ridge2)); $('hd2Box').hidden = !S.hd2;
+    $('ridge2Out').textContent = w2.toFixed(2) + ' mm · ' + thou(w2) + ' thou'; $('ridge2Sub').textContent = w - w2 >= 0.01 ? ((w - w2) / 2).toFixed(2) + ' mm of the first layer shows each side of it' : 'As wide as the ridge under it';
+    $('height2Out').textContent = S.height2.toFixed(2) + ' mm'; $('height2Sub').textContent = 'Ridge ' + (S.height + S.height2).toFixed(2) + ' mm in all · one pass through a ' + Math.round(S.height2 / CURE * 1000) + ' µm stencil';
     $('splitOut').textContent = S.split + ' / ' + (100 - S.split);
     $('guardOut').textContent = S.guard.toFixed(2) + ' mm';
     $('regOut').textContent = (S.reg > 0 ? '+' : '') + S.reg.toFixed(2) + ' mm'; $('capOut').textContent = S.cap.toFixed(2) + ' mm';
@@ -2124,7 +2169,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     $('loupeSpanOut').textContent = S.loupeSpan + ' mm';
   }
   var raf = 0, dirtyGeom = false, dirtyArt = false, hooks = []; // hooks: called after every redraw (the Films panel listens)
-  function geometryChanged() { dirtyGeom = true; gcache.clear(); if (!lockBusy) lockNote(); schedule(); } // anything else that changes the ridges sets new proportions to hold
+  function geometryChanged() { dirtyGeom = true; gcache.clear(); inkCols(); if (!lockBusy) lockNote(); schedule(); } // anything else that changes the ridges sets new proportions to hold
   function schedule() { if (!raf) raf = requestAnimationFrame(frame); }
   function frame() {
     raf = 0; if (!ART) return;
@@ -2150,11 +2195,12 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
   // Ticked, the ridge sliders move as one: pitch, width and height keep the proportions they had when the box was ticked (the dead band and the
   // cap overhang go with them), so the cross-section only gets coarser or finer and every viewing angle stays where it was.
   var lockR = null, LOCKLIM = { pitch: [0.3, 3], ridge: [0.15, 1.5], height: [0.05, 1.6] };
-  function lockNote() { lockR = S.lock && S.pitch > 0 ? { pitch: 1, ridge: S.ridge / S.pitch, height: S.height / S.pitch, guard: S.guard / S.pitch, cap: S.cap / S.pitch } : null; }
+  function lockNote() { lockR = S.lock && S.pitch > 0 ? { pitch: 1, ridge: S.ridge / S.pitch, height: S.height / S.pitch, guard: S.guard / S.pitch, cap: S.cap / S.pitch, ridge2: S.ridge2 / S.pitch, height2: S.height2 / S.pitch } : null; }
   function lockMove(key, v) { // `key` was dragged to v: the pitch that goes with it, held inside every slider's range so the proportions survive
     var P = v / lockR[key]; ['pitch', 'ridge', 'height'].forEach(function (k) { P = Math.max(LOCKLIM[k][0] / lockR[k], Math.min(LOCKLIM[k][1] / lockR[k], P)); });
     P = snapPitch(P); S.pitch = P; S.ridge = P * lockR.ridge; S.height = P * lockR.height; S.guard = Math.min(0.6, P * lockR.guard); S.cap = Math.min(0.4, P * lockR.cap);
-    ['pitch', 'ridge', 'height', 'guard', 'cap'].forEach(function (k) { $(k).value = S[k]; });
+    if (S.hd2 && lockR.ridge2) { S.ridge2 = Math.max(0.1, Math.min(1.5, P * lockR.ridge2)); S.height2 = Math.max(0.05, Math.min(0.8, P * lockR.height2)); } // the second layer keeps its share of the ridge too
+    ['pitch', 'ridge', 'height', 'guard', 'cap', 'ridge2', 'height2'].forEach(function (k) { $(k).value = S[k]; });
   }
   function bindRidge(key) { $(key).addEventListener('input', function (e) { var v = parseFloat(e.target.value);
     if (S.lock && lockR && S.proc !== 'lens') { lockMove(key, v); lockBusy = true; geometryChanged(); lockBusy = false; } else { S[key] = v; after(key); geometryChanged(); } }); }
@@ -2164,12 +2210,14 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     if (key === 'pitch') { S.pitch = snapPitch(S.pitch); if (S.proc !== 'lens' && S.ridge > S.pitch - 0.1) { S.ridge = Math.max(0.15, S.pitch - 0.1); $('ridge').value = S.ridge; } }
     if (key === 'ridge' && S.ridge > S.pitch - 0.1) { S.pitch = snapPitch(S.ridge + 0.1); $('pitch').value = S.pitch; }
     if (key === 'snap') { S.pitch = snapPitch(S.pitch); $('pitch').value = S.pitch; }
+    if (key === 'ridge2' && S.ridge2 > S.ridge) { S.ridge2 = S.ridge; $('ridge2').value = S.ridge2; } // no wider than the ridge it stands on
     if (key === 'printIn') { S.pitch = snapPitch(S.pitch); buildZone(); if (multi()) dirtyArt = true; }
     if (key === 'zone' || key === 'padX' || key === 'padY') buildZone();
     if (key === 'zone' || key === 'padX' || key === 'padY' || key === 'printIn' || key === 'spotA' || key === 'spotB' || key === 'spot') buildSpot();
     var gmax = Math.max(0, S.pitch - S.ridge - 0.05); if (S.guard > gmax) { S.guard = Math.round(gmax * 100) / 100; $('guard').value = S.guard; }
   }
-  bindRidge('pitch'); bindRidge('ridge'); bindRidge('height'); bind('split', 'split'); bind('guard', 'guard'); bind('reg', 'reg'); bind('cap', 'cap'); bind('lensAngle', 'lensAngle'); bind('curve', 'curve'); bind('printIn', 'printIn'); bind('padX', 'padX'); bind('padY', 'padY');
+  bindRidge('pitch'); bindRidge('ridge'); bindRidge('height'); bind('split', 'split'); bind('guard', 'guard'); bind('reg', 'reg'); bind('cap', 'cap'); bind('lensAngle', 'lensAngle'); bind('curve', 'curve'); bind('printIn', 'printIn'); bind('padX', 'padX'); bind('padY', 'padY'); bind('ridge2', 'ridge2'); bind('height2', 'height2');
+  bind('hd2', 'hd2', function (t) { return t.checked; }); bind('ink2', 'ink2', function (t) { return t.value; });
   $('proc').addEventListener('change', function (e) { // each process keeps its own slider settings
     var old = S.proc, np = e.target.value; if (!PROC[np]) return;
     procMem[old] = {}; Object.keys(PROCDEF[old]).forEach(function (k) { procMem[old][k] = S[k]; });
@@ -2185,7 +2233,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
   ['meshH', 'meshC', 'meshW'].forEach(function (id) { var hd = id === 'meshH'; $(id).innerHTML = Object.keys(MESHES).filter(function (k) { return hd ? MESHES[k][0] <= 137 : MESHES[k][0] >= 110; }).map(function (k) { return '<option value="' + k + '">' + MESHES[k][0] + ' mesh, ' + MESHES[k][1] + ' µm thread</option>'; }).join('');
     $(id).addEventListener('change', function (e) { S[id] = e.target.value; geometryChanged(); }); });
   ['lpi', 'coat22', 'coatAdd'].forEach(function (id) { $(id).addEventListener('change', function (e) { var v = parseFloat(e.target.value); if (!(v > 0)) { e.target.value = S[id]; return; } S[id] = v; geometryChanged(); }); });
-  Array.prototype.forEach.call(document.querySelectorAll('.aim'), function (b) { b.addEventListener('click', function () { var t = parseFloat(b.dataset.aim) * Math.PI / 180, g = 2 * S.height * Math.tan(t) + S.guard; S.split = 50; S.pitch = snapPitch(Math.min(3, Math.max(0.5, S.ridge + g))); syncControls(); geometryChanged(); }); });
+  Array.prototype.forEach.call(document.querySelectorAll('.aim'), function (b) { b.addEventListener('click', function () { var t = parseFloat(b.dataset.aim) * Math.PI / 180, g = 2 * reach(Math.tan(t)) + S.guard; S.split = 50; S.pitch = snapPitch(Math.min(3, Math.max(0.5, S.ridge + g))); syncControls(); geometryChanged(); }); });
   $('btnReset').addEventListener('click', function () { var keep = { angle: S.angle, lu: S.lu, lv: S.lv, zoom: S.zoom, proc: S.proc }; Object.assign(S, DEF, PROCDEF[S.proc], keep); S.pitch = snapPitch(S.pitch); buildZone(); buildSpot(); syncControls(); geometryChanged(); });
   $('builds').addEventListener('click', function (e) { var tr = e.target.closest('tr.build'); if (tr) applyBuild(+tr.dataset.i); });
   $('builds').addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { var tr = e.target.closest('tr.build'); if (tr) { e.preventDefault(); applyBuild(+tr.dataset.i); } } });
@@ -2309,13 +2357,13 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
   /* ================= layers list ================= */
   function drawLayers() {
     var h = '', mu = multi();
-    ART.nodes.slice().reverse().forEach(function (n) { var idx = ART.nodes.indexOf(n), d3 = d3Of(n), hd = n.assign === 'hd', wl = n.assign === 'w', rz = n.assign === 'r', HT = 'HD film only: added to the ridges as drawn, in neither view', WT = 'White film only: added to the white under the colours, in neither view', RT = 'Where ridges go: the area is ridged wherever this image has anything, whatever the two pictures do there. In neither view', opts = mu ? [['on', 'In'], ['out', 'Out'], ['hd', 'HD', HT], ['r', 'Ridge', RT], ['w', 'W', WT]] : [['a', 'A'], ['b', 'B'], ['both', 'Both'], ['hd', 'HD', HT], ['r', 'Ridge', RT], ['w', 'W', WT], ['off', 'Off']], cur = hd ? 'hd' : wl ? 'w' : rz ? 'r' : mu ? (d3.on ? 'on' : 'out') : n.assign;
+    ART.nodes.slice().reverse().forEach(function (n) { var idx = ART.nodes.indexOf(n), d3 = d3Of(n), hd = n.assign === 'hd', h2 = n.assign === 'h2', wl = n.assign === 'w', rz = n.assign === 'r', HT = 'HD film only: added to the ridges as drawn, in neither view', H2T = 'Second HD film only: printed as drawn by the second HD screen, in neither view', WT = 'White film only: added to the white under the colours, in neither view', RT = 'Where ridges go: the area is ridged wherever this image has anything, whatever the two pictures do there. In neither view', opts = mu ? [['on', 'In'], ['out', 'Out'], ['hd', 'HD', HT], ['h2', 'HD2', H2T], ['r', 'Ridge', RT], ['w', 'W', WT]] : [['a', 'A'], ['b', 'B'], ['both', 'Both'], ['hd', 'HD', HT], ['h2', 'HD2', H2T], ['r', 'Ridge', RT], ['w', 'W', WT], ['off', 'Off']], cur = hd ? 'hd' : h2 ? 'h2' : wl ? 'w' : rz ? 'r' : mu ? (d3.on ? 'on' : 'out') : n.assign;
       var tool = n.psdNode && n.kind === 'group' ? '<button type="button" class="ghost mini" data-split="' + esc(n.name) + '" title="List this group’s layers separately, so each can sit at its own depth or in its own view">Split</button>' : n.psdNode && n.parent ? '<button type="button" class="ghost mini" data-join="' + esc(n.parent) + '" title="Treat the group as one layer again">Join</button>' : '';
-      h += '<div class="layer"><div class="th" style="background-image:url(' + (n.thumb || '') + ')"></div><div class="nm">' + esc(n.name) + '<small>' + (n.kind === 'group' ? 'group' : n.kind === 'image' ? 'image' : 'layer') + (n.key && n.key !== n.name ? ', another with this name' : '') + (n.parent ? ' in ' + esc(n.parent) : '') + (n.visible === false ? ' · hidden in Photoshop' : '') + (hd ? ' · HD film only, in neither view' : wl ? ' · white film only, under both views' : rz ? ' · ridges wherever it has anything, in neither view' : '') + '</small></div>' + tool + '<div class="seg" role="radiogroup" aria-label="' + (mu ? 'In the 3D scene: ' : 'View for ') + esc(n.name) + '">' +
+      h += '<div class="layer"><div class="th" style="background-image:url(' + (n.thumb || '') + ')"></div><div class="nm">' + esc(n.name) + '<small>' + (n.kind === 'group' ? 'group' : n.kind === 'image' ? 'image' : 'layer') + (n.key && n.key !== n.name ? ', another with this name' : '') + (n.parent ? ' in ' + esc(n.parent) : '') + (n.visible === false ? ' · hidden in Photoshop' : '') + (hd ? ' · HD film only, in neither view' : h2 ? ' · second HD film only, in neither view' : wl ? ' · white film only, under both views' : rz ? ' · ridges wherever it has anything, in neither view' : '') + '</small></div>' + tool + '<div class="seg" role="radiogroup" aria-label="' + (mu ? 'In the 3D scene: ' : 'View for ') + esc(n.name) + '">' +
         opts.map(function (o) { return '<label' + (o[2] ? ' title="' + o[2] + '"' : '') + '><input type="radio" name="as' + idx + '" id="as' + idx + o[0] + '" value="' + o[0] + '"' + (cur === o[0] ? ' checked' : '') + ' data-idx="' + idx + '">' + o[1] + '</label>'; }).join('') + '</div></div>'; });
     $('layers').innerHTML = h || '<p class="note" style="padding:8px 0">No layers to show.</p>';
-    var hds = ART.nodes.filter(function (n) { return n.assign === 'hd'; }).map(function (n) { return n.name; }), wls = ART.nodes.filter(function (n) { return n.assign === 'w'; }).map(function (n) { return n.name; }), rzs = ART.nodes.filter(function (n) { return n.assign === 'r'; }).map(function (n) { return n.name; });
-    $('artNote').textContent = (mu ? S.views + ' views, made by sliding each layer by its depth' : 'A = ' + ART.labelA + ', B = ' + ART.labelB) + (hds.length ? ' · HD film: ' + hds.join(', ') : '') + (rzs.length ? ' · Ridges where: ' + rzs.join(', ') : '') + (wls.length ? ' · White film: ' + wls.join(', ') : '');
+    var hds = ART.nodes.filter(function (n) { return n.assign === 'hd'; }).map(function (n) { return n.name; }), wls = ART.nodes.filter(function (n) { return n.assign === 'w'; }).map(function (n) { return n.name; }), rzs = ART.nodes.filter(function (n) { return n.assign === 'r'; }).map(function (n) { return n.name; }), h2s = ART.nodes.filter(function (n) { return n.assign === 'h2'; }).map(function (n) { return n.name; });
+    $('artNote').textContent = (mu ? S.views + ' views, made by sliding each layer by its depth' : 'A = ' + ART.labelA + ', B = ' + ART.labelB) + (hds.length ? ' · HD film: ' + hds.join(', ') : '') + (h2s.length ? ' · Second HD film: ' + h2s.join(', ') : '') + (rzs.length ? ' · Ridges where: ' + rzs.join(', ') : '') + (wls.length ? ' · White film: ' + wls.join(', ') : '');
     $('layersH').textContent = mu ? 'Which layers are in the 3D scene' : 'Which layers go to which view';
   }
   function depthText(mm) { return mm === 0 ? 'flat, in the shirt' : (mm > 0 ? '+' : '−') + Math.abs(mm).toFixed(2).replace(/0$/, '') + ' mm · ' + (mm > 0 ? 'behind' : 'in front'); }
@@ -2357,7 +2405,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
   });
   $('layers').addEventListener('change', async function (e) {
     var t = e.target; if (!t.dataset || t.dataset.idx === undefined) return; var n = ART.nodes[+t.dataset.idx];
-    if (t.value === 'on' || t.value === 'out') { if (n.assign === 'hd' || n.assign === 'w' || n.assign === 'r') n.assign = assignMem[keyOf(n)] = 'both'; d3Mem[keyOf(n)] = { on: t.value === 'on', mm: d3Of(n).mm }; } else { n.assign = t.value; assignMem[keyOf(n)] = t.value; }
+    if (t.value === 'on' || t.value === 'out') { if (n.assign === 'hd' || n.assign === 'h2' || n.assign === 'w' || n.assign === 'r') n.assign = assignMem[keyOf(n)] = 'both'; d3Mem[keyOf(n)] = { on: t.value === 'on', mm: d3Of(n).mm }; } else { n.assign = t.value; assignMem[keyOf(n)] = t.value; }
     if (!n.rgba && wanted(n) && n.psdNode && ART.psd) { setSource(ART.src, 'reading “' + n.name + '”…', !!watch); try { await renderPsdNode(ART.psd, ART.grid, n); } catch (err) { } setSource(ART.src, watch ? 'linked, re-reads on save' : 'loaded once', !!watch); showPsdWarnings(); }
     persist(); artChanged(false); keepMeta();
   });
@@ -2383,7 +2431,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     var slots = { a: nodes.some(function (n) { return n.assign === 'a'; }), b: nodes.some(function (n) { return n.assign === 'b'; }) };
     imgs.forEach(function (x) { var r = imgToRGBA(x.im, W, H), ex = nodes.filter(function (n) { return n.name === x.f.name; })[0];
       if (ex) { ex.rgba = r; ex.bb = null; ex.file = x.f; ex.thumb = thumbOf(r, W, H); return; }
-      var as = assignMem[x.f.name] || (KNOWN[x.f.name] && KNOWN[x.f.name].assign) || (RNAME.test(x.f.name) ? 'r' : HDNAME.test(x.f.name) ? 'hd' : WNAME.test(x.f.name) ? 'w' : /ledge|stand|left|guy|[-_ ]a\./i.test(x.f.name) ? 'a' : /jump|leap|right|logo|[-_ ]b\./i.test(x.f.name) ? 'b' : null);
+      var as = assignMem[x.f.name] || (KNOWN[x.f.name] && KNOWN[x.f.name].assign) || (RNAME.test(x.f.name) ? 'r' : H2NAME.test(x.f.name) ? 'h2' : HDNAME.test(x.f.name) ? 'hd' : WNAME.test(x.f.name) ? 'w' : /ledge|stand|left|guy|[-_ ]a\./i.test(x.f.name) ? 'a' : /jump|leap|right|logo|[-_ ]b\./i.test(x.f.name) ? 'b' : null);
       nodes.push({ name: x.f.name, assign: as, kind: 'image', rgba: r, thumb: thumbOf(r, W, H), file: x.f }); if (as) slots[as] = true; }); // file: the film exporter reads it again at full size
     nodes.forEach(function (n) { if (!n.assign) { n.assign = !slots.a ? 'a' : !slots.b ? 'b' : 'both'; slots[n.assign] = true; } });
     if (nodes.every(function (n) { return KNOWN[n.name] && KNOWN[n.name].z; })) nodes.sort(function (p, q) { return KNOWN[p.name].z - KNOWN[q.name].z; }); // the shirt's own exports stack the way the PSD does, whatever order they were picked in
@@ -2489,7 +2537,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
       try { imgs = await Promise.all(rec.layers.map(function (l) { var u; if (where === 'local') { u = URL.createObjectURL(l.prev); urls.push(u); } else u = base + l.prev; return loadImg(u); })); }
       finally { urls.forEach(function (u) { URL.revokeObjectURL(u); }); }
       var W = ARTW, H = Math.round(ARTW * imgs[0].naturalHeight / imgs[0].naturalWidth);
-      var nodes = rec.layers.map(function (l, i) { var r = imgToRGBA(imgs[i], W, H), k = l.key || l.name, n = { name: l.name, assign: assignMem[k] || (/^(a|b|both|hd|w|r|off)$/.test(l.assign) ? l.assign : guessAssign(l.name, true)), kind: 'image', rgba: r, thumb: thumbOf(r, W, H) };
+      var nodes = rec.layers.map(function (l, i) { var r = imgToRGBA(imgs[i], W, H), k = l.key || l.name, n = { name: l.name, assign: assignMem[k] || (/^(a|b|both|hd|h2|w|r|off)$/.test(l.assign) ? l.assign : guessAssign(l.name, true)), kind: 'image', rgba: r, thumb: thumbOf(r, W, H) };
         if (l.key && l.key !== l.name) n.key = l.key; if (l.file) n.file = l.file;
         if (far && l.full) n.remote = { id: l.full, url: base + l.full, site: where === 'site', fp: l.fp || '', type: l.type || 'image/png', size: +l.size || 0, lm: +l.lm || 0 }; else if (where === 'local' && l.remote && !l.file) n.remote = l.remote;
         if (far && l.d3 && !d3Mem[k]) d3Mem[k] = { on: !!l.d3.on, mm: +l.d3.mm || 0 }; return n; });
@@ -2701,7 +2749,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     } finally { bt.disabled = false; }
   });
 
-  window.__lent = { S: S, known: function (name) { return KNOWN[name] || null; }, buildSegs: geom, geom: geom, classify: classify, ranges: ranges, loadFiles: loadFiles, startWatch: startWatch, sizes: SZ, applySizes: applySizes, layout: function () { return LAY; }, layMove: layMove, sweeping: function () { return !!sweep; }, setZoom: setZoom, view: function () { return MVIEW; }, fetchRemote: fetchRemote, keep: KEEP, ov: OV, brush: BRUSH, sitePublish: SITE ? sitePublish : null, gitSha: gitSha, keepNow: keepNow, sharedSave: sharedSave, multi: multi, d3Of: d3Of, psdNodes: psdNodes, keyOf: keyOf, hooks: hooks, art: function () { return ART; } };
+  window.__lent = { S: S, top2: top2, reach: reach, profile: profile, solveProfile: solveProfile, known: function (name) { return KNOWN[name] || null; }, buildSegs: geom, geom: geom, classify: classify, ranges: ranges, loadFiles: loadFiles, startWatch: startWatch, sizes: SZ, applySizes: applySizes, layout: function () { return LAY; }, layMove: layMove, sweeping: function () { return !!sweep; }, setZoom: setZoom, view: function () { return MVIEW; }, fetchRemote: fetchRemote, keep: KEEP, ov: OV, brush: BRUSH, sitePublish: SITE ? sitePublish : null, gitSha: gitSha, keepNow: keepNow, sharedSave: sharedSave, multi: multi, d3Of: d3Of, psdNodes: psdNodes, keyOf: keyOf, hooks: hooks, art: function () { return ART; } };
 
   startArt().catch(function (e) { if (window.console) console.error(e); if (!ART) $('psdWarns').innerHTML = '<div class="warn"><b>Built-in artwork failed to load.</b> Drop your PSD below to continue.</div>'; });
 })();
@@ -2724,8 +2772,8 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
   var L = window.__lent; if (!L || !document.getElementById('filmCard')) return;
   var S = L.S, $ = function (id) { return document.getElementById(id); };
   var BC = 1, BM = 2, BY = 4, BK = 8, BA = 16, BR = 32, BU = 64; // one byte per pixel: inks, art present, black to raise in HD, black with white under it
-  var FILMS = ['W', 'C', 'M', 'Y', 'K', 'H'];
-  var FILMNAME = { W: 'white', C: 'cyan', M: 'magenta', Y: 'yellow', K: 'black', H: 'HD' };
+  var FILMS = ['W', 'C', 'M', 'Y', 'K', 'H', 'H2']; // H2: a second HD screen, made only when something is on it
+  var FILMNAME = { W: 'white', C: 'cyan', M: 'magenta', Y: 'yellow', K: 'black', H: 'HD', H2: 'second HD' };
   // sRGB of each solid build under U.S. Web Coated (SWOP) v2, relative colorimetric with black point compensation.
   // Every build that contains K lands within a few levels of the last two, so K is read as K alone.
   var SOLIDS = [[255, 255, 255, BA], [0, 174, 239, BA | BC], [236, 0, 140, BA | BM], [255, 242, 0, BA | BY], [237, 28, 36, BA | BM | BY], [0, 166, 80, BA | BC | BY],
@@ -2741,8 +2789,9 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
 
   // ---------- options ----------
   var KEY = 'lenticular-shirt-films.v1';
-  var F = { filmW: 24, dpi: 600, choke: 0.1, minRaise: 1.5, v: 2, cmyK: false, mirror: false, on: { W: true, C: true, M: true, Y: true, K: true, H: true }, raise: {}, under: {}, wlChoke: true, proof: 'print', zoom: 2, layout: 'pages', pos: {}, auto: true, sheetLen: 0, sheetZoom: 'fit', hdClip: true }; // hdClip: a layer set to HD is left off where the ridges are // pos: where each film sits on the single sheet, inches from its top left
+  var F = { filmW: 24, dpi: 600, choke: 0.1, minRaise: 1.5, v: 2, cmyK: false, mirror: false, on: { W: true, C: true, M: true, Y: true, K: true, H: true, H2: true }, noK: false, raise: {}, under: {}, wlChoke: true, proof: 'print', zoom: 2, layout: 'pages', pos: {}, auto: true, sheetLen: 0, sheetZoom: 'fit', hdClip: true }; // hdClip: a layer set to HD is left off where the ridges are // pos: where each film sits on the single sheet, inches from its top left
   try { var sv = JSON.parse(localStorage.getItem(KEY) || '{}'); Object.keys(F).forEach(function (k) { if (sv[k] !== undefined && typeof sv[k] === typeof F[k]) F[k] = sv[k]; });
+    if (F.on.H2 === undefined) F.on.H2 = true; // settings saved before there was a second HD film
     if (sv.v === undefined && sv.minRaise === 0.5) F.minRaise = 1.5; // settings saved before 17 Nov carry the old 0.5 mm, which also raised halftone dots and thin lines
     F.v = 2; } catch (e) { }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(F)); } catch (e) { } }
@@ -2863,10 +2912,12 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
   }
   function isFull(n) { var c = cache.get(L.keyOf(n)); return !!(c && c.full && n.file && c.id === fileId(n.file)); }
   function isHD(n) { return n.assign === 'hd'; } // art for the HD screen alone: in neither view, added to the HD film as drawn
+  function isH2(n) { return n.assign === 'h2'; } // art for the second HD screen alone: in neither view, on the second HD film as drawn
   function isWL(n) { return n.assign === 'w'; } // art for the white screen alone: wherever the layer has anything, white is added to the white film
   function isRZ(n) { return n.assign === 'r'; } // says only where ridges go: it is in the ridged area the page hands over, and on no film itself
   function hasHD() { var ART = L.art(); return !!ART && ART.nodes.some(function (n) { return isHD(n) && (n.rgba || n.file); }); }
-  function inScene(n) { return isHD(n) || isWL(n) || isRZ(n) ? false : L.multi() ? L.d3Of(n).on : n.assign !== 'off'; }
+  function h2On() { var ART = L.art(); return !!(L.top2 && L.top2()) || (!!ART && ART.nodes.some(function (n) { return isH2(n) && (n.rgba || n.file); })); } // is anything on the second HD screen
+  function inScene(n) { return isHD(n) || isH2(n) || isWL(n) || isRZ(n) ? false : L.multi() ? L.d3Of(n).on : n.assign !== 'off'; }
   function isStatic(n) { return L.multi() ? L.d3Of(n).mm === 0 : n.assign === 'both'; }
   // With an HD layer linked, the HD film is that layer and the ridges and nothing else: no black is raised unless its box is ticked by hand.
   function raiseOn(n) { var v = F.raise[L.keyOf(n)], k = L.known(n.name); return v === undefined ? !hasHD() && (isStatic(n) || !!(k && k.raise)) : v; }
@@ -2875,8 +2926,8 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
   async function loadFull(status) {
     var ART = L.art(); if (!ART || loadingFull) return; loadingFull = true;
     try {
-      if (L.fetchRemote) await L.fetchRemote(function (n) { return inScene(n) || isHD(n) || isWL(n); }, function (name, i, n) { if (status) status('Fetching ' + name + ' (' + i + ' of ' + n + ')', 0); }); // files saved with the page come down when the films need them
-      var todo = ART.nodes.filter(function (n) { return (inScene(n) || isHD(n) || isWL(n)) && n.file && !isFull(n); });
+      if (L.fetchRemote) await L.fetchRemote(function (n) { return inScene(n) || isHD(n) || isH2(n) || isWL(n); }, function (name, i, n) { if (status) status('Fetching ' + name + ' (' + i + ' of ' + n + ')', 0); }); // files saved with the page come down when the films need them
+      var todo = ART.nodes.filter(function (n) { return (inScene(n) || isHD(n) || isH2(n) || isWL(n)) && n.file && !isFull(n); });
       for (var i = 0; i < todo.length; i++) { var n = todo[i], f = n.file;
         var pl = await readFile(f, function (p) { if (status) status('Reading ' + f.name + ' (' + (i + 1) + ' of ' + todo.length + ')', (i + p) / todo.length); });
         cache.set(L.keyOf(n), { id: fileId(f), plane: pl, full: true }); }
@@ -2904,6 +2955,10 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     });
     var hd = [], hdUsed = []; // layers set to HD: their ink (anything opaque that is not white) goes on the HD film as drawn
     ART.nodes.forEach(function (n) { if (!isHD(n)) return; var pl = planeFor(n); if (!pl) return; hd.push({ pl: pl, dx: 0, raise: false }); grow(pl, 0); hdUsed.push({ n: n, pl: pl, full: isFull(n) }); });
+    var hd2 = [], hd2Used = []; // layers set to HD2: the same, on the second HD film
+    ART.nodes.forEach(function (n) { if (!isH2(n)) return; var pl = planeFor(n); if (!pl) return; hd2.push({ pl: pl, dx: 0, raise: false }); grow(pl, 0); hd2Used.push({ n: n, pl: pl, full: isFull(n) }); });
+    // the second layer of the ridges: a narrower line down the centre of each one
+    var T2 = L.top2 ? L.top2() : null, w2 = T2 ? Math.max(2, Math.min(w, Math.round(T2.w * ppmm))) : 0, wl2 = w2 >> 1, wr2 = w2 - wl2, rid2 = new Uint8Array(P); if (w2) for (ph = 0; ph < P; ph++) rid2[ph] = (ph < wr2 || ph >= P - wl2) ? 1 : 0;
     var wAdd = [], wUsed = []; // layers set to W: wherever they have anything at all, white is added to the white film
     ART.nodes.forEach(function (n) { if (!isWL(n)) return; var pl = planeFor(n); if (!pl) return; wAdd.push({ pl: pl, dx: 0, raise: false }); grow(pl, 0); wUsed.push({ n: n, pl: pl, full: isFull(n) }); });
     // ridges: the page's zone, sampled down each ridge's centre line, with short breaks bridged and short pieces dropped
@@ -2915,8 +2970,8 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
       for (y = 0, y0 = -1; y <= Hf; y++) { var v = y < Hf && RUN[o + y]; if (!v && y0 < 0) y0 = y; if (v && y0 >= 0) { if (y0 > 0 && y - y0 < minGap) RUN.fill(1, o + y0, o + y); y0 = -1; } }
       for (y = 0, y0 = -1; y <= Hf; y++) { v = y < Hf && RUN[o + y]; if (v && y0 < 0) y0 = y; if (!v && y0 >= 0) { if (y - y0 < minLen) RUN.fill(0, o + y0, o + y); else { on = true; ridgeLen += y - y0; bx0 = Math.min(bx0, x - wl); bx1 = Math.max(bx1, x + wr); by0 = Math.min(by0, y0); by1 = Math.max(by1, y); } y0 = -1; } }
       if (on) ridges++; }
-    return { ART: ART, dpi: dpi, ppmm: ppmm, Wf: Wf, Hf: Hf, xc: xc, P: P, w: w, g: g, wl: wl, wr: wr, N: N, mu: mu, sel: sel, selDead: selDead, rid: rid, edges: edges, wAdd: wAdd, wUsed: wUsed, wlChoke: F.wlChoke, views: views, used: used, hd: hd, hdUsed: hdUsed, hdClip: F.hdClip,
-      Z: Z, ZW: ZW, zx: zx, zy: zy, nLo: nLo, RUN: RUN, ridges: ridges, ridgeLen: ridgeLen, choke: Math.max(0, Math.round(F.choke * ppmm)), rr: Math.max(0, Math.floor(Math.round(F.minRaise * ppmm) / 2)), cmyK: F.cmyK,
+    return { ART: ART, dpi: dpi, ppmm: ppmm, Wf: Wf, Hf: Hf, xc: xc, P: P, w: w, g: g, wl: wl, wr: wr, N: N, mu: mu, sel: sel, selDead: selDead, rid: rid, edges: edges, wAdd: wAdd, wUsed: wUsed, wlChoke: F.wlChoke, views: views, used: used, hd: hd, hdUsed: hdUsed, hdClip: F.hdClip, hd2: hd2, hd2Used: hd2Used, w2: w2, rid2: rid2, h2on: !!(w2 || hd2.length), noK: F.noK,
+      Z: Z, ZW: ZW, zx: zx, zy: zy, nLo: nLo, RUN: RUN, ridges: ridges, ridgeLen: ridgeLen, choke: Math.max(0, Math.round(F.choke * ppmm)), rr: Math.max(0, Math.floor(Math.round(F.minRaise * ppmm) / 2)), cmyK: F.cmyK || F.noK, // with no K screen every black is one black, the three-colour kind included
       bb: bx1 < 0 ? null : [Math.max(0, bx0), Math.min(Wf, bx1), Math.max(0, by0), Math.min(Hf, by1)] };
   }
   function paintRow(row, X0, Wd, e, y, G) {
@@ -2942,17 +2997,18 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     var halo = Math.max(G.choke, 2 * G.rr) + 1, X0 = x0 - halo, Y0 = y0 - halo, Wd = w + 2 * halo, Hd = h + 2 * halo, n = Wd * Hd, nv = G.views.length,
       cls = new Uint8Array(n), mU = new Uint8Array(n), vr = [], v, i, j, x, y, o, c, k, P = G.P; // mU: the print, any view's art
     for (v = 0; v < nv; v++) vr.push(new Uint8Array(Wd));
-    var colSel = new Uint8Array(Wd), colDead = new Uint8Array(Wd), colRid = new Int32Array(Wd), colIn = new Uint8Array(Wd), mA = G.wAdd.length ? new Uint8Array(n) : null, mD = G.hd.length ? new Uint8Array(n) : null, hr = mD || mA ? new Uint8Array(Wd) : null;
-    for (i = 0; i < Wd; i++) { x = X0 + i; colRid[i] = -1; if (x < 0 || x >= G.Wf) continue; colIn[i] = 1; var q = x - G.xc, ph = ((q % P) + P) % P; colSel[i] = G.sel[ph]; colDead[i] = G.selDead[ph]; if (G.rid[ph]) colRid[i] = Math.floor((q + G.wl) / P) - G.nLo; }
+    var colSel = new Uint8Array(Wd), colDead = new Uint8Array(Wd), colRid = new Int32Array(Wd), colIn = new Uint8Array(Wd), mA = G.wAdd.length ? new Uint8Array(n) : null, mD = G.hd.length ? new Uint8Array(n) : null, mD2 = G.hd2.length ? new Uint8Array(n) : null, colR2 = new Uint8Array(Wd), hr = mD || mA || mD2 ? new Uint8Array(Wd) : null;
+    for (i = 0; i < Wd; i++) { x = X0 + i; colRid[i] = -1; if (x < 0 || x >= G.Wf) continue; colIn[i] = 1; var q = x - G.xc, ph = ((q % P) + P) % P; colSel[i] = G.sel[ph]; colDead[i] = G.selDead[ph]; colR2[i] = G.rid2[ph]; if (G.rid[ph]) colRid[i] = Math.floor((q + G.wl) / P) - G.nLo; }
     for (j = 0; j < Hd; j++) { y = Y0 + j; if (y < 0 || y >= G.Hf) continue;
       for (v = 0; v < nv; v++) { vr[v].fill(0); var es = G.views[v]; for (var e = 0; e < es.length; e++) paintRow(vr[v], X0, Wd, es[e], y, G); }
       o = j * Wd; var zr = G.zy[y] * G.ZW;
       if (mD) for (var hk = 0; hk < G.hd.length; hk++) { hr.fill(0); paintRow(hr, X0, Wd, G.hd[hk], y, G); for (i = 0; i < Wd; i++) if (colIn[i] && (hr[i] & 15)) mD[o + i] = 1; } // 15: any of C M Y K, so white in the image is not ink
+      if (mD2) for (var h2k = 0; h2k < G.hd2.length; h2k++) { hr.fill(0); paintRow(hr, X0, Wd, G.hd2[h2k], y, G); for (i = 0; i < Wd; i++) if (colIn[i] && (hr[i] & 15)) mD2[o + i] = 1; }
       if (mA) for (var wk = 0; wk < G.wAdd.length; wk++) { hr.fill(0); paintRow(hr, X0, Wd, G.wAdd[wk], y, G); for (i = 0; i < Wd; i++) if (colIn[i] && hr[i] && !(colSel[i] === 255 && G.Z[zr + G.zx[X0 + i]] >= 128)) mA[o + i] = 1; } // any pixel of the layer, whatever its colour; not in the bare band between stripes where the ridges are
       for (i = 0; i < Wd; i++) { if (!colIn[i]) continue; for (v = 0; v < nv; v++) if (vr[v][i]) { mU[o + i] = 1; break; } v = colSel[i]; if (v === 255) { if (G.Z[zr + G.zx[X0 + i]] >= 128) continue; v = colDead[i]; } cls[o + i] = vr[v][i]; } }
-    var mW = new Uint8Array(n), mC = new Uint8Array(n), mM = new Uint8Array(n), mY = new Uint8Array(n), mK = new Uint8Array(n), mR = new Uint8Array(n), mH = new Uint8Array(n), anyR = false;
+    var mW = new Uint8Array(n), mC = new Uint8Array(n), mM = new Uint8Array(n), mY = new Uint8Array(n), mK = new Uint8Array(n), mR = new Uint8Array(n), mH = new Uint8Array(n), m2 = G.h2on ? new Uint8Array(n) : null, anyR = false, noK = G.noK;
     for (i = 0; i < n; i++) { c = cls[i]; if (!c) continue; k = (c & BK) || (G.cmyK && (c & 7) === 7);
-      if (k) { mK[i] = 1; if (c & BR) { mR[i] = 1; anyR = true; } if (c & BU) mW[i] = 1; /* this layer wants white under all of it, its black included */ } else { mW[i] = 1; if (c & BC) mC[i] = 1; if (c & BM) mM[i] = 1; if (c & BY) mY[i] = 1; } }
+      if (k) { if (noK) mC[i] = mM[i] = mY[i] = 1; /* no K screen: black is the three colours together */ else mK[i] = 1; if (c & BR) { mR[i] = 1; anyR = true; } if (c & BU) mW[i] = 1; /* this layer wants white under all of it, its black included */ } else { mW[i] = 1; if (c & BC) mC[i] = 1; if (c & BM) mM[i] = 1; if (c & BY) mY[i] = 1; } }
     // The white is pulled in only from the outline of the whole print: where no view has any art beside it. That is also what keeps white
     // laid under a black outline from showing past it. Against black it is left alone, so
     // colour has white right up to the black beside it (pulling it back there would leave a ring of colour on bare shirt round every black line
@@ -2965,9 +3021,10 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     if (anyR && G.rr > 0) mR = morph(morph(mR, Wd, Hd, G.rr, true), Wd, Hd, G.rr, false); // only bold black is raised: halftone dots, hatching and thin lines are narrower than the width set and stay flat
     for (j = 0; j < Hd; j++) { y = Y0 + j; if (y < 0 || y >= G.Hf) continue; o = j * Wd; zr = G.zy[y] * G.ZW;
       for (i = 0; i < Wd; i++) { var ri = colRid[i]; if (ri >= 0 && G.RUN[ri * G.Hf + y]) mH[o + i] = 1; else if (anyR && mR[o + i] && G.Z[zr + G.zx[X0 + i]] < 128) mH[o + i] = 1;
-        else if (mD && mD[o + i] && (!G.hdClip || G.Z[zr + G.zx[X0 + i]] < 128)) mH[o + i] = 1; } } // the HD layer is added as drawn; kept off the ridged area unless told otherwise, or it would fill in between the ridges
+        else if (mD && mD[o + i] && (!G.hdClip || G.Z[zr + G.zx[X0 + i]] < 128)) mH[o + i] = 1;
+        if (m2) { if (ri >= 0 && colR2[i] && G.RUN[ri * G.Hf + y]) m2[o + i] = 1; else if (mD2 && mD2[o + i] && (!G.hdClip || G.Z[zr + G.zx[X0 + i]] < 128)) m2[o + i] = 1; } } } // the second HD film: the ridges' second layer, and layers set to HD2 under the same rule // the HD layer is added as drawn; kept off the ridged area unless told otherwise, or it would fill in between the ridges
     function crop(m) { var out = new Uint8Array(w * h); for (var jj = 0; jj < h; jj++) out.set(m.subarray((jj + halo) * Wd + halo, (jj + halo) * Wd + halo + w), jj * w); return out; }
-    return { W: crop(mW), C: crop(mC), M: crop(mM), Y: crop(mY), K: crop(mK), H: crop(mH) };
+    return { W: crop(mW), C: crop(mC), M: crop(mM), Y: crop(mY), K: crop(mK), H: crop(mH), H2: m2 ? crop(m2) : new Uint8Array(w * h) };
   }
 
   // ---------- the film page: the art's bounding box centred across the film, a T above and below on the centre line ----------
@@ -2977,7 +3034,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     var pad = inch(0.15), bx0 = Math.max(0, G.bb[0] - pad), bx1 = Math.min(G.Wf, G.bb[1] + pad), by0 = Math.max(0, G.bb[2] - pad), by1 = Math.min(G.Hf, G.bb[3] + pad), bw = bx1 - bx0, bh = by1 - by0;
     var W = inch(F.filmW), th = inch(0.47), tw = inch(0.40), ts = inch(0.09), gap = inch(0.25), margin = inch(0.35), side = inch(0.25);
     // The ink's letter sits right beside the T, two spaces away as if typed after it: a space is 0.278 em of the letter's font and its capitals 0.716 em high.
-    var sp = Math.round(2 * 0.278 * th / 0.716), letX = Math.round(tw / 2) + sp, letBox = inch(0.75);
+    var sp = Math.round(2 * 0.278 * th / 0.716), letX = Math.round(tw / 2) + sp, letBox = inch(G.h2on ? 0.95 : 0.75); // room for the widest label: W, or H2 when there is one
     var offX = Math.round((W - bw) / 2) - bx0, offY = margin + th + gap - by0, H = margin + th + gap + bh + gap + th + margin, filmW = W;
     if (tile) { var left = Math.min(bx0 - side, G.xc - Math.round(tw / 2) - side), right = Math.max(bx1 + side, G.xc + letX + letBox + side); W = right - left; offX = -left; }
     var cx = G.xc + offX;
@@ -3039,7 +3096,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
 
   // ---------- one sheet: each film is a piece that can sit anywhere across the film ----------
   var SNAP = 0.125, TPI = 64, CLEAR = 2; // drag snaps to an eighth of an inch; arranging thumbnails are 64 px to the inch; packing keeps CLEAR eighths between films' ink
-  function filmsOn() { return FILMS.filter(function (f) { return F.on[f]; }); }
+  function filmsOn() { var h2 = h2On(); return FILMS.filter(function (f) { return F.on[f] && (f !== 'K' || !F.noK) && (f !== 'H2' || h2); }); } // no K film without a K screen, no H2 film with nothing on it
   function tidy(PG, dpi) { // rows of as many as fit across, top to bottom: the fallback until the films have been drawn small
     var tw = PG.W / dpi, th = PG.H / dpi, cols = Math.max(1, Math.floor(F.filmW / tw)), cw = F.filmW / cols; F.pos = {};
     filmsOn().forEach(function (f, i) { F.pos[f] = [Math.round(((i % cols) * cw + (cw - tw) / 2) / SNAP) * SNAP, Math.floor(i / cols) * th]; });
@@ -3076,7 +3133,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
   function sheetLen(PG, dpi) { var m = 0; filmsOn().forEach(function (f) { if (F.pos[f]) m = Math.max(m, Math.round(F.pos[f][1] * dpi) + PG.H); }); return m; } // film pixels
   var thumbs = null, madeSig = null, thumbTimer = 0, zCount = 0, cur = null, sel = null, drag = null;
   function thumbKey() { var ART = L.art(); // everything the small films are made from
-    return [S.views, S.pitch, S.ridge, S.split, S.guard, S.swap, S.printIn, S.zone, F.filmW, F.choke, F.minRaise, F.cmyK, F.mirror, F.hdClip, JSON.stringify(F.on), JSON.stringify(F.raise), zCount].join('|') + ART.nodes.map(function (n) { var d = L.d3Of(n); return L.keyOf(n) + n.assign + d.on + d.mm + isFull(n); }).join('|'); }
+    return [S.views, S.pitch, S.ridge, S.split, S.guard, S.swap, S.printIn, S.zone, S.hd2, S.ridge2, F.noK, F.filmW, F.choke, F.minRaise, F.cmyK, F.mirror, F.hdClip, JSON.stringify(F.on), JSON.stringify(F.raise), zCount].join('|') + ART.nodes.map(function (n) { var d = L.d3Of(n); return L.keyOf(n) + n.assign + d.on + d.mm + isFull(n); }).join('|'); }
   function ensureThumbs() { // draw the small films if anything they are made from has changed, and pack them again unless they were placed by hand
     var k = thumbKey(); if (k === madeSig) return false; try { makeThumbs(); } catch (e) { thumbs = null; } madeSig = k;
     if (F.auto && cur && cur.PG && pack(cur.PG, cur.G.dpi)) save(); return true; }
@@ -3164,7 +3221,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     if (!PG.fits) throw new Error('The art is ' + (PG.bw / G.dpi).toFixed(1) + ' in wide and will not fit across ' + F.filmW + ' in film with its marks.');
     if (arrange) { status('Arranging the sheet'); await tick(); cur = { G: G, PG: PG, over: [], past: 0 }; ensureThumbs(); placeAll(PG, G.dpi); // what is exported is what the sheet shows afterwards
       var ov = overlaps(); if (ov.length) throw new Error('Films ' + ov.map(function (o) { return o.a + ' and ' + o.b; }).join(', ') + ' overlap on the sheet. Move them apart and export again.'); }
-    var films = FILMS.filter(function (f) { return F.on[f]; }), rb = Math.ceil(PG.W / 8), bufs = {}, ink = {}, put = {};
+    var films = filmsOn(), rb = Math.ceil(PG.W / 8), bufs = {}, ink = {}, put = {};
     films.forEach(function (f) { var b = new Uint8Array(rb * PG.H); b.fill(255); bufs[f] = b; ink[f] = 0;
       put[f] = function (px, py) { if (px < 0 || py < 0 || px >= PG.W || py >= PG.H) return; if (F.mirror) px = PG.W - 1 - px; b[py * rb + (px >> 3)] &= ~(0x80 >> (px & 7)); }; });
     var band = 128, t0 = Date.now();
@@ -3258,7 +3315,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     for (var y = 0, t0 = Date.now(); y < ART.H; y++) { each(n.rgba.subarray(y * ART.W * 4, (y + 1) * ART.W * 4), y, ART.W, ART.H); if (Date.now() - t0 > 60) { if (progress) progress(y / ART.H); await tick(); t0 = Date.now(); } }
     return false;
   }
-  function artShown(n) { return isHD(n) || isWL(n) || isRZ(n) ? false : L.multi() ? L.d3Of(n).on : n.assign === 'a' || n.assign === 'both'; } // the first view is what shows when the document opens
+  function artShown(n) { return isHD(n) || isH2(n) || isWL(n) || isRZ(n) ? false : L.multi() ? L.d3Of(n).on : n.assign === 'a' || n.assign === 'both'; } // the first view is what shows when the document opens
   // One of the loaded images as a layer, on the film's own pixels: sampled exactly as the films sample it, so it lines up with them to the pixel.
   async function artLayer(n, G, PG, progress) {
     var ART = G.ART, Wf = G.Wf, Hf = G.Hf, mir = F.mirror, lay = { name: n.name.replace(/\.(png|jpe?g|webp|gif|bmp|tiff?)$/i, ''), hidden: !artShown(n), top: 0, left: 0, bottom: 0, right: 0, ch: null, full: false, srcW: 0, kind: '' };
@@ -3391,9 +3448,10 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
       if (mode !== 'print') { var v = R[mode][i] ? 0 : 255; r = g = b = v; }
       else { r = 58; g = 59; b = 63; // the shirt
         var wOn = F.on.W && R.W[i], ci = (F.on.C && R.C[i] ? 1 : 0) | (F.on.M && R.M[i] ? 2 : 0) | (F.on.Y && R.Y[i] ? 4 : 0);
-        if (wOn || ci) { var col = INK[ci]; if (wOn) { r = col[0]; g = col[1]; b = col[2]; } else { r = 58 + (col[0] - 58) * 0.3; g = 59 + (col[1] - 59) * 0.3; b = 63 + (col[2] - 63) * 0.3; } } // colour with no white under it stays dim
+        if (wOn || ci) { var col = INK[ci]; if (wOn) { r = col[0]; g = col[1]; b = col[2]; } else if (ci === 7) { r = 38; g = 38; b = 42; } /* three transparent inks straight on the shirt: the shirt, darker */ else { r = 58 + (col[0] - 58) * 0.3; g = 59 + (col[1] - 59) * 0.3; b = 63 + (col[2] - 63) * 0.3; } } // colour with no white under it stays dim
         if (F.on.K && R.K[i]) { r = g = b = 6; }
-        if (F.on.H && R.H[i]) { r = 96; g = 98; b = 110; } }
+        if (F.on.H && R.H[i]) { r = 96; g = 98; b = 110; }
+        if (F.on.H2 && R.H2[i]) { r = 150; g = 158; b = 190; } }
       d[o] = r; d[o + 1] = g; d[o + 2] = b; d[o + 3] = 255; }
     ox.putImageData(im, 0, 0); cx.imageSmoothingEnabled = false; cx.drawImage(off, 0, 0, rw * z, rh * z);
     $('filmProofCap').textContent = (rw / G.ppmm).toFixed(1) + ' × ' + (rh / G.ppmm).toFixed(1) + ' mm of film at the loupe, ' + (z * 100) + '%. Click the shirt to move it.';
@@ -3415,20 +3473,26 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     h += row(G.mu ? G.N + ' views' : 'Stripes', stripes + '<br><span class="muted">' + show + '</span>');
     h += row('Ridges', G.ridges + ', ' + (G.ridgeLen / G.dpi * 25.4 / 1000).toFixed(1) + ' m of line');
     if (G.hdUsed.length) h += row('HD layer', G.hdUsed.map(function (u) { return esc(u.n.name); }).join(', '));
+    if (G.w2) h += row('Second layer', G.w2 + ' px = ' + mm(G.w2) + ' mm lines down the ridges, on film H2');
+    if (G.hd2Used.length) h += row('HD2 layer', G.hd2Used.map(function (u) { return esc(u.n.name); }).join(', '));
+    if (G.h2on || F.noK) { var scr = filmsOn(); h += row('Screens', scr.length + ': ' + scr.join(' ')); }
     if (G.wUsed.length) h += row('White layer', G.wUsed.map(function (u) { return esc(u.n.name); }).join(', '));
     if (PG && F.layout === 'sheet') h += row('Sheet', '<span data-sheet>' + F.filmW + ' × ' + (F.sheetLen > 0 ? F.sheetLen : sheetLen(PG, G.dpi) / G.dpi).toFixed(1) + ' in</span><br><span class="muted">' + filmsOn().length + ' films of ' + (PG.W / G.dpi).toFixed(1) + ' × ' + (PG.H / G.dpi).toFixed(1) + ' in</span>');
     else if (PG) h += row('Each film', (PG.W / G.dpi).toFixed(1) + ' × ' + (PG.H / G.dpi).toFixed(1) + ' in, art ' + (PG.bw / G.dpi).toFixed(1) + ' × ' + (PG.bh / G.dpi).toFixed(1) + ' in');
     $('filmSummary').innerHTML = h;
   }
   function sourceNote(G) {
-    var W = [], ART = G.ART, all = G.used.concat(G.hdUsed, G.wUsed), low = all.filter(function (u) { return u.pl.W < G.Wf * 0.98; }), pending = all.filter(function (u) { return (u.n.file || u.n.remote) && !u.full; }), noFile = all.filter(function (u) { return !u.n.file && !u.n.remote; });
+    var W = [], ART = G.ART, all = G.used.concat(G.hdUsed, G.hd2Used, G.wUsed), low = all.filter(function (u) { return u.pl.W < G.Wf * 0.98; }), pending = all.filter(function (u) { return (u.n.file || u.n.remote) && !u.full; }), noFile = all.filter(function (u) { return !u.n.file && !u.n.remote; });
     if (noFile.length) W.push(['Art', (ART.psd ? 'The PSD’s layers are' : 'This artwork is') + ' only available at preview size, ' + Math.round(ART.W / S.printIn) + ' dpi at this print width. For films, export each layer from Photoshop as a PNG at 100% and link those files.']);
     else if (pending.length) W.push(['Art', 'Showing the preview-size art. The full-size files are read when you export, or now with the button below.']);
     else if (low.length) { var worst = Math.min.apply(null, low.map(function (u) { return u.pl.W; })); W.push(['Art', 'The linked files are ' + worst + ' px wide: ' + Math.round(worst / S.printIn) + ' dpi at ' + S.printIn + ' in. Films are ' + G.dpi + ' dpi, so the art will be blocky. Export at 100% (' + G.Wf + ' px wide) for the real films.']); }
     var px = 0, off = 0, cmy = 0, n = {}; G.used.forEach(function (u) { px += u.pl.px; off += u.pl.off; for (var c = 1; c < 64; c++) if (u.pl.n[c]) n[c] = (n[c] || 0) + u.pl.n[c]; }); cmy = n[BA | BC | BM | BY] || 0;
     if (px && off / px > 0.02 && !noFile.length && !pending.length) W.push(['Colours', (100 * off / px).toFixed(off / px < 0.1 ? 1 : 0) + '% of the art is not a solid process build and was put on the nearest one. Films carry no halftone of their own: screen the art in Photoshop first (a Hard Mix fill does it).']);
-    if (px && cmy / px > 0.005 && !F.cmyK) W.push(['Black', (100 * cmy / px).toFixed(1) + '% of the art is three-colour black (C+M+Y with no K). It will print as three inks over white unless you tick the box to print it as K.']);
-    G.hdUsed.forEach(function (u) { var share = hdInZone(G, u.pl); if (share > 0.005) W.push(['HD layer', Math.round(share * 100) + '% of ' + esc(u.n.name) + ' lies where the ridges are. ' + (G.hdClip ? 'It is left off there, so the ridges stay open and each view keeps its own picture.' : 'It prints there too, filling in between the ridges, so it shows in both views.')]); });
+    var blackPx = (n[BA | BK] || 0) + cmy;
+    if (F.noK && px && blackPx) W.push(['Black', 'No K screen: the ' + (100 * blackPx / px).toFixed(blackPx / px < 0.1 ? 1 : 0) + '% of the art that is black prints as C + M + Y, straight onto the shirt unless its layer is ticked for white under it. Process inks are transparent, so on a dark shirt that reads as the shirt a shade darker; the black that is raised is still solid, on the HD film.']);
+    if (G.h2on && filmsOn().length > 6) W.push(['Screens', 'With the second HD screen that is ' + filmsOn().length + ': ' + filmsOn().join(', ') + '. For six, tick No K screen: black then prints as C + M + Y, and raised black on the HD.']);
+    if (px && cmy / px > 0.005 && !F.cmyK && !F.noK) W.push(['Black', (100 * cmy / px).toFixed(1) + '% of the art is three-colour black (C+M+Y with no K). It will print as three inks over white unless you tick the box to print it as K.']);
+    G.hdUsed.concat(G.hd2Used).forEach(function (u) { var share = hdInZone(G, u.pl); if (share > 0.005) W.push([isH2(u.n) ? 'HD2 layer' : 'HD layer', Math.round(share * 100) + '% of ' + esc(u.n.name) + ' lies where the ridges are. ' + (G.hdClip ? 'It is left off there, so the ridges stay open and each view keeps its own picture.' : 'It prints there too, filling in between the ridges, so it shows in both views.')]); });
     if (S.reg) W.push(['Registration', 'The page’s registration error is a what-if. Films are made with the ridges exactly on the seams.']);
     if (G.choke * 2 + 1 >= Math.min(G.edges[1] - G.edges[0], G.P)) W.push(['Choke', 'The underbase choke is as wide as a stripe, so stripes that stand alone will lose their white.']);
     $('filmWarns').innerHTML = W.map(function (w) { return '<div class="warn"><b>' + w[0] + '</b> ' + w[1] + '</div>'; }).join('');
@@ -3440,14 +3504,17 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     $('filmHD').innerHTML = G.hdUsed.length ? G.hdUsed.map(function (u) { return '<p class="note"><b>' + esc(u.n.name) + '</b> goes on the HD film exactly as drawn, added to the ridges.</p>'; }).join('') +
       '<label class="check"><input type="checkbox" id="fHdClip"' + (F.hdClip ? ' checked' : '') + '><span>Leave it off where the ridges are</span></label>'
       : '<p class="note">None. To put your own art on the HD film, link the image and set it to HD under Artwork.</p>';
+    var t2 = L.top2 ? L.top2() : null, h2h = (t2 ? '<p class="note">The second layer of the ridges: a ' + (G.w2 / G.ppmm).toFixed(2) + ' mm line down the centre of each ridge.</p>' : '') + G.hd2Used.map(function (u) { return '<p class="note"><b>' + esc(u.n.name) + '</b> goes on the second HD film exactly as drawn' + (G.hdClip && G.hdUsed.length ? ', left off where the ridges are like the HD layer.' : '.') + '</p>'; }).join('');
+    if (G.hd2Used.length && !G.hdUsed.length) h2h += '<label class="check"><input type="checkbox" id="fHdClip"' + (F.hdClip ? ' checked' : '') + '><span>Leave it off where the ridges are</span></label>';
+    $('filmH2').innerHTML = h2h || '<p class="note">Not in use. Set an image to HD2 under Artwork, or tick Second HD layer on top under HD ridges.</p>';
     $('filmWL').innerHTML = G.wUsed.length ? G.wUsed.map(function (u) { return '<p class="note"><b>' + esc(u.n.name) + '</b> is added to the white film: white wherever the layer has anything, on top of the white under the colours.</p>'; }).join('') +
       '<label class="check"><input type="checkbox" id="fWlChoke"' + (F.wlChoke ? ' checked' : '') + '><span>Pull it in at the outside edge by the choke</span></label>'
       : '<p class="note">None. To add white of your own, link the image and set it to W under Artwork.</p>';
     $('filmRaiseNote').textContent = G.hdUsed.length ? 'With an HD layer linked nothing else is raised, unless you tick it here.' : '';
-    var h = ''; G.used.forEach(function (u) { var c = u.pl.n[BA | BK] + (F.cmyK ? u.pl.n[BA | BC | BM | BY] : 0); if (!c) return; var k = L.keyOf(u.n);
+    var h = ''; G.used.forEach(function (u) { var c = u.pl.n[BA | BK] + (F.cmyK || F.noK ? u.pl.n[BA | BC | BM | BY] : 0); if (!c) return; var k = L.keyOf(u.n);
       h += '<label class="check"><input type="checkbox" data-raise="' + esc(k) + '"' + (raiseOn(u.n) ? ' checked' : '') + '><span>' + esc(u.n.name) + '</span></label>'; });
     $('filmRaise').innerHTML = h || '<p class="note">No layer has black in it.</p>';
-    h = ''; G.used.forEach(function (u) { var c = u.pl.n[BA | BK] + (F.cmyK ? u.pl.n[BA | BC | BM | BY] : 0); if (!c) return; var k = L.keyOf(u.n);
+    h = ''; G.used.forEach(function (u) { var c = u.pl.n[BA | BK] + (F.cmyK || F.noK ? u.pl.n[BA | BC | BM | BY] : 0); if (!c) return; var k = L.keyOf(u.n);
       h += '<label class="check"><input type="checkbox" data-under="' + esc(k) + '"' + (underOn(u.n) ? ' checked' : '') + '><span>' + esc(u.n.name) + '</span></label>'; });
     $('filmUnder').innerHTML = h || '<p class="note">No layer has black in it.</p>';
   }
@@ -3455,7 +3522,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     var ART = L.art(), card = $('filmCard'); if (!ART) return;
     var ok = S.proc === 'barrier'; $('filmBody').hidden = !ok; $('filmOff').hidden = ok; if (!ok) return;
     var r = card.getBoundingClientRect(), wide = Math.round(r.width);
-    var sig = [S.proc, S.views, S.pitch, S.ridge, S.split, S.guard, S.swap, S.printIn, S.zone, S.lu, S.lv, S.reg, wide, JSON.stringify(Object.assign({}, F, { pos: 0 }))].join('|') + ART.nodes.map(function (n) { var d = L.d3Of(n); return L.keyOf(n) + n.assign + d.on + d.mm + (n.file ? fileId(n.file) : '') + isFull(n); }).join('|');
+    var sig = [S.proc, S.views, S.pitch, S.ridge, S.split, S.guard, S.swap, S.printIn, S.zone, S.lu, S.lv, S.reg, S.hd2, S.ridge2, S.height2, wide, JSON.stringify(Object.assign({}, F, { pos: 0 }))].join('|') + ART.nodes.map(function (n) { var d = L.d3Of(n); return L.keyOf(n) + n.assign + d.on + d.mm + (n.file ? fileId(n.file) : '') + isFull(n); }).join('|');
     var same = !force && sig === lastSig && ART.Z === lastZ && ART.nodes.every(function (n) { var c = cache.get(L.keyOf(n)); return !n.rgba || !inScene(n) || (c && (c.full ? isFull(n) : c.id === n.rgba)); });
     if (same) return; lastSig = sig; if (ART.Z !== lastZ) { lastZ = ART.Z; zCount++; }
     var G = scene(); if (!G) return; var sheet = F.layout === 'sheet', PG = pageOf(G, sheet); cur = { G: G, PG: PG, over: [] };
@@ -3476,18 +3543,19 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     if (on && cur.PG) { var dd = $('filmSummary').querySelector('[data-sheet]'); if (dd) dd.textContent = F.filmW + ' × ' + (F.sheetLen > 0 ? F.sheetLen : sheetLen(cur.PG, cur.G.dpi) / cur.G.dpi).toFixed(1) + ' in'; }
   }
   function syncInputs() {
-    $('fW').value = F.filmW; $('fDpi').value = F.dpi; $('fChoke').value = F.choke; $('fRaise').value = F.minRaise; $('fCmyK').checked = F.cmyK; $('fMirror').checked = F.mirror; $('fProof').value = F.proof; $('fZoom').value = F.zoom;
+    $('fW').value = F.filmW; $('fDpi').value = F.dpi; $('fChoke').value = F.choke; $('fRaise').value = F.minRaise; $('fCmyK').checked = F.cmyK; $('fCmyK').disabled = F.noK; $('fNoK').checked = F.noK; $('fOnK').disabled = F.noK; $('fMirror').checked = F.mirror; $('fProof').value = F.proof; $('fZoom').value = F.zoom;
     FILMS.forEach(function (f) { $('fOn' + f).checked = F.on[f]; });
     $(F.layout === 'sheet' ? 'fLaySheet' : 'fLayPages').checked = true; $('shLen').value = F.sheetLen > 0 ? F.sheetLen : ''; $('shZoom').value = /^(wide|mid)$/.test(F.sheetZoom) ? F.sheetZoom : 'fit';
   }
   function num(id, key, lo, hi) { $(id).addEventListener('change', function () { var v = parseFloat($(id).value); if (!isFinite(v)) v = F[key]; F[key] = Math.max(lo, Math.min(hi, v)); $(id).value = F[key]; save(); refresh(true); }); }
   num('fW', 'filmW', 8, 60); num('fDpi', 'dpi', 150, 1440); num('fChoke', 'choke', 0, 1); num('fRaise', 'minRaise', 0, 6);
   $('fCmyK').addEventListener('change', function () { F.cmyK = this.checked; save(); refresh(true); });
+  $('fNoK').addEventListener('change', function () { F.noK = this.checked; save(); syncInputs(); refresh(true); });
   $('fMirror').addEventListener('change', function () { F.mirror = this.checked; save(); refresh(true); });
   $('fProof').addEventListener('change', function () { F.proof = this.value; save(); refresh(true); });
   $('fZoom').addEventListener('change', function () { F.zoom = parseInt(this.value, 10) || 2; save(); refresh(true); });
   FILMS.forEach(function (f) { $('fOn' + f).addEventListener('change', function () { F.on[f] = this.checked; save(); refresh(true); }); });
-  $('filmHD').addEventListener('change', function (e) { if (e.target.id !== 'fHdClip') return; F.hdClip = e.target.checked; save(); refresh(true); });
+  ['filmHD', 'filmH2'].forEach(function (id) { $(id).addEventListener('change', function (e) { if (e.target.id !== 'fHdClip') return; F.hdClip = e.target.checked; save(); refresh(true); }); });
   $('filmWL').addEventListener('change', function (e) { if (e.target.id !== 'fWlChoke') return; F.wlChoke = e.target.checked; save(); refresh(true); });
   $('filmRaise').addEventListener('change', function (e) { var k = e.target.dataset && e.target.dataset.raise; if (k === undefined) return; F.raise[k] = e.target.checked; save(); refresh(true); });
   $('filmUnder').addEventListener('change', function (e) { var k = e.target.dataset && e.target.dataset.under; if (k === undefined) return; if (e.target.checked) F.under[k] = true; else delete F.under[k]; save(); refresh(true); });
