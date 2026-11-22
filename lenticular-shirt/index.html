@@ -132,6 +132,10 @@
 #viewer .seg input{position:absolute;opacity:0;pointer-events:none}
 #viewer .seg label:has(input:checked){background:var(--ink);color:var(--bg)}
 #viewer .seg label:has(input:disabled){opacity:.32;cursor:default}
+#viewer .pushseg{margin:6px 0 2px}
+#viewer .pushseg button{font:600 11.5px/1 var(--display);letter-spacing:.05em;text-transform:uppercase;padding:6px 8px;cursor:pointer;color:var(--muted);background:none;border:0;border-left:1px solid var(--line);white-space:nowrap}
+#viewer .pushseg button:first-child{border-left:0}
+#viewer .pushseg button[aria-pressed=true]{background:var(--ink);color:var(--bg)}
 #viewer .check{display:inline-flex;gap:7px;align-items:center;font-size:13.5px}
 #viewer .check input{accent-color:var(--ink);width:15px;height:15px;margin:0;flex:none}
 #viewer .aim{padding:5px 8px}
@@ -380,18 +384,20 @@
 
       <h2 id="geoH">HD ridges</h2>
       <div class="ctl"><label for="pitch">Pitch</label><output id="pitchOut"></output><input id="pitch" type="range" min="0.3" max="3" step="0.01"><small id="pitchSub"></small></div>
-      <div class="ctl" data-procs="barrier walls domes hidden"><label for="ridge" id="ridgeLbl">Ridge width</label><output id="ridgeOut"></output><input id="ridge" type="range" min="0.15" max="1.5" step="0.01"><small id="ridgeSub"></small></div>
-      <div class="ctl" data-procs="barrier walls domes hidden"><label for="height" id="heightLbl">Ridge height</label><output id="heightOut"></output><input id="height" type="range" min="0.05" max="1.6" step="0.01"><small id="heightSub"></small></div>
+      <div class="ctl" data-procs="barrier walls domes hidden"><label for="ridge" id="ridgeLbl">Ridge width</label><output id="ridgeOut"></output><input id="ridge" type="range" min="0.1" max="1.5" step="0.01"><small id="ridgeSub"></small></div>
+      <div class="ctl" data-procs="barrier walls domes hidden"><label for="height" id="heightLbl">Ridge height</label><output id="heightOut"></output><input id="height" type="range" min="0.05" max="2.4" step="0.01"><small id="heightSub"></small></div>
       <label class="check" data-procs="barrier walls domes hidden" title="Pitch, width and height keep their proportions (the dead band goes with them), so every viewing angle stays where it is and only the scale changes."><input type="checkbox" id="lock"><span>Move pitch, width and height together</span></label>
       <div class="row" data-procs="barrier walls domes hidden">
         <div class="seg" role="radiogroup" aria-label="Number of stacked HD passes">
-          <label><input type="radio" name="passes" id="passes1" value="1">1 pass</label><label><input type="radio" name="passes" id="passes2" value="2">2 passes</label><label><input type="radio" name="passes" id="passes3" value="3">3 passes</label>
+          <label><input type="radio" name="passes" id="passes1" value="1">1 pass</label><label><input type="radio" name="passes" id="passes2" value="2">2</label><label><input type="radio" name="passes" id="passes3" value="3">3</label><label><input type="radio" name="passes" id="passes4" value="4">4</label><label><input type="radio" name="passes" id="passes5" value="5">5</label><label><input type="radio" name="passes" id="passes6" value="6">6 passes</label>
         </div></div>
       <div data-procs="barrier">
-        <label class="check" title="A second HD screen prints a second, narrower layer on top of each ridge. The ridge stands taller, so each view turns clean at a shallower angle with the stripes left as wide as they are."><input type="checkbox" id="hd2"><span>Second HD layer on top (a second HD screen)</span></label>
+        <label class="check" title="A second screen prints a second layer on top of each ridge: more HD, narrower, or a puff that hangs a little over the edges. Taller ridges and wider tops both make each view turn clean at a shallower angle with the stripes left as wide as they are."><input type="checkbox" id="hd2"><span>Second layer on top (a second HD or puff screen)</span></label>
         <div id="hd2Box" hidden>
-          <div class="ctl"><label for="ridge2">Second layer width</label><output id="ridge2Out"></output><input id="ridge2" type="range" min="0.1" max="1.5" step="0.01"><small id="ridge2Sub"></small></div>
-          <div class="ctl"><label for="height2">Second layer height</label><output id="height2Out"></output><input id="height2" type="range" min="0.05" max="0.8" step="0.01"><small id="height2Sub"></small></div>
+          <div class="ctl"><label for="ridge2">Second layer width</label><output id="ridge2Out"></output><input id="ridge2" type="range" min="0.1" max="2.5" step="0.01"><small id="ridge2Sub"></small></div>
+          <div class="ctl"><label for="height2">Second layer height</label><output id="height2Out"></output><input id="height2" type="range" min="0.05" max="1.2" step="0.01"><small id="height2Sub"></small></div>
+          <div class="ctl"><label for="round2">Second layer roundness</label><output id="round2Out"></output><input id="round2" type="range" min="0" max="100" step="5" title="0 is a square-shouldered layer, as HD ink prints. 100 is a dome, as puff rises."></div>
+          <div class="ctl"><label for="grow2">Grows sideways in the dryer</label><output id="grow2Out"></output><input id="grow2" type="range" min="0" max="0.4" step="0.01" title="Puff swells in every direction. Set how far it grows each side and the film line is drawn that much narrower, so that it finishes at the width above."><small id="grow2Sub"></small></div>
           <div class="row" style="gap:14px"><label class="swatch"><input type="color" id="ink2" aria-label="Ink of the second HD layer"><span>Its ink</span></label></div>
         </div>
       </div>
@@ -418,6 +424,7 @@
 
       <h2>Shirt</h2>
       <div class="ctl"><label for="curve">Chest curve</label><output id="curveOut"></output><input id="curve" type="range" min="0" max="100" step="1" title="0 is the shirt flat on a table. On a body each part of the print faces a slightly different way."></div>
+      <div class="ctl" data-procs="barrier" data-flip><label for="aim">Stripes aimed</label><output id="aimOut"></output><input id="aim" type="range" min="0" max="100" step="1" title="0 leaves the two stripes even everywhere, so the changeover sweeps across a chest. Further right, the boundary between them is moved a little more off-centre toward the edges of the print, so that a chest of this radius changes over all at once. It is printed into the films."></div>
       <div class="ctl"><label for="printIn">Artboard width</label><output id="printOut"></output><input id="printIn" type="range" min="8" max="20" step="0.25"><small id="printSub"></small></div>
       <div class="row"><span class="note" style="flex:none;font-size:12.5px">Ridges cover</span>
         <div class="seg" role="radiogroup" aria-label="Where the ridges are printed">
@@ -484,6 +491,7 @@
       </div>
       <section class="card readcard" aria-label="What this geometry gives you">
         <div class="read">
+          <div class="stat m" id="rdXbox" style="grid-column:1/-1"><div class="k">Changeover</div><div class="v" id="rdX">—</div><div class="s" id="rdXs"></div></div>
           <div class="stat a"><div class="k" id="rdAk">View A is clean</div><div class="v" id="rdA">—</div><div class="s" id="rdAs"></div></div>
           <div class="stat b"><div class="k" id="rdBk">View B is clean</div><div class="v" id="rdB">—</div><div class="s" id="rdBs"></div></div>
           <div class="stat m"><div class="k">Straight on</div><div class="v" id="rd0">—</div><div class="s" id="rd0s"></div></div>
@@ -623,7 +631,9 @@
           <li>The shirt, the view from above, the loupe and the section can each be resized: drag the hatched corner, and double-click it to go back. The three small ones can also be moved: drag one by its title onto the left, right, top or bottom of another, and double-click a title to put them back. Reloading the page puts the whole layout back. <b>Sweep</b> keeps running while you move the sliders; taking hold of the viewer stops it.</li>
           <li><b>Screens</b>, lower down, gives the same sizes in screen-making terms: mils, threads of the mesh you pick for each screen, what that mesh can hold, and how many coats of emulsion build the HD stencil. Its defaults (83, 230 and 156 mesh, and one maker’s figures for a thick-stencil emulsion) are placeholders: set your own.</li>
           <li><b>HD</b> is for art drawn for the HD screen alone, such as the outline to raise: it is in neither view and is added to the HD film as it is.</li>
-          <li><b>HD2</b> is art for a second HD screen, printed as drawn and in neither view: a gloss, a second raised colour (a file with “hd2” or “gloss” in its name starts there). The same screen can print a second layer on top of the ridges: tick <b>Second HD layer on top</b> under HD ridges. Six screens is then W, C, M, Y, HD and HD2, with <b>No K screen</b> ticked in the film panel so black prints as C + M + Y.</li>
+          <li><b>Changeover</b>, at the top of the readouts, is how far a viewer moves to get from one clean picture to the other. Taller ridges, narrower stripes, a dead band and a second layer that hangs over the ridge all narrow it. <b>By the book, Pushed, At the edge</b> under Will it print set how far past the published rules of thumb a build is judged.</li>
+          <li><b>Stripes aimed</b>, under Chest curve, moves the boundary between the stripes toward the edges of the print so that a chest of the radius it shows changes over all at once instead of in a sweep. It goes into the films. Left at 0 the stripes are even.</li>
+          <li><b>HD2</b> is art for a second HD screen, printed as drawn and in neither view: a gloss, a second raised colour (a file with “hd2” or “gloss” in its name starts there). The same screen can print a second layer on top of the ridges: tick <b>Second layer on top</b> under HD ridges. It can be wider than the ridge and rounded, as a puff is. Six screens is then W, C, M, Y, HD and HD2, with <b>No K screen</b> ticked in the film panel so black prints as C + M + Y.</li>
           <li><b>Ridge</b> is for saying where ridges go yourself: wherever that image has anything, whatever its colour, the area is ridged, even where both pictures are the same. Draw a filled shape, export it like the other layers and set it to Ridge (a file with “ridge” in its name is set that way for you). It is in neither view and on no film itself; the ridge brush still works on top of it.</li>
           <li><b>W</b> is for white underbase of your own, such as a solid shape under the whole wordmark: it is in neither view, and white is added to the white film wherever the image has anything, whatever its colour. The white under the colours is still made for you.</li>
           <li><b>Save for Photoshop</b>, under Films, gives a .psd with every film as its own layer (black on clear, with its marks, stacked in register) over every image you loaded, so a film can be touched up against the art. The films are switched off when it opens. It is RGB, with the images’ own numbers.</li>
@@ -1297,13 +1307,13 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
 (function () {
   'use strict';
   var $ = function (id) { return document.getElementById(id); };
-  var LS = 'lenticular-shirt-viewer.v1', ARTW = 1350, FILMS = [100, 150, 200, 250, 300, 400, 700], CURE = 0.9;
+  var LS = 'lenticular-shirt-viewer.v1', ARTW = 1350, FILMS = [100, 150, 200, 250, 300, 400, 700, 1000], CURE = 0.9;
   // Monofilament polyester mesh as sold for garment work: threads per inch, thread µm, opening µm, open area %, fabric thickness µm, theoretical ink volume cm³/m² (the µm of wet ink it lays down)
   var MESHES = { '60/120': [60, 120, 294, 49.7, 210, 104.3], '83/70': [83, 70, 240, 58.7, 117, 68.7], '83/100': [83, 100, 209, 44.5, 166, 72.1], '110/80': [110, 80, 149, 40.8, 130, 53.0], '137/64': [137, 64, 115, 38.7, 103, 39.8], '156/64': [156, 64, 90, 30.1, 101, 30.4],
     '195/55': [195, 55, 67, 26.5, 87, 23.3], '195/48': [195, 48, 77, 35.0, 80, 28.0], '230/48': [230, 48, 55, 24.6, 78, 19.2], '230/40': [230, 40, 68, 37.6, 65, 24.4], '255/40': [255, 40, 57, 32.5, 64, 21.1], '305/40': [305, 40, 37, 20.1, 64, 13.0], '305/34': [305, 34, 45, 29.6, 55, 16.3] };
   function meshOf(k) { var m = MESHES[k] || MESHES['83/70']; return { key: MESHES[k] ? k : '83/70', n: m[0], d: m[1] / 1000, o: m[2] / 1000, open: m[3], t: m[4] / 1000, vol: m[5], pitch: 25.4 / m[0] }; } // lengths in mm
   function hdT() { return meshOf(S.meshH).t; } // thickness of the HD screen's mesh: a stencil cannot hold a line finer than itself plus this
-  var DEF = { proc: 'barrier', views: 2, pitch: 1.27, ridge: 0.52, height: 0.72, passes: 2, split: 50, guard: 0, reg: 0, cap: 0, lensAngle: 49, spot: true, spotA: '#f04bcd', spotB: '#ffd400', swap: false, snap: true, lock: false, angle: 30, curve: 55, printIn: 18, zone: 'diff', padX: 1.2, padY: 1.2, meshH: '83/70', meshC: '230/48', meshW: '156/64', lpi: 45, coat22: 125, coatAdd: 55, loupeSpan: 10, lu: null, lv: null, zoom: 1, hd2: false, ridge2: 0.36, height2: 0.36, ink2: '#0b0b0c' }; // hd2: a second, narrower HD layer printed on top of the ridges by a second HD screen
+  var DEF = { proc: 'barrier', views: 2, pitch: 1.27, ridge: 0.52, height: 0.72, passes: 2, split: 50, guard: 0, reg: 0, cap: 0, lensAngle: 49, spot: true, spotA: '#f04bcd', spotB: '#ffd400', swap: false, snap: true, lock: false, angle: 30, curve: 55, printIn: 18, zone: 'diff', padX: 1.2, padY: 1.2, meshH: '83/70', meshC: '230/48', meshW: '156/64', lpi: 45, coat22: 125, coatAdd: 55, loupeSpan: 10, lu: null, lv: null, zoom: 1, hd2: false, ridge2: 0.36, height2: 0.36, ink2: '#0b0b0c', round2: 0, grow2: 0, aim: 0, push: 1 }; // hd2: a second, narrower HD layer printed on top of the ridges by a second HD screen
   var KNOWN = { 'Layer 5 copy 2': { assign: 'both', mm: 0 }, 'Layer 2': { assign: 'b', label: 'Jump' }, 'ledgenew': { assign: 'a', label: 'Ledge', split: true, mm: 3 }, 'Layer 5 copy': { assign: 'a', label: 'Ledge', mm: 4 }, 'Layer 7': { assign: 'a', label: 'Ledge', mm: -3 },
     'lentV62guy.png': { assign: 'a', label: 'Guy', mm: -3, z: 4 }, 'lentV62oldlogo.png': { assign: 'b', label: 'Old logo', z: 3 }, 'lentV62fulltext.png': { assign: 'b', on3: true, mm: 0, z: 1, raise: true },
     'lentV62textcut.png': { assign: 'a', on3: false, z: 2, raise: true }, 'Screenshot 2026-11-12 at 12.10.36\u202fPM.png': { assign: 'a', on3: false, z: 2, raise: true }, 'Screenshot 2026-11-12 at 12.10.36 PM.png': { assign: 'a', on3: false, z: 2, raise: true },
@@ -1532,7 +1542,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     var keys = Object.keys(ovMem); if (keys.length > 8) keys.slice(0, keys.length - 8).forEach(function (k) { if (k !== OV.sig) delete ovMem[k]; });
     if (redraw) { OV.mask = null; ovBuild(); }
     ovApply(); if (ART.Z === ART.ZA && OV.strokes.length) ART.Z = new Uint8Array(ART.Z);
-    buildSpot(); dirtyGeom = true; gcache.clear(); persist(); brushButtons(); schedule(); keepMeta();
+    buildSpot(); dirtyGeom = true; clearGeom(); persist(); brushButtons(); schedule(); keepMeta();
   }
   function brushButtons() { var b = $('brUndo'); if (!b) return; b.disabled = $('brClear').disabled = !OV.strokes.length; }
   function brushPoint(e) { // where on the art the pointer is, as fractions of the artboard; null off the print
@@ -1607,8 +1617,43 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
   // A second HD screen can print a second, narrower layer on top of each ridge. It is centred, so the ridge is a step: d mm of the first layer
   // is left showing each side of it. TOP2 and WALL2 are that layer's top and wall, in its own ink.
   var TOP2 = 20, WALL2 = 21, TOP2L = TOPL.slice(), WALL2L = WALLL.slice();
-  function top2() { if (S.proc !== 'barrier' || !S.hd2 || !(S.height2 > 0)) return null; var w = Math.min(S.ridge, S.pitch - 0.02), w2 = Math.max(0.05, Math.min(w, S.ridge2)); return { w: w2, h: S.height2, d: (w - w2) / 2 }; }
-  function reach(ta) { var T = top2(); return T ? Math.max(S.height * ta, (S.height + T.h) * ta - T.d) : S.height * ta; } // how far past its foot a ridge hides the print, along a sight line of slope ta
+  function top2() { if (S.proc !== 'barrier' || !S.hd2 || !(S.height2 > 0)) return null; var P = S.pitch, w = Math.min(S.ridge, P - 0.02), w2 = Math.max(0.05, Math.min(P - 0.04, S.ridge2)); return { w: w2, h: S.height2, d: (w - w2) / 2, r: Math.max(0, Math.min(1, (S.round2 || 0) / 100)) }; } // d: how much of the first layer shows each side of it, negative when it hangs over; r: how round its top is, 0 square to 1 a dome
+  function film2() { var T = top2(); return T ? Math.max(0.1, T.w - 2 * Math.max(0, S.grow2 || 0)) : 0; } // the line on the second screen's film: the finished width less what the ink grows sideways in the dryer
+  function capPts(T2, h) { // the second layer's outline from its left foot over the top to its right foot: [x, z, face]
+    var a = T2.w / 2, H = h + T2.h, rx = T2.r * a, rz = T2.r * T2.h, V = [[-a, h]], n = T2.r > 0.001 ? 7 : 0, i, f;
+    if (!n) V.push([-a, H], [a, H]);
+    else { for (i = 0; i <= n; i++) { f = i / n * Math.PI / 2; V.push([-a + rx * (1 - Math.cos(f)), H - rz * (1 - Math.sin(f))]); }
+      for (i = 0; i <= n; i++) { f = i / n * Math.PI / 2; V.push([a - rx * (1 - Math.sin(f)), H - rz * (1 - Math.cos(f))]); } }
+    V.push([a, h]);
+    for (i = 0; i < V.length - 1; i++) V[i][2] = Math.abs(V[i + 1][1] - V[i][1]) > Math.abs(V[i + 1][0] - V[i][0]) ? WALL2 : TOP2; // steeper than 45 degrees is drawn as wall
+    V[V.length - 1][2] = TOP; return V; // past its right foot the first layer's ledge runs on (or, under an overhang, its underside, which nothing sees)
+  }
+  function reach(ta) { // how far past its foot a ridge hides the print, along a sight line of slope ta
+    var T = top2(); if (!T) return S.height * ta; if (T.d >= 0 && T.r < 0.001) return Math.max(S.height * ta, (S.height + T.h) * ta - T.d);
+    var V = profile(), m = 0, i; for (i = 0; i < V.length - 1; i++) m = Math.max(m, -V[i][0] + V[i][1] * ta); return m - Math.min(S.ridge, S.pitch - 0.02) / 2; }
+  // A second layer that hangs over or is rounded has no short formula: its faces in sight come from the depth buffer over the drawn section, and the strip
+  // of print in sight, exactly, from the section's corners (one ridge hides the print from its lowest projection to its highest).
+  var capCache = new Map();
+  function capShape(th) {
+    var key = Math.round(th * 1145.91559), c = capCache.get(key); if (c) return c;
+    var V = profile(), P = S.pitch, t = Math.tan(th), N = 1600, sol = solveProfile(V, th, N), segs = [], tl = [0, 0, 0, 0], j, st = 0, i, lo = 1e9, hi = -1e9;
+    for (j = 1; j <= N; j++) if (j === N || sol.mb[j] !== sol.mb[st]) { var m = sol.mb[st], q = m === TOP ? 0 : m === WALL ? 1 : m === TOP2 ? 2 : m === WALL2 ? 3 : -1; if (q >= 0) { segs.push([sol.p0 + st * P / N, sol.p0 + j * P / N, m]); tl[q] += (j - st) * P / N; } st = j; }
+    for (i = 0; i < V.length - 1; i++) { var pp = V[i][0] - V[i][1] * t; if (pp < lo) lo = pp; if (pp > hi) hi = pp; }
+    c = { segs: segs, tl: tl, f0: hi, f1: P + lo }; if (capCache.size > 4000) capCache.clear(); capCache.set(key, c); return c;
+  }
+  // Aiming: on a chest each part of the print faces a different way, so the changeover sweeps across it. Moving the boundary between the two stripes
+  // a little further off-centre in each gap, the further the gap is from the middle, makes a chest of one radius change over all at once.
+  var aimC = null;
+  function aimK() { if (aimC) return aimC; var P = S.pitch, w = Math.min(S.ridge, P - 0.02), g = P - w, a = g * S.split / 100, c = S.guard, T = top2(), want = Math.max(0.02, g / 2 - c / 2), lo = 0, hi = 1.45;
+    for (var i = 0; i < 40; i++) { var m = (lo + hi) / 2; if (reach(Math.tan(m)) < want) lo = m; else hi = m; } // the angle at which a view turns clean with the stripes even
+    return aimC = { R: 25000 / S.aim, H: S.height + (T ? T.h : 0), tc: hi, lim: Math.max(0, Math.min(a, g - a) - c / 2 - 0.08) }; } // lim: neither stripe is squeezed under 0.08 mm
+  function aimAt(u) { // mm the boundary moves, u mm from the middle of the print
+    if (!(S.aim > 0) || S.proc !== 'barrier' || S.views > 2 || !u) return 0; var A = aimK(), top = 1.48 - A.tc, x = u / A.R; if (x > top) x = top; else if (x < -top) x = -top;
+    var e = A.H * (Math.tan(A.tc + x) - Math.tan(A.tc - x)) / 2; return e > A.lim ? A.lim : e < -A.lim ? -A.lim : e; }
+  function clearGeom() { gcache.clear(); acache.clear(); capCache.clear(); aimC = null; }
+  // How far past the rules of thumb a build is judged. The first is what suppliers publish; the other two are estimates of what a careful shop can hold, not published figures.
+  var PUSH = [{ name: 'By the book', line: 1, film: 700, stripe: 0.25, reg: 0.3, passes: 3 }, { name: 'Pushed', line: 0.75, film: 1000, stripe: 0.18, reg: 0.2, passes: 4 }, { name: 'At the edge', line: 0.55, film: 1400, stripe: 0.13, reg: 0.12, passes: 6 }];
+  function pushK() { return PUSH[S.push] || PUSH[1]; }
   function inkCols() { var c = /^#[0-9a-f]{6}$/i.test(S.ink2 || '') ? S.ink2 : '#0b0b0c'; for (var i = 0; i < 3; i++) { var v = S2L[parseInt(c.substr(1 + 2 * i, 2), 16)]; TOP2L[i] = Math.max(TOPL[i], Math.round(v * 0.9)); WALL2L[i] = Math.max(WALLL[i], Math.round(v * 0.35)); } } // lit on top, in shadow on the wall, and never darker than the black ink
   function blk(g) { return g.top + g.wall + (g.top2 || 0) + (g.wall2 || 0); } // all the raised ink in sight
   inkCols();
@@ -1623,7 +1668,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     else { lw = Math.min(-s, g - pR); add(t0 - lw + P, t0 - pL + P, inkL); }
     return { segs: out, a: len[FA] / P, b: len[FB] / P, top: len[TOP] / P, wall: 0, floor: Math.max(0, P - len[FA] - len[FB] - len[TOP]) / P, s: s };
   }
-  function ridgeSegs(th, mode) {
+  function ridgeSegs(th, mode, ea) {
     if (mode === 'walls') return wallSegs(th);
     var P = S.pitch, w = Math.min(S.ridge, P - 0.02), g = P - w, s = S.height * Math.tan(th), r0 = -w / 2, out = [], f0, f1, ia = 0, ib = 0, lw, wt = WALL, N = mode === 'barrier' && S.views > 2 ? S.views : 0, vv = null, k;
     if (N) { vv = []; for (k = 0; k < N; k++) vv.push(0); }
@@ -1631,7 +1676,8 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     if (s >= 0) { out.push([r0 - s, r0 + w - s, TOP]); lw = Math.min(s, g); if (lw > 0) out.push([r0 + w - s, r0 + w - s + lw, wt]); f0 = r0 + w; f1 = r0 + P - s; }
     else { var t = -s; out.push([r0 + t, r0 + w + t, TOP]); lw = Math.min(t, g); if (lw > 0) out.push([r0 + P + t - lw, r0 + P + t, wt]); f0 = r0 + w + t; f1 = r0 + P; }
     var T2 = mode === 'barrier' ? top2() : null, tl = null;
-    if (T2) { // a stepped ridge, worked out as seen from the right and mirrored for the left: what shows of each face before the next ridge stands in front of it
+    if (T2 && (T2.d < -1e-6 || T2.r > 0.001)) { var cs = capShape(th); out = cs.segs.slice(); tl = cs.tl; f0 = cs.f0; f1 = cs.f1; lw = tl[1]; }
+    else if (T2) { // a stepped ridge, worked out as seen from the right and mirrored for the left: what shows of each face before the next ridge stands in front of it
       var ta = Math.abs(Math.tan(th)), h1 = S.height, H2 = h1 + T2.h, d2 = T2.d, sh = Math.max(h1 * ta, H2 * ta - d2), lim = r0 + P - sh, neg = s < 0; tl = [0, 0, 0, 0]; out = [];
       var put = function (x0, x1, m, q) { if (x1 > lim) x1 = lim; if (x1 > x0 + 1e-9) { out.push(neg ? [-x1, -x0, m] : [x0, x1, m]); tl[q] += x1 - x0; } };
       if (d2 > T2.h * ta) put(r0 - h1 * ta, r0 + d2 - H2 * ta, TOP, 0); // the far ledge of the first layer, until the second layer hides it
@@ -1651,7 +1697,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
         }
         for (k = 0; k < N; k++) { ia += vv[k] * (1 - k / (N - 1)); ib += vv[k] * k / (N - 1); vv[k] /= P; } // a and b: how much of what shows leans to the first and the last view
       }
-      else { var a = g * S.split / 100, c = S.guard, e = S.reg, A0 = e, A1 = w / 2 + a - c / 2 + e, B0 = w / 2 + a + c / 2 + e, B1 = P + e, tA = S.swap ? FB : FA, tB = S.swap ? FA : FB;
+      else { var a = g * S.split / 100 + (ea || 0), c = S.guard, e = S.reg, A0 = e, A1 = w / 2 + a - c / 2 + e, B0 = w / 2 + a + c / 2 + e, B1 = P + e, tA = S.swap ? FB : FA, tB = S.swap ? FA : FB;
         for (var n = -1; n <= 1; n++) {
           var x0 = Math.max(f0, A0 + n * P), x1 = Math.min(f1, A1 + n * P); if (x1 > x0) { out.push([x0, x1, tA]); if (tA === FA) ia += x1 - x0; else ib += x1 - x0; }
           x0 = Math.max(f0, B0 + n * P); x1 = Math.min(f1, B1 + n * P); if (x1 > x0) { out.push([x0, x1, tB]); if (tB === FA) ia += x1 - x0; else ib += x1 - x0; }
@@ -1675,7 +1721,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
       if (oL > 0) V.push([-w / 2, h - lip, TOP], [-w / 2 - oL, h - lip, TOP], [-w / 2 - oL, h, TOP]); else { V.push([-w / 2, h, oL < 0 ? sB : TOP]); if (oL < 0) V.push([-w / 2 - oL, h, TOP]); }
       if (oR > 0) V.push([w / 2 + oR, h, TOP], [w / 2 + oR, h - lip, TOP], [w / 2, h - lip, sA]); else { if (oR < 0) V.push([w / 2 + oR, h, sA]); V.push([w / 2, h, sA]); }
       V.push([w / 2, 0, BARE]);
-    } else { var T2 = top2(); if (T2) V.push([-w / 2, 0, WALL], [-w / 2, h, TOP], [-w / 2 + T2.d, h, WALL2], [-w / 2 + T2.d, h + T2.h, TOP2], [w / 2 - T2.d, h + T2.h, WALL2], [w / 2 - T2.d, h, TOP], [w / 2, h, WALL], [w / 2, 0, BARE]); else V.push([-w / 2, 0, WALL], [-w / 2, h, TOP], [w / 2, h, WALL], [w / 2, 0, BARE]); }
+    } else { var T2 = top2(); if (T2) { V.push([-w / 2, 0, WALL], [-w / 2, h, TOP]); capPts(T2, h).forEach(function (v) { V.push(v); }); V.push([w / 2, h, WALL], [w / 2, 0, BARE]); } else V.push([-w / 2, 0, WALL], [-w / 2, h, TOP], [w / 2, h, WALL], [w / 2, 0, BARE]); }
     V.push([P - w / 2, 0, BARE]); return V;
   }
   // What each sight line meets first: a depth buffer along the projected axis p = x - z*tan(th), over neighbouring periods
@@ -1702,11 +1748,11 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     var left = ovl(ph - blur / 2, ph + blur / 2, 0, 0.5, 1) / blur, a = S.swap ? 1 - left : left;
     return { segs: [], a: a, b: 1 - a, top: 0, wall: 0, uniform: true };
   }
-  var gcache = new Map();
-  function geom(th) { // memoised to 0.05 degrees
-    var key = Math.round(th * 1145.91559), g = gcache.get(key); if (g) return g; var q = key / 1145.91559, p = S.proc;
-    g = p === 'walls' ? ridgeSegs(q, 'walls') : p === 'domes' ? domeGeom(q) : p === 'hidden' ? hiddenGeom(q) : p === 'lens' ? lensGeom(q) : ridgeSegs(q, 'barrier');
-    if (gcache.size > 8000) gcache.clear(); gcache.set(key, g); return g;
+  var gcache = new Map(), acache = new Map();
+  function geom(th, ea) { // memoised to 0.05 degrees and, where the stripes are aimed, to a micron of aim
+    var key = Math.round(th * 1145.91559), ke = ea ? Math.round(ea * 1000) : 0, C = ke ? acache : gcache, k2 = ke ? key * 4096 + ke : key, g = C.get(k2); if (g) return g; var q = key / 1145.91559, p = S.proc;
+    g = p === 'walls' ? ridgeSegs(q, 'walls') : p === 'domes' ? domeGeom(q) : p === 'hidden' ? hiddenGeom(q) : p === 'lens' ? lensGeom(q) : ridgeSegs(q, 'barrier', ke / 1000);
+    if (C.size > (ke ? 30000 : 8000)) C.clear(); C.set(k2, g); return g;
   }
   function classify(g) {
     if (g.hidden) return g.contrast < 0.15 ? 'a' : g.contrast >= 0.5 ? 'b' : 'm';
@@ -1750,7 +1796,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
   function fullStates(n) {
     var MW = mmW(), mmOut = MW * 1.22 / n, th = S.angle * Math.PI / 180, R = radius(), TW = MW * 0.68, C = { n: n, ok: new Uint8Array(n), u: new Float32Array(n), st: new Uint8Array(n) }, gF = R === Infinity ? geom(th) : null, c0 = Math.cos(th);
     for (var X = 0; X < n; X++) { var sx = (X + 0.5 - n / 2) * mmOut, u, g;
-      if (R === Infinity) { if (c0 < 0.03) continue; u = sx / c0; g = gF; } else { var q = sx / R - Math.sin(th); if (q <= -0.998 || q >= 0.998) continue; var thl = -Math.asin(q); u = R * (th - thl); g = geom(thl); }
+      if (R === Infinity) { if (c0 < 0.03) continue; u = sx / c0; g = S.aim > 0 ? geom(th, aimAt(u)) : gF; } else { var q = sx / R - Math.sin(th); if (q <= -0.998 || q >= 0.998) continue; var thl = -Math.asin(q); u = R * (th - thl); g = geom(thl, aimAt(u)); }
       if (Math.abs(u) > TW) continue; C.ok[X] = 1; C.u[X] = u; C.st[X] = STATEC[classify(g)]; }
     return C;
   }
@@ -1761,14 +1807,14 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     if (!C.img || C.img.width !== cw || C.img.height !== ch) C.img = ctx.createImageData(cw, ch);
     var d = C.img.data, W = ART.W, H = ART.H, mpp = mmPerArtPx(), MW = mmW(), MH = MW * H / W, th = S.angle * Math.PI / 180, R = radius();
     var MV = loupe ? null : mainView(), viewMm = loupe ? S.loupeSpan : MV.span, mmOut = viewMm / cw, sx0 = loupe ? 0 : MV.sx, TW = MW * 0.68, wts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], X, Y, hid = S.proc === 'hidden', HM = S.swap ? ART.MA : ART.MB, MVs = multi() && ART.V && ART.V.length === S.views ? ART.V : null, NV = MVs ? MVs.length : 0, kk;
-    var thL0 = loupe ? localAngle(S.lu) : 0, gFlat = (R === Infinity || loupe) ? geom(loupe ? thL0 : th) : null;
+    var thL0 = loupe ? localAngle(S.lu) : 0, gFlat = (R === Infinity || loupe) ? geom(loupe ? thL0 : th, loupe ? aimAt(S.lu) : 0) : null, aimed = S.aim > 0;
     var T0MM = TEXMM / TEXN, RA = new Int32Array(4), RB = new Int32Array(4), RF = new Float32Array(4), S0 = SHIRTL[0], S1 = SHIRTL[1], S2 = SHIRTL[2], SL = S0 + S1 + S2, ISL = 1 / SL, lk;
     for (X = 0; X < cw; X++) {
       var sx = sx0 + (X + 0.5 - cw / 2) * mmOut, u, du, thl, g;
       C.ok[X] = 0;
       if (loupe) { var cl = Math.max(0.06, Math.cos(thL0)); u = S.lu + sx / cl; du = mmOut / cl; thl = thL0; g = gFlat; }
-      else if (R === Infinity) { var c0 = Math.cos(th); if (c0 < 0.03) continue; u = sx / c0; du = mmOut / c0; thl = th; g = gFlat; }
-      else { var q = sx / R - Math.sin(th); if (q <= -0.998 || q >= 0.998) continue; thl = -Math.asin(q); u = R * (th - thl); du = mmOut / Math.cos(thl); g = geom(thl); }
+      else if (R === Infinity) { var c0 = Math.cos(th); if (c0 < 0.03) continue; u = sx / c0; du = mmOut / c0; thl = th; g = aimed ? geom(th, aimAt(u)) : gFlat; }
+      else { var q = sx / R - Math.sin(th); if (q <= -0.998 || q >= 0.998) continue; thl = -Math.asin(q); u = R * (th - thl); du = mmOut / Math.cos(thl); g = geom(thl, aimAt(u)); }
       if (!loupe && Math.abs(u) > TW) continue;
       C.ok[X] = 1; C.u[X] = u; C.ax[X] = (u + MW / 2) / mpp;
       // The cloth is read at the size that matches what one screen pixel covers of it here: a column seen edge-on covers more, and past the coarsest
@@ -1902,7 +1948,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
       if (S.proc === 'barrier' && S.views > 2) { var N3 = S.views, sw3 = g / N3;
         for (var k3 = 0; k3 < N3; k3++) { var q0 = n * P + (k3 === 0 ? 0 : w / 2 + k3 * sw3) + e, q1 = n * P + (k3 === N3 - 1 ? P : w / 2 + (k3 + 1) * sw3) + e;
           hh += '<rect x="' + X(q0) + '" y="' + (y0 - 5) + '" width="' + ((q1 - q0) * sc).toFixed(1) + '" height="5" style="fill:' + viewCol(S.swap ? N3 - 1 - k3 : k3, N3) + '"/>'; } }
-      else if (S.proc === 'barrier') { var a = g * S.split / 100, c = S.guard, A0 = n * P + e, A1 = n * P + w / 2 + a - c / 2 + e, B0 = n * P + w / 2 + a + c / 2 + e, B1 = n * P + P + e;
+      else if (S.proc === 'barrier') { var a = g * S.split / 100 + aimAt(S.lu || 0), c = S.guard, A0 = n * P + e, A1 = n * P + w / 2 + a - c / 2 + e, B0 = n * P + w / 2 + a + c / 2 + e, B1 = n * P + P + e;
         if (A1 > A0) hh += '<rect x="' + X(A0) + '" y="' + (y0 - 5) + '" width="' + ((A1 - A0) * sc).toFixed(1) + '" height="5" fill="' + colA + '"/>';
         if (B1 > B0) hh += '<rect x="' + X(B0) + '" y="' + (y0 - 5) + '" width="' + ((B1 - B0) * sc).toFixed(1) + '" height="5" fill="' + colB + '"/>'; }
       else if (S.proc === 'hidden') hh += '<rect x="' + X(n * P - w / 2) + '" y="' + (y0 - 5) + '" width="' + (P * sc + 0.5).toFixed(1) + '" height="5" fill="' + colA + '"/>';
@@ -1911,7 +1957,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     for (n = -8; n <= 12; n++) for (i = 0; i < RAYS; i++) { // sight lines, each ending on the first thing it meets
       var j = Math.floor((i + 0.5) / RAYS * sol.N), z = Math.max(0, sol.zb[j]), px = sol.p0 + (j + 0.5) * P / sol.N + n * P, hx = px + z * t, m = sol.mb[j], dot = matCol[m];
       if (m === BARE && S.proc === 'barrier' && S.views > 2) { var xv = (hx - e) / P; xv = (xv - Math.floor(xv)) * P; var kv = xv < w / 2 ? 0 : xv >= P - w / 2 ? S.views - 1 : Math.min(S.views - 1, Math.floor((xv - w / 2) / (g / S.views))); dot = viewCol(S.swap ? S.views - 1 - kv : kv, S.views); }
-      else if (m === BARE && S.proc === 'barrier') { var xs = (hx - e) / P; xs = (xs - Math.floor(xs)) * P; var aa = g * S.split / 100; dot = xs < w / 2 + aa - S.guard / 2 ? colA : xs > w / 2 + aa + S.guard / 2 ? colB : null; }
+      else if (m === BARE && S.proc === 'barrier') { var xs = (hx - e) / P; xs = (xs - Math.floor(xs)) * P; var aa = g * S.split / 100 + aimAt(S.lu || 0); dot = xs < w / 2 + aa - S.guard / 2 ? colA : xs > w / 2 + aa + S.guard / 2 ? colB : null; }
       if (m === BARE && S.proc === 'hidden') dot = colA;
       hh += '<path d="M' + X(hx) + ' ' + Y(z) + 'L' + X(hx + far * Math.sin(thl)) + ' ' + Y(z + far * Math.cos(thl)) + '" stroke="var(--muted)" stroke-width="0.8" stroke-dasharray="2 3" fill="none"/>';
       if (dot) hh += '<circle cx="' + X(hx) + '" cy="' + Y(z) + '" r="2.2" style="fill:' + dot + '" stroke="var(--ink)" stroke-width="0.7"/>';
@@ -1920,7 +1966,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
       var d = '', k2;
       for (k2 = 0; k2 < V.length - 1; k2++) d += (k2 ? 'L' : 'M') + X(V[k2][0] + n * P) + ' ' + Y(V[k2][1]);
       hh += '<path d="' + d + 'Z" fill="#0b0b0c" stroke="var(--muted)" stroke-width="1" stroke-linejoin="round"/>';
-      if (T2s) hh += '<rect x="' + X(n * P - T2s.w / 2) + '" y="' + Y(hgt) + '" width="' + (T2s.w * sc).toFixed(1) + '" height="' + (T2s.h * sc).toFixed(1) + '" fill="' + esc(S.ink2) + '" stroke="var(--muted)" stroke-width="1" stroke-linejoin="round"/>'; // the second layer, in its own ink
+      if (T2s) hh += '<path d="' + capPts(T2s, S.height).map(function (v, q) { return (q ? 'L' : 'M') + X(n * P + v[0]) + ' ' + Y(v[1]); }).join('') + 'Z" fill="' + esc(S.ink2) + '" stroke="var(--muted)" stroke-width="1" stroke-linejoin="round"/>'; // the second layer, in its own ink
       for (k2 = 0; k2 < V.length - 2; k2++) if (V[k2][2] === FA || V[k2][2] === FB) hh += '<path d="M' + X(V[k2][0] + n * P) + ' ' + Y(V[k2][1]) + 'L' + X(V[k2 + 1][0] + n * P) + ' ' + Y(V[k2 + 1][1]) + '" stroke="' + (V[k2][2] === FA ? ca : cb) + '" stroke-width="3.4" stroke-linecap="round" fill="none"/>';
     }
     hh += '</g>';
@@ -1930,18 +1976,21 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     hh += '<path d="M' + (parseFloat(X(xr)) - 7) + ' ' + yb2 + 'V' + yh.toFixed(1) + 'm-3 0h6m-6 ' + (hgt * sc).toFixed(1) + 'h6" stroke="var(--ink)" stroke-width="1" fill="none"/><text x="' + (parseFloat(X(xr)) - 11) + '" y="' + ((yb2 + yh) / 2 + 4).toFixed(1) + '" text-anchor="end">' + hgt.toFixed(2) + '</text>';
     hh += '<text class="lab" x="8" y="15">' + esc(angleText(thl * 180 / Math.PI)) + ' at the loupe</text>';
     $('section').innerHTML = hh;
-    $('sectionNote').textContent = 'True proportions, in mm. Each dashed sight line ends on the first thing it meets' + (S.proc === 'hidden' ? '. Drawn where the hidden image is; elsewhere the lines are flat.' : T2s ? '. The ridge is ' + S.height.toFixed(2) + ' mm with a second layer of ' + T2s.h.toFixed(2) + ' mm on top, ' + T2s.w.toFixed(2) + ' wide.' : '.');
+    $('sectionNote').textContent = 'True proportions, in mm. Each dashed sight line ends on the first thing it meets' + (S.proc === 'hidden' ? '. Drawn where the hidden image is; elsewhere the lines are flat.' : T2s ? '. The ridge is ' + S.height.toFixed(2) + ' mm with a second layer of ' + T2s.h.toFixed(2) + ' mm on top, ' + T2s.w.toFixed(2) + ' wide' + (T2s.d < -0.004 ? ', hanging over by ' + (-T2s.d).toFixed(2) + ' a side.' : '.') : '.');
   }
 
   /* ================= readouts ================= */
   function angleText(a) { var r = Math.round(Math.abs(a)); return r === 0 ? 'Straight on' : r + '° ' + (a > 0 ? 'right' : 'left'); }
+  function changeover(rA, rB) { // between the nearest clean view on the left and the nearest on the right: [from, to] in degrees
+    var lo = null, hi = null; rA.concat(rB).forEach(function (r) { if (r[1] <= 0 && (lo === null || r[1] > lo)) lo = r[1]; if (r[0] >= 0 && (hi === null || r[0] < hi)) hi = r[0]; });
+    return lo === null || hi === null ? null : [lo, hi]; }
   function fmtRange(rg) { if (!rg) return 'never'; var lo = Math.min(Math.abs(rg[0]), Math.abs(rg[1])), hi = Math.max(Math.abs(rg[0]), Math.abs(rg[1])), side = (rg[0] + rg[1]) / 2 > 0 ? 'right' : 'left'; if (rg[0] < 0 && rg[1] > 0) return Math.round(-rg[0]) + '° left to ' + Math.round(rg[1]) + '° right'; return Math.round(lo) + '°–' + Math.round(hi) + '° ' + side; }
   function nearestFilm(um) { var best = FILMS[0]; FILMS.forEach(function (f) { if (Math.abs(f - um) < Math.abs(best - um)) best = f; }); return best; }
   function thou(mm) { return Math.round(mm / 0.0254); }
   function readouts() {
     var P = S.pitch, w = S.ridge, g = P - w, a = g * S.split / 100, rA = ranges('a'), rB = ranges('b'), g0 = geom(0), W = [], nm = names(), pr = S.proc, cost = PROC[pr].cost;
     function peak(rg, st) { if (!rg) return ''; if (st && !multi()) { var vs = viewStat(st); if (vs) return 'Brightest at ' + Math.round(Math.abs(vs.at)) + '°: ' + Math.round(vs.own * 100) + '% of the surface is this picture'; } var best = 0, at = 0; for (var x = rg[0]; x <= rg[1]; x += 0.25) { var q = geom(x * Math.PI / 180), v = q.a + q.b; if (v > best) { best = v; at = x; } } return 'Brightest at ' + Math.round(Math.abs(at)) + '°: ' + Math.round(best * 100) + '% of the surface is print'; }
-    $('rdAk').textContent = nm.ka; $('rdBk').textContent = nm.kb;
+    $('rdAk').textContent = nm.ka; $('rdBk').textContent = nm.kb; $('rdXbox').hidden = pr === 'hidden' || pr === 'lens' || multi();
     if (pr === 'hidden') {
       $('rdA').textContent = rA[0] ? 'within ' + Math.round(Math.min(-rA[0][0], rA[0][1])) + '° of straight on' : 'never'; $('rdAs').textContent = 'Shading under 15%, so only the flat print shows';
       $('rdB').textContent = rB[0] ? 'from ' + Math.round(Math.min(Math.abs(rB[0][0]), Math.abs(rB[0][1]))) + '° either side' : 'never'; $('rdBs').textContent = 'The raised lines hide at least half the print between them';
@@ -1949,6 +1998,8 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
       var never = multi() ? 'The next view never drops out, so the sweep stops short of this one' : 'The other image never drops under 10%';
       $('rdA').textContent = fmtRange(rA[0]); $('rdAs').textContent = rA[0] ? peak(rA[0], 'a') : never;
       $('rdB').textContent = fmtRange(rB[0]); $('rdBs').textContent = rB[0] ? peak(rB[0], 'b') : never;
+      var xo = changeover(rA, rB), sd = function (v) { return Math.abs(v) < 0.2 ? 'straight on' : fx1(Math.abs(v)).replace(/\.0$/, '') + '° ' + (v < 0 ? 'left' : 'right'); };
+      $('rdX').textContent = xo ? fx1(xo[1] - xo[0]).replace(/\.0$/, '') + '° wide' : 'never complete'; $('rdXs').textContent = xo ? 'Both pictures show from ' + sd(xo[0]) + ' to ' + sd(xo[1]) + ', at the middle of the print. The narrower this is, the snappier the flip.' : 'One of the pictures never shows alone.';
       if (pr === 'lens') $('rdAs').textContent = $('rdBs').textContent = 'The views swap again past ' + Math.round(S.lensAngle / 2) + '°, then keep repeating';
     }
     if (multi()) { $('rd0').textContent = Math.round((g0.a + g0.b) * 100) + ' / ' + Math.round(blk(g0) * 100); $('rd0s').textContent = '% print / black. All ' + S.views + ' views show at once, ' + Math.round((g0.a + g0.b) * 100 / S.views) + '% each'; }
@@ -1969,8 +2020,8 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     // warnings
     var listed = pr !== 'hidden' && pr !== 'lens'; // "Will it print" lists these rules with their margins, so they are not said twice
     if (pr !== 'lens') {
-      var per = S.height / CURE / S.passes, minLine = per + hdT(), what = PROC[pr].wLabel.split(' ')[0];
-      if (per * 1000 > 760 && !listed) W.push(['Height', 'needs a ' + Math.round(per * 1000) + ' µm stencil per pass. 700 µm is the thickest film sold; add a pass.']);
+      var per = S.height / CURE / S.passes, minLine = (per + hdT()) * pushK().line, what = PROC[pr].wLabel.split(' ')[0];
+      if (per * 1000 > pushK().film * 1.09 && !listed) W.push(['Height', 'needs a ' + Math.round(per * 1000) + ' µm stencil per pass. 700 µm is the thickest film most shops stock; add a pass.']);
       if (pr === 'walls') { var gc = g - 2 * S.cap; if (S.cap > 0 && gc < 0.22) W.push(['Caps', 'leave only ' + Math.max(0, gc).toFixed(2) + ' mm between them. Even a thin cap stencil needs about 0.22 mm.']);
         if (w < 2 * minLine - 0.03 && !listed) W.push(['Rib', 'is two lines side by side, one per view. A ' + Math.round(per * 1000) + ' µm stencil holds each down to about ' + minLine.toFixed(2) + ' mm, so the rib needs about ' + (2 * minLine).toFixed(2) + ' mm.']); }
       else if (w < minLine - 0.015 && !listed) W.push([what, w.toFixed(2) + ' mm is narrower than a ' + Math.round(per * 1000) + ' µm stencil resolves (about ' + minLine.toFixed(2) + ' mm). Widen it or build the height from more, thinner passes.']);
@@ -2012,19 +2063,23 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
   }
   // The same rules of thumb as the warnings, as a list with how much room each has: [what, how it stands, ok | tight | no]
   function buildChecks() {
-    var pr = S.proc, P = S.pitch, w = S.ridge, g = P - w, per = S.height / CURE / S.passes, minLine = per + hdT(), C = [], what = PROC[pr].wLabel.split(' ')[0], um = Math.round(per * 1000);
+    var pr = S.proc, P = S.pitch, w = S.ridge, g = P - w, K = pushK(), per = S.height / CURE / S.passes, minLine = (per + hdT()) * K.line, C = [], what = PROC[pr].wLabel.split(' ')[0], um = Math.round(per * 1000), held = K.line < 1 ? ' by the book, ' + Math.round(K.line * 100) + '% of that pushed, ' : '';
     function st(have, need) { var r = have / need; return r >= 1.15 ? 'ok' : r >= 0.98 ? 'tight' : 'no'; }
     function of(have, need) { return Math.round(have / need * 100) + '% of it'; }
     var needW = pr === 'walls' ? 2 * minLine : minLine;
-    C.push([what + ' width', w.toFixed(2) + ' mm. A ' + um + ' µm stencil holds a line down to about ' + needW.toFixed(2) + ' mm' + (pr === 'walls' ? ' (two side by side)' : '') + ': ' + of(w, needW) + '.', st(w, needW)]);
+    C.push([what + ' width', w.toFixed(2) + ' mm. A ' + um + ' µm stencil holds a line down to about ' + (held ? (needW / K.line).toFixed(2) + ' mm' + held : '') + needW.toFixed(2) + ' mm' + (pr === 'walls' ? ' (two side by side)' : '') + ': ' + of(w, needW) + '.', st(w, needW)]);
     C.push(['Gap', g.toFixed(2) + ' mm of stencil standing between the lines. It needs about ' + minLine.toFixed(2) + ' mm to survive washout: ' + of(g, minLine) + '.', st(g, minLine)]);
-    C.push(['Stencil', um + ' µm a pass (' + S.passes + (S.passes > 1 ? ' passes' : ' pass') + '). The thickest film sold is 700 µm.', um <= 700 ? 'ok' : um <= 760 ? 'tight' : 'no']);
-    var T2 = top2(); if (T2) { var per2 = T2.h / CURE, min2 = per2 + hdT(), um2 = Math.round(per2 * 1000);
-      C.push(['Second layer', T2.w.toFixed(2) + ' mm wide and ' + T2.h.toFixed(2) + ' mm high, from a ' + um2 + ' µm stencil in one pass on the second HD screen. That stencil holds a line down to about ' + min2.toFixed(2) + ' mm: ' + of(T2.w, min2) + '.', um2 > 760 ? 'no' : st(T2.w, min2)]);
-      C.push(['Second register', T2.d >= 0.005 ? 'It sits ' + T2.d.toFixed(2) + ' mm in from each edge of the ridge under it, so the second HD screen can land that far off before it hangs over an edge.' : 'It is as wide as the ridge under it, so any error in register hangs it over an edge.', T2.d >= 0.1 ? 'ok' : 'tight']); }
+    C.push(['Stencil', um + ' µm a pass (' + S.passes + (S.passes > 1 ? ' passes' : ' pass') + '). ' + (K.film <= 700 ? 'The thickest film most shops stock is 700 µm.' : K.film <= 1000 ? 'Capillary film is made up to 1000 µm; 700 is the thickest most shops stock.' : 'Past the 1000 µm film that is made, two films laminated together.'), um <= K.film ? 'ok' : um <= K.film * 1.09 ? 'tight' : 'no']);
+    if (S.passes > K.passes) C.push(['Passes', S.passes + ' print and flash rounds on one screen. Each has to land on the last one, and the off-contact has to rise with the stack; ' + K.passes + ' is as many as this setting takes for granted.', 'tight']);
+    var T2 = top2(); if (T2) { var per2 = T2.h / CURE, min2 = (per2 + hdT()) * K.line, um2 = Math.round(per2 * 1000);
+      var f2 = film2(), puff = S.grow2 > 0 || S.round2 > 0;
+      C.push(['Second layer', T2.w.toFixed(2) + ' mm wide and ' + T2.h.toFixed(2) + ' mm high when finished' + (f2 < T2.w - 0.004 ? ', printed as a ' + f2.toFixed(2) + ' mm line' : '') + '. ' + (puff ? 'A puff rises to several times what is printed, so its stencil is an ordinary thin one; how far it rises and spreads is the ink and the dryer, and wants a test strip.' : 'From a ' + um2 + ' µm stencil in one pass on the second HD screen, which holds a line down to about ' + min2.toFixed(2) + ' mm: ' + of(f2, min2) + '.'), puff ? (f2 >= 0.2 * K.line / 0.75 ? 'ok' : 'tight') : um2 > K.film * 1.09 ? 'no' : st(f2, min2)]);
+      if (T2.d < -0.004) { var open = P - T2.w; C.push(['Overhang', 'Finished, the second layer is ' + (-T2.d).toFixed(2) + ' mm wider than the ridge each side, which leaves ' + open.toFixed(2) + ' mm open between one and the next. Printed wider than the ridge it has nothing under its edges and will sag down the walls; let it grow there in the dryer instead (the slider below the roundness). The model takes its underside as flat.', open >= 0.25 * K.line ? 'ok' : open >= 0.15 * K.line ? 'tight' : 'no']);
+        C.push(['Second register', 'Any error in register hangs it further over one side and less over the other; ' + (-T2.d).toFixed(2) + ' mm off and one side has no overhang at all.', -T2.d >= K.reg / 2 ? 'ok' : 'tight']); }
+      else C.push(['Second register', T2.d >= 0.005 ? 'It sits ' + T2.d.toFixed(2) + ' mm in from each edge of the ridge under it, so the second HD screen can land that far off before it hangs over an edge.' : 'It is as wide as the ridge under it, so any error in register hangs it over an edge.', T2.d >= K.reg / 2 ? 'ok' : 'tight']); }
     if (pr === 'barrier') { var a = g * S.split / 100, sa = Math.max(0, a - S.guard / 2), sb = Math.max(0, g - a - S.guard / 2), N = multi() ? S.views : 0, stripe = N ? g / N : Math.min(sa, sb), printed = N ? g / N : stripe + w / 2;
-      C.push(['HD register', 'The HD screen can land ' + (stripe / 2).toFixed(2) + ' mm off before half of a clean window is gone, ' + stripe.toFixed(2) + ' mm before all of it.', stripe >= 0.3 ? 'ok' : 'tight']);
-      C.push(['Colour stripes', 'The narrowest is ' + printed.toFixed(2) + ' mm. A flat screen holds about 0.25 mm cleanly on fabric: ' + of(printed, 0.25) + '.', st(printed, 0.25)]);
+      C.push(['HD register', 'The HD screen can land ' + (stripe / 2).toFixed(2) + ' mm off before half of a clean window is gone, ' + stripe.toFixed(2) + ' mm before all of it.', stripe >= K.reg ? 'ok' : 'tight']);
+      C.push(['Colour stripes', 'The narrowest is ' + printed.toFixed(2) + ' mm. A flat screen holds about 0.25 mm cleanly on fabric' + (K.stripe < 0.25 ? ' by the book; judged here against ' + K.stripe.toFixed(2) + ' mm' : '') + ': ' + of(printed, K.stripe) + '.', st(printed, K.stripe)]);
       if (stripe < 0.56) C.push(['Halftones', 'A 45 LPI dot cell is 0.56 mm, wider than the ' + stripe.toFixed(2) + ' mm that shows of each stripe, so dots under the ridges get chopped. Solid fills are safe.', 'info']); }
     return C;
   }
@@ -2039,12 +2094,13 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     function row(tag, what, text) { R.push('<div class="chk ' + tag + '"><span class="tag">' + (tag === 'ok' ? 'OK' : tag === 'tight' ? 'Tight' : tag === 'no' ? 'No' : '—') + '</span><span><b>' + what + '</b> ' + text + '</span></div>'); }
     if (!flat) {
       row('info', 'Pitch, ' + mmil(P) + '.', (25.4 / P).toFixed(1) + ' ridges to the inch, a ' + (25.4 / P).toFixed(1) + ' LPI line screen. Each ridge and gap takes ' + (P / H.pitch).toFixed(1) + ' threads of the ' + H.key + ' mesh.');
-      var needW = Math.max(per + H.t, fine(H)) * (pr === 'walls' ? 2 : 1), wl = PROC[pr].wLabel.split(' ')[0];
+      var KP = pushK(), needW = Math.max(per + H.t, fine(H)) * KP.line * (pr === 'walls' ? 2 : 1), wl = PROC[pr].wLabel.split(' ')[0];
       row(st(w, needW), wl + ', ' + mmil(w) + '.', 'An open line ' + across(w, H) + '. The threads can block a line under ' + fine(H).toFixed(2) + ' mm, and a ' + um + ' µm stencil on ' + Math.round(H.t * 1000) + ' µm of mesh does not resolve one finer than about ' + (per + H.t).toFixed(2) + ' mm (stencil plus mesh)' + (pr === 'walls' ? ', twice that for two side by side' : '') + '.');
       row(st(g, per + H.t), 'Gap, ' + mmil(g) + '.', 'A bar of emulsion ' + across(g, H) + ', standing between the lines. It wants about ' + (per + H.t).toFixed(2) + ' mm, as wide as stencil plus mesh are tall, to stand through washout.');
-      var T2 = top2(); if (T2) { var per2 = T2.h / CURE, um2 = Math.round(per2 * 1000), need2 = Math.max(per2 + H.t, fine(H));
-        row(um2 > 700 ? 'no' : st(T2.w, need2), 'Second HD screen, ' + mmil(T2.w) + ' lines.', 'The second layer of the ridges, on a screen of its own: a ' + um2 + ' µm (' + mil(per2) + ') stencil for ' + mmil(T2.h) + ' cured in one pass, here on the same ' + H.key + ' mesh, which resolves a line down to about ' + need2.toFixed(2) + ' mm. It prints after the first HD layer has been flashed, with the off-contact raised by the ' + S.height.toFixed(2) + ' mm already standing.'); }
-      row(um <= 300 ? 'ok' : um <= 700 ? 'tight' : 'no', 'HD stencil, ' + um + ' µm (' + mil(per) + ') a pass.', 'That is ' + (per / H.t).toFixed(1) + ' times the thickness of the ' + H.key + ' mesh; an ordinary flat stencil stands 10 to 25% of the mesh thickness above it (' + Math.round(H.t * 100) + ' to ' + Math.round(H.t * 250) + ' µm). Coats of emulsion are published up to about 300 µm, capillary film up to 700 µm.');
+      var T2 = top2(); if (T2) { var per2 = T2.h / CURE, um2 = Math.round(per2 * 1000), need2 = Math.max(per2 + H.t, fine(H)) * KP.line;
+        if (S.round2 > 0 || S.grow2 > 0) row('info', 'Second screen, puff: ' + mmil(film2()) + ' lines.', 'Puff rises to several times what is printed, so this is an ordinary stencil, not a thick one. Suppliers give 10 to 20% puff additive (15% for fine detail), a 60 to 110 mesh or up to 157 for detail, and a rise that starts at about 270 to 300 °F; it spreads sideways as it rises, and over-curing collapses it. It prints last, on top of the flashed HD, to finish ' + mmil(T2.w) + ' wide and ' + mmil(T2.h) + ' high: a test strip gives the line width and the percentage that do that.');
+        else row(um2 > KP.film ? 'no' : st(T2.w, need2), 'Second HD screen, ' + mmil(T2.w) + ' lines.', 'The second layer of the ridges, on a screen of its own: a ' + um2 + ' µm (' + mil(per2) + ') stencil for ' + mmil(T2.h) + ' cured in one pass, here on the same ' + H.key + ' mesh, which resolves a line down to about ' + need2.toFixed(2) + ' mm. It prints after the first HD layer has been flashed, with the off-contact raised by the ' + S.height.toFixed(2) + ' mm already standing.'); }
+      row(um <= (S.push ? 400 : 300) ? 'ok' : um <= KP.film ? 'tight' : 'no', 'HD stencil, ' + um + ' µm (' + mil(per) + ') a pass.', 'That is ' + (per / H.t).toFixed(1) + ' times the thickness of the ' + H.key + ' mesh; an ordinary flat stencil stands 10 to 25% of the mesh thickness above it (' + Math.round(H.t * 100) + ' to ' + Math.round(H.t * 250) + ' µm). Coats of emulsion are published up to about 300 µm, capillary film up to 700 µm.');
     }
     if (pr === 'barrier' || flat) { var a = g * S.split / 100, sa = Math.max(0, a - S.guard / 2), sb = Math.max(0, g - a - S.guard / 2), N = multi() ? S.views : 0, printed = flat ? P / Math.max(2, S.views) : N ? g / N : Math.min(sa, sb) + w / 2;
       row(st(printed, fine(Cm)), 'Picture stripes, ' + mmil(printed) + ' at the narrowest.', across(printed, Cm).replace(/^./, function (c) { return c.toUpperCase(); }) + '. That mesh holds a printing line down to about ' + fine(Cm).toFixed(2) + ' mm (one opening plus a thread and a half), and lays down about ' + Math.round(Cm.vol) + ' µm of wet ink.');
@@ -2107,9 +2163,9 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     h += '<div class="stat wide"><div class="k">Crispness</div><div class="v">' + fx1(25.4 / P) + ' per inch' + (!mu && A ? ' · ' + Math.round(A.width) + '° clean' : '') + '</div><div class="s">' + cr + '</div></div>';
     // will it print
     var C = buildChecks(), worst = C.some(function (c) { return c[2] === 'no'; }) ? 'no' : C.some(function (c) { return c[2] === 'tight'; }) ? 'tight' : 'ok', first = C.filter(function (c) { return c[2] === worst; })[0];
-    h += '<div class="stat wide"><div class="k">Will it print</div><div class="v ' + worst + '">' + (worst === 'no' ? 'Unlikely as set' : worst === 'tight' ? 'Tight' : 'Inside the rules of thumb') + (worst !== 'ok' ? ': ' + esc(first[0].toLowerCase()) : '') + '</div><div class="checks">' +
+    h += '<div class="stat wide"><div class="k">Will it print</div><div class="v ' + worst + '">' + (worst === 'no' ? 'Unlikely as set' : worst === 'tight' ? 'Tight' : S.push ? 'Inside the pushed limits' : 'Inside the rules of thumb') + (worst !== 'ok' ? ': ' + esc(first[0].toLowerCase()) : '') + '</div><div class="checks">' +
       C.map(function (c) { return '<div class="chk ' + c[2] + '"><span class="tag">' + (c[2] === 'ok' ? 'OK' : c[2] === 'tight' ? 'Tight' : c[2] === 'info' ? 'Note' : 'No') + '</span><span><b>' + esc(c[0]) + '</b> ' + esc(c[1]) + '</span></div>'; }).join('') +
-      '</div><div class="s">Rules of thumb for capillary-film HD and a flat screen on fabric, not tested on your press.</div></div>';
+      '</div><div class="seg pushseg" role="group" aria-label="How hard to push the process">' + PUSH.map(function (q, qi) { return '<button type="button" data-push="' + qi + '" aria-pressed="' + (qi === S.push) + '">' + q.name + '</button>'; }).join('') + '</div><div class="s">' + (S.push ? 'Judged past the rules of thumb: lines down to ' + Math.round(pushK().line * 100) + '% of what the stencil is said to hold, stencils to ' + pushK().film + ' µm, colour stripes to ' + pushK().stripe.toFixed(2) + ' mm, ' + pushK().passes + ' passes. These are estimates of what a careful shop can hold, not published limits: prove them with a test strip.' : 'Rules of thumb for capillary-film HD and a flat screen on fabric, not tested on your press.') + '</div></div>';
     el.innerHTML = h + '</div>';
   }
 
@@ -2128,7 +2184,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     ['pitch', 'ridge', 'height', 'split', 'guard', 'reg', 'cap', 'lensAngle', 'curve', 'printIn', 'padX', 'padY', 'angle', 'loupeSpan'].forEach(function (k) { $(k).value = S[k]; });
     ['meshH', 'meshC', 'meshW', 'lpi', 'coat22', 'coatAdd'].forEach(function (k) { $(k).value = S[k]; });
     $('zoom').value = Math.log(Math.max(1, +S.zoom || 1)) / Math.LN2; $('zoomOut').textContent = zoomText(Math.max(1, +S.zoom || 1)); stageHint();
-    $('hd2').checked = !!S.hd2; $('ridge2').value = S.ridge2; $('height2').value = S.height2; $('ink2').value = /^#[0-9a-f]{6}$/i.test(S.ink2 || '') ? S.ink2 : '#0b0b0c';
+    $('hd2').checked = !!S.hd2; $('ridge2').value = S.ridge2; $('height2').value = S.height2; $('round2').value = S.round2 || 0; $('grow2').value = S.grow2 || 0; $('aim').value = S.aim || 0; $('ink2').value = /^#[0-9a-f]{6}$/i.test(S.ink2 || '') ? S.ink2 : '#0b0b0c';
     $('proc').value = S.proc; $('spot').checked = S.spot; $('spotA').value = S.spotA; $('spotB').value = S.spotB;
     $('swap').checked = S.swap; $('snap').checked = S.snap; $('lock').checked = S.lock; $('passes' + S.passes).checked = true; $('views' + S.views).checked = true;
     $('zone' + (S.zone === 'diff' ? 'Diff' : S.zone === 'box' ? 'Box' : 'All')).checked = true;
@@ -2149,12 +2205,13 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     $('pitchOut').textContent = P.toFixed(2) + ' mm · ' + fx1(25.4 / P) + ' LPI';
     $('pitchSub').textContent = S.proc === 'lens' ? 'One lenticule per pair of stripes' : 'Gap ' + g.toFixed(2) + ' mm' + (S.proc === 'barrier' ? ' · ' + fx1(P * k) + ' px in the artwork' : '');
     $('ridgeOut').textContent = w.toFixed(2) + ' mm · ' + thou(w) + ' thou';
-    $('ridgeSub').textContent = 'A ' + Math.round(per * 1000) + ' µm stencil holds ≥ ' + (per + hdT()).toFixed(2) + ' mm';
+    $('ridgeSub').textContent = 'A ' + Math.round(per * 1000) + ' µm stencil holds ≥ ' + ((per + hdT()) * pushK().line).toFixed(2) + ' mm' + (S.push ? ' (' + pushK().name.toLowerCase() + ')' : '');
     $('heightOut').textContent = S.height.toFixed(2) + ' mm';
     $('heightSub').textContent = '≈ ' + S.passes + ' × ' + nearestFilm(per * 1000) + ' µm capillary film';
     var T2 = top2(), w2 = Math.max(0.05, Math.min(w, S.ridge2)); $('hd2Box').hidden = !S.hd2;
-    $('ridge2Out').textContent = w2.toFixed(2) + ' mm · ' + thou(w2) + ' thou'; $('ridge2Sub').textContent = w - w2 >= 0.01 ? ((w - w2) / 2).toFixed(2) + ' mm of the first layer shows each side of it' : 'As wide as the ridge under it';
-    $('height2Out').textContent = S.height2.toFixed(2) + ' mm'; $('height2Sub').textContent = 'Ridge ' + (S.height + S.height2).toFixed(2) + ' mm in all · one pass through a ' + Math.round(S.height2 / CURE * 1000) + ' µm stencil';
+    w2 = T2 ? T2.w : Math.max(0.05, Math.min(P - 0.04, S.ridge2)); $('ridge2Out').textContent = w2.toFixed(2) + ' mm · ' + thou(w2) + ' thou'; $('ridge2Sub').textContent = w - w2 >= 0.01 ? ((w - w2) / 2).toFixed(2) + ' mm of the first layer shows each side of it' : w2 - w >= 0.01 ? 'Hangs over the ridge by ' + ((w2 - w) / 2).toFixed(2) + ' mm a side · ' + (P - w2).toFixed(2) + ' mm open between them' : 'As wide as the ridge under it';
+    $('round2Out').textContent = (S.round2 || 0) + '%'; $('grow2Out').textContent = (S.grow2 || 0).toFixed(2) + ' mm a side'; $('grow2Sub').textContent = S.grow2 > 0 ? 'The line on the film is ' + film2().toFixed(2) + ' mm; it finishes ' + w2.toFixed(2) + ' mm' : 'The film line is the finished width'; $('aimOut').textContent = S.aim > 0 ? 'for a ' + Math.round(2500 / S.aim) + ' cm chest' : 'not aimed';
+    $('height2Out').textContent = S.height2.toFixed(2) + ' mm'; $('height2Sub').textContent = 'Ridge ' + (S.height + S.height2).toFixed(2) + ' mm in all · ' + (S.round2 > 0 || S.grow2 > 0 ? 'as it stands after the dryer' : 'one pass through a ' + Math.round(S.height2 / CURE * 1000) + ' µm stencil');
     $('splitOut').textContent = S.split + ' / ' + (100 - S.split);
     $('guardOut').textContent = S.guard.toFixed(2) + ' mm';
     $('regOut').textContent = (S.reg > 0 ? '+' : '') + S.reg.toFixed(2) + ' mm'; $('capOut').textContent = S.cap.toFixed(2) + ' mm';
@@ -2169,7 +2226,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     $('loupeSpanOut').textContent = S.loupeSpan + ' mm';
   }
   var raf = 0, dirtyGeom = false, dirtyArt = false, hooks = []; // hooks: called after every redraw (the Films panel listens)
-  function geometryChanged() { dirtyGeom = true; gcache.clear(); inkCols(); if (!lockBusy) lockNote(); schedule(); } // anything else that changes the ridges sets new proportions to hold
+  function geometryChanged() { dirtyGeom = true; clearGeom(); inkCols(); if (!lockBusy) lockNote(); schedule(); } // anything else that changes the ridges sets new proportions to hold
   function schedule() { if (!raf) raf = requestAnimationFrame(frame); }
   function frame() {
     raf = 0; if (!ART) return;
@@ -2181,7 +2238,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     for (var hk = 0; hk < hooks.length; hk++) { try { hooks[hk](); } catch (e) { if (window.console) console.error(e); } }
     drawSection();
     $('hudAngle').textContent = angleText(S.angle);
-    var zin = MVIEW.z > 1, gc = geom(localAngle(zin ? S.lu || 0 : 0)), st = classify(gc); // zoomed in, the line under the angle is about the spot being looked at, not the middle of the shirt
+    var zin = MVIEW.z > 1, gc = geom(localAngle(zin ? S.lu || 0 : 0), aimAt(zin ? S.lu || 0 : 0)), st = classify(gc); // zoomed in, the line under the angle is about the spot being looked at, not the middle of the shirt
     var what = names()[st]; if (gc.v && st !== 'd') { var seen = []; gc.v.forEach(function (x, i) { if (x > 0.004) seen.push(i + 1); }); what = seen.length > 1 ? 'views ' + seen[0] + '–' + seen[seen.length - 1] : 'view ' + seen[0] + ' alone'; }
     $('hudState').textContent = (zin ? 'Crosshair: ' : 'Centre: ') + what + ' · ' + Math.round((gc.a + gc.b) * 100) + '% print';
   }
@@ -2199,7 +2256,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
   function lockMove(key, v) { // `key` was dragged to v: the pitch that goes with it, held inside every slider's range so the proportions survive
     var P = v / lockR[key]; ['pitch', 'ridge', 'height'].forEach(function (k) { P = Math.max(LOCKLIM[k][0] / lockR[k], Math.min(LOCKLIM[k][1] / lockR[k], P)); });
     P = snapPitch(P); S.pitch = P; S.ridge = P * lockR.ridge; S.height = P * lockR.height; S.guard = Math.min(0.6, P * lockR.guard); S.cap = Math.min(0.4, P * lockR.cap);
-    if (S.hd2 && lockR.ridge2) { S.ridge2 = Math.max(0.1, Math.min(1.5, P * lockR.ridge2)); S.height2 = Math.max(0.05, Math.min(0.8, P * lockR.height2)); } // the second layer keeps its share of the ridge too
+    if (S.hd2 && lockR.ridge2) { S.ridge2 = Math.max(0.1, Math.min(2.5, P * lockR.ridge2)); S.height2 = Math.max(0.05, Math.min(1.2, P * lockR.height2)); } // the second layer keeps its share of the ridge too
     ['pitch', 'ridge', 'height', 'guard', 'cap', 'ridge2', 'height2'].forEach(function (k) { $(k).value = S[k]; });
   }
   function bindRidge(key) { $(key).addEventListener('input', function (e) { var v = parseFloat(e.target.value);
@@ -2210,13 +2267,13 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     if (key === 'pitch') { S.pitch = snapPitch(S.pitch); if (S.proc !== 'lens' && S.ridge > S.pitch - 0.1) { S.ridge = Math.max(0.15, S.pitch - 0.1); $('ridge').value = S.ridge; } }
     if (key === 'ridge' && S.ridge > S.pitch - 0.1) { S.pitch = snapPitch(S.ridge + 0.1); $('pitch').value = S.pitch; }
     if (key === 'snap') { S.pitch = snapPitch(S.pitch); $('pitch').value = S.pitch; }
-    if (key === 'ridge2' && S.ridge2 > S.ridge) { S.ridge2 = S.ridge; $('ridge2').value = S.ridge2; } // no wider than the ridge it stands on
+    if (key === 'ridge2' && S.ridge2 > S.pitch - 0.04) { S.ridge2 = Math.round((S.pitch - 0.04) * 100) / 100; $('ridge2').value = S.ridge2; } // the second layers must not meet
     if (key === 'printIn') { S.pitch = snapPitch(S.pitch); buildZone(); if (multi()) dirtyArt = true; }
     if (key === 'zone' || key === 'padX' || key === 'padY') buildZone();
     if (key === 'zone' || key === 'padX' || key === 'padY' || key === 'printIn' || key === 'spotA' || key === 'spotB' || key === 'spot') buildSpot();
     var gmax = Math.max(0, S.pitch - S.ridge - 0.05); if (S.guard > gmax) { S.guard = Math.round(gmax * 100) / 100; $('guard').value = S.guard; }
   }
-  bindRidge('pitch'); bindRidge('ridge'); bindRidge('height'); bind('split', 'split'); bind('guard', 'guard'); bind('reg', 'reg'); bind('cap', 'cap'); bind('lensAngle', 'lensAngle'); bind('curve', 'curve'); bind('printIn', 'printIn'); bind('padX', 'padX'); bind('padY', 'padY'); bind('ridge2', 'ridge2'); bind('height2', 'height2');
+  bindRidge('pitch'); bindRidge('ridge'); bindRidge('height'); bind('split', 'split'); bind('guard', 'guard'); bind('reg', 'reg'); bind('cap', 'cap'); bind('lensAngle', 'lensAngle'); bind('curve', 'curve'); bind('printIn', 'printIn'); bind('padX', 'padX'); bind('padY', 'padY'); bind('ridge2', 'ridge2'); bind('height2', 'height2'); bind('round2', 'round2'); bind('grow2', 'grow2'); bind('aim', 'aim');
   bind('hd2', 'hd2', function (t) { return t.checked; }); bind('ink2', 'ink2', function (t) { return t.value; });
   $('proc').addEventListener('change', function (e) { // each process keeps its own slider settings
     var old = S.proc, np = e.target.value; if (!PROC[np]) return;
@@ -2227,7 +2284,8 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
   bind('swap', 'swap', function (t) { return t.checked; }); bind('snap', 'snap', function (t) { return t.checked; }); bind('lock', 'lock', function (t) { return t.checked; }); bind('spot', 'spot', function (t) { return t.checked; });
   bind('spotA', 'spotA', function (t) { return t.value; }); bind('spotB', 'spotB', function (t) { return t.value; });
   bind('angle', 'angle', null, false); bind('loupeSpan', 'loupeSpan', null, false);
-  ['passes1', 'passes2', 'passes3'].forEach(function (id) { bind(id, 'passes', function (t) { return parseInt(t.value, 10); }); });
+  $('balance').addEventListener('click', function (e) { var b = e.target.closest ? e.target.closest('[data-push]') : null; if (!b) return; S.push = parseInt(b.dataset.push, 10) || 0; geometryChanged(); labels(); persist(); }); // how hard to push: By the book, Pushed, At the edge
+  ['passes1', 'passes2', 'passes3', 'passes4', 'passes5', 'passes6'].forEach(function (id) { bind(id, 'passes', function (t) { return parseInt(t.value, 10); }); });
   ['views2', 'views3', 'views4', 'views5'].forEach(function (id) { bind(id, 'views', function (t) { return parseInt(t.value, 10); }); });
   ['zoneDiff', 'zoneBox', 'zoneAll'].forEach(function (id) { bind(id, 'zone', function (t) { return t.value; }); });
   ['meshH', 'meshC', 'meshW'].forEach(function (id) { var hd = id === 'meshH'; $(id).innerHTML = Object.keys(MESHES).filter(function (k) { return hd ? MESHES[k][0] <= 137 : MESHES[k][0] >= 110; }).map(function (k) { return '<option value="' + k + '">' + MESHES[k][0] + ' mesh, ' + MESHES[k][1] + ' µm thread</option>'; }).join('');
@@ -2749,7 +2807,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     } finally { bt.disabled = false; }
   });
 
-  window.__lent = { S: S, top2: top2, reach: reach, profile: profile, solveProfile: solveProfile, known: function (name) { return KNOWN[name] || null; }, buildSegs: geom, geom: geom, classify: classify, ranges: ranges, loadFiles: loadFiles, startWatch: startWatch, sizes: SZ, applySizes: applySizes, layout: function () { return LAY; }, layMove: layMove, sweeping: function () { return !!sweep; }, setZoom: setZoom, view: function () { return MVIEW; }, fetchRemote: fetchRemote, keep: KEEP, ov: OV, brush: BRUSH, sitePublish: SITE ? sitePublish : null, gitSha: gitSha, keepNow: keepNow, sharedSave: sharedSave, multi: multi, d3Of: d3Of, psdNodes: psdNodes, keyOf: keyOf, hooks: hooks, art: function () { return ART; } };
+  window.__lent = { S: S, top2: top2, film2: film2, reach: reach, aimAt: aimAt, capPts: capPts, PUSH: PUSH, profile: profile, solveProfile: solveProfile, known: function (name) { return KNOWN[name] || null; }, buildSegs: geom, geom: geom, classify: classify, ranges: ranges, loadFiles: loadFiles, startWatch: startWatch, sizes: SZ, applySizes: applySizes, layout: function () { return LAY; }, layMove: layMove, sweeping: function () { return !!sweep; }, setZoom: setZoom, view: function () { return MVIEW; }, fetchRemote: fetchRemote, keep: KEEP, ov: OV, brush: BRUSH, sitePublish: SITE ? sitePublish : null, gitSha: gitSha, keepNow: keepNow, sharedSave: sharedSave, multi: multi, d3Of: d3Of, psdNodes: psdNodes, keyOf: keyOf, hooks: hooks, art: function () { return ART; } };
 
   startArt().catch(function (e) { if (window.console) console.error(e); if (!ART) $('psdWarns').innerHTML = '<div class="warn"><b>Built-in artwork failed to load.</b> Drop your PSD below to continue.</div>'; });
 })();
@@ -2942,7 +3000,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     var sel = new Uint8Array(P), selDead = new Uint8Array(P), rid = new Uint8Array(P), ph, k, edges = [];
     if (mu) { for (k = 0; k <= N; k++) edges.push(k === 0 ? 0 : k === N ? P : wr + Math.round(k * g / N)); for (ph = 0; ph < P; ph++) { k = 0; while (ph >= edges[k + 1]) k++; sel[ph] = selDead[ph] = S.swap ? N - 1 - k : k; } }
     else { var a = Math.round(g * S.split / 100), c = Math.min(Math.max(0, Math.round(S.guard * ppmm)), g), d0 = Math.max(wr, Math.min(P - wl - c, wr + a - (c >> 1))), d1 = d0 + c, first = S.swap ? 1 : 0;
-      for (ph = 0; ph < P; ph++) { sel[ph] = ph < d0 ? first : ph < d1 ? 255 : 1 - first; selDead[ph] = ph < wr + a ? first : 1 - first; } edges = [0, d0, d1, P]; }
+      for (ph = 0; ph < P; ph++) { sel[ph] = ph < d0 ? first : ph < d1 ? 255 : 1 - first; selDead[ph] = ph < wr + a ? first : 1 - first; } edges = [0, d0, d1, P]; var aD0 = d0, aD1 = d1, aDm = wr + a, aFirst = first; }
     for (ph = 0; ph < P; ph++) rid[ph] = (ph < wr || ph >= P - wl) ? 1 : 0;
     var views = [], used = [], bx0 = Wf, bx1 = -1, by0 = Hf, by1 = -1;
     for (k = 0; k < N; k++) views.push([]);
@@ -2958,19 +3016,23 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     var hd2 = [], hd2Used = []; // layers set to HD2: the same, on the second HD film
     ART.nodes.forEach(function (n) { if (!isH2(n)) return; var pl = planeFor(n); if (!pl) return; hd2.push({ pl: pl, dx: 0, raise: false }); grow(pl, 0); hd2Used.push({ n: n, pl: pl, full: isFull(n) }); });
     // the second layer of the ridges: a narrower line down the centre of each one
-    var T2 = L.top2 ? L.top2() : null, w2 = T2 ? Math.max(2, Math.min(w, Math.round(T2.w * ppmm))) : 0, wl2 = w2 >> 1, wr2 = w2 - wl2, rid2 = new Uint8Array(P); if (w2) for (ph = 0; ph < P; ph++) rid2[ph] = (ph < wr2 || ph >= P - wl2) ? 1 : 0;
+    var T2 = L.top2 ? L.top2() : null, w2 = T2 ? Math.max(2, Math.min(P - 2, Math.round((L.film2 ? L.film2() : T2.w) * ppmm))) : 0, /* it may be wider than the ridge under it: a puff that hangs over */ wl2 = w2 >> 1, wr2 = w2 - wl2, rid2 = new Uint8Array(P); if (w2) for (ph = 0; ph < P; ph++) rid2[ph] = (ph < wr2 || ph >= P - wl2) ? 1 : 0;
     var wAdd = [], wUsed = []; // layers set to W: wherever they have anything at all, white is added to the white film
     ART.nodes.forEach(function (n) { if (!isWL(n)) return; var pl = planeFor(n); if (!pl) return; wAdd.push({ pl: pl, dx: 0, raise: false }); grow(pl, 0); wUsed.push({ n: n, pl: pl, full: isFull(n) }); });
     // ridges: the page's zone, sampled down each ridge's centre line, with short breaks bridged and short pieces dropped
     var Z = ART.Z, ZW = ART.W, ZH = ART.H, zx = new Int32Array(Wf), zy = new Int32Array(Hf), x, y;
     for (x = 0; x < Wf; x++) zx[x] = Math.min(ZW - 1, Math.floor(x * ZW / Wf)); for (y = 0; y < Hf; y++) zy[y] = Math.min(ZH - 1, Math.floor(y * ZH / Hf));
     var nLo = Math.floor((-xc - wr) / P), nHi = Math.ceil((Wf - xc + wl) / P), nR = nHi - nLo + 1, RUN = new Uint8Array(nR * Hf), minLen = Math.round(MINRUN * ppmm), minGap = Math.round(FILLGAP * ppmm), ridges = 0, ridgeLen = 0;
+    var aim = null, aimMax = 0; // stripes aimed for a chest: how many px the boundary between the two stripes is moved in the gap to the right of each ridge
+    if (!mu && L.aimAt && S.aim > 0) { aim = new Int16Array(nR); var loE = Math.min(0, wr + 1 - aD0), hiE = Math.max(0, P - wl - 1 - aD1);
+      for (var na = nLo; na <= nHi; na++) { var ea = Math.max(loE, Math.min(hiE, Math.round(L.aimAt((na * P + (wr + P - wl) / 2) / ppmm) * ppmm))); aim[na - nLo] = ea; if (Math.abs(ea) > aimMax) aimMax = Math.abs(ea); }
+      if (!aimMax) aim = null; }
     for (var n = nLo; n <= nHi; n++) { x = xc + n * P; if (x < 0 || x >= Wf) continue; var o = (n - nLo) * Hf, zc = zx[x], y0, on = false;
       for (y = 0; y < Hf; y++) RUN[o + y] = Z[zy[y] * ZW + zc] >= 128 ? 1 : 0;
       for (y = 0, y0 = -1; y <= Hf; y++) { var v = y < Hf && RUN[o + y]; if (!v && y0 < 0) y0 = y; if (v && y0 >= 0) { if (y0 > 0 && y - y0 < minGap) RUN.fill(1, o + y0, o + y); y0 = -1; } }
       for (y = 0, y0 = -1; y <= Hf; y++) { v = y < Hf && RUN[o + y]; if (v && y0 < 0) y0 = y; if (!v && y0 >= 0) { if (y - y0 < minLen) RUN.fill(0, o + y0, o + y); else { on = true; ridgeLen += y - y0; bx0 = Math.min(bx0, x - wl); bx1 = Math.max(bx1, x + wr); by0 = Math.min(by0, y0); by1 = Math.max(by1, y); } y0 = -1; } }
       if (on) ridges++; }
-    return { ART: ART, dpi: dpi, ppmm: ppmm, Wf: Wf, Hf: Hf, xc: xc, P: P, w: w, g: g, wl: wl, wr: wr, N: N, mu: mu, sel: sel, selDead: selDead, rid: rid, edges: edges, wAdd: wAdd, wUsed: wUsed, wlChoke: F.wlChoke, views: views, used: used, hd: hd, hdUsed: hdUsed, hdClip: F.hdClip, hd2: hd2, hd2Used: hd2Used, w2: w2, rid2: rid2, h2on: !!(w2 || hd2.length), noK: F.noK,
+    return { ART: ART, dpi: dpi, ppmm: ppmm, Wf: Wf, Hf: Hf, xc: xc, P: P, w: w, g: g, wl: wl, wr: wr, N: N, mu: mu, sel: sel, selDead: selDead, rid: rid, edges: edges, wAdd: wAdd, wUsed: wUsed, wlChoke: F.wlChoke, views: views, used: used, aim: aim, aimMax: aimMax, d0: aD0, d1: aD1, dm: aDm, first: aFirst, nR: nR, hd: hd, hdUsed: hdUsed, hdClip: F.hdClip, hd2: hd2, hd2Used: hd2Used, w2: w2, rid2: rid2, h2on: !!(w2 || hd2.length), noK: F.noK,
       Z: Z, ZW: ZW, zx: zx, zy: zy, nLo: nLo, RUN: RUN, ridges: ridges, ridgeLen: ridgeLen, choke: Math.max(0, Math.round(F.choke * ppmm)), rr: Math.max(0, Math.floor(Math.round(F.minRaise * ppmm) / 2)), cmyK: F.cmyK || F.noK, // with no K screen every black is one black, the three-colour kind included
       bb: bx1 < 0 ? null : [Math.max(0, bx0), Math.min(Wf, bx1), Math.max(0, by0), Math.min(Hf, by1)] };
   }
@@ -2997,8 +3059,10 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     var halo = Math.max(G.choke, 2 * G.rr) + 1, X0 = x0 - halo, Y0 = y0 - halo, Wd = w + 2 * halo, Hd = h + 2 * halo, n = Wd * Hd, nv = G.views.length,
       cls = new Uint8Array(n), mU = new Uint8Array(n), vr = [], v, i, j, x, y, o, c, k, P = G.P; // mU: the print, any view's art
     for (v = 0; v < nv; v++) vr.push(new Uint8Array(Wd));
-    var colSel = new Uint8Array(Wd), colDead = new Uint8Array(Wd), colRid = new Int32Array(Wd), colIn = new Uint8Array(Wd), mA = G.wAdd.length ? new Uint8Array(n) : null, mD = G.hd.length ? new Uint8Array(n) : null, mD2 = G.hd2.length ? new Uint8Array(n) : null, colR2 = new Uint8Array(Wd), hr = mD || mA || mD2 ? new Uint8Array(Wd) : null;
-    for (i = 0; i < Wd; i++) { x = X0 + i; colRid[i] = -1; if (x < 0 || x >= G.Wf) continue; colIn[i] = 1; var q = x - G.xc, ph = ((q % P) + P) % P; colSel[i] = G.sel[ph]; colDead[i] = G.selDead[ph]; colR2[i] = G.rid2[ph]; if (G.rid[ph]) colRid[i] = Math.floor((q + G.wl) / P) - G.nLo; }
+    var colSel = new Uint8Array(Wd), colDead = new Uint8Array(Wd), colRid = new Int32Array(Wd), colIn = new Uint8Array(Wd), mA = G.wAdd.length ? new Uint8Array(n) : null, mD = G.hd.length ? new Uint8Array(n) : null, mD2 = G.hd2.length ? new Uint8Array(n) : null, colR2 = new Int32Array(Wd), wl2 = G.w2 >> 1, aimN = G.aim, hr = mD || mA || mD2 ? new Uint8Array(Wd) : null;
+    for (i = 0; i < Wd; i++) { x = X0 + i; colRid[i] = -1; if (x < 0 || x >= G.Wf) continue; colIn[i] = 1; var q = x - G.xc, ph = ((q % P) + P) % P; colSel[i] = G.sel[ph]; colDead[i] = G.selDead[ph]; colR2[i] = G.rid2[ph] ? Math.floor((q + wl2) / P) - G.nLo : -1;
+      if (aimN) { var ex = aimN[Math.floor(q / P) - G.nLo] || 0; if (ex) { colSel[i] = ph < G.d0 + ex ? G.first : ph < G.d1 + ex ? 255 : 1 - G.first; colDead[i] = ph < G.dm + ex ? G.first : 1 - G.first; } } // stripes aimed: this gap's boundary is moved
+      if (G.rid[ph]) colRid[i] = Math.floor((q + G.wl) / P) - G.nLo; }
     for (j = 0; j < Hd; j++) { y = Y0 + j; if (y < 0 || y >= G.Hf) continue;
       for (v = 0; v < nv; v++) { vr[v].fill(0); var es = G.views[v]; for (var e = 0; e < es.length; e++) paintRow(vr[v], X0, Wd, es[e], y, G); }
       o = j * Wd; var zr = G.zy[y] * G.ZW;
@@ -3022,7 +3086,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     for (j = 0; j < Hd; j++) { y = Y0 + j; if (y < 0 || y >= G.Hf) continue; o = j * Wd; zr = G.zy[y] * G.ZW;
       for (i = 0; i < Wd; i++) { var ri = colRid[i]; if (ri >= 0 && G.RUN[ri * G.Hf + y]) mH[o + i] = 1; else if (anyR && mR[o + i] && G.Z[zr + G.zx[X0 + i]] < 128) mH[o + i] = 1;
         else if (mD && mD[o + i] && (!G.hdClip || G.Z[zr + G.zx[X0 + i]] < 128)) mH[o + i] = 1;
-        if (m2) { if (ri >= 0 && colR2[i] && G.RUN[ri * G.Hf + y]) m2[o + i] = 1; else if (mD2 && mD2[o + i] && (!G.hdClip || G.Z[zr + G.zx[X0 + i]] < 128)) m2[o + i] = 1; } } } // the second HD film: the ridges' second layer, and layers set to HD2 under the same rule // the HD layer is added as drawn; kept off the ridged area unless told otherwise, or it would fill in between the ridges
+        if (m2) { var r2 = colR2[i]; if (r2 >= 0 && r2 < G.nR && G.RUN[r2 * G.Hf + y]) m2[o + i] = 1; else if (mD2 && mD2[o + i] && (!G.hdClip || G.Z[zr + G.zx[X0 + i]] < 128)) m2[o + i] = 1; } } } // the second HD film: the ridges' second layer, and layers set to HD2 under the same rule // the HD layer is added as drawn; kept off the ridged area unless told otherwise, or it would fill in between the ridges
     function crop(m) { var out = new Uint8Array(w * h); for (var jj = 0; jj < h; jj++) out.set(m.subarray((jj + halo) * Wd + halo, (jj + halo) * Wd + halo + w), jj * w); return out; }
     return { W: crop(mW), C: crop(mC), M: crop(mM), Y: crop(mY), K: crop(mK), H: crop(mH), H2: m2 ? crop(m2) : new Uint8Array(w * h) };
   }
@@ -3133,7 +3197,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
   function sheetLen(PG, dpi) { var m = 0; filmsOn().forEach(function (f) { if (F.pos[f]) m = Math.max(m, Math.round(F.pos[f][1] * dpi) + PG.H); }); return m; } // film pixels
   var thumbs = null, madeSig = null, thumbTimer = 0, zCount = 0, cur = null, sel = null, drag = null;
   function thumbKey() { var ART = L.art(); // everything the small films are made from
-    return [S.views, S.pitch, S.ridge, S.split, S.guard, S.swap, S.printIn, S.zone, S.hd2, S.ridge2, F.noK, F.filmW, F.choke, F.minRaise, F.cmyK, F.mirror, F.hdClip, JSON.stringify(F.on), JSON.stringify(F.raise), zCount].join('|') + ART.nodes.map(function (n) { var d = L.d3Of(n); return L.keyOf(n) + n.assign + d.on + d.mm + isFull(n); }).join('|'); }
+    return [S.views, S.pitch, S.ridge, S.split, S.guard, S.swap, S.printIn, S.zone, S.hd2, S.ridge2, S.grow2, S.aim, S.aim > 0 ? [S.height, S.height2, S.round2].join('/') : '', F.noK, F.filmW, F.choke, F.minRaise, F.cmyK, F.mirror, F.hdClip, JSON.stringify(F.on), JSON.stringify(F.raise), zCount].join('|') + ART.nodes.map(function (n) { var d = L.d3Of(n); return L.keyOf(n) + n.assign + d.on + d.mm + isFull(n); }).join('|'); }
   function ensureThumbs() { // draw the small films if anything they are made from has changed, and pack them again unless they were placed by hand
     var k = thumbKey(); if (k === madeSig) return false; try { makeThumbs(); } catch (e) { thumbs = null; } madeSig = k;
     if (F.auto && cur && cur.PG && pack(cur.PG, cur.G.dpi)) save(); return true; }
@@ -3473,7 +3537,8 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     h += row(G.mu ? G.N + ' views' : 'Stripes', stripes + '<br><span class="muted">' + show + '</span>');
     h += row('Ridges', G.ridges + ', ' + (G.ridgeLen / G.dpi * 25.4 / 1000).toFixed(1) + ' m of line');
     if (G.hdUsed.length) h += row('HD layer', G.hdUsed.map(function (u) { return esc(u.n.name); }).join(', '));
-    if (G.w2) h += row('Second layer', G.w2 + ' px = ' + mm(G.w2) + ' mm lines down the ridges, on film H2');
+    if (G.w2) h += row('Second layer', G.w2 + ' px = ' + mm(G.w2) + ' mm lines down the ridges, on film H2' + (G.w2 > G.w ? ', ' + mm((G.w2 - G.w) / 2) + ' mm wider than the ridge each side' : ''));
+    if (G.aim) h += row('Stripes aimed', 'for a ' + Math.round(2500 / S.aim) + ' cm chest: the boundary between the stripes moves by up to ' + G.aimMax + ' px (' + mm(G.aimMax) + ' mm) toward the edges of the print');
     if (G.hd2Used.length) h += row('HD2 layer', G.hd2Used.map(function (u) { return esc(u.n.name); }).join(', '));
     if (G.h2on || F.noK) { var scr = filmsOn(); h += row('Screens', scr.length + ': ' + scr.join(' ')); }
     if (G.wUsed.length) h += row('White layer', G.wUsed.map(function (u) { return esc(u.n.name); }).join(', '));
@@ -3522,7 +3587,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     var ART = L.art(), card = $('filmCard'); if (!ART) return;
     var ok = S.proc === 'barrier'; $('filmBody').hidden = !ok; $('filmOff').hidden = ok; if (!ok) return;
     var r = card.getBoundingClientRect(), wide = Math.round(r.width);
-    var sig = [S.proc, S.views, S.pitch, S.ridge, S.split, S.guard, S.swap, S.printIn, S.zone, S.lu, S.lv, S.reg, S.hd2, S.ridge2, S.height2, wide, JSON.stringify(Object.assign({}, F, { pos: 0 }))].join('|') + ART.nodes.map(function (n) { var d = L.d3Of(n); return L.keyOf(n) + n.assign + d.on + d.mm + (n.file ? fileId(n.file) : '') + isFull(n); }).join('|');
+    var sig = [S.proc, S.views, S.pitch, S.ridge, S.split, S.guard, S.swap, S.printIn, S.zone, S.lu, S.lv, S.reg, S.hd2, S.ridge2, S.height2, S.round2, S.grow2, S.aim, S.height, wide, JSON.stringify(Object.assign({}, F, { pos: 0 }))].join('|') + ART.nodes.map(function (n) { var d = L.d3Of(n); return L.keyOf(n) + n.assign + d.on + d.mm + (n.file ? fileId(n.file) : '') + isFull(n); }).join('|');
     var same = !force && sig === lastSig && ART.Z === lastZ && ART.nodes.every(function (n) { var c = cache.get(L.keyOf(n)); return !n.rgba || !inScene(n) || (c && (c.full ? isFull(n) : c.id === n.rgba)); });
     if (same) return; lastSig = sig; if (ART.Z !== lastZ) { lastZ = ART.Z; zCount++; }
     var G = scene(); if (!G) return; var sheet = F.layout === 'sheet', PG = pageOf(G, sheet); cur = { G: G, PG: PG, over: [] };
