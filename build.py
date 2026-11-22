@@ -13,6 +13,7 @@ import re
 import shutil
 import subprocess
 from pathlib import Path
+from urllib.parse import quote
 
 ROOT = Path(__file__).resolve().parent
 OUT = ROOT / "_site"
@@ -106,16 +107,52 @@ def page(title: str, theme: str, css_prefix: str, body: str) -> str:
     )
 
 
-def listing(folder: Path, href_prefix: str) -> str:
-    items = []
-    for p in sorted(folder.iterdir()):
-        if p.name.startswith(".") or p.name in ("index.html", RECENT) or p.is_dir():
-            continue
-        if p.suffix == ".html":
-            items.append(f'<li><a href="{href_prefix}{p.name}">{html.escape(title_of(p))}</a></li>')
-        else:
-            items.append(f'<li><a href="{href_prefix}{p.name}">{html.escape(p.name)}</a><small>{p.suffix[1:]}</small></li>')
-    return "<ul class=\"docs\">\n" + "\n".join(items) + "\n</ul>" if items else "<p class=\"muted\">Nothing here yet.</p>"
+def size(n: int) -> str:
+    return f"{n / 1e6:.1f} MB" if n >= 1e6 else f"{max(1, round(n / 1e3))} kB"
+
+
+def role(name: str, texts: list) -> str:
+    """How a folder's pages treat one of its files: 'loaded' (a page shows or fetches it),
+    'linked' (a page links to it as a download), or '' (no page mentions it)."""
+    names = [re.escape(n) for n in {name, quote(name)}]
+    if any(re.search(rf"""src=["'](?:\./)?{n}["'?#]""", x) for n in names for x in texts):
+        return "loaded"                     # an image that is also wrapped in a zoom link is still part of the page
+    if any(re.search(rf"""href=["'](?:\./)?{n}["'?#]""", x) for n in names for x in texts):
+        return "linked"
+    return "loaded" if any(re.search(n, x) for n in names for x in texts) else ""
+
+
+def folder_index(d: Path) -> str:
+    """Body of the index build.py writes for a folder that has none: the pages first, as rows; then the files a
+    visitor might want (linked from a page, or mentioned by none); then, folded away, the files pages only load."""
+    esc = html.escape
+    pages = sorted(d.glob("*.html"), key=lambda p: title_of(p).lower())
+    texts = [p.read_text(errors="replace") for p in pages]
+    files = sorted(p for p in d.iterdir() if p.is_file() and p.suffix != ".html" and not p.name.startswith(".") and p.name != RECENT)
+    loaded = [p for p in files if role(p.name, texts) == "loaded"]
+    wanted = [p for p in files if p not in loaded]
+
+    def count(n: int, one: str, many: str) -> str:
+        return f"{n} {one if n == 1 else many}"
+
+    def file_list(group: list) -> str:
+        return '<ul class="ix-files">\n' + "\n".join(
+            f'  <li><a href="{quote(p.name)}">{esc(p.name)}</a><small>{esc(p.suffix[1:].upper() or "FILE")} · {size(p.stat().st_size)}</small></li>'
+            for p in group) + "\n</ul>"
+
+    out = []
+    if pages:
+        rows = "\n".join(
+            f'  <li><h2><a href="{quote(p.name)}">{esc(title_of(p))}</a></h2><small>{day(touched(p))}</small>'
+            + (f'<p>{esc(meta(p, "description"))}</p>' if meta(p, "description") else "") + "</li>" for p in pages)
+        out.append(f'<p class="ix-label">{count(len(pages), "PAGE", "PAGES")}</p>\n<ul class="ix-rows stack cycle">\n{rows}\n</ul>')
+    if wanted:
+        out.append(f'<p class="ix-label">{count(len(wanted), "FILE", "FILES")}</p>\n{file_list(wanted)}')
+    if loaded:
+        where = "THE PAGE" if len(pages) == 1 else "THE PAGES"
+        out.append(f'<details class="ix-more">\n<summary class="ix-label">{count(len(loaded), "MORE FILE", "MORE FILES")} USED INSIDE {where}</summary>\n'
+                   f"{file_list(loaded)}\n</details>")
+    return "\n".join(out) or '<p class="muted">Nothing here yet.</p>'
 
 
 def version() -> str:
@@ -214,7 +251,15 @@ def landing(projects: list) -> str:
     return out
 
 
+def check() -> None:
+    """The one self-check: role() tells a page's own images from the downloads it links and from stray files."""
+    page = ['<a href="plate.jpg"><img src="plate.jpg"></a> <a href="print.pdf">get it</a> <script>fetch("data.json")</script>']
+    got = [role(n, page) for n in ("plate.jpg", "print.pdf", "data.json", "orphan.zip")]
+    assert got == ["loaded", "linked", "loaded", ""], got
+
+
 def main() -> None:
+    check()
     if OUT.exists():
         shutil.rmtree(OUT)
     OUT.mkdir()
@@ -232,7 +277,7 @@ def main() -> None:
         if not (d / "index.html").exists():
             crumb = f'<p class="eyebrow"><a href="../">slopswap</a> / {html.escape(d.name)}</p>'
             (OUT / d.name / "index.html").write_text(
-                page(name, theme_of(d), "../", f"{crumb}\n<h1>{html.escape(name)}</h1>\n{listing(d, '')}"))
+                page(name, theme_of(d), "../", f"{crumb}\n<h1>{html.escape(name)}</h1>\n{folder_index(d)}"))
         if theme_of(d) == DEFAULT_THEME:        # folders with their own branding (Del Mar) keep the site icon off
             add_icons(OUT / d.name, "../")
 

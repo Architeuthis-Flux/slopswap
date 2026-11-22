@@ -69,7 +69,7 @@ python3 build.py && python3 -m http.server -d _site 8000
 
 The hero image is `styles/architeuthis-flux.webp`, the Architeuthis Flux mark; the two icons are the same mark. `styles/favicon.png` and `styles/apple-touch-icon.png` are added to every built page that does not name an icon of its own, except in folders with their own branding (Del Mar).
 
-A folder without its own `index.html` gets a generated one.
+A folder without its own `index.html` gets a generated one in three tiers: its pages as rows (title, the page's `<meta name="description">`, date), then the files a visitor might want (anything a page links to as a download, or that no page mentions), then, folded away, the files the pages only load (their images, data and scripts). The rows, labels and file lists are the theme's `.ix-rows`, `.ix-label` and `.ix-files`, which a hand-written index can use too.
 
 ## Hosting
 
