@@ -164,10 +164,11 @@ def version() -> str:
 
 
 def bust(folder: Path, v: str) -> None:
-    """Append ?v=<commit> to styles/*.css and styles/*.js references in the built HTML (Cloudflare caches them for hours)."""
+    """Append ?v=<commit> to styles/*.css, styles/*.js and same-folder script references in the built HTML (Cloudflare caches them for hours)."""
     for p in folder.rglob("*.html"):
         s = p.read_text(errors="replace")
         s2 = re.sub(r'((?:href|src)="(?:\.\./)*styles/[\w-]+\.(?:css|js))"', rf'\1?v={v}"', s)
+        s2 = re.sub(r'(<script src="[\w.-]+\.js)"', rf'\1?v={v}"', s2)     # a page's own shared script, next to it
         if s2 != s:
             p.write_text(s2)
 

@@ -94,7 +94,7 @@
 <main class="page wide">
 <p class="eyebrow"><a href="../">slopswap</a> / <a href="./">V6</a></p>
 <h1>Edge connector options for V6 modules</h1>
-<p class="lede">Every way found so far to join a Jumperless module to the main board along an edge, with what each costs in board area, height and money: one 70-way connector, or two or three smaller ones so half a breadboard can be swapped for something else. Catalog parts, Chinese and Taiwanese makers that are not (or barely) on LCSC, the custom "kiss slot" coupler, the single-contact SMT plug-and-socket clips, and the shorted-when-empty type. Dimensions are read from the makers' drawings and prices from listings as of 22 Nov 2026; anything marked ≈ is an estimate. Yuan prices are converted at ¥6.7 to the dollar.</p>
+<p class="lede">Every way found so far to join a Jumperless module to the main board along an edge, with what each costs in board area, height and money: one 70-way connector, or two or three smaller ones so half a breadboard can be swapped for something else. Catalog parts, Chinese and Taiwanese makers that are not (or barely) on LCSC, the custom "kiss slot" coupler, SFP-style right-angle sockets, the single-contact SMT plug-and-socket clips, and the shorted-when-empty type. Each coplanar and right-angle part can be seen on a real wig and barnacle in the <a href="edge-connectors-3d.html">3D viewer</a>. Vertical-mount parts are kept in the data but hidden unless the geometry filter asks for them. Dimensions are read from the makers' drawings and prices from listings as of 22 Nov 2026; anything marked ≈ is an estimate. Yuan prices are converted at ¥6.7 to the dollar.</p>
 
 <div class="tool">
 <aside class="side" aria-label="Filters">
@@ -105,13 +105,13 @@
   <label>edge available, mm <input id="edge" type="number" value="51" min="10" max="300" step="1"></label>
   <label class="chk"><input id="fitonly" type="checkbox"> only what fits the edge</label>
   <label>card thickness <select id="thk"><option value="any">any</option><option value="1.6">1.6 mm</option><option value="1.0">1.0 mm</option><option value="0.8">0.8 mm</option></select></label>
-  <label>geometry <select id="orient"><option value="any">any</option><option value="coplanar">coplanar (straddle / coupler)</option><option value="vertical">vertical (card stands up)</option><option value="stacked">parallel, raised (right-angle / M.2)</option></select></label>
+  <label>geometry <select id="orient"><option value="useful">coplanar + right angle</option><option value="coplanar">coplanar (straddle / coupler)</option><option value="stacked">right angle, card parallel (SFP / M.2 style)</option><option value="vertical">vertical (not wanted)</option><option value="any">everything</option></select></label>
   <label>source <select id="fam"><option value="any">any</option><option value="cn">Chinese / Taiwanese makers</option><option value="brand">Samtec</option><option value="custom">custom + today's part</option></select></label>
   <label>sort by <select id="sort"><option value="area">dead area</option><option value="edge">edge length</option><option value="cap">most contacts that fit</option><option value="z">Z height</option><option value="price">price per module</option><option value="pitch">pitch</option></select></label>
 </div>
 <p class="hint" id="hint"></p>
-<p class="legend"><span><i style="background:var(--accent)"></i>custom</span><span><i style="background:var(--accent-2)"></i>coplanar</span><span><i style="background:var(--r5)"></i>vertical</span><span><i style="background:var(--r9)"></i>parallel, raised</span></p>
-<nav class="toc" aria-label="On this page"><a href="#calc">Area calculator</a><a href="#options">Every option</a><a href="#ask">Makers to ask</a><a href="#print">Printed pinout</a><a href="#clips">Single-contact clips</a><a href="#custom">Custom kiss slot</a><a href="#normalling">Shorted when empty</a><a href="#other">Not card edge</a></nav>
+<p class="legend"><span><i style="background:var(--accent)"></i>custom</span><span><i style="background:var(--accent-2)"></i>coplanar</span><span><i style="background:var(--r9)"></i>right angle</span><span><i style="background:var(--r5)"></i>vertical</span></p>
+<nav class="toc" aria-label="On this page"><a href="edge-connectors-3d.html"><b>3D viewer</b></a><a href="#calc">Area calculator</a><a href="#options">Every option</a><a href="#sfp">SFP-style parts</a><a href="#ask">Makers to ask</a><a href="#print">Printed pinout</a><a href="#clips">Single-contact clips</a><a href="#custom">Custom kiss slot</a><a href="#normalling">Shorted when empty</a><a href="#other">Not card edge</a></nav>
 </aside>
 
 <div class="results">
@@ -135,16 +135,17 @@
 <tbody id="rows"></tbody>
 </table>
 </div>
-<p class="muted" style="font-size:.85rem"><b>Dead area</b> is PCB that can hold nothing else. On a coplanar joint it is connector length × the whole strip from the back of the host pads to the tip of the module's tongue (host depth + board gap + tongue). On a vertical or raised joint it is the connector's footprint on the host plus the module's tongue. <b>Host</b> depth is solder legs on a straddle part, body plus about 1.8 mm of SMT leads on a vertical one, and body plus tails on a right-angle one. <b>Gap</b> is the distance from the host's edge to the tip of the card on a coplanar joint; <b>tongue</b> is the depth of the module the connector takes. <b>Z height</b> is how far the part stands off the board: total thickness for a coplanar part. <b>Edge used</b> allows 2 mm between connectors and turns orange when it exceeds the edge available. The signal count is a minimum: a connector with more contacts than asked for is fine and its extras are listed as spare, and <b>edge holds</b> is the most contacts that option could put on the edge with that many connectors. <b>Depth</b> reads host + gap + tongue for a coplanar part and host + tongue otherwise. A fixed-size part (PCIe, M.2) uses as many connectors as the signal count needs. <b>Price</b> is the listed price of the nearest size, scaled by contacts<sup>0.75</sup> to the size used. Hover a row for its notes, hover a picture to enlarge it, and click a name for the maker or distributor page with the datasheet and price (opens in a new tab).</p>
+<p class="muted" style="font-size:.85rem"><b>Dead area</b> is PCB that can hold nothing else. On a coplanar joint it is connector length × the whole strip from the back of the host pads to the tip of the module's tongue (host depth + board gap + tongue). On a vertical or raised joint it is the connector's footprint on the host plus the module's tongue. <b>Host</b> depth is solder legs on a straddle part, body plus about 1.8 mm of SMT leads on a vertical one, and body plus tails on a right-angle one. <b>Gap</b> is the distance from the host's edge to the tip of the card on a coplanar joint; <b>tongue</b> is the depth of the module the connector takes. <b>Z height</b> is how far the part stands off the board: total thickness for a coplanar part. <b>Edge used</b> allows 2 mm between connectors and turns orange when it exceeds the edge available. The signal count is a minimum: a connector with more contacts than asked for is fine and its extras are listed as spare, and <b>edge holds</b> is the most contacts that option could put on the edge with that many connectors. <b>Depth</b> reads host + gap + tongue for a coplanar part and host + tongue otherwise. A fixed-size part (PCIe, M.2) uses as many connectors as the signal count needs. <b>Price</b> is the listed price of the nearest size, scaled by contacts<sup>0.75</sup> to the size used. Hover a row for its notes, hover a picture to enlarge it, click a name for the maker or distributor page with the datasheet and price (opens in a new tab), and click a plan view to open that part in the 3D viewer.</p>
 
 <h3>What the numbers say</h3>
 <ul>
-  <li><b>At 1.27 mm the edge will not split.</b> Two 36-way housings need 59.9 mm and three 24-ways 68 mm, against the 50.5 mm one 70-way uses, because every housing brings its own 7.4 mm of end walls. A custom housing with one divider wall should carry 2 × 34 contacts in the same 50.5 mm (an estimate: 1.2 mm walls, today's 2.3 mm tongue margin).</li>
-  <li><b>Splitting with stock parts means 0.8 mm or finer.</b> Two 40-ways at 0.8 mm take 43–50 mm (Samtec HSEC8-DV, Oupiin 8206-2 and 8208-2, Solepin 61C1 at 2 × 36). Three only fit as HSEC8-DV 3 × 26 (49 mm) or Oupiin's 0.635 mm right-angle part.</li>
-  <li><b>Coplanar from stock means a straddle part</b>: a 12–13.5 mm strip with the boards about 2 mm apart at best, against 18.3 mm and 6.4 mm today. Samtec MEC8-EM is the only one that fits twice on the edge (2 × 40 in 49.6 mm, about $7.80 the pair). The XKB PCIe straddle is $0.57 but its screw ears make it 34.8 mm long.</li>
-  <li><b>The kiss slot is still the only option with the boards touching</b> and a strip under 10 mm, and it is 5 mm thick where the straddle parts are 7–9.</li>
-  <li><b>Right-angle 1.27 mm headers are the cheap coplanar answer if the module may carry a part.</b> A socket on the host and a pin header on the module put 78 contacts on the edge for about $0.50, 3 mm tall on one face, with the boards touching. 2.54 mm fits only 38.</li>
-  <li><b>Cheapest per contact is M.2</b>: 67 contacts for $0.18, if a 0.8 mm card lying parallel to the host at 0.5 A a contact is acceptable.</li>
+  <li><b>At 1.27 mm a card edge will not split.</b> Two 36-way housings need 59.9 mm and three 24-ways 68 mm, against the 50.5 mm one 70-way uses, because every housing brings its own 7.4 mm of end walls. A custom housing with one divider wall should carry 2 × 34 contacts in the same 50.5 mm (an estimate: 1.2 mm walls, today's 2.3 mm tongue margin).</li>
+  <li><b>Two connectors on a 51 mm edge, from stock.</b> Coplanar: Samtec MEC8-EM (2 × 40 in 49.6 mm, about $7.80 the pair) or the 1.27 mm header pair (2 × 36 in 48.5 mm, $0.58). Right angle: Samtec MEC6-RA or MEC8-RA, two TE Sliver 56-ways (46.7 mm), two M.2 sockets, or four SFP sockets. Three only fit as 1.27 mm header pairs (3 × 24 in 50.9 mm), four SFP sockets, or Oupiin's 0.635 mm right-angle part.</li>
+  <li><b>Coplanar from stock means a straddle part</b>: a 12 to 14.5 mm strip with the boards about 2 mm apart at best, against 18.3 mm and 6.4 mm today. The XKB PCIe straddle is $0.57 but its screw ears make it 34.8 mm long.</li>
+  <li><b>The kiss slot is still the only card-edge option with the boards touching</b> and a strip under 10 mm, and it is 5 mm thick where the straddle parts are 7 to 9.</li>
+  <li><b>SFP-style for a 1.6 mm card is the SFF-TA-1002 family</b> (TE Sliver, Amphenol Mini Cool Edge): a right-angle 56-way is 22.3 × 11.1 × 5.35 mm, and there is a straddle version. It costs $4.40 to $5.80 a piece in reel quantities with a 12 to 16 week lead, and puts 0.6 mm fingers on the barnacle. More under <a href="#sfp">SFP-style parts</a>.</li>
+  <li><b>Right-angle 1.27 mm headers are the cheap coplanar answer if the barnacle may carry a part.</b> A socket on the host and a pin header on the module put 78 contacts on the edge for about $0.50, 3 mm tall on one face, with the boards touching. 2.54 mm fits only 38.</li>
+  <li><b>Cheapest per contact is M.2</b>: 67 contacts for $0.18, if a 0.8 mm card raised above the host at 0.5 A a contact is acceptable.</li>
 </ul>
 
 <h2 id="options">The options, one by one</h2>
@@ -153,6 +154,18 @@
 </div><!-- /tool -->
 
 <div class="doc">
+
+<h2 id="sfp">SFP-style sockets and straddle parts for a 1.6 mm card</h2>
+<p>An SFP socket is a small right-angle SMT part that a module card slides into, parallel to the host and a couple of millimetres above it. The real one is 20 contacts at 0.8 mm in 11.0 × 9.4 × 5.2 mm and costs $0.29 (HCTL HC-SFP-20P at LCSC), but its card is 1.0 mm thick. Parts built the same way for a 1.57 to 1.6 mm card:</p>
+<div class="table-wrap"><table class="kv">
+<tr><th>family</th><th>what it is</th><th>size</th><th>price</th></tr>
+<tr><td>SFF-TA-1002: <a href="https://www.te.com/en/product-2327672-1.html">TE Sliver 2.0</a>, <a href="https://www.digikey.co.uk/en/product-highlight/a/amphenol-commercial-products/mini-cool-edge-0-60-mm-connectors">Amphenol Mini Cool Edge</a></td><td>The EDSFF / OCP NIC 3.0 connector. 0.6 mm pitch, 56 / 84 / 140 / 168 contacts, 1.1 A, in vertical, <b>right-angle</b> and <b>straddle</b> versions. 50 to 200 mating cycles by plating.</td><td class="p">right-angle 56-way 22.3 × 11.1 × 5.35 mm, card 3.05 mm above the host (<a href="https://www.farnell.com/cad/2863763.pdf">drawing</a>); straddle 84-way 33.9 mm body, 39.7 with screw ears, 14.55 deep, 8.9 thick (<a href="https://www.farnell.com/cad/2876224.pdf">drawing</a>)</td><td class="p">right-angle 56-way €4.03 ≈ $4.42 at 2,000 (<a href="https://ie.farnell.com/te-connectivity/2327672-1/card-edge-conn-dual-side-56-pos/dp/3261601">Farnell</a>, 12 weeks); straddle 84-way zł23.75 ≈ $5.84 at 1,536 (<a href="https://pl.farnell.com/en-PL/te-connectivity/2340326-1/card-edge-conn-dual-side-84-pos/dp/3261626">Farnell</a>, 16 weeks); Amphenol ME20 56-way right-angle $19.99 in ones (<a href="https://www.lcsc.com/product-detail/C4957064.html">LCSC</a>, out of stock)</td></tr>
+<tr><td>Samtec HSEC8, MEC8, MEC6, MEC1</td><td>0.635 to 1.0 mm, 1.6 mm card, right-angle (-RA) and edge-mount straddle (-EM). In the calculator above.</td><td class="p">MEC6-RA 80-way 28.6 × 9.1 × 5.8 mm; MEC8-EM strip 13.5 mm</td><td class="p">$3.70 to $4.40 at 1 k for 40-way</td></tr>
+<tr><td>PCIe ×1 right-angle and straddle</td><td>1.0 mm, 36 contacts, 1.57 mm card. Straddle: XKB X3126WS, UMAX 3126. Right-angle: Samtec PCIE-036-02-F-D-RA, Dongguan Youmao's 64-way.</td><td class="p">25 mm body</td><td class="p">XKB straddle $0.57; Samtec right-angle (through-hole) $5.70 in ones (<a href="https://www.lcsc.com/product-detail/C4883766.html">LCSC</a>, out of stock)</td></tr>
+<tr><td><a href="https://www.solepin.com/Product/jinshouzhi/0-80mm-pitch-series/1033.html">Solepin 61C6</a></td><td>Listed as an SFP-style 0.8 mm socket in 4 to 100 positions with a 1.60 mm PCB, full gold, 1 A, 15 to 20 day lead. Its only <a href="https://www.solepin.com/uploads/soft/20230130/1-230130134022393.pdf">drawing</a> is the standard 20-way with a 1.00 mm card, so whether they will make a longer one for 1.6 mm is a question to ask, not a stock part.</td><td class="p">20-way 11.0 × 9.4 × 5.2 mm</td><td class="p">ask</td></tr>
+<tr><td><a href="https://www.solepin.com/Product/jinshouzhi/1-27mm-pitch-series/1219.html">Solepin 61F9</a></td><td>1.27 mm, 90° SMT straddle, any 6 to 300 contacts, for 1.6 to 2.0 mm boards. The closest Chinese part to today's WingTAT in a soldered straddle form.</td><td class="p">no drawing online</td><td class="p">¥40 ≈ $5.97 sample</td></tr>
+</table></div>
+<p>The M.2, mini PCIe, SO-DIMM and MXM sockets are the same idea for thinner cards (0.8, 1.0 and 1.2 mm) and do not take 1.6 mm.</p>
 
 <h2 id="ask">Makers to ask: no full drawing or price yet</h2>
 <p>These turned up in the off-LCSC search but without enough numbers to put in the calculator. Solepin is the one to start with: it sells any even pin count in 0.8, 1.0 and 1.27 mm with a 10–20 day lead and sells singles on 1688. No Chinese maker lists a 0.8 mm straddle (edge-mount) part; Solepin, LXW and Shunyi make the vertical version and would be the ones to ask for it.</p>
@@ -236,217 +249,16 @@
 <h2>Sources</h2>
 <div class="srcs" id="srcs"></div>
 <hr>
-<p class="muted">Built 22 Nov 2026 from makers' drawings, distributor and 1688 listings, the V6 connector write-ups and two market surveys. Most product photos load from the vendors' sites; where one does not, the plan view in the table is the picture.</p>
+<p class="muted">Built 22 Nov 2026, updated 23 Nov, from makers' drawings, distributor and 1688 listings, the V6 connector write-ups and two market surveys. Most product photos load from the vendors' sites; where one does not, the plan view in the table is the picture.</p>
 </div><!-- /doc -->
 </main>
 
+<script src="edge-connector-data.js"></script>
 <script>
-// ---------------------------------------------------------------- data
-// orient: coplanar (straddle / coupler: boards in one plane), vertical (card stands up off the host),
-//         stacked (card parallel to the host but raised: right-angle socket or M.2)
-// length: fixedLen, or len(nPerRow), or (nPerRow-1)*pitch + end
-// host: legs / footprint depth on the host board; gap: host edge to card tip (coplanar); tongue: module depth used; z: stand-off height
-// sizes: contacts per row the maker offers; fixedPos: the part comes in one size only
-// price: USD for repPos contacts at priceQty
-const S = "https://suddendocs.samtec.com/kineticimages/images/product/parts/";
-const OPTIONS = [
-  {id:"wingtat", name:"WingTAT HEE70LP03BK (today)", maker:"WingTAT 永達", family:"today", pitch:1.27, rows:2, repPos:70, posRange:"4–200, any even count", thk:["1.6"],
-   orient:"coplanar", geomNote:"straddle: host edge in the solder-tail fork, card in the slot", end:7.37, host:4.3, gap:6.38, tongue:7.62, z:8.88,
-   cycles:"about 30 (3 µin Au)", plating:"3 µin Au flash (up to 15 µin)", price:2.15, priceQty:"1,100 (LCSC)",
-   links:[["LCSC C5448235","https://www.lcsc.com/product-detail/C5448235.html"],["datasheet","https://www.lcsc.com/datasheet/C5448235.pdf"],["20-way, LCSC C5448210","https://www.lcsc.com/product-detail/C5448210.html"]],
-   img:"https://assets.lcsc.com/images/lcsc/900x900/20230630_WingTAT-HEE70LP03BK_C5448235_front.jpg",
-   note:"What V5 uses as an unsoldered coupler, flipped either way. 18.3 mm end to end; the solder tails act as a second, very stiff edge contact. The 20-way is $0.74 in ones."},
-  {id:"kiss", name:"Custom kiss-slot coupler (V2)", maker:"Fulimei (custom)", family:"custom", pitch:1.27, rows:2, repPos:70, posRange:"any", thk:["1.6","0.8 in a pinch"],
-   orient:"coplanar", geomNote:"symmetric through-slot coupler, both boards' tongues meet inside", end:7.37, host:4.5, gap:0.2, tongue:4.5, z:5.0,
-   cycles:"200+ (15–30 µin Au)", plating:"selective hard Au 0.38–0.76 µm", price:3.4, priceQty:"est., 10 k a year, BeCu", page:"#custom",
-   links:[["STEP models","edge-coupler-variants-step.zip"]],
-   img:"edge-variants-iso.png",
-   note:"BeCu 0.25 mm crossed beams, 6 mm lever, rest gap 0.30: 51–61 gf on 1.6 mm boards, about 20 gf on 0.8 mm. Boards 0.2 mm apart. Same strip in a shorter housing for the 2- and 3-way splits; one housing with a divider wall would fit 2 × 34 in the same length."},
-  {id:"kiss08", name:"Custom kiss-slot, 0.8 mm sister", maker:"Fulimei (custom)", family:"custom", pitch:1.27, rows:2, repPos:70, posRange:"any", thk:["0.8"],
-   orient:"coplanar", geomNote:"same contacts, narrow slot core", end:7.37, host:4.5, gap:0.2, tongue:4.5, z:5.0,
-   cycles:"200+", plating:"selective hard Au", price:3.4, priceQty:"est.", page:"#custom", links:[["STEP models","edge-coupler-variants-step.zip"]], img:"edge-variants-iso.png",
-   note:"About 30 gf on 0.8 mm boards; one slot-core insert change on the same mould."},
-];
-const SURVEY = [
-  // ---- coplanar (straddle / edge mount)
-  {id:"xkb3126", name:"XKB X3126WS-36 (PCIe ×1 straddle)", maker:"XKB 星坤 (Shenzhen)", family:"cn", pitch:1.0, rows:2, fixedPos:36, fixedLen:34.8, repPos:36, posRange:"36 / 64 / 98 / 164", thk:["1.6"],
-   orient:"coplanar", geomNote:"straddle: 4.4 mm legs on the host edge, 7.6 mm body hangs off it", host:4.4, gap:2.0, tongue:5.6, z:8.8, approx:"gap and tongue",
-   cycles:"50 (PCIe CEM spec)", plating:"selective Au: flash, 15 or 30 µin", price:0.565, priceQty:"1 (LCSC)",
-   links:[["LCSC C5711235","https://lcsc.com/product-detail/Card-Edge-Connectors_XKB-Connection-X3126WS-36-9TV01_C5711235.html"],["drawing","https://datasheet.lcsc.com/datasheet/pdf/5d257980edb4d0d17147cf4a83c0a0bd.pdf"],["UMAX 3126, LCSC C404097","https://www.lcsc.com/product-detail/C404097.html"],["Samtec PCIE-036 EMS2","https://www.samtec.com/products/pcie-036-02-f-d-ems2"]],
-   img:"https://assets.lcsc.com/images/lcsc/900x900/20230430_XKB-Connection-X3126WS-36-9TV01_C5711235_blank.jpg",
-   note:"Cheapest coplanar part found. PCIe ×1 pad pattern with its key (11 + 25 pads a side). The body is 25.0 mm; the stock part has Ø2.2 screw ears that take it to 34.8, so two do not fit a 51 mm edge unless XKB will supply it without ears (two bodies need 52 mm). UMAX 3126 is the same thing ($0.90 at 1 k for the 98-way); Samtec PCIE-036-02-F-D-EMS2 is the earless branded one, 25.0 mm, $2.09 at 1 k."},
-  {id:"hsec8em", name:"Samtec HSEC8-EM (0.8 mm edge mount)", maker:"Samtec", family:"brand", pitch:0.8, rows:2, repPos:40, sizes:[10,20,30,40,50,60], len:n=>n*0.8+(n>=40?18.4:15.2), posRange:"20–120", thk:["1.6"],
-   orient:"coplanar", geomNote:"straddle: 5.0 mm legs on both faces of the host edge, 7.8 mm body hangs off it", host:5.0, gap:2.0, tongue:5.8, z:7.0, approx:"gap and tongue",
-   cycles:"1,000 (extended-durability report)", plating:"10 µin Au", price:4.12, priceQty:"1,000 (40-way)",
-   links:[["Samtec HSEC8-EM","https://www.samtec.com/products/hsec8-120-01-l-d-em2"],["catalog page","https://suddendocs.samtec.com/catalog_english/hsec8_em.pdf"]],
-   img:S+"batch_04_mar_2025/23d-libs/samtec/modelling/hsec8_em/hsec8-120-01-l-d-em2.png",
-   note:"Shortest strip of the branded straddle parts (12.8 mm), but the clamp ears add 15–18 mm to the length."},
-  {id:"mec8em", name:"Samtec MEC8-EM (0.8 mm edge mount)", maker:"Samtec", family:"brand", pitch:0.8, rows:2, repPos:40, sizes:[10,20,30,40,50,60,70], len:n=>n*0.8+7.8, posRange:"20–140", thk:["1.6","1.0"],
-   orient:"coplanar", geomNote:"straddle: 5.0 mm legs on both faces of the host edge, 8.5 mm body hangs off it", host:5.0, gap:2.0, tongue:6.5, z:7.0, approx:"gap",
-   cycles:"100 (10 µin Au)", plating:"10 µin Au", price:3.90, priceQty:"1,000 (40-way)",
-   links:[["Samtec MEC8-EM","https://www.samtec.com/products/mec8-120-02-l-d-em2"],["catalog page","https://suddendocs.samtec.com/catalog_english/mec8_em.pdf"]],
-   img:"https://cms.samtec-cdn.net/series/mec8_em_thumb_c7b24528d7.png",
-   note:"The most compact branded coupler: the strip is 13.5 mm (legs + body), 70 contacts in 35.8 mm of edge. Where the card bottoms inside the body is not on the catalog page, so the 2 mm gap is an estimate. The -01 slot takes a 1.0 mm card."},
-  {id:"mec1em", name:"Samtec MEC1-EM (1.0 mm edge mount)", maker:"Samtec", family:"brand", pitch:1.0, rows:2, repPos:40, sizes:[5,8,20,30,40,50,60,70], len:n=>(n+2)*1.0+12.45, posRange:"10–140", thk:["1.6"],
-   orient:"coplanar", geomNote:"straddle: 4.7 mm legs on the host edge, 8.89 mm body hangs off it", host:4.7, gap:2.0, tongue:6.9, z:8.13, approx:"gap and tongue",
-   cycles:"500", plating:"10 µin Au or flash, phosphor bronze", price:4.00, priceQty:"1,000 (40-way)",
-   links:[["Samtec MEC1-EM","https://www.samtec.com/products/mec1-120-02-l-d-em2"],["catalog page","https://suddendocs.samtec.com/catalog_english/mec1_em.pdf"]],
-   img:S+"mec1_em/mec1-120-02-l-d-em2.png",
-   note:"-EM1 clamps a 0.8 mm host board and -EM2 a 1.6 mm one; the card is 1.6 mm either way. Clamp ears add 12.45 mm to the length."},
-  // ---- right-angle pin header pairs: not card edge (the module needs a header soldered on), but coplanar
-  {id:"ra127", name:"1.27 mm right-angle socket + pin header pair", maker:"XKB 星坤 · Yinaxin 翊纳芯 · many Shenzhen makers", family:"cn", pitch:1.27, rows:2, repPos:80, end:1.67, posRange:"2 × 2 to 2 × 50, any count", thk:["1.6","1.0","0.8"], thkLabel:"any board thickness",
-   orient:"coplanar", geomNote:"right-angle female header on the host, right-angle pin header on the module; both through-hole, on one face only", host:5.8, gap:0, tongue:4.5, z:3.0, approx:"tongue (the depth the pin header takes on the module)",
-   cycles:"not stated", plating:"1 µin Au flash on brass (thicker to order)", price:0.53, priceQty:"1 (1688: socket $0.31 ≈ ¥2.1, pin header $0.22 ≈ ¥1.45, both 2 × 40)",
-   links:[["Yinaxin A127C socket (1688)","https://detail.1688.com/offer/720627455651.html"],["Yisheng 2 × 40 socket (1688)","https://detail.1688.com/offer/847458103608.html"],["XKB X1321FR, LCSC C2881906","https://www.lcsc.com/product-detail/C2881906.html"],["socket drawing","https://datasheet.lcsc.com/datasheet/pdf/283491d8a24e08857c68a58900fe76cb.pdf?productCode=C2881906"],["Tianlewei pin header (1688)","https://detail.1688.com/offer/1088653614031.html"]],
-   img:"https://assets.lcsc.com/images/lcsc/900x900/20230526_XKB-Connection-X1321FR-2x20-C43D24_C2881906_blank.jpg",
-   note:"Not a card edge: the module needs a pin header soldered on, so it is no longer a bare PCB. In return it is 3.0 mm tall, sits on one face, lets the boards touch, and costs about 50 cents a joint. 78 contacts fit a 51 mm edge (2 × 39, 49.9 mm); 2 × 40 is 51.2 mm. The socket is 1.27 × N + 0.4 long, 4.3 deep (5.8 with the bent tails) and 3.0 high, rated 1 A. No mating force or cycle life is published; header contacts are stiffer than card-edge beams, so 78 of them will want a firm push. Variant: a socket on both boards, joined by a loose double-ended pin strip, which then is the wear part."},
-  {id:"ra254", name:"2.54 mm right-angle socket + pin header pair", maker:"HCTL 华灿天禄 · many", family:"cn", pitch:2.54, rows:2, repPos:40, end:2.94, posRange:"2 × 2 to 2 × 40, any count", thk:["1.6","1.0","0.8"], thkLabel:"any board thickness",
-   orient:"coplanar", geomNote:"right-angle female header on the host, right-angle pin header on the module; through-hole", host:12.7, gap:0, tongue:6.5, z:5.0, approx:"tongue (the depth the pin header takes on the module)",
-   cycles:"not stated", plating:"Au flash or tin", price:0.46, priceQty:"1 (LCSC socket $0.36 for 2 × 20, pin header about $0.10)",
-   links:[["HCTL PM254-2-20-W-8.5, LCSC C2897440","https://www.lcsc.com/product-detail/C2897440.html"],["drawing","https://datasheet.lcsc.com/datasheet/pdf/861a2a3a23baf5e501a282998fccc77c.pdf?productCode=C2897440"]],
-   img:"https://assets.lcsc.com/images/lcsc/900x900/20230107_HCTL-PM254-2-20-W-8-5_C2897440_blank.jpg",
-   note:"The pitch every jumper wire and Dupont lead fits, and big enough to print on comfortably. But only 38 contacts fit a 51 mm edge in two rows (2 × 19, 48.7 mm), so it cannot carry 70 signals; three- and four-row right-angle sockets are not stock parts. Socket 2.54 × N + 0.4 long, 8.5 deep (12.7 with tails), 5.0 high, 3 A."},
-  // ---- vertical
-  {id:"hsec8dv", name:"Samtec HSEC8-DV (0.8 mm vertical)", maker:"Samtec", family:"brand", pitch:0.8, rows:2, repPos:40, sizes:[10,13,20,25,30,37,40,49,50,60,70,80,100], len:n=>n*0.8+(n>=40?7.8:4.6), posRange:"18–200", thk:["1.6"],
-   orient:"vertical", geomNote:"vertical SMT, body 5.8 mm wide", host:7.6, tongue:6.4, z:7.98,
-   cycles:"1,000–2,500 by plating", plating:"10 µin Au (30 µin option)", price:2.36, priceQty:"924 (40-way)",
-   links:[["Samtec HSEC8-DV","https://www.samtec.com/products/hsec8-120-01-l-dv-a"],["catalog page","https://suddendocs.samtec.com/catalog_english/hsec8_dv.pdf"]],
-   img:S+"hsec8/hsec8-120-01-l-dv-a.png",
-   note:"Narrowest and cheapest Samtec 0.8 mm socket and the highest cycle rating. 13 a row (26 contacts, 15.0 mm) suits the 3-way split."},
-  {id:"solepin61c1", name:"Solepin 61C1 (0.8 mm vertical, any count)", maker:"Solepin 硕品 (Dongguan)", family:"cn", pitch:0.8, rows:2, repPos:40, end:8.6, posRange:"6–200, any even count", thk:["1.6"],
-   orient:"vertical", geomNote:"vertical SMT with posts, body 5.6 mm wide; Samtec HSEC8-compatible", host:7.4, tongue:6.4, z:7.8,
-   cycles:"not stated", plating:"Au 1–30 µin over Ni", price:null, priceQty:"ask; singles on 1688",
-   links:[["Solepin 61C1","https://www.solepin.com/Product/jinshouzhi/0-80mm-pitch-series/hsec8.html"],["drawing","https://www.solepin.com/uploads/soft/20211204/1-211204130I0504.pdf"]],
-   img:"https://www.solepin.com/uploads/allimg/20231202/1-231202143H3941.png",
-   note:"Not on LCSC. Any pin count is the point: 24 contacts in 17.4 mm, 36 in 22.2 mm. 3 A a pin, LCP, 10–15 day lead. Factory contact is on the product page."},
-  {id:"oupiin8208", name:"Oupiin 8208-2 (0.8 mm vertical, slim)", maker:"Oupiin 歐品 (Kunshan)", family:"cn", pitch:0.8, rows:2, repPos:40, sizes:[10,20,30,35], end:5.4, posRange:"20 / 40 / 60 / 70", thk:["1.6"],
-   orient:"vertical", geomNote:"vertical SMT, body 5.5 mm wide", host:7.3, tongue:5.66, z:8.65,
-   cycles:"not stated", plating:"Au flash to 30 µin, selective", price:null, priceQty:"ask",
-   links:[["Oupiin 8208-2","https://www.oupiin.com/product_3i.php?id=123"],["drawing","https://www.oupiin.com/upload/docDB/20250122145242RcMv.pdf"]],
-   img:"https://www.oupiin.com/upload/goodsClass1/20200317151651cZad.webp",
-   note:"Narrowest 0.8 mm vertical body found. 70 contacts in 32.6 mm. 1.8 A. Not on LCSC."},
-  {id:"oupiin8206", name:"Oupiin 8206-2 (0.8 mm vertical)", maker:"Oupiin 歐品 (Kunshan)", family:"cn", pitch:0.8, rows:2, repPos:20, sizes:[10,20,30,40], end:5.4, posRange:"20 / 40 / 60 / 80", thk:["1.6"],
-   orient:"vertical", geomNote:"vertical SMT, body 7.0 mm wide; a MEC8-DV look-alike", host:8.8, tongue:5.55, z:7.8,
-   cycles:"not stated", plating:"Au 10 or 30 µin", price:2.40, priceQty:"1,000 (20-way, DigiKey)",
-   links:[["Oupiin 8206-2","https://www.oupiin.com/product_3i.php?id=117"],["drawing","https://www.oupiin.com/upload/docDB/202504111409035B8a.pdf"]],
-   img:"https://mm.digikey.com/Volume0/opasdata/d220001/derivates/1/003/213/431/MFG_8206-2X10C30DPT-S_sml%28200x200%29.jpg",
-   note:"3.1 A a pin. DigiKey stocks the 2 × 10; the rest of the family is a factory quote, which should come in well under the price scaled here."},
-  {id:"mec8dv", name:"Samtec MEC8-DV (0.8 mm vertical)", maker:"Samtec", family:"brand", pitch:0.8, rows:2, repPos:40, sizes:[10,20,30,40,50,60,70], len:n=>n*0.8+(n>=40?7.8:4.6), posRange:"20–140", thk:["1.6","1.0"],
-   orient:"vertical", geomNote:"vertical SMT, body 7.0 mm wide", host:8.8, tongue:6.5, z:8.5,
-   cycles:"100 (10 µin Au)", plating:"10 µin Au", price:3.89, priceQty:"936 (40-way)",
-   links:[["Samtec MEC8-DV","https://www.samtec.com/products/mec8-120-02-l-dv-a"],["catalog page","https://suddendocs.samtec.com/catalog_english/mec8_dv.pdf"]],
-   img:S+"mec8_dv/mec8-120-02-l-dv-a.png",
-   note:"The -01 slot takes a 1.0 mm card."},
-  {id:"mec6dv", name:"Samtec MEC6-DV (0.635 mm vertical)", maker:"Samtec", family:"brand", pitch:0.635, rows:2, repPos:40, sizes:[10,20,30,40,50,60,70], len:n=>n*0.635+(n>=50?7.94:4.77), posRange:"20–140", thk:["1.6"],
-   orient:"vertical", geomNote:"vertical SMT, body 7.0 mm wide", host:8.8, tongue:6.5, z:8.5,
-   cycles:"100", plating:"10 µin Au", price:3.39, priceQty:"936 (40-way)",
-   links:[["Samtec MEC6-DV","https://www.samtec.com/products/mec6-120-02-l-dv-a"],["catalog page","https://suddendocs.samtec.com/catalog_english/mec6_dv.pdf"],["LCSC C4681103","https://www.lcsc.com/product-detail/C4681103.html"]],
-   img:S+"mec6_dv/mec6-120-02-l-dv-a.png",
-   note:"Shortest 40-contact vertical socket (17.5 mm). No size between 20 and 40 contacts, so a 3-way split wastes 16 a connector."},
-  {id:"mec5dv", name:"Samtec MEC5-DV (0.5 mm vertical)", maker:"Samtec", family:"brand", pitch:0.5, rows:2, repPos:80, sizes:[30,40,50,60,70,80,90,100], len:n=>({30:21.63,40:26.63,50:34.13})[n]??n*0.5+9.13, posRange:"60–200", thk:["1.6"],
-   orient:"vertical", geomNote:"vertical, SMT contacts with weld tabs, body 4.6 mm wide", host:6.4, tongue:5.5, z:10.25,
-   cycles:"100", plating:"10 µin Au", price:4.87, priceQty:"900 (80-way, LCSC)",
-   links:[["Samtec MEC5-DV","https://www.samtec.com/products/mec5-030-01-l-dv-w1-k"],["catalog page","https://suddendocs.samtec.com/catalog_english/mec5_dv.pdf"],["LCSC C6590951","https://www.lcsc.com/product-detail/C6590951.html"]],
-   img:"https://assets.lcsc.com/images/lcsc/900x900/20250705_Samtec-MEC5-040-01-L-DV-W1-K-TR_C6590951_front.jpg",
-   note:"Narrowest body of all, but 10.25 mm tall, 60 contacts minimum, 1.5 A, and 0.5 mm fingers need tight PCB tolerances."},
-  {id:"mec1dv", name:"Samtec MEC1 (1.0 mm vertical)", maker:"Samtec", family:"brand", pitch:1.0, rows:2, repPos:40, sizes:[5,8,10,20,30,40,50,60,70], len:n=>(n+2)*1.0, posRange:"10–140", thk:["1.6","0.8"],
-   orient:"vertical", geomNote:"vertical SMT, footprint 8.51 mm wide", host:8.51, tongue:8.89, z:9.04,
-   cycles:"500", plating:"10 µin Au or flash", price:3.43, priceQty:"1,000 (40-way)",
-   links:[["Samtec MEC1","https://www.samtec.com/products/mec1-120-02-l-d-a"],["catalog page","https://suddendocs.samtec.com/catalog_english/mec1.pdf"]],
-   img:S+"mec1/mec1-120-02-l-d-a.png",
-   note:"The -01 slot takes a 0.8 mm card. 2.2 A."},
-  {id:"mecf", name:"Samtec MECF-DV (1.27 mm vertical)", maker:"Samtec", family:"brand", pitch:1.27, rows:2, repPos:40, sizes:[5,8,20,30,40,50], len:n=>n*1.27+4.11, posRange:"10–100", thk:["1.6"],
-   orient:"vertical", geomNote:"vertical SMT with weld tabs, body 5.6 mm wide", host:7.4, tongue:7.0, z:8.5,
-   cycles:"100", plating:"10 µin Au", price:4.06, priceQty:"1,000 (40-way)",
-   links:[["Samtec MECF","https://www.samtec.com/products/mecf-20-01-l-dv-wt"],["catalog page","https://suddendocs.samtec.com/catalog_english/mecf.pdf"],["80-way, LCSC C4541130","https://www.lcsc.com/product-detail/C4541130.html"]],
-   img:S+"mecf/parts/mecf-20-01-l-dv-wt.png",
-   note:"Today's pitch in a body half as tall. 3.5 A contacts. LCSC has the 80-way at $2.68 (1 k). Solepin 66F6 is the Chinese compatible in any count."},
-  {id:"oupiin8406", name:"Oupiin 8406 (1.0 mm vertical, 38-way keyed)", maker:"Oupiin 歐品 (Kunshan)", family:"cn", pitch:1.0, rows:2, fixedPos:38, fixedLen:24.5, repPos:38, posRange:"38 only (2 × 19)", thk:["1.6"],
-   orient:"vertical", geomNote:"vertical SMT with posts, body 7.5 mm wide", host:9.3, tongue:8.5, z:8.8,
-   cycles:"not stated", plating:"Au flash", price:null, priceQty:"ask",
-   links:[["Oupiin 8406","https://www.oupiin.com/product_3i.php?id=127"],["drawing","https://www.oupiin.com/upload/docDB/202501221449272S1K.pdf"]],
-   img:"https://www.oupiin.com/upload/goodsClass1/20200317151651cZad.webp",
-   note:"One size only, keyed 7 + 12 a row so it cannot go in backwards. Two give 76 contacts in 51 mm. 1.1 A."},
-  {id:"pciex1v", name:"PCIe ×1 vertical socket (Amphenol / XKB / Fushu)", maker:"Amphenol ICC · XKB 星坤 · Dongguan Fushu 富庶", family:"cn", pitch:1.0, rows:2, fixedPos:36, fixedLen:27.0, repPos:36, posRange:"36 (×1); 64 / 98 / 164", thk:["1.6"],
-   orient:"vertical", geomNote:"vertical, through-hole or SMT, body 8.8 mm wide", host:8.8, tongue:8.0, z:11.25, approx:"tongue",
-   cycles:"50 (PCIe CEM spec)", plating:"Au flash, 15 or 30 µin", price:0.41, priceQty:"2,100 (Amphenol, DigiKey)",
-   links:[["Amphenol 10018783-10110TLF","https://www.digikey.com/en/products/detail/amphenol-cs-fci/10018783-10110TLF/1002287"],["XKB X1611WVS, LCSC C21263079","https://www.lcsc.com/product-detail/C21263079.html"],["Fushu, Made-in-China","https://fushuelectronic.en.made-in-china.com/product/sRZpVPouAAcS/China-1-0mm-Straight-DIP-to-PCB-PCI-Express-Card-Slot-Connector.html"]],
-   img:"https://assets.lcsc.com/images/lcsc/900x900/20240727_XKB-Connection-X1611WVS-36-9TV01_C21263079_front.jpg",
-   note:"An open standard, so the cheapest gold card-edge socket there is: Amphenol $0.41 (2.1 k), XKB's SMT clone $0.47 (1.4 k), Dongguan Fushu $0.10–0.75 at 1 k. 11 mm tall; the key splits the card into 11 + 25 pads a side."},
-  {id:"wingtathed", name:"WingTAT HED (1.27 mm vertical, through-hole)", maker:"WingTAT 永達", family:"cn", pitch:1.27, rows:2, repPos:40, end:7.37, posRange:"4–200, any even count", thk:["1.6"],
-   orient:"vertical", geomNote:"vertical through-hole, body 8.88 mm wide", host:8.88, tongue:7.62, z:14.0,
-   cycles:"about 30 (3 µin Au)", plating:"3 µin Au standard", price:1.13, priceQty:"850 (40-way, LCSC)",
-   links:[["LCSC C5448171","https://www.lcsc.com/product-detail/C5448171.html"],["drawing","https://datasheet.lcsc.com/datasheet/pdf/d99332832e1a1ebddb5d9069587ae4c4.pdf"],["EDAC 302","https://edac.net/series/302"],["Sullins ACB20DHHD, LCSC","https://www.lcsc.com/product-detail/C5000565.html"]],
-   img:"https://assets.lcsc.com/images/lcsc/900x900/20231103_WingTAT-HED40LP03BK_C5448171_front.jpg",
-   note:"Today's contact in a vertical body. Dimensionally an EDAC 302 at a quarter of the price (EDAC 302-040 $4.16, Sullins ACB20DHHD $4.84 at 1 k)."},
-  // ---- parallel, raised (right-angle sockets, M.2, mini PCIe)
-  {id:"oupiin8208b", name:"Oupiin 8208-B (0.635 mm right angle, 3.7 mm high)", maker:"Oupiin 歐品 (Kunshan)", family:"cn", pitch:0.635, rows:2, repPos:20, end:3.8, posRange:"2 × 10 documented; other counts by part number", thk:["1.6"],
-   orient:"stacked", geomNote:"right-angle SMT with post and lock; card parallel to the host", host:9.1, tongue:6.5, z:3.7, approx:"tongue; length beyond 2 × 10",
-   cycles:"not stated", plating:"Au 10 or 30 µin", price:null, priceQty:"ask",
-   links:[["Oupiin 8208-B","https://www.oupiin.com/product_3i.php?id=904"],["drawing","https://www.oupiin.com/upload/docDB/20250221113740A8RM.pdf"]],
-   img:"https://www.oupiin.com/upload/goodsClass1/20200317151651cZad.webp",
-   note:"Lowest profile and smallest body found: 9.5 × 9.1 × 3.7 mm for 20 contacts. 1.8 A. Only the 2 × 10 has a public drawing; longer lengths here follow the same formula."},
-  {id:"mec6ra", name:"Samtec MEC6-RA (0.635 mm right angle)", maker:"Samtec", family:"brand", pitch:0.635, rows:2, repPos:40, sizes:[10,20,30,40,50], len:n=>n*0.635+3.17, posRange:"20–100", thk:["1.6"],
-   orient:"stacked", geomNote:"right-angle SMT, 7.4 mm body, 9.1 mm with tails; card 1 mm above the host", host:9.1, tongue:6.5, z:5.78,
-   cycles:"100", plating:"10 µin Au", price:4.40, priceQty:"960 (40-way)",
-   links:[["Samtec MEC6-RA","https://www.samtec.com/products/mec6-120-02-l-d-ra1"],["catalog page","https://suddendocs.samtec.com/catalog_english/mec6_ra.pdf"]],
-   img:S+"mec6_ra/mec6-120-02-l-d-ra1.png",
-   note:"Smallest branded right-angle body: 15.9 × 7.4 mm for 40 contacts."},
-  {id:"mec8ra", name:"Samtec MEC8-RA (0.8 mm right angle)", maker:"Samtec", family:"brand", pitch:0.8, rows:2, repPos:40, sizes:[10,13,20,25,30,37,40,49,50], len:n=>n*0.8+6.2, posRange:"20–100", thk:["1.6","1.0"],
-   orient:"stacked", geomNote:"right-angle SMT, 7.4 mm body, 9.1 mm with tails", host:9.1, tongue:6.5, z:5.77,
-   cycles:"100", plating:"10 µin Au", price:3.81, priceQty:"936 (40-way)",
-   links:[["Samtec MEC8-RA","https://www.samtec.com/products/mec8-120-02-l-d-ra1"],["catalog page","https://suddendocs.samtec.com/catalog_english/mec8_ra.pdf"],["60-way, LCSC C5040736","https://www.lcsc.com/product-detail/C5040736.html"]],
-   img:"https://assets.lcsc.com/images/lcsc/900x900/20251128_Samtec-MEC8-130-02-L-D-RA1-TR_C5040736_front.jpg",
-   note:"13 a row (26 contacts) suits the 3-way split. Length includes the weld tabs."},
-  {id:"hsec8ra", name:"Samtec HSEC8-RA (0.8 mm right angle)", maker:"Samtec", family:"brand", pitch:0.8, rows:2, repPos:40, sizes:[10,13,20,25,30,40,49,50,60], len:n=>n*0.8+8.61, posRange:"18–120", thk:["1.6"],
-   orient:"stacked", geomNote:"right-angle SMT, 9.3 mm body, 12.05 mm with tails", host:12.05, tongue:6.4, z:5.2,
-   cycles:"1,000 (extended-durability report)", plating:"10 µin Au", price:3.72, priceQty:"1,000 (40-way)",
-   links:[["Samtec HSEC8-RA","https://www.samtec.com/products/hsec8-120-01-l-ra"],["catalog page","https://suddendocs.samtec.com/catalog_english/hsec8_ra.pdf"]],
-   img:S+"hsec8_ra/hsec8-120-01-l-ra.png",
-   note:"Lowest branded right-angle part at 5.2 mm, but deep."},
-  {id:"mec1ra", name:"Samtec MEC1-RA (1.0 mm right angle)", maker:"Samtec", family:"brand", pitch:1.0, rows:2, repPos:40, sizes:[5,8,20,30,40,50,60,70], len:n=>(n+2)*1.0+2.54, posRange:"10–140", thk:["1.6"],
-   orient:"stacked", geomNote:"right-angle through-hole, 8.89 mm body, 11.96 mm with tails", host:11.96, tongue:8.89, z:6.81,
-   cycles:"500", plating:"10 µin Au or flash", price:3.72, priceQty:"1,000 (40-way)",
-   links:[["Samtec MEC1-RA","https://www.samtec.com/products/mec1-120-02-l-d-ra1-sl"],["catalog page","https://suddendocs.samtec.com/catalog_english/mec1_ra.pdf"]],
-   img:S+"mec1_ra/mec1-120-02-l-d-ra1-sl.png",
-   note:"Card sits about 5 mm above the host."},
-  {id:"m2", name:"M.2 socket, 67 contacts (Foxconn / Lotes / Attend / TE)", maker:"Foxconn · Lotes 嘉澤 · Attend 鋐寶 · Oupiin · TE · JAE", family:"cn", pitch:0.5, rows:2, fixedPos:67, fixedLen:21.9, repPos:67, posRange:"67 (75 positions less the key)", thk:["0.8"],
-   orient:"stacked", geomNote:"right-angle SMT; module parallel to the host", host:8.7, tongue:3.5, z:3.2, approx:"tongue; host depth is 5.65 on the lowest Attend part",
-   cycles:"60 (M.2 spec)", plating:"Au flash to 15 µin", price:0.18, priceQty:"940 (Foxconn AS0BC21, LCSC)",
-   links:[["Foxconn AS0BC21, LCSC C410527","https://www.lcsc.com/product-detail/C410527.html"],["Lotes APCI0107, LCSC C841661","https://www.lcsc.com/product-detail/C841661.html"],["Attend 123A","https://www.attend.com.tw/en/product.php?act=view&id=416"],["Oupiin 8402-C","https://www.oupiin.com/product_ii.php?c2=31"],["TE 2199230-2, DigiKey","https://www.digikey.com/en/products/detail/te-connectivity-amp-connectors/2199230-2/22753092"],["Lotes vertical M.2","https://www.lotes.cc/en/product.php?act=view&id=401"]],
-   img:"https://assets.lcsc.com/images/lcsc/900x900/20230217_FOXCONN-AS0BC21-S40BE-7H_C410527_front.jpg",
-   note:"Most contacts per millimetre and per dollar by a wide margin: 67 in 22 mm for $0.18–0.25 (Foxconn, Lotes), $1.0–1.2 from TE or JAE. But it needs a 0.8 mm card, carries 0.5 A a contact, is rated 60 cycles, and one socket is 3 short of 70. Heights from 2.05 to 8.5 mm. Lotes APCI0490 / 0491 are vertical M.2 sockets."},
-  {id:"minipcie", name:"Mini PCIe socket, 52 contacts (Lian Xin / TE / Attend)", maker:"Lian Xin · TE · Attend 鋐寶 · Shenzhen clones", family:"cn", pitch:0.8, rows:2, fixedPos:52, fixedLen:30.0, repPos:52, posRange:"52", thk:["1.0"],
-   orient:"stacked", geomNote:"right-angle SMT; module parallel to the host", host:8.2, tongue:4.0, z:4.0, approx:"tongue",
-   cycles:"50 (spec)", plating:"Au flash", price:0.34, priceQty:"1,400 (Lian Xin XDMP-040-A02, LCSC)",
-   links:[["Lian Xin XDMP-040-A02, LCSC C18202142","https://www.lcsc.com/product-detail/C18202142.html"],["TE 1775862-2, LCSC C428486","https://www.lcsc.com/product-detail/C428486.html"],["Attend 119A","https://www.attend.com.tw/en/product.php?act=view&id=124"],["Shenzhen Tuozhi, Alibaba","https://www.alibaba.com/product-detail/52P-Mini-PCI-E-4-0H_1600428674015.html"]],
-   img:"https://assets.lcsc.com/images/lcsc/900x900/20231101_Lian-Xin-Technology-XDMP-040-A02_C18202142_front.jpg",
-   note:"1.0 mm card. Lian Xin $0.34, TE $0.53 (1.1 k), unbranded Shenzhen sockets $0.18–0.45 in tens to hundreds. Heights 4.0–9.9 mm."},
-];
-const EXTRA_SOURCES = [
-  ["Mengjing MJT-81013 (1688)","https://detail.1688.com/offer/911510152446.html"],
-  ["Boruisen MJT-81013 (1688)","https://detail.1688.com/offer/1067755811760.html"],
-  ["Gaodi Gd-I059 (1688)","https://detail.1688.com/offer/856479368135.html"],
-  ["Mingyun 81014 (1688)","https://detail.1688.com/offer/737330272539.html"],
-  ["Keystone SMT low-profile PCB edge connectors (DigiKey)","https://www.digikey.co.uk/en/product-highlight/k/keystone/smt-low-profile-printed-circuit-board-edge-connectors"],
-  ["Keystone launch note (Design World)","https://www.designworldonline.com/keystone-electronics-offers-smt-low-profile-pcb-edge-connectors/"],
-  ["MAC8 KEO parallel-connection connector (Sekorm)","https://en.sekorm.com/doc/537115399.html"],
-  ["Where Labs Pico headers with silkscreen labels","https://dirtypcbs.com/store/details/6637/raspberry-pi-pico-header-with-silkscreen-labels"],
-  ["Arduino printed MKR headers","https://store-usa.arduino.cc/products/female-headers-14-ways-arduino-mkr1000-printed"],
-  ["Yonglifeng pad-printed coloured headers (1688)","https://detail.1688.com/offer/560609649065.html"],
-  ["Solepin 61F9 1.27 mm straddle","https://www.solepin.com/Product/jinshouzhi/1-27mm-pitch-series/1219.html"],
-  ["Solepin 61D3 1.0 mm","https://www.solepin.com/Product/jinshouzhi/1-00mm-pitch-series/813.html"],
-  ["LXW 0.8 mm card edge","https://www.lxw-conn.com/product/0-8mm-pitch-20pin-200pin-high-speed-pcb-card-edge-connector/"],
-  ["Sunny Young R6830","https://www.sunnyyoung.com.tw/zh-tw/product-704151/1-27mm-Straddle-Mount-Card-Edge-Connector-R6830-Series.html"],
-  ["US 4,087,151","https://patents.google.com/patent/US4087151"],["US 4,514,030","https://patents.google.com/patent/US4514030"],
-  ["US 5,286,215","https://patents.google.com/patent/US5286215"],["US 6,764,345","https://patents.google.com/patent/US6764345B1/en"],
-  ["synth-diy: Amphenol 225-22821-110","https://synth-diy.org/pipermail/synth-diy/2022-March/170395.html"],["TEDSS surplus 225 series","https://www.tedss.com/2025009664"],
-];
-
 // ---------------------------------------------------------------- model
-const ALL = OPTIONS.concat(SURVEY);
+const ALL = EDGE_ALL;
 const BETWEEN = 2;   // mm between neighbouring connectors on one edge
-const state = {k:1, n:70, edge:51, fitonly:false, thk:"any", orient:"any", fam:"any", sort:"area", dir:1};
+const state = {k:1, n:70, edge:51, fitonly:false, thk:"any", orient:"useful", fam:"any", sort:"area", dir:1};
 const $ = s => document.querySelector(s);
 const fmt = (v, d=1) => v==null||isNaN(v) ? "—" : Number(v).toFixed(d);
 const esc = s => String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");
@@ -478,7 +290,7 @@ const primary = o => o.page || (o.links && o.links[0] ? o.links[0][1] : "#option
 const blank = u => /^https?:/.test(u) ? ' target="_blank" rel="noopener"' : '';
 function visible(o){
   if(state.thk!=="any" && !o.thk.some(t=>String(t).startsWith(state.thk))) return false;
-  if(state.orient!=="any" && o.orient!==state.orient) return false;
+  if(state.orient==="useful" ? o.orient==="vertical" : state.orient!=="any" && o.orient!==state.orient) return false;
   if(state.fam==="custom" && !(o.family==="custom"||o.family==="today")) return false;
   if((state.fam==="cn"||state.fam==="brand") && o.family!==state.fam) return false;
   return true;
@@ -503,7 +315,7 @@ function sketch(o, c){
   if(o.orient==="coplanar") g += `<rect x="2" y="1" width="${W-4}" height="${Math.max(2,(y0-c.strip*s)-1)}" fill="var(--surface-2)" stroke="var(--line)"/>`;
   return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="plan view of ${esc(o.name)}">${g}</svg>`;
 }
-const tagFor = o => (o.orient==="coplanar" ? '<span class="tag cop">coplanar</span>' : o.orient==="vertical" ? '<span class="tag vt">vertical</span>' : '<span class="tag st">parallel</span>')
+const tagFor = o => (o.orient==="coplanar" ? '<span class="tag cop">coplanar</span>' : o.orient==="vertical" ? '<span class="tag vt">vertical</span>' : '<span class="tag st">right angle</span>')
   + (o.family==="custom" ? '<span class="tag cu">custom</span>' : o.family==="cn" ? '<span class="tag cn">CN / TW</span>' : '');
 const thumb = (o, cls, ph) => o.img ? `<img class="${cls}" src="${o.img}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.outerHTML='<div class=&quot;${cls} ph&quot;>${ph}</div>'">` : `<div class="${cls} ph">${ph}</div>`;
 function render(){
@@ -525,7 +337,7 @@ function render(){
     <td class="num"><b>${fmt(c.area,0)}</b> mm²</td>
     <td class="num">${fmt(o.z, 1)}</td>
     <td class="num">${c.price==null?'ask':'$'+fmt(c.price,2)}</td>
-    <td class="sketch">${sketch(o, c)}</td></tr>`; }).join("");
+    <td class="sketch">${o.orient!=="vertical"?`<a href="edge-connectors-3d.html#${o.id}" title="open in the 3D viewer">${sketch(o, c)}</a>`:sketch(o, c)}</td></tr>`; }).join("");
   const per = Math.ceil(state.n/state.k);
   $("#hint").textContent = `${state.k} connector${state.k>1?'s':''} of at least ${per} contacts each; more is fine. ${rows.length} options shown, ${fits.length} fit a ${state.edge} mm edge`
     + (dropped ? `; ${dropped} left out because they come in no size that large` : '') + `. The lowest dead area that fits is highlighted.`;
@@ -549,7 +361,7 @@ function cards(){
     <dt>tongue</dt><dd>${fmt(o.tongue)} mm${o.approx?' <small>(≈ '+o.approx+')</small>':''}</dd><dt>cycles</dt><dd>${o.cycles||'—'}</dd><dt>plating</dt><dd>${o.plating||'—'}</dd>
     <dt>price</dt><dd class="price">${o.price==null?'ask':'$'+fmt(o.price,2)+(o.priceCny?' (¥'+o.priceCny+')':'')} <small>${o.price==null?o.priceQty:'@ '+o.priceQty}</small></dd></dl>
     <p class="note">${o.note||''}</p>
-    <div class="links">${(o.links||[]).map(l=>`<a href="${l[1]}"${blank(l[1])}>${l[0]}</a>`).join('')}</div></li>`; }).join("");
+    <div class="links">${o.orient!=="vertical"?`<a href="edge-connectors-3d.html#${o.id}">see it in 3D</a>`:''}${(o.links||[]).map(l=>`<a href="${l[1]}"${blank(l[1])}>${l[0]}</a>`).join('')}</div></li>`; }).join("");
 }
 function sources(){
   const srcs = new Map();

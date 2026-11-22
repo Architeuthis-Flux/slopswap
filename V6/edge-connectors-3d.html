@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>V6 Edge Connectors in 3D</title>
+<meta name="short-title" content="Connectors 3D">
+<meta name="description" content="Every non-vertical edge connector option drawn to scale between the real WigLEDmag wig and a Proto barnacle, top face and underside side by side.">
+<link rel="stylesheet" href="../styles/jumperless.css">
+<style>
+  main.page.wide{max-width:100rem}
+  .lede{color:var(--muted);max-width:78ch}
+  .tool{display:grid;grid-template-columns:17rem minmax(0,1fr);gap:1.5rem;align-items:start;margin-top:1.25rem}
+  .side{position:sticky;top:1rem;max-height:calc(100vh - 2rem);overflow-y:auto;overscroll-behavior:contain;padding:.8rem .8rem;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+  .side h2{font-size:.8rem;margin:.9rem 0 .4rem;border:0;padding:0}
+  .side h2:first-child{margin-top:0}
+  .pick{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+  .pick button{all:unset;box-sizing:border-box;display:block;width:100%;padding:.32rem .5rem;border-radius:5px;cursor:pointer;font:13px/1.3 var(--font-body);color:var(--fg);border-left:3px solid transparent}
+  .pick button:hover{background:var(--surface-2)}
+  .pick button[aria-current=true]{background:var(--surface-2);border-left-color:var(--accent)}
+  .pick button small{display:block;color:var(--muted);font-family:var(--font-mono);font-size:11px}
+  .stage{position:relative;border:1px solid var(--line);border-radius:8px;background:var(--surface);overflow:hidden;height:min(68vh,46rem);min-height:22rem;touch-action:none}
+  .stage canvas{display:block;width:100%;height:100%;cursor:grab}
+  .stage canvas:active{cursor:grabbing}
+  .vlabel{position:absolute;top:.55rem;font-family:var(--font-pixel);font-size:.5rem;color:var(--muted);pointer-events:none;letter-spacing:0}
+  .vlabel.l{left:.8rem}.vlabel.r{left:calc(50% + .8rem)}
+  .split{position:absolute;top:0;bottom:0;left:50%;width:1px;background:var(--line);pointer-events:none}
+  .stage.single .split,.stage.single .vlabel.r{display:none}
+  .names{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+  .names span{position:absolute;transform:translate(-50%,-50%);font:600 11px/1.1 var(--font-body);color:var(--fg);white-space:nowrap;text-shadow:0 0 4px var(--surface),0 0 4px var(--surface)}
+  .hintbar{position:absolute;right:.8rem;bottom:.5rem;font-size:.75rem;color:var(--muted);pointer-events:none}
+  .bar{display:flex;flex-wrap:wrap;gap:.5rem 1rem;align-items:center;margin:.7rem 0 0}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+  .seg button{font:13px var(--font-body);color:var(--fg);background:var(--surface-2);border:0;padding:.38rem .7rem;cursor:pointer}
+  .seg button+button{border-left:1px solid var(--line)}
+  .seg button[aria-pressed=true]{background:var(--accent);color:#fff}
+  .bar label{display:inline-flex;align-items:center;gap:.4rem;font-size:.85rem;color:var(--fg)}
+  .bar input[type=range]{width:9rem;accent-color:var(--accent)}
+  .info{margin-top:1rem;padding:1rem 1.1rem;border:1px solid var(--line);border-radius:8px;background:var(--surface)}
+  .info h3{margin:0 0 .3rem;font-size:1rem}
+  .info dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(10.5rem,1fr));gap:.5rem 1.2rem;margin:.7rem 0}
+  .info dt{font-family:var(--font-pixel);font-size:.45rem;color:var(--muted)}
+  .info dd{margin:.15rem 0 0;font-family:var(--font-mono);font-size:.9rem}
+  .info p{margin:.4rem 0;font-size:.92rem;color:var(--muted);max-width:90ch}
+  .info .links{display:flex;flex-wrap:wrap;gap:.3rem 1rem;font-size:.88rem}
+  .tag{display:inline-block;font-family:var(--font-pixel);font-size:.42rem;padding:.3em .55em;border-radius:999px;border:1px solid var(--line);margin:0 .25rem .2rem 0;color:var(--muted);white-space:nowrap}
+  .tag.cop{border-color:var(--accent-2);color:var(--accent-2)}.tag.st{border-color:var(--r9);color:var(--r9)}.tag.cu{border-color:var(--accent);color:var(--accent)}
+  .doc{max-width:72rem}
+  @media (max-width:900px){.tool{grid-template-columns:minmax(0,1fr)}.side{position:static;max-height:14rem}.stage{height:62vh}}
+</style>
+</head>
+<body>
+<main class="page wide">
+<p class="eyebrow"><a href="../">slopswap</a> / <a href="./">V6</a> / <a href="edge-connectors.html">edge connectors</a></p>
+<h1>Edge connectors in 3D</h1>
+<p class="lede">Each coplanar and right-angle connector from the <a href="edge-connectors.html">connector options page</a>, drawn to scale between the real WigLEDmag wig and a Proto barnacle plugged in at its top edge. The left view looks at the top face and the right view at the underside of the same assembly. The boards are the actual outlines and copper from the Barnacle_Board KiCad files; the plain strip added to each board is the area that connector would take. Housings are simplified blocks built from the catalogue dimensions, so trust the sizes and positions, not the fine detail.</p>
+
+<div class="tool">
+<aside class="side" aria-label="Connectors">
+  <h2>Coplanar</h2><ul class="pick" id="pick-cop"></ul>
+  <h2>Right angle, card parallel</h2><ul class="pick" id="pick-ra"></ul>
+</aside>
+<div>
+  <div class="stage" id="stage">
+    <canvas id="c" aria-label="3D view of the wig, the connector and the barnacle"></canvas>
+    <span class="vlabel l" id="lab-l">TOP FACE</span><span class="vlabel r">UNDERSIDE</span><span class="split"></span><div class="names" id="names"></div>
+    <span class="hintbar" id="hintbar">drag to turn · scroll to zoom · shift-drag to move · arrow keys change connector</span>
+  </div>
+  <div class="bar">
+    <span class="seg" id="mode"><button data-m="one" aria-pressed="true">One connector</button><button data-m="all" aria-pressed="false">All side by side</button></span>
+    <span class="seg" id="faces"><button data-f="both" aria-pressed="true">Both faces</button><button data-f="one" aria-pressed="false">One view</button></span>
+    <span class="seg" id="views"><button data-v="iso">Angled</button><button data-v="top">Straight on</button><button data-v="edge">Edge-on</button></span>
+    <label>unplug <input id="pull" type="range" min="0" max="20" step="0.5" value="0"></label>
+    <label><input id="leds" type="checkbox" checked> LEDs lit</label>
+  </div>
+  <div class="info" id="info"></div>
+</div>
+</div>
+
+<div class="doc">
+<h2>How to read it</h2>
+<ul>
+  <li><b>Wig</b> (below, nearer you): WigLEDmag, 78.7 × 55.0 mm without its tongue, 1.4 mm thick, 480 LEDs on top. <b>Barnacle</b> (above): the Proto barnacle, 1.6 mm thick. Both have had their real 45.47 mm tongues cut off and replaced by whatever that connector needs.</li>
+  <li><b>The plain strips</b> are the dead area: the strip on the wig is as deep as the connector's legs or footprint, and the strip on the barnacle is the tongue it takes. A right-angle socket lifts the barnacle above the wig's top face by the height of its slot.</li>
+  <li><b>Fixed-size parts</b> (PCIe, SFP, M.2) are shown in the number needed for 70 signals. Vertical-mount parts are left out.</li>
+  <li><b>Estimates</b>: where a maker's page does not say how deep the card seats, or how high a right-angle slot sits, the model uses the same estimate as the calculator and the panel says so.</li>
+</ul>
+<p class="muted">Board geometry from <a href="https://github.com/Architeuthis-Flux/Barnacle_Board">Architeuthis-Flux/Barnacle_Board</a> (Wigs/WigLEDmag and Barnacles/Proto). Rendered with three.js 0.160, served from this site. Built 23 Nov 2026.</p>
+</div>
+</main>
+
+<script src="edge-connector-data.js"></script>
+<script type="module">
+import * as THREE from "../styles/vendor/three-0.160.1.module.min.js";
+const BOARDS = {"wig":{"t":1.4,"cx":155.21,"y0":28.3,"bbox":[115.842,24.875,194.582,83.295],"outline":[[28.704,-53.929],[28.373,-54.259],[28.327,-54.313],[28.291,-54.373],[28.265,-54.439],[28.25,-54.508],[28.247,-54.579],[28.255,-54.649],[28.275,-54.717],[28.305,-54.781],[28.345,-54.839],[28.395,-54.89],[28.452,-54.932],[28.515,-54.964],[28.583,-54.985],[28.653,-54.995],[30.482,-54.995],[36.813,-54.995],[36.858,-54.995],[36.948,-54.987],[37.037,-54.971],[37.125,-54.947],[37.209,-54.916],[37.291,-54.877],[37.369,-54.832],[37.406,-54.806],[37.643,-54.65],[38.928,-53.73],[38.965,-53.704],[39.034,-53.647],[39.099,-53.584],[39.157,-53.515],[39.209,-53.442],[39.254,-53.364],[39.293,-53.282],[39.324,-53.198],[39.347,-53.111],[39.363,-53.022],[39.371,-52.933],[39.371,-52.888],[39.371,-45.205],[39.361,-44.96],[39.331,-44.717],[39.282,-44.477],[38.826,-42.654],[38.776,-42.414],[38.746,-42.171],[38.736,-41.926],[38.736,-13.455],[38.746,-13.21],[38.776,-12.967],[38.826,-12.727],[39.282,-10.904],[39.331,-10.664],[39.361,-10.421],[39.371,-10.176],[39.372,-2.113],[39.371,-2.068],[39.363,-1.978],[39.347,-1.889],[39.324,-1.802],[39.293,-1.718],[39.254,-1.636],[39.209,-1.559],[39.157,-1.485],[39.099,-1.417],[39.035,-1.353],[38.965,-1.296],[38.928,-1.27],[37.634,-0.343],[37.407,-0.194],[37.369,-0.168],[37.291,-0.122],[37.21,-0.084],[37.125,-0.052],[37.037,-0.028],[36.948,-0.013],[36.832,-0.004],[31.867,-0.004],[31.769,-0.0],[25.401,-0.0],[25.401,-0.541],[25.398,-0.576],[25.389,-0.609],[25.374,-0.641],[25.354,-0.67],[25.329,-0.694],[25.301,-0.714],[25.269,-0.729],[25.235,-0.738],[25.198,-0.741],[23.062,-0.741],[23.03,-0.738],[23.0,-0.731],[22.971,-0.719],[22.944,-0.703],[22.92,-0.682],[22.9,-0.658],[22.883,-0.632],[22.871,-0.603],[22.864,-0.572],[22.862,-0.536],[22.862,-0.0],[-22.858,-0.0],[-22.858,-0.541],[-22.862,-0.576],[-22.871,-0.609],[-22.885,-0.641],[-22.905,-0.669],[-22.93,-0.694],[-22.958,-0.714],[-22.99,-0.729],[-23.024,-0.738],[-23.058,-0.741],[-25.198,-0.741],[-25.229,-0.738],[-25.259,-0.731],[-25.288,-0.719],[-25.315,-0.703],[-25.339,-0.682],[-25.359,-0.659],[-25.376,-0.632],[-25.388,-0.603],[-25.395,-0.572],[-25.398,-0.541],[-25.398,-0.0],[-31.766,-0.0],[-31.864,-0.004],[-36.828,-0.004],[-36.856,-0.005],[-36.945,-0.013],[-37.034,-0.028],[-37.122,-0.052],[-37.206,-0.084],[-37.288,-0.122],[-37.366,-0.168],[-37.403,-0.194],[-37.631,-0.343],[-38.925,-1.27],[-38.962,-1.296],[-39.032,-1.353],[-39.096,-1.417],[-39.154,-1.485],[-39.206,-1.559],[-39.251,-1.636],[-39.29,-1.718],[-39.321,-1.802],[-39.344,-1.889],[-39.36,-1.978],[-39.368,-2.068],[-39.368,-2.113],[-39.368,-10.176],[-39.358,-10.421],[-39.328,-10.664],[-39.279,-10.904],[-38.823,-12.727],[-38.773,-12.967],[-38.743,-13.21],[-38.733,-13.455],[-38.733,-41.926],[-38.743,-42.171],[-38.773,-42.414],[-38.823,-42.654],[-39.279,-44.477],[-39.328,-44.717],[-39.358,-44.96],[-39.368,-45.205],[-39.368,-52.888],[-39.368,-52.933],[-39.36,-53.022],[-39.344,-53.111],[-39.321,-53.198],[-39.29,-53.282],[-39.251,-53.364],[-39.206,-53.442],[-39.154,-53.515],[-39.095,-53.584],[-39.031,-53.647],[-38.962,-53.704],[-38.925,-53.73],[-37.64,-54.65],[-37.403,-54.806],[-37.366,-54.832],[-37.288,-54.877],[-37.206,-54.916],[-37.121,-54.947],[-37.034,-54.971],[-36.945,-54.987],[-36.855,-54.995],[-36.81,-54.995],[-30.478,-54.995],[-28.65,-54.995],[-28.58,-54.985],[-28.512,-54.964],[-28.449,-54.932],[-28.392,-54.89],[-28.342,-54.839],[-28.302,-54.781],[-28.271,-54.717],[-28.252,-54.649],[-28.244,-54.579],[-28.247,-54.508],[-28.262,-54.439],[-28.288,-54.373],[-28.324,-54.313],[-28.37,-54.259],[-28.7,-53.929],[-28.727,-53.889],[-28.748,-53.846],[-28.761,-53.8],[-28.768,-53.752],[-28.768,-53.598],[-28.762,-53.55],[-28.748,-53.502],[-28.727,-53.458],[-28.698,-53.419],[-28.663,-53.384],[-28.622,-53.356],[-28.578,-53.336],[-28.53,-53.324],[-28.481,-53.319],[-25.538,-53.319],[-22.595,-53.319],[-22.546,-53.324],[-22.499,-53.336],[-22.454,-53.356],[-22.413,-53.384],[-22.378,-53.419],[-22.35,-53.458],[-22.328,-53.502],[-22.314,-53.55],[-22.309,-53.598],[-22.309,-53.752],[-22.315,-53.8],[-22.329,-53.846],[-22.349,-53.889],[-22.376,-53.929],[-22.706,-54.259],[-22.752,-54.313],[-22.788,-54.373],[-22.814,-54.439],[-22.829,-54.508],[-22.833,-54.579],[-22.824,-54.649],[-22.805,-54.717],[-22.774,-54.781],[-22.734,-54.839],[-22.684,-54.89],[-22.627,-54.932],[-22.564,-54.964],[-22.497,-54.985],[-22.427,-54.995],[0.002,-54.995],[22.43,-54.995],[22.5,-54.985],[22.567,-54.964],[22.63,-54.932],[22.688,-54.89],[22.737,-54.839],[22.777,-54.781],[22.808,-54.717],[22.828,-54.649],[22.836,-54.579],[22.832,-54.508],[22.817,-54.439],[22.791,-54.373],[22.755,-54.313],[22.709,-54.259],[22.379,-53.929],[22.352,-53.889],[22.332,-53.846],[22.318,-53.8],[22.312,-53.752],[22.312,-53.598],[22.317,-53.55],[22.331,-53.502],[22.353,-53.458],[22.381,-53.419],[22.417,-53.384],[22.457,-53.356],[22.502,-53.336],[22.549,-53.324],[22.598,-53.319],[25.541,-53.319],[28.484,-53.319],[28.533,-53.324],[28.581,-53.336],[28.625,-53.356],[28.666,-53.384],[28.701,-53.419],[28.73,-53.458],[28.751,-53.502],[28.765,-53.55],[28.771,-53.598],[28.771,-53.752],[28.764,-53.8],[28.751,-53.846],[28.73,-53.889]],"leds":[[-31.748,-23.88],[1.272,-34.04],[1.272,-49.28],[-16.508,-21.34],[-34.288,-28.96],[-24.128,-49.28],[-24.128,-26.42],[34.292,-36.58],[21.592,-28.96],[-16.508,-26.42],[-19.048,-26.42],[36.832,-21.34],[34.292,-26.42],[-11.428,-3.56],[24.132,-39.12],[29.212,-21.34],[8.892,-6.1],[24.132,-16.26],[29.212,-18.8],[-3.808,-36.58],[6.352,-13.72],[-36.828,-21.34],[3.812,-51.82],[-6.348,-49.28],[19.052,-26.42],[-36.828,-31.5],[-8.888,-21.34],[24.132,-21.34],[-19.048,-16.26],[26.672,-31.5],[-11.428,-51.82],[24.132,-18.8],[3.812,-21.34],[31.752,-51.82],[13.972,-6.1],[-21.588,-34.04],[-8.888,-34.04],[3.812,-28.96],[-34.288,-39.12],[3.812,-39.12],[-34.288,-21.34],[29.212,-23.88],[-1.268,-39.12],[19.052,-51.82],[31.752,-13.72],[-16.508,-39.12],[-13.968,-6.1],[-36.828,-16.26],[16.512,-18.8],[24.132,-51.82],[-3.808,-26.42],[21.592,-51.82],[24.132,-49.28],[36.832,-34.04],[29.212,-34.04],[19.052,-21.34],[-3.808,-49.28],[31.752,-6.1],[-36.828,-39.12],[-26.668,-39.12],[6.352,-18.8],[21.592,-39.12],[-19.048,-3.56],[-1.268,-41.66],[3.812,-31.5],[-36.828,-51.82],[-1.268,-49.28],[21.592,-3.56],[19.052,-23.88],[-19.048,-49.28],[8.892,-49.28],[-36.828,-18.8],[-34.288,-18.8],[-8.888,-39.12],[-1.268,-28.96],[-19.048,-6.1],[31.752,-3.56],[-31.748,-49.28],[-16.508,-23.88],[-24.128,-31.5],[-31.748,-28.96],[-3.808,-31.5],[-21.588,-16.26],[-36.828,-28.96],[-11.428,-41.66],[8.892,-28.96],[-13.968,-21.34],[11.432,-13.72],[-16.508,-28.96],[-1.268,-31.5],[-24.128,-13.72],[-11.428,-26.42],[-3.808,-18.8],[26.672,-36.58],[6.352,-16.26],[1.272,-21.34],[21.592,-23.88],[-26.668,-21.34],[-21.588,-3.56],[29.212,-41.66],[-11.428,-23.88],[8.892,-3.56],[8.892,-41.66],[-26.668,-18.8],[21.592,-26.42],[21.592,-49.28],[21.592,-31.5],[16.512,-39.12],[-24.128,-28.96],[16.512,-28.96],[36.832,-13.72],[-8.888,-49.28],[13.972,-36.58],[36.832,-23.88],[16.512,-23.88],[3.812,-18.8],[-29.208,-31.5],[-1.268,-13.72],[-6.348,-23.88],[34.292,-21.34],[11.432,-21.34],[24.132,-13.72],[-26.668,-31.5],[-1.268,-51.82],[24.132,-23.88],[-26.668,-23.88],[-26.668,-28.96],[26.672,-39.12],[-36.828,-23.88],[3.812,-6.1],[-19.048,-23.88],[-24.128,-51.82],[6.352,-39.12],[19.052,-13.72],[16.512,-31.5],[-11.428,-18.8],[31.752,-36.58],[13.972,-49.28],[8.892,-18.8],[-19.048,-39.12],[34.292,-49.28],[31.752,-18.8],[8.892,-51.82],[1.272,-28.96],[-26.668,-36.58],[8.892,-26.42],[-8.888,-6.1],[19.052,-6.1],[24.132,-36.58],[-13.968,-36.58],[31.752,-49.28],[26.672,-21.34],[-1.268,-3.56],[-29.208,-51.82],[-21.588,-31.5],[34.292,-23.88],[-6.348,-6.1],[31.752,-41.66],[19.052,-49.28],[-6.348,-51.82],[-19.048,-31.5],[6.352,-6.1],[-24.128,-23.88],[-29.208,-3.56],[3.812,-23.88],[-13.968,-39.12],[-13.968,-28.96],[21.592,-41.66],[-3.808,-34.04],[16.512,-34.04],[26.672,-3.56],[26.672,-26.42],[-34.288,-26.42],[29.212,-6.1],[11.432,-34.04],[-24.128,-39.12],[-36.828,-34.04],[24.132,-31.5],[-29.208,-21.34],[11.432,-36.58],[-6.348,-39.12],[-21.588,-51.82],[-6.348,-18.8],[-6.348,-26.42],[13.972,-26.42],[-34.288,-6.1],[-13.968,-34.04],[-16.508,-18.8],[6.352,-49.28],[-3.808,-39.12],[21.592,-18.8],[19.052,-16.26],[6.352,-31.5],[-8.888,-18.8],[6.352,-36.58],[3.812,-16.26],[19.052,-18.8],[26.672,-49.28],[34.292,-28.96],[21.592,-13.72],[36.832,-6.1],[11.432,-51.82],[-26.668,-13.72],[-31.748,-36.58],[-31.748,-16.26],[-29.208,-13.72],[13.972,-3.56],[36.832,-26.42],[24.132,-26.42],[-19.048,-21.34],[-3.808,-16.26],[-3.808,-23.88],[-11.428,-39.12],[34.292,-31.5],[-21.588,-49.28],[-31.748,-34.04],[3.812,-34.04],[-16.508,-41.66],[1.272,-18.8],[-26.668,-51.82],[21.592,-6.1],[-1.268,-34.04],[6.352,-34.04],[-36.828,-36.58],[-11.428,-36.58],[-16.508,-51.82],[34.292,-16.26],[16.512,-36.58],[8.892,-23.88],[-31.748,-31.5],[6.352,-23.88],[31.752,-34.04],[6.352,-3.56],[13.972,-51.82],[11.432,-26.42],[19.052,-41.66],[-6.348,-21.34],[-1.268,-18.8],[29.212,-36.58],[-21.588,-36.58],[16.512,-16.26],[-16.508,-36.58],[-11.428,-49.28],[-8.888,-26.42],[34.292,-18.8],[13.972,-23.88],[29.212,-3.56],[-11.428,-21.34],[34.292,-6.1],[36.832,-36.58],[3.812,-3.56],[-16.508,-34.04],[1.272,-36.58],[-6.348,-36.58],[34.292,-41.66],[6.352,-51.82],[-29.208,-41.66],[-26.668,-3.56],[11.432,-39.12],[16.512,-26.42],[16.512,-13.72],[29.212,-13.72],[21.592,-21.34],[1.272,-6.1],[26.672,-18.8],[-24.128,-16.26],[-29.208,-23.88],[-6.348,-31.5],[11.432,-49.28],[-21.588,-39.12],[-13.968,-3.56],[-1.268,-26.42],[-36.828,-49.28],[11.432,-23.88],[19.052,-34.04],[-8.888,-51.82],[-19.048,-36.58],[-13.968,-41.66],[19.052,-31.5],[36.832,-18.8],[36.832,-51.82],[16.512,-51.82],[16.512,-21.34],[3.812,-41.66],[-36.828,-26.42],[31.752,-31.5],[26.672,-16.26],[-11.428,-31.5],[6.352,-21.34],[16.512,-3.56],[-11.428,-16.26],[-3.808,-6.1],[29.212,-39.12],[-36.828,-3.56],[-29.208,-34.04],[1.272,-23.88],[-31.748,-18.8],[-26.668,-49.28],[-26.668,-41.66],[-3.808,-51.82],[19.052,-39.12],[-21.588,-23.88],[-16.508,-3.56],[11.432,-16.26],[24.132,-41.66],[-24.128,-18.8],[-6.348,-28.96],[16.512,-49.28],[31.752,-21.34],[8.892,-16.26],[-34.288,-23.88],[-29.208,-16.26],[-6.348,-41.66],[-1.268,-23.88],[34.292,-39.12],[11.432,-3.56],[31.752,-26.42],[-31.748,-51.82],[3.812,-26.42],[-24.128,-36.58],[-31.748,-3.56],[13.972,-16.26],[-31.748,-39.12],[26.672,-6.1],[29.212,-26.42],[13.972,-41.66],[-21.588,-28.96],[13.972,-34.04],[-34.288,-41.66],[24.132,-6.1],[-34.288,-49.28],[1.272,-31.5],[-16.508,-16.26],[11.432,-18.8],[-29.208,-28.96],[-21.588,-18.8],[-16.508,-6.1],[-19.048,-51.82],[-1.268,-36.58],[8.892,-31.5],[21.592,-36.58],[-13.968,-26.42],[-13.968,-16.26],[-13.968,-23.88],[16.512,-41.66],[29.212,-51.82],[24.132,-34.04],[16.512,-6.1],[26.672,-28.96],[-3.808,-28.96],[-24.128,-41.66],[3.812,-36.58],[1.272,-16.26],[-26.668,-16.26],[34.292,-34.04],[36.832,-28.96],[3.812,-49.28],[-21.588,-6.1],[-3.808,-41.66],[29.212,-16.26],[-31.748,-21.34],[-8.888,-31.5],[-16.508,-31.5],[19.052,-28.96],[8.892,-21.34],[-36.828,-41.66],[-6.348,-34.04],[-21.588,-13.72],[13.972,-13.72],[26.672,-13.72],[-29.208,-18.8],[-11.428,-6.1],[-13.968,-51.82],[1.272,-26.42],[34.292,-51.82],[29.212,-31.5],[-24.128,-6.1],[36.832,-39.12],[-6.348,-16.26],[-26.668,-34.04],[-11.428,-13.72],[-29.208,-49.28],[-8.888,-28.96],[13.972,-39.12],[3.812,-13.72],[-31.748,-41.66],[-26.668,-26.42],[-31.748,-6.1],[34.292,-13.72],[36.832,-16.26],[1.272,-13.72],[21.592,-16.26],[24.132,-28.96],[-34.288,-34.04],[26.672,-23.88],[-19.048,-28.96],[-8.888,-3.56],[-8.888,-16.26],[-29.208,-26.42],[8.892,-36.58],[13.972,-28.96],[-24.128,-21.34],[-21.588,-21.34],[-34.288,-36.58],[-3.808,-13.72],[-1.268,-6.1],[-34.288,-51.82],[6.352,-41.66],[34.292,-3.56],[11.432,-31.5],[-24.128,-3.56],[-31.748,-26.42],[-19.048,-13.72],[-26.668,-6.1],[21.592,-34.04],[-21.588,-26.42],[-16.508,-13.72],[-34.288,-31.5],[19.052,-36.58],[13.972,-21.34],[11.432,-28.96],[1.272,-3.56],[29.212,-49.28],[13.972,-31.5],[-29.208,-6.1],[-11.428,-28.96],[-29.208,-39.12],[31.752,-39.12],[-34.288,-16.26],[-6.348,-3.56],[-13.968,-31.5],[-6.348,-13.72],[-34.288,-3.56],[29.212,-28.96],[-19.048,-41.66],[-8.888,-13.72],[1.272,-41.66],[8.892,-34.04],[36.832,-31.5],[-1.268,-21.34],[6.352,-28.96],[31.752,-23.88],[36.832,-41.66],[-19.048,-34.04],[-34.288,-13.72],[6.352,-26.42],[36.832,-3.56],[11.432,-41.66],[-1.268,-16.26],[-36.828,-6.1],[-8.888,-41.66],[-8.888,-23.88],[-24.128,-34.04],[-13.968,-13.72],[26.672,-41.66],[-3.808,-3.56],[-29.208,-36.58],[31.752,-16.26],[-19.048,-18.8],[11.432,-6.1],[26.672,-51.82],[-8.888,-36.58],[-13.968,-18.8],[1.272,-39.12],[-16.508,-49.28],[-36.828,-13.72],[8.892,-13.72],[8.892,-39.12],[36.832,-49.28],[-21.588,-41.66],[24.132,-3.56],[31.752,-28.96],[-3.808,-21.34],[26.672,-34.04],[19.052,-3.56],[-13.968,-49.28],[-31.748,-13.72],[13.972,-18.8],[-11.428,-34.04],[1.272,-51.82]],"ledsB":0},"barnacle":{"t":1.6,"cx":155.19,"y0":68.71,"bbox":[113.934,49.758,198.386,76.327],"outline":[[22.734,0.003],[22.734,0.0],[-22.732,0.0],[-22.732,0.003],[-25.399,0.003],[-38.208,0.003],[-38.481,0.036],[-38.746,0.113],[-38.994,0.232],[-39.22,0.39],[-39.417,0.582],[-39.58,0.804],[-41.089,2.734],[-41.152,2.83],[-41.202,2.935],[-41.237,3.045],[-41.256,3.159],[-41.256,3.808],[-41.256,6.119],[-41.256,6.156],[-41.234,6.225],[-41.191,6.284],[-41.132,6.326],[-41.063,6.349],[-40.773,6.349],[-40.743,6.349],[-40.685,6.333],[-40.61,6.281],[-40.08,5.794],[-40.024,5.751],[-39.956,5.723],[-39.884,5.713],[-39.63,5.713],[-39.544,5.727],[-39.466,5.767],[-39.404,5.828],[-39.365,5.906],[-39.351,5.992],[-39.351,7.008],[-39.351,8.888],[-39.351,10.768],[-39.351,11.784],[-39.365,11.87],[-39.404,11.948],[-39.466,12.009],[-39.544,12.049],[-39.63,12.063],[-39.884,12.063],[-39.956,12.053],[-40.024,12.025],[-40.08,11.982],[-40.081,11.982],[-40.61,11.495],[-40.611,11.495],[-40.632,11.473],[-40.685,11.443],[-40.743,11.427],[-40.773,11.427],[-41.063,11.427],[-41.132,11.45],[-41.191,11.492],[-41.234,11.551],[-41.256,11.62],[-41.256,11.657],[-41.256,13.968],[-41.256,14.12],[-41.236,14.235],[-41.201,14.346],[-41.151,14.451],[-41.086,14.547],[-39.58,16.474],[-39.417,16.695],[-39.22,16.888],[-38.994,17.046],[-38.746,17.165],[-38.481,17.242],[-38.208,17.275],[-30.479,17.275],[-28.342,17.275],[-28.292,17.279],[-28.243,17.292],[-28.198,17.313],[-28.157,17.341],[-28.121,17.376],[-28.092,17.417],[-28.07,17.462],[-28.056,17.51],[-28.05,17.56],[-28.054,17.61],[-28.065,17.658],[-28.085,17.704],[-28.113,17.747],[-28.625,18.307],[-28.648,18.334],[-28.667,18.364],[-28.681,18.397],[-28.69,18.432],[-28.692,18.468],[-28.692,18.722],[-28.69,18.758],[-28.681,18.793],[-28.667,18.826],[-28.649,18.856],[-28.625,18.884],[-28.598,18.907],[-28.568,18.926],[-28.534,18.939],[-28.5,18.948],[-28.464,18.951],[-25.536,18.951],[-22.589,18.952],[-22.553,18.949],[-22.518,18.94],[-22.485,18.927],[-22.454,18.908],[-22.427,18.885],[-22.404,18.857],[-22.385,18.827],[-22.371,18.794],[-22.363,18.759],[-22.36,18.723],[-22.36,18.469],[-22.363,18.433],[-22.372,18.398],[-22.385,18.365],[-22.404,18.335],[-22.428,18.308],[-22.94,17.747],[-22.968,17.705],[-22.987,17.659],[-22.999,17.611],[-23.002,17.561],[-22.997,17.511],[-22.983,17.463],[-22.961,17.418],[-22.932,17.377],[-22.896,17.342],[-22.855,17.314],[-22.809,17.293],[-22.761,17.28],[-22.711,17.276],[0.002,17.274],[22.744,17.275],[22.794,17.279],[22.842,17.292],[22.888,17.313],[22.929,17.341],[22.965,17.376],[22.994,17.417],[23.016,17.462],[23.03,17.51],[23.035,17.56],[23.032,17.61],[23.02,17.658],[23.001,17.704],[22.972,17.747],[22.461,18.307],[22.437,18.334],[22.418,18.364],[22.405,18.397],[22.396,18.432],[22.393,18.468],[22.393,18.722],[22.396,18.758],[22.404,18.793],[22.418,18.826],[22.437,18.856],[22.46,18.884],[22.488,18.907],[22.518,18.926],[22.551,18.939],[22.586,18.948],[22.622,18.951],[25.54,18.951],[28.46,18.951],[28.496,18.948],[28.531,18.939],[28.564,18.926],[28.595,18.907],[28.622,18.884],[28.645,18.856],[28.664,18.826],[28.678,18.793],[28.686,18.758],[28.689,18.722],[28.689,18.468],[28.686,18.432],[28.678,18.397],[28.664,18.364],[28.645,18.334],[28.621,18.307],[28.109,17.746],[28.082,17.704],[28.062,17.658],[28.05,17.61],[28.047,17.56],[28.052,17.51],[28.066,17.462],[28.088,17.417],[28.117,17.376],[28.153,17.341],[28.194,17.313],[28.24,17.292],[28.288,17.279],[28.347,17.275],[30.481,17.275],[38.243,17.275],[38.517,17.242],[38.781,17.165],[39.029,17.046],[39.255,16.888],[39.452,16.695],[39.616,16.474],[41.124,14.544],[41.194,14.436],[41.246,14.318],[41.278,14.194],[41.291,14.066],[41.291,13.973],[41.291,11.675],[41.305,11.589],[41.345,11.512],[41.406,11.45],[41.484,11.41],[41.57,11.397],[41.824,11.397],[41.896,11.406],[41.964,11.434],[42.02,11.477],[42.551,11.964],[42.551,11.965],[42.625,12.016],[42.683,12.032],[42.713,12.032],[42.967,12.032],[43.004,12.032],[43.073,12.009],[43.131,11.967],[43.174,11.908],[43.196,11.839],[43.196,11.8],[43.196,8.893],[43.196,5.986],[43.196,5.947],[43.174,5.878],[43.131,5.819],[43.073,5.777],[43.004,5.754],[42.967,5.754],[42.713,5.754],[42.683,5.754],[42.625,5.77],[42.573,5.8],[42.021,6.308],[41.964,6.352],[41.896,6.38],[41.824,6.389],[41.57,6.389],[41.484,6.376],[41.406,6.336],[41.345,6.274],[41.305,6.197],[41.291,6.111],[41.291,3.813],[41.291,3.159],[41.272,3.045],[41.237,2.935],[41.188,2.831],[41.125,2.735],[39.616,0.804],[39.452,0.583],[39.255,0.39],[39.029,0.232],[38.781,0.113],[38.516,0.036],[38.243,0.003],[25.401,0.003]]}};
+const ALL = window.EDGE.ALL.filter(o => o.orient !== "vertical");
+const $ = s => document.querySelector(s);
+const fmt = (v, d=1) => v==null||isNaN(v) ? "—" : Number(v).toFixed(d);
+const N_SIGNALS = 70, BETWEEN = 2;
+
+// ---------------------------------------------------------------- sizes for 70 signals with one connector (or as many fixed-size parts as that takes)
+function plan(o){
+  let k = 1, nps;
+  if(o.fixedPos){ k = Math.ceil(N_SIGNALS/o.fixedPos); nps = o.fixedPos/o.rows; }
+  else { nps = Math.ceil(N_SIGNALS/o.rows); if(o.sizes){ nps = o.sizes.find(x => x>=nps) ?? o.sizes[o.sizes.length-1]; } }
+  const len = o.fixedLen!=null ? o.fixedLen : o.len ? o.len(nps) : (nps-1)*o.pitch + o.end;
+  return {k, nps, len, edge:k*len+(k-1)*BETWEEN, contacts:k*nps*o.rows};
+}
+const kind = o => (o.id==="kiss"||o.id==="kiss08") ? "kiss" : o.id.startsWith("ra") && o.orient==="coplanar" ? "header" : o.orient==="coplanar" ? "straddle" : "ra";
+const cardT = o => Number(o.thk[0]) || 1.6;
+
+// ---------------------------------------------------------------- scene helpers. Design axes: x along the edge, y from the wig towards the barnacle, z up (0 = wig top face).
+const D = (x, y, z) => new THREE.Vector3(x, z, -y);
+const M = {
+  plastic: new THREE.MeshStandardMaterial({color:0x202024, roughness:.55, metalness:.05, side:THREE.DoubleSide}),
+  plasticB: new THREE.MeshStandardMaterial({color:0x2c2c33, roughness:.6, metalness:.05, side:THREE.DoubleSide}),
+  gold: new THREE.MeshStandardMaterial({color:0xe0b44c, roughness:.32, metalness:.85}),
+  tin: new THREE.MeshStandardMaterial({color:0xc5c8cf, roughness:.4, metalness:.8}),
+  mask: new THREE.MeshStandardMaterial({color:0x1a1820, roughness:.5, metalness:.1, side:THREE.DoubleSide}),
+  fr4: new THREE.MeshStandardMaterial({color:0x7d6e3c, roughness:.8, side:THREE.DoubleSide}),
+  steel: new THREE.MeshStandardMaterial({color:0x8d9097, roughness:.35, metalness:.9}),
+};
+function box(g, mat, x0, x1, y0, y1, z0, z1){
+  const m = new THREE.Mesh(new THREE.BoxGeometry(Math.abs(x1-x0), Math.abs(z1-z0), Math.abs(y1-y0)), mat);
+  m.position.copy(D((x0+x1)/2, (y0+y1)/2, (z0+z1)/2)); g.add(m); return m;
+}
+const _m4 = new THREE.Matrix4();
+function row(g, mat, xs, w, y0, y1, z0, z1){          // one instanced box per x position
+  if(!xs.length) return;
+  const im = new THREE.InstancedMesh(new THREE.BoxGeometry(w, Math.abs(z1-z0), Math.abs(y1-y0)), mat, xs.length);
+  xs.forEach((x, i) => { const p = D(x, (y0+y1)/2, (z0+z1)/2); im.setMatrixAt(i, _m4.makeTranslation(p.x, p.y, p.z)); });
+  g.add(im); return im;
+}
+const span = (n, pitch, cx=0) => Array.from({length:n}, (_, i) => cx + (i-(n-1)/2)*pitch);
+
+// ---------------------------------------------------------------- the two real boards
+const loader = new THREE.TextureLoader();
+const tex = name => { const t = loader.load(name, () => requestRender()); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t; };
+const TEX = {wt:tex("edge3d-wig-top.png"), wb:tex("edge3d-wig-bottom.png"), bt:tex("edge3d-barnacle-top.png"), bb:tex("edge3d-barnacle-bottom.png")};
+function boardGeo(b, flipY){
+  const shape = new THREE.Shape(b.outline.map(([x, y]) => new THREE.Vector2(x, y)));
+  const flat = new THREE.ShapeGeometry(shape); const pos = flat.attributes.position, uv = flat.attributes.uv;
+  const [x0, y0, x1, y1] = b.bbox;
+  for(let i=0;i<pos.count;i++){ const kx = pos.getX(i)+b.cx, ky = flipY ? b.y0 - pos.getY(i) : b.y0 - pos.getY(i); uv.setXY(i, (kx-x0)/(x1-x0), 1-(ky-y0)/(y1-y0)); }
+  flat.rotateX(-Math.PI/2);
+  const solid = new THREE.ExtrudeGeometry(shape, {depth:b.t-0.04, bevelEnabled:false}); solid.rotateX(-Math.PI/2);
+  return {flat, solid};
+}
+const GEO = {wig:boardGeo(BOARDS.wig), barnacle:boardGeo(BOARDS.barnacle)};
+const MAT = {
+  wt:new THREE.MeshStandardMaterial({map:TEX.wt, roughness:.5, metalness:.15}), wb:new THREE.MeshStandardMaterial({map:TEX.wb, roughness:.5, metalness:.15, side:THREE.BackSide}),
+  bt:new THREE.MeshStandardMaterial({map:TEX.bt, roughness:.5, metalness:.15}), bb:new THREE.MeshStandardMaterial({map:TEX.bb, roughness:.5, metalness:.15, side:THREE.BackSide}),
+};
+function board(which, zTop, yOff){          // textured top and bottom faces with a plain core between them
+  const g = new THREE.Group(), b = BOARDS[which], G = GEO[which];
+  const top = new THREE.Mesh(G.flat, which==="wig"?MAT.wt:MAT.bt); top.position.set(0, zTop, -yOff);
+  const bot = new THREE.Mesh(G.flat, which==="wig"?MAT.wb:MAT.bb); bot.position.set(0, zTop-b.t, -yOff);
+  const core = new THREE.Mesh(G.solid, M.fr4); core.position.set(0, zTop-b.t+0.02, -yOff);
+  g.add(top, bot, core); return g;
+}
+const ledGeo = new THREE.BoxGeometry(1.3, 0.45, 1.3);
+function leds(){
+  const L = BOARDS.wig.leds, im = new THREE.InstancedMesh(ledGeo, new THREE.MeshBasicMaterial({color:0xffffff}), L.length), col = new THREE.Color();
+  L.forEach(([x, y], i) => { const p = D(x, y, 0.23); im.setMatrixAt(i, _m4.makeTranslation(p.x, p.y, p.z)); im.setColorAt(i, col.set(0xd8d8d2)); });
+  im.userData.led = true; return im;
+}
+// a plain strip of board: the part of each board the connector uses up
+function strip(g, x0, x1, y0, y1, zTop, t){ box(g, M.mask, x0, x1, y0, y1, zTop-t, zTop); }
+function fingers(g, xs, w, y0, y1, zTop, t, faces="both"){
+  if(faces!=="bottom") row(g, M.gold, xs, w, y0, y1, zTop, zTop+0.04);
+  if(faces!=="top") row(g, M.gold, xs, w, y0, y1, zTop-t-0.04, zTop-t);
+}
+
+// ---------------------------------------------------------------- connector builders. Each returns {fixed, moving}: the wig side and the barnacle side.
+function assembly(o){
+  const P = plan(o), K = kind(o), fixed = new THREE.Group(), moving = new THREE.Group();
+  const WT = BOARDS.wig.t, BT = K==="ra" || K==="straddle" || K==="kiss" ? cardT(o) : BOARDS.barnacle.t;
+  const host = o.host, tongue = o.tongue, gap = o.orient==="coplanar" ? o.gap : 0, z = o.z;
+  fixed.add(board("wig", 0, 0), leds());
+  const total = P.edge, x0s = Array.from({length:P.k}, (_, i) => -total/2 + i*(P.len+BETWEEN) + P.len/2);
+  let barnY, barnZ;                                                    // where the barnacle body's near edge sits, and its top face
+  for(const cx of x0s){
+    const g = new THREE.Group(); g.position.x = cx; fixed.add(g);
+    const mg = new THREE.Group(); mg.position.x = cx; moving.add(mg);
+    const ear = o.earW || 0, bodyLen = P.len - 2*ear, xs = span(P.nps, o.pitch), fw = Math.min(o.pitch*0.55, 1.0), cw = (P.nps-1)*o.pitch + Math.max(2.3, o.pitch*2);
+    if(K==="straddle"){
+      const zc = -WT/2, body = gap + tongue, slot = Math.min(tongue, body-1.2), yb = host + body, jaw = BT/2 + 0.12;
+      strip(g, -P.len/2-1, P.len/2+1, 0, host, 0, WT);                                          // the wig grows by the depth of the legs
+      box(g, M.plastic, -bodyLen/2, bodyLen/2, host, yb-slot, zc-z/2, zc+z/2);                 // back of the housing, against the wig edge
+      box(g, M.plastic, -bodyLen/2, bodyLen/2, yb-slot, yb, zc+jaw, zc+z/2);                   // upper jaw
+      box(g, M.plastic, -bodyLen/2, bodyLen/2, yb-slot, yb, zc-z/2, zc-jaw);                   // lower jaw
+      for(const s of [-1, 1]) box(g, M.plastic, s*bodyLen/2, s*(bodyLen/2-Math.min(1.6,(bodyLen-cw)/2+0.4)), yb-slot, yb, zc-jaw, zc+jaw);
+      if(ear) for(const s of [-1, 1]){ box(g, M.plasticB, s*bodyLen/2, s*(bodyLen/2+ear), Math.max(0, host-4), host+Math.min(body, 5), zc-z/2, zc+z/2);
+        if(o.id!=="sliversm" && o.id!=="xkb3126") continue;
+        const scr = new THREE.Mesh(new THREE.CylinderGeometry(Math.min(1.1, ear*0.3), Math.min(1.1, ear*0.3), z+0.3, 20), M.steel); scr.position.copy(D(s*(bodyLen/2+ear/2), host-Math.min(2, host/2), zc)); g.add(scr); }
+      const legMat = o.id==="wingtat" ? M.gold : M.tin, leg = Math.min(host*0.92, host-0.2);
+      row(g, legMat, xs, fw, host-leg, host+0.4, 0, 0.3); row(g, legMat, xs, fw, host-leg, host+0.4, -WT-0.3, -WT);   // legs on both faces of the wig
+      box(g, M.plastic, -bodyLen/2, bodyLen/2, host-Math.min(1.4, host*0.3), host, 0.3, zc+z/2);                   // housing lip over the legs, top
+      box(g, M.plastic, -bodyLen/2, bodyLen/2, host-Math.min(1.4, host*0.3), host, zc-z/2, -WT-0.3);               // and bottom
+      row(g, M.gold, xs, fw, yb-slot+0.4, yb-0.5, zc+BT/2, zc+jaw); row(g, M.gold, xs, fw, yb-slot+0.4, yb-0.5, zc-jaw, zc-BT/2);
+      strip(mg, -cw/2, cw/2, host+gap, yb, zc+BT/2, BT); fingers(mg, xs, fw, host+gap+0.3, yb-0.4, zc+BT/2, BT);
+      barnY = yb; barnZ = zc+BT/2;
+    } else if(K==="kiss"){
+      const zc = -WT/2, yb = host+gap+tongue, jaw = Math.max(BT, WT)/2 + 0.12, tw = 45.47;
+      strip(g, -tw/2, tw/2, 0, host, 0, WT);
+      box(g, M.plastic, -P.len/2, P.len/2, 0, yb, zc+jaw, zc+z/2); box(g, M.plastic, -P.len/2, P.len/2, 0, yb, zc-z/2, zc-jaw);
+      for(const s of [-1, 1]) box(g, M.plastic, s*P.len/2, s*(tw/2+0.25), 0, yb, zc-jaw, zc+jaw);
+      row(g, M.gold, xs.map(x => x-0.3), 0.3, 0.6, yb-0.6, zc+z/2, zc+z/2+0.05); row(g, M.gold, xs.map(x => x+0.3), 0.3, 0.6, yb-0.6, zc-z/2-0.05, zc-z/2);   // contact spines on the outer faces
+      fingers(g, xs, fw, 0.3, host-0.2, 0, WT);
+      strip(mg, -tw/2, tw/2, host+gap, yb, zc+BT/2, BT); fingers(mg, xs, fw, host+gap+0.2, yb-0.3, zc+BT/2, BT);
+      barnY = yb; barnZ = zc+BT/2;
+    } else if(K==="header"){
+      const bd = o.pitch < 2 ? 4.3 : 8.5, rows = 2, hw = P.nps*o.pitch + 0.4;
+      strip(g, -P.len/2-1, P.len/2+1, 0, host, 0, WT);
+      box(g, M.plastic, -hw/2, hw/2, host-bd, host, 0, z);                                                          // socket body on the wig
+      for(let r=0;r<rows;r++) row(g, M.tin, xs, fw*0.7, 0.1, host-bd+0.2, 0, 0.25+r*o.pitch*0.5);                   // bent tails behind it
+      for(let r=0;r<rows;r++) row(g, M.gold, xs, fw*0.8, host-0.6, host+0.02, (r+0.5)*o.pitch-fw*0.4+0.2, (r+0.5)*o.pitch+fw*0.4+0.2);   // socket mouths
+      const pb = o.pitch < 2 ? 2.1 : 2.5;
+      strip(mg, -hw/2-1, hw/2+1, host+gap, host+gap+tongue, 0, BOARDS.barnacle.t);
+      box(mg, M.plasticB, -hw/2, hw/2, host+gap+0.05, host+gap+pb, 0, rows*o.pitch+0.4);                             // pin header body on the barnacle
+      for(let r=0;r<rows;r++) row(mg, M.tin, xs, fw*0.7, host+gap+pb-0.1, host+gap+tongue-0.2, 0, 0.25+r*o.pitch*0.5);
+      barnY = host+gap+tongue; barnZ = 0;
+    } else {                                                                                                         // right-angle socket: the card rides above the wig
+      const tail = host > 6 ? 1.7 : 1.0, bd = host - tail, hc = o.hc || z*0.5, jaw = BT/2 + 0.12, slot = Math.min(tongue, bd-1.0);
+      strip(g, -P.len/2-1, P.len/2+1, 0, host, 0, WT);
+      box(g, M.plastic, -bodyLen/2, bodyLen/2, host-bd, host-slot, 0.05, z);
+      box(g, M.plastic, -bodyLen/2, bodyLen/2, host-slot, host, hc+jaw, z);
+      if(hc-jaw > 0.15) box(g, M.plastic, -bodyLen/2, bodyLen/2, host-slot, host, 0.05, hc-jaw);
+      for(const s of [-1, 1]) box(g, M.plastic, s*bodyLen/2, s*(bodyLen/2-Math.min(1.5,(bodyLen-cw)/2+0.4)), host-slot, host, hc-jaw, hc+jaw);
+      row(g, M.tin, xs, fw, 0.05, tail+0.4, 0, 0.25);                                                              // solder tails behind the body
+      row(g, M.gold, xs, fw, host-slot+0.3, host-0.4, hc+BT/2, hc+jaw); row(g, M.gold, xs, fw, host-slot+0.3, host-0.4, hc-jaw, hc-BT/2);
+      strip(mg, -cw/2, cw/2, host-slot, host, hc+BT/2, BT); fingers(mg, xs, fw, host-slot+0.2, host-0.3, hc+BT/2, BT);
+      barnY = host; barnZ = hc+BT/2;
+    }
+  }
+  const bb = board("barnacle", barnZ, barnY);
+  if(Math.abs(BT - BOARDS.barnacle.t) > 0.05) bb.scale.y = BT/BOARDS.barnacle.t, bb.position.y = barnZ*(1-BT/BOARDS.barnacle.t);
+  moving.add(bb);
+  const root = new THREE.Group(); root.add(fixed, moving); root.userData = {o, P, moving, reach: barnY + 19};
+  return root;
+}
+
+// ---------------------------------------------------------------- renderer, two cameras, hand-rolled orbit
+const canvas = $("#c"), stage = $("#stage");
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true}); renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+const scene = new THREE.Scene();
+scene.add(new THREE.HemisphereLight(0xffffff, 0x9a9ab0, 1.15));
+const sunA = new THREE.DirectionalLight(0xffffff, 1.5); sunA.position.set(40, 90, 70); scene.add(sunA);
+const sunB = new THREE.DirectionalLight(0xffffff, 1.3); sunB.position.set(-40, -90, -70); scene.add(sunB);
+const camA = new THREE.PerspectiveCamera(32, 1, 1, 5000), camB = new THREE.PerspectiveCamera(32, 1, 1, 5000), camO = new THREE.OrthographicCamera(-1, 1, 1, -1, 1, 5000);
+const CUT = [new THREE.Plane(new THREE.Vector3(-1, 0, 0), 0.02)];          // edge-on view: slice through the middle and look at the cut
+const view = {theta:0.5, phi:0.95, dist:210, fov:32, solo:false, target:new THREE.Vector3(0, 0, 12)};
+const state = {id:null, mode:"one", faces:"both", pull:0, leds:true};
+let world = new THREE.Group(); scene.add(world);
+let dirty = true; const requestRender = () => { dirty = true; };
+function placeCameras(){
+  const s = Math.sin(view.phi), off = new THREE.Vector3(view.dist*s*Math.sin(view.theta), view.dist*Math.cos(view.phi), view.dist*s*Math.cos(view.theta));
+  camA.position.copy(view.target).add(off); camA.up.set(0, 1, 0); camA.lookAt(view.target);
+  camB.position.copy(view.target).sub(off); camB.up.set(0, 1, 0); camB.lookAt(view.target);       // the antipode: same assembly seen from underneath
+}
+function frame(){
+  if(dirty){
+    dirty = false; const w = stage.clientWidth, h = stage.clientHeight;
+    if(canvas.width !== Math.floor(w*renderer.getPixelRatio()) || canvas.height !== Math.floor(h*renderer.getPixelRatio())) renderer.setSize(w, h, false);
+    placeCameras(); renderer.setScissorTest(true); $("#lab-l").textContent = view.solo ? "SECTION THROUGH THE MIDDLE, SEEN FROM THE RIGHT-HAND END (WIG ON THE LEFT)" : state.faces==="both" ? "TOP FACE" : "ORBIT FREELY";
+    const two = state.faces==="both" && !view.solo; stage.classList.toggle("single", !two);
+    const draw = (cam, x, vw) => { cam.aspect = vw/h; cam.fov = view.fov; cam.near = Math.max(1, view.dist-400); cam.far = view.dist+900; cam.updateProjectionMatrix(); renderer.setViewport(x, 0, vw, h); renderer.setScissor(x, 0, vw, h); renderer.render(scene, cam); };
+    renderer.clippingPlanes = view.solo ? CUT : [];
+    if(view.solo){ const hh = view.dist*Math.tan(view.fov/2*Math.PI/180), hw = hh*w/h; camO.left = -hw; camO.right = hw; camO.top = hh; camO.bottom = -hh; camO.near = 1; camO.far = view.dist+900;
+      camO.position.copy(camA.position); camO.quaternion.copy(camA.quaternion); camO.updateProjectionMatrix(); renderer.setViewport(0, 0, w, h); renderer.setScissor(0, 0, w, h); renderer.render(scene, camO); }
+    else if(two){ draw(camA, 0, w/2); draw(camB, w/2, w/2); } else draw(camA, 0, w);
+    names(w, h, two);
+  }
+  requestAnimationFrame(frame);
+}
+new ResizeObserver(requestRender).observe(stage);
+// orbit: drag turns, shift- or right-drag pans, wheel and pinch zoom
+const ptrs = new Map(); let pinch = 0;
+const inRight = e => state.faces==="both" && !view.solo && (e.clientX - stage.getBoundingClientRect().left) > stage.clientWidth/2;
+canvas.addEventListener("pointerdown", e => { canvas.setPointerCapture(e.pointerId); ptrs.set(e.pointerId, {x:e.clientX, y:e.clientY, right:inRight(e), moved:0}); });
+canvas.addEventListener("pointermove", e => {
+  const p = ptrs.get(e.pointerId); if(!p) return; const dx = e.clientX-p.x, dy = e.clientY-p.y; p.x = e.clientX; p.y = e.clientY; p.moved += Math.abs(dx)+Math.abs(dy);
+  if(ptrs.size===2){ const [a, b] = [...ptrs.values()], d = Math.hypot(a.x-b.x, a.y-b.y); if(pinch) view.dist = Math.max(25, Math.min(1600, view.dist*pinch/d)); pinch = d; requestRender(); return; }
+  const flip = p.right ? -1 : 1;
+  if(e.shiftKey || e.buttons===2){ const k = view.dist/900, r = new THREE.Vector3().setFromMatrixColumn(camA.matrix, 0), u = new THREE.Vector3().setFromMatrixColumn(camA.matrix, 1); view.target.addScaledVector(r, -dx*k*flip).addScaledVector(u, dy*k*flip); }
+  else { view.theta -= dx*0.006*flip; view.phi = Math.max(0.03, Math.min(Math.PI-0.03, view.phi - dy*0.006*flip)); }
+  requestRender();
+});
+const up = e => { const p = ptrs.get(e.pointerId); ptrs.delete(e.pointerId); pinch = 0; if(p && p.moved < 5 && state.mode==="all") pickAt(e, p.right); };
+canvas.addEventListener("pointerup", up); canvas.addEventListener("pointercancel", up);
+canvas.addEventListener("contextmenu", e => e.preventDefault());
+canvas.addEventListener("wheel", e => { e.preventDefault(); view.dist = Math.max(25, Math.min(1600, view.dist*Math.exp(e.deltaY*0.0012))); requestRender(); }, {passive:false});
+canvas.addEventListener("dblclick", () => setView("iso"));
+
+// ---------------------------------------------------------------- building the scene
+function clearWorld(){ world.traverse(n => { if(n.isInstancedMesh) n.dispose(); else if(n.isMesh && n.geometry && !Object.values(GEO).some(G => G.flat===n.geometry || G.solid===n.geometry) && n.geometry!==ledGeo) n.geometry.dispose(); }); scene.remove(world); world = new THREE.Group(); scene.add(world); }
+const SHORT = {wingtat:"WingTAT (today)", kiss:"Kiss slot", kiss08:"Kiss slot, 0.8", xkb3126:"XKB PCIe straddle ×2", hsec8em:"HSEC8-EM", mec8em:"MEC8-EM", mec1em:"MEC1-EM", sliversm:"Sliver straddle", ra127:"1.27 header pair", ra254:"2.54 header pair",
+  oupiin8208b:"Oupiin 8208-B", mec6ra:"MEC6-RA", mec8ra:"MEC8-RA", hsec8ra:"HSEC8-RA", mec1ra:"MEC1-RA", sliverra:"Sliver right angle", sfp20:"SFP ×4", m2:"M.2 ×2", minipcie:"Mini PCIe ×2"};
+const _v3 = new THREE.Vector3();
+function names(w, h, two){
+  const box = $("#names"); if(state.mode!=="all"){ if(box.childElementCount) box.textContent = ""; return; }
+  const items = world.children.filter(c => c.userData && c.userData.o), need = items.length*(two?2:1);
+  while(box.childElementCount < need) box.append(document.createElement("span")); while(box.childElementCount > need) box.lastChild.remove();
+  let k = 0;
+  for(const [cam, x0, vw, sign] of (two ? [[camA, 0, w/2, 1], [camB, w/2, w/2, -1]] : [[camA, 0, w, 1]])) for(const a of items){
+    const el = box.children[k++]; _v3.set(a.position.x, 0, a.position.z + 60).project(cam);
+    const x = x0 + (_v3.x*0.5+0.5)*vw, y = (-_v3.y*0.5+0.5)*h, off = _v3.z > 1 || x < x0+20 || x > x0+vw-20 || y < 8 || y > h-8;
+    el.style.display = off ? "none" : ""; el.style.left = x+"px"; el.style.top = y+"px"; if(el.textContent !== (SHORT[a.userData.o.id] || a.userData.o.name)) el.textContent = SHORT[a.userData.o.id] || a.userData.o.name;
+  }
+}
+function build(){
+  clearWorld();
+  if(state.mode==="one"){
+    const o = ALL.find(a => a.id===state.id) || ALL[0], a = assembly(o); world.add(a);
+  } else {
+    const cols = Math.ceil(Math.sqrt(ALL.length*1.25)), dx = 96, dz = 124;
+    world.userData.grid = {w:cols*dx, h:Math.ceil(ALL.length/cols)*dz};
+    ALL.forEach((o, i) => { const a = assembly(o), c = i%cols, r = Math.floor(i/cols); a.position.set((c-(cols-1)/2)*dx, 0, (r-(Math.ceil(ALL.length/cols)-1)/2)*dz); world.add(a); });
+  }
+  applyPull(); applyLeds(); requestRender();
+  $("#hintbar").textContent = state.mode==="all" ? "click a board to open it · drag to turn · scroll to zoom" : "drag to turn · scroll to zoom · shift-drag to move · arrow keys change connector";
+}
+function applyPull(){ world.traverse(n => { if(n.userData && n.userData.moving) n.userData.moving.position.z = -state.pull; }); requestRender(); }
+function applyLeds(){
+  const col = new THREE.Color(), L = BOARDS.wig.leds;
+  world.traverse(n => { if(!(n.userData && n.userData.led)) return;
+    L.forEach(([x, y], i) => { state.leds ? col.setHSL(((x+39.4)/78.8)*0.83 + ((y+55)/55)*0.08, 1, 0.56) : col.set(0xd8d8d2); n.setColorAt(i, col); });
+    n.instanceColor.needsUpdate = true; });
+  requestRender();
+}
+function setView(v){
+  const a = world.children.find(c => c.userData && c.userData.o), reach = a ? a.userData.reach : 30;
+  view.solo = v==="edge" && state.mode==="one"; view.fov = v==="edge" ? 7 : v==="top" ? 20 : 32;
+  const two = state.faces==="both" && !view.solo, asp = Math.max(0.3, (stage.clientWidth/(two?2:1))/stage.clientHeight), tan = Math.tan(view.fov/2*Math.PI/180);
+  const fit = (halfW, halfH) => Math.max(halfW/(tan*asp), halfH/tan)*1.08;
+  if(!world.children.some(c => c.userData && c.userData.o)) return;
+  if(state.mode==="all"){ const G = world.userData.grid || {w:520, h:480}; view.fov = 18; view.target.set(0, 0, -14); view.theta = 0; view.phi = v==="iso" ? 0.5 : 0.03; view.dist = Math.max((G.w/2+8)/(Math.tan(9*Math.PI/180)*asp), (G.h/2+8)/Math.tan(9*Math.PI/180)); }
+  else { const span = reach + 55; view.target.set(0, 0, -(reach-55)/2);
+    if(v==="top"){ view.theta = 0; view.phi = 0.03; view.dist = fit(45, span/2*1.02); }
+    else if(v==="edge"){ const o = a.userData.o, far = o.host + (o.gap||0) + o.tongue + 6; view.theta = Math.PI/2; view.phi = Math.PI/2; view.target.set(0, 0.5, -(far-14)/2); view.dist = fit((far+14)/2, 9); }
+    else { view.theta = 0.55; view.phi = 0.9; view.dist = fit(58, span/2*0.74); } }
+  requestRender();
+}
+const ray = new THREE.Raycaster();
+function pickAt(e, right){
+  const r = stage.getBoundingClientRect(), two = state.faces==="both", vw = two ? r.width/2 : r.width, x0 = right ? r.width/2 : 0;
+  const ndc = new THREE.Vector2(((e.clientX-r.left-x0)/vw)*2-1, -((e.clientY-r.top)/r.height)*2+1); ray.setFromCamera(ndc, right ? camB : camA);
+  const hit = ray.intersectObjects(world.children, true)[0]; if(!hit) return;
+  let n = hit.object; while(n && !(n.userData && n.userData.o)) n = n.parent; if(n){ state.mode = "one"; press("#mode", "m", "one"); select(n.userData.o.id); setView("iso"); }
+}
+
+// ---------------------------------------------------------------- lists, panel, controls
+const press = (sel, key, val) => document.querySelectorAll(sel+" button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset[key]===val)));
+const blank = u => /^https?:/.test(u) ? ' target="_blank" rel="noopener"' : '';
+function lists(){
+  const li = o => { const P = plan(o); return `<li><button data-id="${o.id}">${o.name}<small>${fmt(o.pitch, o.pitch===0.635?3:2)} mm · ${P.k>1?P.k+' × ':''}${P.nps*o.rows} · ${fmt(o.z)} mm high</small></button></li>`; };
+  $("#pick-cop").innerHTML = ALL.filter(o => o.orient==="coplanar").map(li).join("");
+  $("#pick-ra").innerHTML = ALL.filter(o => o.orient==="stacked").map(li).join("");
+  document.querySelectorAll(".pick button").forEach(b => b.addEventListener("click", () => { if(state.mode==="all"){ state.mode = "one"; press("#mode", "m", "one"); } select(b.dataset.id); setView("iso"); }));
+}
+function info(o){
+  const P = plan(o), cop = o.orient==="coplanar", stripD = cop ? o.host+o.gap+o.tongue : null;
+  $("#info").innerHTML = `<h3>${o.name}</h3>
+  <div><span class="tag ${cop?'cop':'st'}">${cop?'coplanar':'right angle'}</span>${o.family==='custom'?'<span class="tag cu">custom</span>':''}<span class="tag">${o.thkLabel || o.thk.join(' / ')+' mm card'}</span><span class="tag">${o.maker}</span></div>
+  <dl><div><dt>shown</dt><dd>${P.k>1?P.k+' × ':''}${P.nps*o.rows} contacts at ${fmt(o.pitch, o.pitch===0.635?3:2)} mm</dd></div>
+  <div><dt>along the edge</dt><dd>${fmt(P.edge)} mm${P.edge>51?' (over 51)':''}</dd></div>
+  <div><dt>${cop?'strip: wig + gap + barnacle':'on the wig + barnacle tongue'}</dt><dd>${cop?`${fmt(o.host)} + ${fmt(o.gap)} + ${fmt(o.tongue)} = ${fmt(stripD)} mm`:`${fmt(o.host)} + ${fmt(o.tongue)} mm`}</dd></div>
+  <div><dt>${cop?'thickness':'height off the wig'}</dt><dd>${fmt(o.z)} mm${!cop?`, card ${fmt((o.hc||o.z/2))} mm up`:''}</dd></div>
+  <div><dt>price</dt><dd>${o.price==null?'ask':'$'+fmt(o.price,2)+(P.k>1?' each':'')} <small>${o.price==null?'':'@ '+o.priceQty}</small></dd></div>
+  <div><dt>cycles</dt><dd>${o.cycles||'—'}</dd></div></dl>
+  <p>${o.note||''}</p>${o.approx?`<p>Estimated in this model: ${o.approx}${!cop && !o.hc?', and the height of the card slot':''}.</p>`:(!cop && !o.hc?'<p>Estimated in this model: the height of the card slot.</p>':'')}
+  <div class="links">${(o.links||[]).map(l=>`<a href="${l[1]}"${blank(l[1])}>${l[0]}${blank(l[1])?' ↗':''}</a>`).join('')}<a href="edge-connectors.html#${o.id}">in the calculator</a></div>`;
+}
+function select(id){
+  state.id = ALL.some(o => o.id===id) ? id : ALL[0].id;
+  document.querySelectorAll(".pick button").forEach(b => { const on = b.dataset.id===state.id; b.setAttribute("aria-current", String(on));
+    if(on){ const side = b.closest(".side"), r = b.getBoundingClientRect(), sr = side.getBoundingClientRect(); if(r.top < sr.top) side.scrollTop -= sr.top - r.top + 8; else if(r.bottom > sr.bottom) side.scrollTop += r.bottom - sr.bottom + 8; } });
+  info(ALL.find(o => o.id===state.id)); history.replaceState(null, "", "#"+state.id); build();
+}
+$("#mode").addEventListener("click", e => { const b = e.target.closest("button"); if(!b) return; state.mode = b.dataset.m; press("#mode", "m", state.mode); build(); setView("iso"); });
+$("#faces").addEventListener("click", e => { const b = e.target.closest("button"); if(!b) return; state.faces = b.dataset.f; press("#faces", "f", state.faces); setView("iso"); });
+$("#views").addEventListener("click", e => { const b = e.target.closest("button"); if(b) setView(b.dataset.v); });
+$("#pull").addEventListener("input", e => { state.pull = +e.target.value; applyPull(); });
+$("#leds").addEventListener("change", e => { state.leds = e.target.checked; applyLeds(); });
+addEventListener("keydown", e => { if(e.target.matches("input,select,textarea")) return; const i = ALL.findIndex(o => o.id===state.id);
+  if(e.key==="ArrowDown"||e.key==="ArrowRight"){ e.preventDefault(); select(ALL[(i+1)%ALL.length].id); } if(e.key==="ArrowUp"||e.key==="ArrowLeft"){ e.preventDefault(); select(ALL[(i-1+ALL.length)%ALL.length].id); } });
+addEventListener("hashchange", () => { const id = location.hash.slice(1); if(id && id!==state.id) select(id); });
+if(matchMedia("(max-width:900px)").matches){ state.faces = "one"; press("#faces", "f", "one"); }
+lists(); select(location.hash.slice(1) || "kiss"); setView("iso"); frame();
+window.__viewer = {state, view, select, setView, build, requestRender, ALL};
+</script>
+</body>
+</html>
