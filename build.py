@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Build _site/ for slopswap.org.
 
-Copies every project folder and styles/ into _site/, then writes an index.html
-for the root and for each project folder that does not have its own.
+Copies every project folder and styles/ into _site/, writes an index.html for each
+project folder that does not have its own, and fills landing.html (the front page)
+with the project list and the most recently updated pages.
 Run locally:  python3 build.py && python3 -m http.server -d _site 8000
 """
 import datetime
@@ -20,6 +21,9 @@ DEFAULT_THEME = "jumperless"
 RECENT = "recent.json"            # written per folder: newest pages first, read by styles/splash.js
 HEAD_BYTES = 8000                  # only the top of a file is scanned for <title> / stylesheet
 DR_LOCK = '<meta name="darkreader-lock">'   # tells the Dark Reader extension to leave a page alone
+LATEST = 6                         # pages in the front page's "recently updated" list
+ARTICLE_BYTES = 20_000             # ponytail: an index.html bigger than this is an article, not a list of links,
+                                   # and may appear under "recently updated"; add a <meta> marker if this misfires
 
 
 def head(p: Path) -> str:
@@ -46,6 +50,33 @@ def added_on(p: Path) -> str:
     except (subprocess.CalledProcessError, FileNotFoundError):
         pass
     return datetime.date.fromtimestamp(p.stat().st_mtime).isoformat()
+
+
+def touched(p: Path) -> int:
+    """Unix time of the last commit that touched a file or folder; mtime when it has no commit yet."""
+    try:
+        out = subprocess.run(["git", "log", "-1", "--format=%ct", "--", str(p)],
+                             cwd=ROOT, capture_output=True, text=True, check=True).stdout.strip()
+        if out:
+            return int(out)
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        pass
+    return int(p.stat().st_mtime)
+
+
+def day(ts: int, year: bool = True) -> str:
+    d = datetime.date.fromtimestamp(ts)
+    return f"{d.day} {d:%b}{f' {d.year}' if year else ''}".upper()
+
+
+def into_head(s: str, tag: str) -> str:
+    """Insert a tag after the charset declaration (which must stay first), else after <head>, else at the very top:
+    some converted artifacts have no <head> tag and rely on the parser to imply one."""
+    for anchor in (r"<meta\s+charset[^>]*>", r"<head[^>]*>"):
+        s2 = re.sub(anchor, lambda m: m.group(0) + "\n" + tag, s, count=1, flags=re.I)
+        if s2 != s:
+            return s2
+    return tag + "\n" + s
 
 
 def recent(folder: Path) -> list:
@@ -125,17 +156,58 @@ def lock_dark_reader(folder: Path) -> int:
         s = p.read_text(errors="replace")
         if "darkreader-lock" in s or not draws_itself_dark(s):
             continue
-        # after the charset declaration (which must stay first), else after <head>, else at the very top:
-        # some converted artifacts have no <head> tag and rely on the parser to imply one
-        for anchor in (r"<meta\s+charset[^>]*>", r"<head[^>]*>"):
-            s2 = re.sub(anchor, lambda m: m.group(0) + "\n" + DR_LOCK, s, count=1, flags=re.I)
-            if s2 != s:
-                break
-        else:
-            s2 = DR_LOCK + "\n" + s
-        p.write_text(s2)
+        p.write_text(into_head(s, DR_LOCK))
         n += 1
     return n
+
+
+def add_icons(folder: Path, up: str) -> None:
+    """Give every built page in a folder the site icon, unless the page names one of its own."""
+    tag = (f'<link rel="icon" type="image/png" href="{up}styles/favicon.png">\n'
+           f'<link rel="apple-touch-icon" href="{up}styles/apple-touch-icon.png">')
+    for p in folder.glob("*.html"):
+        s = p.read_text(errors="replace")
+        if not re.search(r'rel="(?:shortcut )?icon"', s):
+            p.write_text(into_head(s, tag))
+
+
+def project(d: Path) -> dict:
+    """What the front page shows for one folder: name, one line about it, its pages, when it last changed."""
+    idx = d / "index.html"
+    name = d.name.replace("-", " ")
+    pages = sorted(d.glob("*.html"))
+    moved = idx.exists() and 'http-equiv="refresh"' in head(idx)      # the folder only forwards somewhere else
+    about = meta(idx, "description") if idx.exists() else ""
+    if not about and idx.exists() and title_of(idx).lower() != name.lower():
+        about = title_of(idx)
+    if not about:
+        about = " · ".join(title_of(p) for p in pages if p != idx)
+    latest = [] if moved else [
+        {"title": title_of(p), "href": f"{d.name}/" + ("" if p == idx else p.name), "in": name, "ts": touched(p)}
+        for p in pages if p != idx or p.stat().st_size > ARTICLE_BYTES]
+    return {"dir": d.name, "name": name, "about": about, "pages": len(pages), "moved": moved, "ts": touched(d), "latest": latest}
+
+
+def landing(projects: list) -> str:
+    """landing.html with its three placeholders filled."""
+    esc = html.escape
+    projects = sorted(projects, key=lambda p: p["ts"], reverse=True)
+    rows = "\n".join(
+        f'  <li><h2><a href="{p["dir"]}/">{esc(p["name"])}</a></h2><p>{esc(p["about"])}</p>'
+        f'<small>{"MOVED" if p["moved"] else str(p["pages"]) + (" PAGE" if p["pages"] == 1 else " PAGES")} · {day(p["ts"])}</small></li>'
+        for p in projects)
+    pages = sorted((x for p in projects for x in p["latest"]), key=lambda x: x["ts"], reverse=True)[:LATEST]
+    latest = "\n".join(
+        f'      <li><a href="{x["href"]}">{esc(x["title"])}</a><small>{esc(x["in"]).upper()} · {day(x["ts"], year=False)}</small></li>'
+        for x in pages)
+    live = [p for p in projects if not p["moved"]]
+    stats = f'{len(live)} PROJECTS · {sum(p["pages"] for p in live)} PAGES'
+    out = (ROOT / "landing.html").read_text()
+    for key, value in (("latest", latest), ("projects", rows), ("stats", stats)):
+        out = out.replace("{{" + key + "}}", value)
+    # the one check: every folder is linked and no placeholder is left behind
+    assert "{{" not in out and all(f'href="{p["dir"]}/"' in out for p in projects), "landing.html did not fill"
+    return out
 
 
 def main() -> None:
@@ -149,7 +221,6 @@ def main() -> None:
 
     projects = sorted(d for d in ROOT.iterdir()
                       if d.is_dir() and d.name not in SKIP and not d.name.startswith("."))
-    sections = []
     for d in projects:
         shutil.copytree(d, OUT / d.name)
         (OUT / d.name / RECENT).write_text(json.dumps(recent(d), ensure_ascii=False, indent=0))
@@ -158,13 +229,12 @@ def main() -> None:
             crumb = f'<p class="eyebrow"><a href="../">slopswap</a> / {html.escape(d.name)}</p>'
             (OUT / d.name / "index.html").write_text(
                 page(name, theme_of(d), "../", f"{crumb}\n<h1>{html.escape(name)}</h1>\n{listing(d, '')}"))
-        # a folder with its own index curates itself: the root links it without listing its files
-        files = "" if (d / "index.html").exists() else "\n" + listing(d, d.name + "/")
-        sections.append(f'<h2><a href="{d.name}/">{html.escape(name)}</a></h2>{files}')
+        if theme_of(d) == DEFAULT_THEME:        # folders with their own branding (Del Mar) keep the site icon off
+            add_icons(OUT / d.name, "../")
 
+    (OUT / "index.html").write_text(landing([project(d) for d in projects]))
+    add_icons(OUT, "")
     bust(OUT, version())
-    (OUT / "index.html").write_text(page("slopswap", DEFAULT_THEME, "",
-        '<img class="logo" src="styles/jumperless-wordmark.png" alt="Jumperless">\n<h1>slopswap</h1>\n' + "\n".join(sections)))
     locked = lock_dark_reader(OUT)
     print(f"built {len(projects)} project folders into {OUT.relative_to(ROOT)}/ ({locked} pages locked against Dark Reader)")
 
