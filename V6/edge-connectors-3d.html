@@ -44,6 +44,7 @@
   .info p{margin:.4rem 0;font-size:.92rem;color:var(--muted);max-width:90ch}
   .info .links{display:flex;flex-wrap:wrap;gap:.3rem 1rem;font-size:.88rem}
   .tag{display:inline-block;font-family:var(--font-pixel);font-size:.42rem;padding:.3em .55em;border-radius:999px;border:1px solid var(--line);margin:0 .25rem .2rem 0;color:var(--muted);white-space:nowrap}
+  .tag{max-width:100%;overflow:hidden;text-overflow:ellipsis;vertical-align:bottom}
   .tag.cop{border-color:var(--accent-2);color:var(--accent-2)}.tag.st{border-color:var(--r9);color:var(--r9)}.tag.cu{border-color:var(--accent);color:var(--accent)}
   .doc{max-width:72rem}
   @media (max-width:900px){.tool{grid-template-columns:minmax(0,1fr)}.side{position:static;max-height:14rem}.stage{height:62vh}}
@@ -53,7 +54,7 @@
 <main class="page wide">
 <p class="eyebrow"><a href="../">slopswap</a> / <a href="./">V6</a> / <a href="edge-connectors.html">edge connectors</a></p>
 <h1>Edge connectors in 3D</h1>
-<p class="lede">Each coplanar and right-angle connector from the <a href="edge-connectors.html">connector options page</a>, drawn to scale between the real WigLEDmag wig and a Proto barnacle plugged in at its top edge. The left view looks at the top face and the right view at the underside of the same assembly. The boards are the actual outlines and copper from the Barnacle_Board KiCad files; the plain strip added to each board is the area that connector would take. Housings are simplified blocks built from the catalogue dimensions, so trust the sizes and positions, not the fine detail.</p>
+<p class="lede">Each coplanar and right-angle connector from the <a href="edge-connectors.html">connector options page</a>, drawn to scale between the real WigLEDmag wig and a Proto barnacle plugged in at its top edge. The left view looks at the top face and the right view at the underside of the same assembly. The boards are the actual outlines and copper from the Barnacle_Board KiCad files; the plain strip added to each board is the area that connector would take. Housings are simplified blocks built from the catalogue dimensions, so trust the sizes and positions, not the fine detail. The three pin-header pairs are the exception: they are modelled pin by pin from the makers' drawings.</p>
 
 <div class="tool">
 <aside class="side" aria-label="Connectors">
@@ -69,9 +70,10 @@
   <div class="bar">
     <span class="seg" id="mode"><button data-m="one" aria-pressed="true">One connector</button><button data-m="all" aria-pressed="false">All side by side</button></span>
     <span class="seg" id="faces"><button data-f="both" aria-pressed="true">Both faces</button><button data-f="one" aria-pressed="false">One view</button></span>
-    <span class="seg" id="views"><button data-v="iso">Angled</button><button data-v="top">Straight on</button><button data-v="edge">Edge-on</button></span>
+    <span class="seg" id="views"><button data-v="iso">Angled</button><button data-v="top">Straight on</button><button data-v="close">Close up</button><button data-v="edge">Edge-on</button></span>
     <label>unplug <input id="pull" type="range" min="0" max="20" step="0.5" value="0"></label>
     <label><input id="leds" type="checkbox" checked> LEDs lit</label>
+    <label id="tailsbox" style="display:none"><input id="tails" type="checkbox" checked> tails formed to the boards</label>
   </div>
   <div class="info" id="info"></div>
 </div>
@@ -83,6 +85,7 @@
   <li><b>Wig</b> (below, nearer you): WigLEDmag, 78.7 × 55.0 mm without its tongue, 1.4 mm thick, 480 LEDs on top. <b>Barnacle</b> (above): the Proto barnacle, 1.6 mm thick. Both have had their real 45.47 mm tongues cut off and replaced by whatever that connector needs.</li>
   <li><b>The plain strips</b> are the dead area: the strip on the wig is as deep as the connector's legs or footprint, and the strip on the barnacle is the tongue it takes. A right-angle socket lifts the barnacle above the wig's top face by the height of its slot.</li>
   <li><b>Fixed-size parts</b> (PCIe, SFP, M.2) are shown in the number needed for 70 signals. Vertical-mount parts are left out.</li>
+  <li><b>Pin-header pairs</b> are drawn from the drawings of the XKB socket, the Kinghelm and XFCN pin headers and the Antenk straddle socket: cavities, contact beams, 0.4 mm pins, tails and pads are their real sizes. Use <b>Edge-on</b> to cut through a pin. For the straddle pair, untick <b>tails formed to the boards</b> to see the catalogue tails (red) against the real 1.4 mm wig and 1.6 mm barnacle.</li>
   <li><b>Estimates</b>: where a maker's page does not say how deep the card seats, or how high a right-angle slot sits, the model uses the same estimate as the calculator and the panel says so.</li>
 </ul>
 <p class="muted">Board geometry from <a href="https://github.com/Architeuthis-Flux/Barnacle_Board">Architeuthis-Flux/Barnacle_Board</a> (Wigs/WigLEDmag and Barnacles/Proto). Rendered with three.js 0.160, served from this site. Built 23 Nov 2026.</p>
@@ -106,7 +109,7 @@ function plan(o){
   const len = o.fixedLen!=null ? o.fixedLen : o.len ? o.len(nps) : (nps-1)*o.pitch + o.end;
   return {k, nps, len, edge:k*len+(k-1)*BETWEEN, contacts:k*nps*o.rows};
 }
-const kind = o => (o.id==="kiss"||o.id==="kiss08") ? "kiss" : o.id.startsWith("ra") && o.orient==="coplanar" ? "header" : o.orient==="coplanar" ? "straddle" : "ra";
+const kind = o => o.hdr ? (o.hdr.type==="straddle" ? "hstraddle" : "header") : (o.id==="kiss"||o.id==="kiss08") ? "kiss" : o.orient==="coplanar" ? "straddle" : "ra";
 const cardT = o => Number(o.thk[0]) || 1.6;
 
 // ---------------------------------------------------------------- scene helpers. Design axes: x along the edge, y from the wig towards the barnacle, z up (0 = wig top face).
@@ -114,11 +117,15 @@ const D = (x, y, z) => new THREE.Vector3(x, z, -y);
 const M = {
   plastic: new THREE.MeshStandardMaterial({color:0x202024, roughness:.55, metalness:.05, side:THREE.DoubleSide}),
   plasticB: new THREE.MeshStandardMaterial({color:0x2c2c33, roughness:.6, metalness:.05, side:THREE.DoubleSide}),
-  gold: new THREE.MeshStandardMaterial({color:0xe0b44c, roughness:.32, metalness:.85}),
-  tin: new THREE.MeshStandardMaterial({color:0xc5c8cf, roughness:.4, metalness:.8}),
+  gold: new THREE.MeshStandardMaterial({color:0xe0b44c, roughness:.32, metalness:.85, emissive:0x3d2f0a, side:THREE.DoubleSide}),
+  tin: new THREE.MeshStandardMaterial({color:0xc5c8cf, roughness:.4, metalness:.8, emissive:0x26282d, side:THREE.DoubleSide}),
+  rib: new THREE.MeshStandardMaterial({color:0x3d3d48, roughness:.6, metalness:.05, side:THREE.DoubleSide}),
+  bar: new THREE.MeshStandardMaterial({color:0x4a4a57, roughness:.6, metalness:.05, side:THREE.DoubleSide}),
   mask: new THREE.MeshStandardMaterial({color:0x1a1820, roughness:.5, metalness:.1, side:THREE.DoubleSide}),
   fr4: new THREE.MeshStandardMaterial({color:0x7d6e3c, roughness:.8, side:THREE.DoubleSide}),
   steel: new THREE.MeshStandardMaterial({color:0x8d9097, roughness:.35, metalness:.9}),
+  bad: new THREE.MeshStandardMaterial({color:0xff3046, roughness:.45, metalness:.1, emissive:0x70101c}),
+  ghost: new THREE.MeshStandardMaterial({color:0x8a7a44, roughness:.7, side:THREE.DoubleSide, transparent:true, opacity:.38, depthWrite:false}),
 };
 function box(g, mat, x0, x1, y0, y1, z0, z1){
   const m = new THREE.Mesh(new THREE.BoxGeometry(Math.abs(x1-x0), Math.abs(z1-z0), Math.abs(y1-y0)), mat);
@@ -132,6 +139,11 @@ function row(g, mat, xs, w, y0, y1, z0, z1){          // one instanced box per x
   g.add(im); return im;
 }
 const span = (n, pitch, cx=0) => Array.from({length:n}, (_, i) => cx + (i-(n-1)/2)*pitch);
+function discs(g, mat, pts, r, z0, z1){              // one thin instanced cylinder per [x, y]: pads round a hole
+  if(!pts.length) return;
+  const im = new THREE.InstancedMesh(new THREE.CylinderGeometry(r, r, Math.abs(z1-z0), 14), mat, pts.length);
+  pts.forEach(([x, y], i) => { const p = D(x, y, (z0+z1)/2); im.setMatrixAt(i, _m4.makeTranslation(p.x, p.y, p.z)); }); g.add(im); return im;
+}
 
 // ---------------------------------------------------------------- the two real boards
 const loader = new THREE.TextureLoader();
@@ -165,10 +177,32 @@ function leds(){
   im.userData.led = true; return im;
 }
 // a plain strip of board: the part of each board the connector uses up
-function strip(g, x0, x1, y0, y1, zTop, t){ box(g, M.mask, x0, x1, y0, y1, zTop-t, zTop); }
+const STRIP = [M.fr4, M.fr4, M.mask, M.mask, M.fr4, M.fr4];                    // solder mask on the faces, bare laminate on the cut edges
+function strip(g, x0, x1, y0, y1, zTop, t, mat=STRIP){ box(g, mat, x0, x1, y0, y1, zTop-t, zTop); }
 function fingers(g, xs, w, y0, y1, zTop, t, faces="both"){
   if(faces!=="bottom") row(g, M.gold, xs, w, y0, y1, zTop, zTop+0.04);
   if(faces!=="top") row(g, M.gold, xs, w, y0, y1, zTop-t-0.04, zTop-t);
+}
+
+// ---------------------------------------------------------------- pin headers, from the makers' drawings: every cavity, contact, pin and tail is its real size
+// A two-row socket strip with its mating face towards +y at yF and its two rows centred on zc.
+function socketStrip(g, n, p, h, yF, zc){
+  const L = p*n + h.sockEnd, W = h.sockW, c = h.cav, xs = span(n, p), yB = yF - h.sockD, back = Math.min(0.7, h.sockD*0.16), zr = [zc - p/2, zc + p/2];
+  box(g, M.plastic, -L/2, L/2, yB, yF, zr[1]+c/2, zc+W/2);                                  // outer wall above the upper row
+  box(g, M.plastic, -L/2, L/2, yB, yF, zc-W/2, zr[0]-c/2);                                  // and below the lower row
+  box(g, M.plastic, -L/2, L/2, yB, yF, zr[0]+c/2, zr[1]-c/2);                               // wall between the rows
+  box(g, M.plastic, -L/2, L/2, yB, yB+back, zc-W/2, zc+W/2);                                // closed back
+  for(const z of zr) row(g, M.rib, xs.slice(1).map(x => x - p/2), p-c, yB, yF-0.02, z-c/2, z+c/2);   // ribs between the cavities (a shade lighter, so a section shows where the cavities are)
+  for(const s of [-1, 1]) box(g, M.plastic, s*L/2, s*(xs[n-1]+c/2), yB, yF, zc-W/2, zc+W/2);
+  for(const z of zr) for(const s of [-1, 1]) row(g, M.gold, xs.map(x => x + s*(h.pin/2+0.07)), 0.12, yB+back, yF-Math.min(0.8, h.sockD*0.18), z-c*0.36, z+c*0.36);   // twin contact beams
+  return {L, xs, yB, zr};
+}
+// A pin header: a plastic bar with its mating face at yP and square pins pointing towards -y.
+function pinStrip(g, n, p, h, yP, zc){
+  const L = p*n, xs = span(n, p), zr = [zc - p/2, zc + p/2];
+  box(g, M.bar, -L/2, L/2, yP, yP+h.plasT, zc-h.plasW/2, zc+h.plasW/2);
+  for(const z of zr) row(g, M.gold, xs, h.pin, yP-h.mate, yP+h.plasT+0.02, z-h.pin/2, z+h.pin/2);
+  return {L, xs, zr, yBk:yP+h.plasT};
 }
 
 // ---------------------------------------------------------------- connector builders. Each returns {fixed, moving}: the wig side and the barnacle side.
@@ -209,17 +243,39 @@ function assembly(o){
       fingers(g, xs, fw, 0.3, host-0.2, 0, WT);
       strip(mg, -tw/2, tw/2, host+gap, yb, zc+BT/2, BT); fingers(mg, xs, fw, host+gap+0.2, yb-0.3, zc+BT/2, BT);
       barnY = yb; barnZ = zc+BT/2;
-    } else if(K==="header"){
-      const bd = o.pitch < 2 ? 4.3 : 8.5, rows = 2, hw = P.nps*o.pitch + 0.4;
+    } else if(K==="header"){                                                                                         // right-angle through-hole socket on the wig, right-angle pin header on the barnacle
+      const h = o.hdr, n = P.nps, p = o.pitch, BR = BOARDS.barnacle.t, ring = h.hole/2 + 0.22, tt = Math.min(0.25, h.tw*0.5);
       strip(g, -P.len/2-1, P.len/2+1, 0, host, 0, WT);
-      box(g, M.plastic, -hw/2, hw/2, host-bd, host, 0, z);                                                          // socket body on the wig
-      for(let r=0;r<rows;r++) row(g, M.tin, xs, fw*0.7, 0.1, host-bd+0.2, 0, 0.25+r*o.pitch*0.5);                   // bent tails behind it
-      for(let r=0;r<rows;r++) row(g, M.gold, xs, fw*0.8, host-0.6, host+0.02, (r+0.5)*o.pitch-fw*0.4+0.2, (r+0.5)*o.pitch+fw*0.4+0.2);   // socket mouths
-      const pb = o.pitch < 2 ? 2.1 : 2.5;
-      strip(mg, -hw/2-1, hw/2+1, host+gap, host+gap+tongue, 0, BOARDS.barnacle.t);
-      box(mg, M.plasticB, -hw/2, hw/2, host+gap+0.05, host+gap+pb, 0, rows*o.pitch+0.4);                             // pin header body on the barnacle
-      for(let r=0;r<rows;r++) row(mg, M.tin, xs, fw*0.7, host+gap+pb-0.1, host+gap+tongue-0.2, 0, 0.25+r*o.pitch*0.5);
-      barnY = host+gap+tongue; barnZ = 0;
+      const S = socketStrip(g, n, p, h, host, h.sockW/2);                                                             // body sits on the wig, mating face flush with its edge
+      S.zr.forEach((z, r) => { const yt = S.yB - h.tailS[r], pts = S.xs.map(x => [x, yt]);
+        row(g, M.tin, S.xs, h.tw, yt-tt/2, S.yB+0.05, z-tt/2, z+tt/2);                                                // tail out of the back of the body
+        row(g, M.tin, S.xs, h.tw, yt-tt/2, yt+tt/2, -h.dropS, z+tt/2);                                                // and down through the wig
+        discs(g, M.gold, pts, ring, 0, 0.035); discs(g, M.gold, pts, ring, -WT-0.035, -WT); });
+      const zb = (h.sockW - h.plasW)/2, yP = host + gap, H = pinStrip(mg, n, p, h, yP, zb + h.plasW/2);               // the bar stands on the barnacle; its rows meet the socket's
+      strip(mg, -P.len/2-1, P.len/2+1, yP, yP+tongue, zb, BR);
+      H.zr.forEach((z, r) => { const yt = H.yBk + h.tailP[r], pts = H.xs.map(x => [x, yt]);
+        row(mg, M.gold, H.xs, h.pin, H.yBk-0.02, yt+h.pin/2, z-h.pin/2, z+h.pin/2);
+        row(mg, M.tin, H.xs, h.pin, yt-h.pin/2, yt+h.pin/2, zb-h.dropP, z+h.pin/2);
+        discs(mg, M.gold, pts, ring, zb, zb+0.035); discs(mg, M.gold, pts, ring, zb-BR-0.035, zb-BR); });
+      barnY = yP + tongue; barnZ = zb;
+    } else if(K==="hstraddle"){                                                                                      // the same headers lying in the plane of the boards, tails on both faces
+      const h = o.hdr, n = P.nps, p = o.pitch, BR = BOARDS.barnacle.t, zc = -WT/2, formed = state.formed, board = formed ? STRIP : M.ghost;
+      strip(g, -P.len/2-1, P.len/2+1, 0, host, 0, WT, board);
+      const S = socketStrip(g, n, p, h, host + h.sockD, zc);                                                          // body hangs off the wig's edge, centred on the board
+      fingers(g, S.xs, h.padS[0], host-h.padS[1]-0.1, host-0.1, 0, WT);
+      const tS = h.ttS, gapS = formed ? WT : h.stockGapS, matS = formed ? M.tin : M.bad;
+      for(const s of [-1, 1]){ const zx = zc + s*p/2, zp = zc + s*(gapS/2 + tS/2);
+        row(g, matS, S.xs, h.twS, host-0.5, host+0.05, zx-tS/2, zx+tS/2);                                             // out of the back of the body
+        row(g, matS, S.xs, h.twS, host-0.5-tS, host-0.5, Math.min(zx, zp)-tS/2, Math.max(zx, zp)+tS/2);               // the jog to the board's face
+        row(g, matS, S.xs, h.twS, host-h.tailLS, host-0.5, zp-tS/2, zp+tS/2); }                                       // lying on its pad (as stocked: inside the board)
+      const H = pinStrip(mg, n, p, h, host + h.sockD, zc), yE = H.yBk, matP = formed ? M.gold : M.bad;                // the barnacle's edge is against the back of the bar
+      strip(mg, -P.len/2-1, P.len/2+1, yE, yE+tongue, zc+BR/2, BR, board);
+      fingers(mg, H.xs, h.padP[0], yE+0.1, yE+0.1+h.padP[1], zc+BR/2, BR);
+      for(const s of [-1, 1]){ const zx = zc + s*p/2, zp = formed ? zc + s*(BR/2 + h.pin/2) : zx;
+        row(mg, matP, H.xs, h.pin, yE-0.02, yE+0.45, zx-h.pin/2, zx+h.pin/2);
+        if(formed) row(mg, matP, H.xs, h.pin, yE+0.45-h.pin/2, yE+0.45+h.pin/2, Math.min(zx, zp)-h.pin/2, Math.max(zx, zp)+h.pin/2);
+        row(mg, matP, H.xs, h.pin, yE+0.45, yE+h.tailLP, zp-h.pin/2, zp+h.pin/2); }
+      barnY = yE + tongue; barnZ = zc + BR/2;
     } else {                                                                                                         // right-angle socket: the card rides above the wig
       const tail = host > 6 ? 1.7 : 1.0, bd = host - tail, hc = o.hc || z*0.5, jaw = BT/2 + 0.12, slot = Math.min(tongue, bd-1.0);
       strip(g, -P.len/2-1, P.len/2+1, 0, host, 0, WT);
@@ -236,7 +292,7 @@ function assembly(o){
   const bb = board("barnacle", barnZ, barnY);
   if(Math.abs(BT - BOARDS.barnacle.t) > 0.05) bb.scale.y = BT/BOARDS.barnacle.t, bb.position.y = barnZ*(1-BT/BOARDS.barnacle.t);
   moving.add(bb);
-  const root = new THREE.Group(); root.add(fixed, moving); root.userData = {o, P, moving, reach: barnY + 19};
+  const root = new THREE.Group(); root.add(fixed, moving); root.userData = {o, P, moving, reach: barnY + 19, cutX: o.hdr && P.nps%2===0 ? o.pitch/2 + 0.02 : 0.02};
   return root;
 }
 
@@ -247,10 +303,11 @@ const scene = new THREE.Scene();
 scene.add(new THREE.HemisphereLight(0xffffff, 0x9a9ab0, 1.15));
 const sunA = new THREE.DirectionalLight(0xffffff, 1.5); sunA.position.set(40, 90, 70); scene.add(sunA);
 const sunB = new THREE.DirectionalLight(0xffffff, 1.3); sunB.position.set(-40, -90, -70); scene.add(sunB);
+const sunC = new THREE.DirectionalLight(0xffffff, 0); sunC.position.set(100, 12, 0); scene.add(sunC);          // lights the cut face in the edge-on section only
 const camA = new THREE.PerspectiveCamera(32, 1, 1, 5000), camB = new THREE.PerspectiveCamera(32, 1, 1, 5000), camO = new THREE.OrthographicCamera(-1, 1, 1, -1, 1, 5000);
 const CUT = [new THREE.Plane(new THREE.Vector3(-1, 0, 0), 0.02)];          // edge-on view: slice through the middle and look at the cut
 const view = {theta:0.5, phi:0.95, dist:210, fov:32, solo:false, target:new THREE.Vector3(0, 0, 12)};
-const state = {id:null, mode:"one", faces:"both", pull:0, leds:true};
+const state = {id:null, mode:"one", faces:"both", pull:0, leds:true, formed:true};
 let world = new THREE.Group(); scene.add(world);
 let dirty = true; const requestRender = () => { dirty = true; };
 function placeCameras(){
@@ -262,10 +319,10 @@ function frame(){
   if(dirty){
     dirty = false; const w = stage.clientWidth, h = stage.clientHeight;
     if(canvas.width !== Math.floor(w*renderer.getPixelRatio()) || canvas.height !== Math.floor(h*renderer.getPixelRatio())) renderer.setSize(w, h, false);
-    placeCameras(); renderer.setScissorTest(true); $("#lab-l").textContent = view.solo ? "SECTION THROUGH THE MIDDLE, SEEN FROM THE RIGHT-HAND END (WIG ON THE LEFT)" : state.faces==="both" ? "TOP FACE" : "ORBIT FREELY";
+    placeCameras(); renderer.setScissorTest(true); $("#lab-l").textContent = view.solo ? "SECTION THROUGH THE MIDDLE, SEEN FROM THE RIGHT-HAND END (WIG ON THE LEFT)" + (!state.formed && $("#tailsbox").style.display!=="none" ? " · RED: TAILS AS CATALOGUED, INSIDE THE BOARDS" : "") : state.faces==="both" ? "TOP FACE" : "ORBIT FREELY";
     const two = state.faces==="both" && !view.solo; stage.classList.toggle("single", !two);
     const draw = (cam, x, vw) => { cam.aspect = vw/h; cam.fov = view.fov; cam.near = Math.max(1, view.dist-400); cam.far = view.dist+900; cam.updateProjectionMatrix(); renderer.setViewport(x, 0, vw, h); renderer.setScissor(x, 0, vw, h); renderer.render(scene, cam); };
-    renderer.clippingPlanes = view.solo ? CUT : [];
+    renderer.clippingPlanes = view.solo ? CUT : []; sunC.intensity = view.solo ? 0.9 : 0;
     if(view.solo){ const hh = view.dist*Math.tan(view.fov/2*Math.PI/180), hw = hh*w/h; camO.left = -hw; camO.right = hw; camO.top = hh; camO.bottom = -hh; camO.near = 1; camO.far = view.dist+900;
       camO.position.copy(camA.position); camO.quaternion.copy(camA.quaternion); camO.updateProjectionMatrix(); renderer.setViewport(0, 0, w, h); renderer.setScissor(0, 0, w, h); renderer.render(scene, camO); }
     else if(two){ draw(camA, 0, w/2); draw(camB, w/2, w/2); } else draw(camA, 0, w);
@@ -294,7 +351,7 @@ canvas.addEventListener("dblclick", () => setView("iso"));
 
 // ---------------------------------------------------------------- building the scene
 function clearWorld(){ world.traverse(n => { if(n.isInstancedMesh) n.dispose(); else if(n.isMesh && n.geometry && !Object.values(GEO).some(G => G.flat===n.geometry || G.solid===n.geometry) && n.geometry!==ledGeo) n.geometry.dispose(); }); scene.remove(world); world = new THREE.Group(); scene.add(world); }
-const SHORT = {wingtat:"WingTAT (today)", kiss:"Kiss slot", kiss08:"Kiss slot, 0.8", xkb3126:"XKB PCIe straddle ×2", hsec8em:"HSEC8-EM", mec8em:"MEC8-EM", mec1em:"MEC1-EM", sliversm:"Sliver straddle", ra127:"1.27 header pair", ra254:"2.54 header pair",
+const SHORT = {wingtat:"WingTAT (today)", kiss:"Kiss slot", kiss08:"Kiss slot, 0.8", xkb3126:"XKB PCIe straddle ×2", hsec8em:"HSEC8-EM", mec8em:"MEC8-EM", mec1em:"MEC1-EM", sliversm:"Sliver straddle", ra127:"1.27 header pair", sm127:"1.27 straddle pair", ra254:"2.54 header pair",
   oupiin8208b:"Oupiin 8208-B", mec6ra:"MEC6-RA", mec8ra:"MEC8-RA", hsec8ra:"HSEC8-RA", mec1ra:"MEC1-RA", sliverra:"Sliver right angle", sfp20:"SFP ×4", m2:"M.2 ×2", minipcie:"Mini PCIe ×2"};
 const _v3 = new THREE.Vector3();
 function names(w, h, two){
@@ -311,7 +368,7 @@ function names(w, h, two){
 function build(){
   clearWorld();
   if(state.mode==="one"){
-    const o = ALL.find(a => a.id===state.id) || ALL[0], a = assembly(o); world.add(a);
+    const o = ALL.find(a => a.id===state.id) || ALL[0], a = assembly(o); world.add(a); CUT[0].constant = a.userData.cutX;
   } else {
     const cols = Math.ceil(Math.sqrt(ALL.length*1.25)), dx = 96, dz = 124;
     world.userData.grid = {w:cols*dx, h:Math.ceil(ALL.length/cols)*dz};
@@ -337,7 +394,8 @@ function setView(v){
   if(state.mode==="all"){ const G = world.userData.grid || {w:520, h:480}; view.fov = 18; view.target.set(0, 0, -14); view.theta = 0; view.phi = v==="iso" ? 0.5 : 0.03; view.dist = Math.max((G.w/2+8)/(Math.tan(9*Math.PI/180)*asp), (G.h/2+8)/Math.tan(9*Math.PI/180)); }
   else { const span = reach + 55; view.target.set(0, 0, -(reach-55)/2);
     if(v==="top"){ view.theta = 0; view.phi = 0.03; view.dist = fit(45, span/2*1.02); }
-    else if(v==="edge"){ const o = a.userData.o, far = o.host + (o.gap||0) + o.tongue + 6; view.theta = Math.PI/2; view.phi = Math.PI/2; view.target.set(0, 0.5, -(far-14)/2); view.dist = fit((far+14)/2, 9); }
+    else if(v==="edge"){ const o = a.userData.o, far = o.host + (o.gap||0) + o.tongue + 5; view.theta = Math.PI/2; view.phi = Math.PI/2; view.target.set(0, 0.5, -(far-9)/2); view.dist = fit((far+9)/2, 8); }
+    else if(v==="close"){ const o = a.userData.o, mid = o.host + ((o.orient==="coplanar" ? o.gap : 0)||0)/2; view.theta = 0.8; view.phi = 1.05; view.target.set(-a.userData.P.edge/2 + 7, 0, -mid); view.dist = fit(13, 9); }
     else { view.theta = 0.55; view.phi = 0.9; view.dist = fit(58, span/2*0.74); } }
   requestRender();
 }
@@ -375,13 +433,15 @@ function select(id){
   state.id = ALL.some(o => o.id===id) ? id : ALL[0].id;
   document.querySelectorAll(".pick button").forEach(b => { const on = b.dataset.id===state.id; b.setAttribute("aria-current", String(on));
     if(on){ const side = b.closest(".side"), r = b.getBoundingClientRect(), sr = side.getBoundingClientRect(); if(r.top < sr.top) side.scrollTop -= sr.top - r.top + 8; else if(r.bottom > sr.bottom) side.scrollTop += r.bottom - sr.bottom + 8; } });
-  info(ALL.find(o => o.id===state.id)); history.replaceState(null, "", "#"+state.id); build();
+  const cur = ALL.find(o => o.id===state.id); $("#tailsbox").style.display = kind(cur)==="hstraddle" ? "" : "none";
+  info(cur); history.replaceState(null, "", "#"+state.id); build();
 }
 $("#mode").addEventListener("click", e => { const b = e.target.closest("button"); if(!b) return; state.mode = b.dataset.m; press("#mode", "m", state.mode); build(); setView("iso"); });
 $("#faces").addEventListener("click", e => { const b = e.target.closest("button"); if(!b) return; state.faces = b.dataset.f; press("#faces", "f", state.faces); setView("iso"); });
 $("#views").addEventListener("click", e => { const b = e.target.closest("button"); if(b) setView(b.dataset.v); });
 $("#pull").addEventListener("input", e => { state.pull = +e.target.value; applyPull(); });
 $("#leds").addEventListener("change", e => { state.leds = e.target.checked; applyLeds(); });
+$("#tails").addEventListener("change", e => { state.formed = e.target.checked; build(); });
 addEventListener("keydown", e => { if(e.target.matches("input,select,textarea")) return; const i = ALL.findIndex(o => o.id===state.id);
   if(e.key==="ArrowDown"||e.key==="ArrowRight"){ e.preventDefault(); select(ALL[(i+1)%ALL.length].id); } if(e.key==="ArrowUp"||e.key==="ArrowLeft"){ e.preventDefault(); select(ALL[(i-1+ALL.length)%ALL.length].id); } });
 addEventListener("hashchange", () => { const id = location.hash.slice(1); if(id && id!==state.id) select(id); });
