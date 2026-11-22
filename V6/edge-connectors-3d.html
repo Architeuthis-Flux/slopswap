@@ -85,7 +85,7 @@
   <li><b>Wig</b> (below, nearer you): WigLEDmag, 78.7 × 55.0 mm without its tongue, 1.4 mm thick, 480 LEDs on top. <b>Barnacle</b> (above): the Proto barnacle, 1.6 mm thick. Both have had their real 45.47 mm tongues cut off and replaced by whatever that connector needs.</li>
   <li><b>The plain strips</b> are the dead area: the strip on the wig is as deep as the connector's legs or footprint, and the strip on the barnacle is the tongue it takes. A right-angle socket lifts the barnacle above the wig's top face by the height of its slot.</li>
   <li><b>Fixed-size parts</b> (PCIe, SFP, M.2) are shown in the number needed for 70 signals. Vertical-mount parts are left out.</li>
-  <li><b>Pin-header pairs</b> are drawn from the drawings of the XKB socket, the Kinghelm and XFCN pin headers and the Antenk straddle socket: cavities, contact beams, 0.4 mm pins, tails and pads are their real sizes. Use <b>Edge-on</b> to cut through a pin. For the straddle pair, untick <b>tails formed to the boards</b> to see the catalogue tails (red) against the real 1.4 mm wig and 1.6 mm barnacle.</li>
+  <li><b>Pin-header layouts</b> are drawn from the makers' drawings (XKB, Kinghelm, XFCN, Antenk, Hanxia, Hong Cheng, HCTL): cavities, contact beams, pins, tails and pads are their real sizes. The 2.54 mm ones are drawn full width, 30 a row, the way they would carry the breadboard's 60 rows. Use <b>Edge-on</b> to cut through a pin. For the straddle and three-row layouts, untick <b>tails formed to the boards</b> to see the catalogue tails (red where they cannot be soldered) against the real 1.4 mm wig and 1.6 mm barnacle.</li>
   <li><b>Estimates</b>: where a maker's page does not say how deep the card seats, or how high a right-angle slot sits, the model uses the same estimate as the calculator and the panel says so.</li>
 </ul>
 <p class="muted">Board geometry from <a href="https://github.com/Architeuthis-Flux/Barnacle_Board">Architeuthis-Flux/Barnacle_Board</a> (Wigs/WigLEDmag and Barnacles/Proto). Rendered with three.js 0.160, served from this site. Built 23 Nov 2026.</p>
@@ -103,13 +103,14 @@ const N_SIGNALS = 70, BETWEEN = 2;
 
 // ---------------------------------------------------------------- sizes for 70 signals with one connector (or as many fixed-size parts as that takes)
 function plan(o){
+  if(o.hdr && o.hdr.perRow){ const nps = o.hdr.perRow, len = (nps-1)*o.pitch + o.end; return {k:1, nps, len, edge:len, contacts:nps*o.rows}; }   // drawn full width, as laid out
   let k = 1, nps;
   if(o.fixedPos){ k = Math.ceil(N_SIGNALS/o.fixedPos); nps = o.fixedPos/o.rows; }
   else { nps = Math.ceil(N_SIGNALS/o.rows); if(o.sizes){ nps = o.sizes.find(x => x>=nps) ?? o.sizes[o.sizes.length-1]; } }
   const len = o.fixedLen!=null ? o.fixedLen : o.len ? o.len(nps) : (nps-1)*o.pitch + o.end;
   return {k, nps, len, edge:k*len+(k-1)*BETWEEN, contacts:k*nps*o.rows};
 }
-const kind = o => o.hdr ? (o.hdr.type==="straddle" ? "hstraddle" : "header") : (o.id==="kiss"||o.id==="kiss08") ? "kiss" : o.orient==="coplanar" ? "straddle" : "ra";
+const kind = o => o.hdr ? ({straddle:"hstraddle", face:"hface"}[o.hdr.type] || "header") : (o.id==="kiss"||o.id==="kiss08") ? "kiss" : o.orient==="coplanar" ? "straddle" : "ra";
 const cardT = o => Number(o.thk[0]) || 1.6;
 
 // ---------------------------------------------------------------- scene helpers. Design axes: x along the edge, y from the wig towards the barnacle, z up (0 = wig top face).
@@ -185,24 +186,36 @@ function fingers(g, xs, w, y0, y1, zTop, t, faces="both"){
 }
 
 // ---------------------------------------------------------------- pin headers, from the makers' drawings: every cavity, contact, pin and tail is its real size
-// A two-row socket strip with its mating face towards +y at yF and its two rows centred on zc.
-function socketStrip(g, n, p, h, yF, zc){
-  const L = p*n + h.sockEnd, W = h.sockW, c = h.cav, xs = span(n, p), yB = yF - h.sockD, back = Math.min(0.7, h.sockD*0.16), zr = [zc - p/2, zc + p/2];
-  box(g, M.plastic, -L/2, L/2, yB, yF, zr[1]+c/2, zc+W/2);                                  // outer wall above the upper row
-  box(g, M.plastic, -L/2, L/2, yB, yF, zc-W/2, zr[0]-c/2);                                  // and below the lower row
-  box(g, M.plastic, -L/2, L/2, yB, yF, zr[0]+c/2, zr[1]-c/2);                               // wall between the rows
-  box(g, M.plastic, -L/2, L/2, yB, yB+back, zc-W/2, zc+W/2);                                // closed back
-  for(const z of zr) row(g, M.rib, xs.slice(1).map(x => x - p/2), p-c, yB, yF-0.02, z-c/2, z+c/2);   // ribs between the cavities (a shade lighter, so a section shows where the cavities are)
-  for(const s of [-1, 1]) box(g, M.plastic, s*L/2, s*(xs[n-1]+c/2), yB, yF, zc-W/2, zc+W/2);
-  for(const z of zr) for(const s of [-1, 1]) row(g, M.gold, xs.map(x => x + s*(h.pin/2+0.07)), 0.12, yB+back, yF-Math.min(0.8, h.sockD*0.18), z-c*0.36, z+c*0.36);   // twin contact beams
-  return {L, xs, yB, zr};
+// A socket strip with its mating face towards +y at yF. Rows at the heights in zr (by default two, one pitch apart about zc); body from zlo to zhi.
+function socketStrip(g, n, p, h, yF, zc, zr = [zc - p/2, zc + p/2], zlo = zc - h.sockW/2, zhi = zc + h.sockW/2){
+  const L = p*n + h.sockEnd, c = h.cav, xs = span(n, p), yB = yF - h.sockD, back = Math.min(0.7, h.sockD*0.16), zs = [...zr].sort((a, b) => a - b);
+  const bands = [[zlo, zs[0]-c/2]]; for(let i=1; i<zs.length; i++) bands.push([zs[i-1]+c/2, zs[i]-c/2]); bands.push([zs[zs.length-1]+c/2, zhi]);
+  for(const [a, b] of bands) if(b - a > 0.01) box(g, M.plastic, -L/2, L/2, yB, yF, a, b);    // walls above, between and below the rows of cavities
+  box(g, M.plastic, -L/2, L/2, yB, yB+back, zlo, zhi);                                       // closed back
+  for(const z of zs) row(g, M.rib, xs.slice(1).map(x => x - p/2), p-c, yB, yF-0.02, z-c/2, z+c/2);   // ribs between the cavities (a shade lighter, so a section shows where the cavities are)
+  for(const s of [-1, 1]) box(g, M.plastic, s*L/2, s*(xs[n-1]+c/2), yB, yF, zlo, zhi);
+  for(const z of zs) for(const s of [-1, 1]) row(g, M.gold, xs.map(x => x + s*(h.pin/2+0.07)), 0.12, yB+back, yF-Math.min(0.8, h.sockD*0.18), z-c*0.36, z+c*0.36);   // twin contact beams
+  return {L, xs, yB, zr:zs};
 }
-// A pin header: a plastic bar with its mating face at yP and square pins pointing towards -y.
-function pinStrip(g, n, p, h, yP, zc){
-  const L = p*n, xs = span(n, p), zr = [zc - p/2, zc + p/2];
-  box(g, M.bar, -L/2, L/2, yP, yP+h.plasT, zc-h.plasW/2, zc+h.plasW/2);
+// A pin header: a plastic bar with its mating face at yP and square pins pointing towards -y; rows and bar as for socketStrip.
+function pinStrip(g, n, p, h, yP, zc, zr = [zc - p/2, zc + p/2], zlo = zc - h.plasW/2, zhi = zc + h.plasW/2){
+  const L = p*n, xs = span(n, p);
+  box(g, M.bar, -L/2, L/2, yP, yP+h.plasT, zlo, zhi);
   for(const z of zr) row(g, M.gold, xs, h.pin, yP-h.mate, yP+h.plasT+0.02, z-h.pin/2, z+h.pin/2);
   return {L, xs, zr, yBk:yP+h.plasT};
+}
+// Plated half-holes along a board's edge at y0 (the board lies towards -y, or +y if dir is -1), with a small ring on each face.
+function castles(g, xs, w, y0, zc, t, dir = 1){
+  const r = w/2, y1 = y0 - dir*r, y2 = y0 - dir*(r + 0.25);
+  row(g, M.gold, xs, w, Math.min(y0, y1), Math.max(y0, y1), zc-t/2-0.02, zc+t/2+0.02);
+  for(const s of [-1, 1]) row(g, M.gold, xs, w + 0.3, Math.min(y0, y2), Math.max(y0, y2), s > 0 ? zc+t/2 : zc-t/2-0.035, s > 0 ? zc+t/2+0.035 : zc-t/2);
+}
+// A tail leaving a body's back face (at y0, height z0, heading -y or +y by dir), jogging to height z1 after a stub, then lying flat to length len.
+function tail(g, mat, xs, w, t, y0, dir, z0, z1, stub, len){
+  const a = y0, b = y0 + dir*stub, c = y0 + dir*(stub+t), e = y0 + dir*len;
+  row(g, mat, xs, w, Math.min(a, b), Math.max(a, b), z0-t/2, z0+t/2);
+  if(Math.abs(z1 - z0) > 0.01) row(g, mat, xs, w, Math.min(b, c), Math.max(b, c), Math.min(z0, z1)-t/2, Math.max(z0, z1)+t/2);
+  row(g, mat, xs, w, Math.min(c, e), Math.max(c, e), z1-t/2, z1+t/2);
 }
 
 // ---------------------------------------------------------------- connector builders. Each returns {fixed, moving}: the wig side and the barnacle side.
@@ -258,24 +271,41 @@ function assembly(o){
         row(mg, M.tin, H.xs, h.pin, yt-h.pin/2, yt+h.pin/2, zb-h.dropP, z+h.pin/2);
         discs(mg, M.gold, pts, ring, zb, zb+0.035); discs(mg, M.gold, pts, ring, zb-BR-0.035, zb-BR); });
       barnY = yP + tongue; barnZ = zb;
-    } else if(K==="hstraddle"){                                                                                      // the same headers lying in the plane of the boards, tails on both faces
-      const h = o.hdr, n = P.nps, p = o.pitch, BR = BOARDS.barnacle.t, zc = -WT/2, formed = state.formed, board = formed ? STRIP : M.ghost;
+    } else if(K==="hstraddle"){                                                                                      // headers lying in the plane of the boards, one row of tails on each face (and a middle row into the edge)
+      const h = o.hdr, n = P.nps, p = o.pitch, rp = h.rowP || p, R = o.rows, BR = BOARDS.barnacle.t, zc = -WT/2, formed = state.formed;
+      const offs = Array.from({length:R}, (_, r) => (r - (R-1)/2)*rp), stub = R > 2 ? 1.2 : 0.5, board = formed ? STRIP : M.ghost;
+      // where a row's tail ends up, and whether it can be soldered there: on the face (touching, or a gap solder bridges), not inside the board, not clear of it
+      const lands = (off, t, tt, stockC) => { const s = Math.sign(off), formedC = t/2 + tt/2, stock = stockC(Math.abs(off)), inner = stock - tt/2, ok = inner >= t/2 - 0.02 && inner - t/2 <= 0.3;
+        return {z: zc + s*(formed ? formedC : stock), ok: formed || ok}; };
       strip(g, -P.len/2-1, P.len/2+1, 0, host, 0, WT, board);
-      const S = socketStrip(g, n, p, h, host + h.sockD, zc);                                                          // body hangs off the wig's edge, centred on the board
-      fingers(g, S.xs, h.padS[0], host-h.padS[1]-0.1, host-0.1, 0, WT);
-      const tS = h.ttS, gapS = formed ? WT : h.stockGapS, matS = formed ? M.tin : M.bad;
-      for(const s of [-1, 1]){ const zx = zc + s*p/2, zp = zc + s*(gapS/2 + tS/2);
-        row(g, matS, S.xs, h.twS, host-0.5, host+0.05, zx-tS/2, zx+tS/2);                                             // out of the back of the body
-        row(g, matS, S.xs, h.twS, host-0.5-tS, host-0.5, Math.min(zx, zp)-tS/2, Math.max(zx, zp)+tS/2);               // the jog to the board's face
-        row(g, matS, S.xs, h.twS, host-h.tailLS, host-0.5, zp-tS/2, zp+tS/2); }                                       // lying on its pad (as stocked: inside the board)
-      const H = pinStrip(mg, n, p, h, host + h.sockD, zc), yE = H.yBk, matP = formed ? M.gold : M.bad;                // the barnacle's edge is against the back of the bar
+      const yF = host + h.sockD, S = socketStrip(g, n, p, h, yF, zc, offs.map(o => zc + o), zc - h.sockW/2, zc + h.sockW/2);   // body hangs off the wig's edge, centred on the board
+      const stockS = a => h.stockGapS != null ? h.stockGapS/2 + h.ttS/2 : a;                                       // as catalogued: straight, or pinched in (1.27 straddle socket)
+      offs.forEach(off => {
+        if(Math.abs(off) < 0.01){ castles(g, S.xs, h.castle || 1.0, host, zc, WT); row(g, M.tin, S.xs, h.twS, host-0.9, host+0.05, zc-h.ttS/2, zc+h.ttS/2); return; }
+        const L = lands(off, WT, h.ttS, stockS), side = off > 0 ? 0 : -WT;
+        tail(g, L.ok ? M.tin : M.bad, S.xs, h.twS, h.ttS, host, -1, zc + off, L.z, stub, h.tailLS + stub - 0.5);
+        row(g, M.gold, S.xs, h.padS[0], host-stub-0.15-h.padS[1], host-stub-0.15, side-(off>0?0:0.035), side+(off>0?0.035:0)); });
+      const H = pinStrip(mg, n, p, h, yF, zc, offs.map(o => zc + o), zc - h.plasW/2, zc + h.plasW/2), yE = H.yBk;     // the barnacle's edge is against the back of the bar
       strip(mg, -P.len/2-1, P.len/2+1, yE, yE+tongue, zc+BR/2, BR, board);
-      fingers(mg, H.xs, h.padP[0], yE+0.1, yE+0.1+h.padP[1], zc+BR/2, BR);
-      for(const s of [-1, 1]){ const zx = zc + s*p/2, zp = formed ? zc + s*(BR/2 + h.pin/2) : zx;
-        row(mg, matP, H.xs, h.pin, yE-0.02, yE+0.45, zx-h.pin/2, zx+h.pin/2);
-        if(formed) row(mg, matP, H.xs, h.pin, yE+0.45-h.pin/2, yE+0.45+h.pin/2, Math.min(zx, zp)-h.pin/2, Math.max(zx, zp)+h.pin/2);
-        row(mg, matP, H.xs, h.pin, yE+0.45, yE+h.tailLP, zp-h.pin/2, zp+h.pin/2); }
+      offs.forEach(off => {
+        if(Math.abs(off) < 0.01){ castles(mg, H.xs, h.castle || 1.0, yE, zc, BR, -1); row(mg, M.gold, H.xs, h.pin, yE-0.02, yE+0.9, zc-h.pin/2, zc+h.pin/2); return; }
+        const L = lands(off, BR, h.pin, a => a), side = off > 0 ? zc + BR/2 : zc - BR/2;
+        tail(mg, L.ok ? M.gold : M.bad, H.xs, h.pin, h.pin, yE, 1, zc + off, L.z, stub, h.tailLP + stub - 0.5);
+        row(mg, M.gold, H.xs, h.padP[0], yE+stub+0.15, yE+stub+0.15+h.padP[1], side-(off>0?0:0.035), side+(off>0?0.035:0)); });
       barnY = yE + tongue; barnZ = zc + BR/2;
+    } else if(K==="hface"){                                                                                         // single-row right-angle SMT parts, one on each face of each board; boards touching
+      const h = o.hdr, n = P.nps, p = o.pitch, BR = BOARDS.barnacle.t, bTop = -WT/2 + BR/2, tt = 0.3;                // the barnacle's mid-plane on the wig's
+      strip(g, -P.len/2-1, P.len/2+1, 0, host, 0, WT);
+      for(const s of [1, -1]){
+        const face = s > 0 ? 0 : -WT, z = face + s*h.hS, S = socketStrip(g, n, p, h, host, z, [z], s > 0 ? face : face - h.sockH, s > 0 ? face + h.sockH : face);
+        tail(g, M.tin, S.xs, 0.64, tt, S.yB, -1, z, face + s*tt/2, 0.6, h.tailS);
+        row(g, M.gold, S.xs, h.padS[0], S.yB-h.tailS-0.2, S.yB-h.tailS-0.2+h.padS[1], face-(s>0?0:0.035), face+(s>0?0.035:0)); }
+      for(const s of [1, -1]){
+        const face = s > 0 ? bTop : bTop - BR, z = face + s*h.hP, H = pinStrip(mg, n, p, h, host, z, [z], s > 0 ? face : face - h.plasH, s > 0 ? face + h.plasH : face);
+        tail(mg, M.gold, H.xs, h.pin, h.pin, H.yBk, 1, z, face + s*h.pin/2, 0.6, h.tailP);
+        row(mg, M.gold, H.xs, h.padP[0], H.yBk+h.tailP+0.2-h.padP[1], H.yBk+h.tailP+0.2, face-(s>0?0:0.035), face+(s>0?0.035:0)); }
+      strip(mg, -P.len/2-1, P.len/2+1, host, host+tongue, bTop, BR);
+      barnY = host + tongue; barnZ = bTop;
     } else {                                                                                                         // right-angle socket: the card rides above the wig
       const tail = host > 6 ? 1.7 : 1.0, bd = host - tail, hc = o.hc || z*0.5, jaw = BT/2 + 0.12, slot = Math.min(tongue, bd-1.0);
       strip(g, -P.len/2-1, P.len/2+1, 0, host, 0, WT);
@@ -319,7 +349,7 @@ function frame(){
   if(dirty){
     dirty = false; const w = stage.clientWidth, h = stage.clientHeight;
     if(canvas.width !== Math.floor(w*renderer.getPixelRatio()) || canvas.height !== Math.floor(h*renderer.getPixelRatio())) renderer.setSize(w, h, false);
-    placeCameras(); renderer.setScissorTest(true); $("#lab-l").textContent = view.solo ? "SECTION THROUGH THE MIDDLE, SEEN FROM THE RIGHT-HAND END (WIG ON THE LEFT)" + (!state.formed && $("#tailsbox").style.display!=="none" ? " · RED: TAILS AS CATALOGUED, INSIDE THE BOARDS" : "") : state.faces==="both" ? "TOP FACE" : "ORBIT FREELY";
+    placeCameras(); renderer.setScissorTest(true); $("#lab-l").textContent = view.solo ? "SECTION THROUGH THE MIDDLE, SEEN FROM THE RIGHT-HAND END (WIG ON THE LEFT)" + (!state.formed && $("#tailsbox").style.display!=="none" ? " · RED: TAILS AS CATALOGUED, NOT ON THE BOARDS' FACES" : "") : state.faces==="both" ? "TOP FACE" : "ORBIT FREELY";
     const two = state.faces==="both" && !view.solo; stage.classList.toggle("single", !two);
     const draw = (cam, x, vw) => { cam.aspect = vw/h; cam.fov = view.fov; cam.near = Math.max(1, view.dist-400); cam.far = view.dist+900; cam.updateProjectionMatrix(); renderer.setViewport(x, 0, vw, h); renderer.setScissor(x, 0, vw, h); renderer.render(scene, cam); };
     renderer.clippingPlanes = view.solo ? CUT : []; sunC.intensity = view.solo ? 0.9 : 0;
@@ -351,7 +381,7 @@ canvas.addEventListener("dblclick", () => setView("iso"));
 
 // ---------------------------------------------------------------- building the scene
 function clearWorld(){ world.traverse(n => { if(n.isInstancedMesh) n.dispose(); else if(n.isMesh && n.geometry && !Object.values(GEO).some(G => G.flat===n.geometry || G.solid===n.geometry) && n.geometry!==ledGeo) n.geometry.dispose(); }); scene.remove(world); world = new THREE.Group(); scene.add(world); }
-const SHORT = {wingtat:"WingTAT (today)", kiss:"Kiss slot", kiss08:"Kiss slot, 0.8", xkb3126:"XKB PCIe straddle ×2", hsec8em:"HSEC8-EM", mec8em:"MEC8-EM", mec1em:"MEC1-EM", sliversm:"Sliver straddle", ra127:"1.27 header pair", sm127:"1.27 straddle pair", ra254:"2.54 header pair",
+const SHORT = {wingtat:"WingTAT (today)", kiss:"Kiss slot", kiss08:"Kiss slot, 0.8", xkb3126:"XKB PCIe straddle ×2", hsec8em:"HSEC8-EM", mec8em:"MEC8-EM", mec1em:"MEC1-EM", sliversm:"Sliver straddle", ra127:"1.27 header pair", sm127:"1.27 straddle pair", ra254:"2.54 header pair", smt254:"2.54 SMT, both faces", sd254:"2.54 dual straddle", tri254:"2.54 three rows",
   oupiin8208b:"Oupiin 8208-B", mec6ra:"MEC6-RA", mec8ra:"MEC8-RA", hsec8ra:"HSEC8-RA", mec1ra:"MEC1-RA", sliverra:"Sliver right angle", sfp20:"SFP ×4", m2:"M.2 ×2", minipcie:"Mini PCIe ×2"};
 const _v3 = new THREE.Vector3();
 function names(w, h, two){
