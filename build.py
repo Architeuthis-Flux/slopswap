@@ -204,6 +204,7 @@ def landing(projects: list) -> str:
     stats = f'{len(live)} PROJECTS · {sum(p["pages"] for p in live)} PAGES'
     out = (ROOT / "landing.html").read_text()
     for key, value in (("latest", latest), ("projects", rows), ("stats", stats)):
+        assert out.count("{{" + key + "}}") == 1, f"landing.html needs exactly one {key} placeholder"
         out = out.replace("{{" + key + "}}", value)
     # the one check: every folder is linked and no placeholder is left behind
     assert "{{" not in out and all(f'href="{p["dir"]}/"' in out for p in projects), "landing.html did not fill"
