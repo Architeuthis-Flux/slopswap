@@ -67,7 +67,7 @@ python3 build.py && python3 -m http.server -d _site 8000
 
 `landing.html` is the front page. Edit its HTML and CSS there; `build.py` fills three placeholders: `{{latest}}` (the six most recently changed pages), `{{stats}}` and `{{projects}}` (one row per folder, most recently changed first). A folder's row shows its `index.html`'s `<meta name="description">`, falling back to the index title, then to its page titles. Dates are the last commit that touched the page or folder.
 
-The hero image is `styles/jumperless-af.webp`. `styles/favicon.png` and `styles/apple-touch-icon.png` are added to every built page that does not name an icon of its own, except in folders with their own branding (Del Mar).
+The hero image is `styles/architeuthis-flux.webp`, the Architeuthis Flux mark; the two icons are the same mark. `styles/favicon.png` and `styles/apple-touch-icon.png` are added to every built page that does not name an icon of its own, except in folders with their own branding (Del Mar).
 
 A folder without its own `index.html` gets a generated one.
 

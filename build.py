@@ -163,8 +163,9 @@ def lock_dark_reader(folder: Path) -> int:
 
 def add_icons(folder: Path, up: str) -> None:
     """Give every built page in a folder the site icon, unless the page names one of its own."""
-    tag = (f'<link rel="icon" type="image/png" href="{up}styles/favicon.png">\n'
-           f'<link rel="apple-touch-icon" href="{up}styles/apple-touch-icon.png">')
+    v = version()        # browsers hold on to tab icons; a new commit id makes them fetch again
+    tag = (f'<link rel="icon" type="image/png" href="{up}styles/favicon.png?v={v}">\n'
+           f'<link rel="apple-touch-icon" href="{up}styles/apple-touch-icon.png?v={v}">')
     for p in folder.glob("*.html"):
         s = p.read_text(errors="replace")
         if not re.search(r'rel="(?:shortcut )?icon"', s):
@@ -185,7 +186,9 @@ def project(d: Path) -> dict:
     latest = [] if moved else [
         {"title": title_of(p), "href": f"{d.name}/" + ("" if p == idx else p.name), "in": name, "ts": touched(p)}
         for p in pages if p != idx or p.stat().st_size > ARTICLE_BYTES]
-    return {"dir": d.name, "name": name, "about": about, "pages": len(pages), "moved": moved, "ts": touched(d), "latest": latest}
+    # a folder is as new as its newest page; an edit to a plain index of links (or to an image) does not move it up
+    ts = max((x["ts"] for x in latest), default=touched(d))
+    return {"dir": d.name, "name": name, "about": about, "pages": len(pages), "moved": moved, "ts": ts, "latest": latest}
 
 
 def landing(projects: list) -> str:
