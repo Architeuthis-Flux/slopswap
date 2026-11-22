@@ -20,6 +20,7 @@ OUT = ROOT / "_site"
 SKIP = {"_site", "styles"}          # dotfolders (.git, .github) are skipped too
 DEFAULT_THEME = "jumperless"
 RECENT = "recent.json"            # written per folder: newest pages first, read by styles/splash.js
+UNLISTED = ".unlisted"            # a folder holding this file is built as usual but left off the front page
 HEAD_BYTES = 8000                  # only the top of a file is scanned for <title> / stylesheet
 DR_LOCK = '<meta name="darkreader-lock">'   # tells the Dark Reader extension to leave a page alone
 LATEST = 6                         # pages in the front page's "recently updated" list
@@ -271,7 +272,7 @@ def main() -> None:
     projects = sorted(d for d in ROOT.iterdir()
                       if d.is_dir() and d.name not in SKIP and not d.name.startswith("."))
     for d in projects:
-        shutil.copytree(d, OUT / d.name)
+        shutil.copytree(d, OUT / d.name, ignore=shutil.ignore_patterns(UNLISTED))
         (OUT / d.name / RECENT).write_text(json.dumps(recent(d), ensure_ascii=False, indent=0))
         name = d.name.replace("-", " ")
         if not (d / "index.html").exists():
@@ -281,11 +282,13 @@ def main() -> None:
         if theme_of(d) == DEFAULT_THEME:        # folders with their own branding (Del Mar) keep the site icon off
             add_icons(OUT / d.name, "../")
 
-    (OUT / "index.html").write_text(landing([project(d) for d in projects]))
+    listed = [d for d in projects if not (d / UNLISTED).exists()]
+    (OUT / "index.html").write_text(landing([project(d) for d in listed]))
     add_icons(OUT, "")
     bust(OUT, version())
     locked = lock_dark_reader(OUT)
-    print(f"built {len(projects)} project folders into {OUT.relative_to(ROOT)}/ ({locked} pages locked against Dark Reader)")
+    print(f"built {len(projects)} project folders into {OUT.relative_to(ROOT)}/ "
+          f"({len(projects) - len(listed)} unlisted, {locked} pages locked against Dark Reader)")
 
 
 if __name__ == "__main__":
