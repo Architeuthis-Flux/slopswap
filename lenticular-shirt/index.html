@@ -524,6 +524,7 @@
         <h3>White layer</h3>
         <div id="filmWL" class="raise"></div>
         <h3>Second HD screen</h3>
+        <div class="row" style="gap:8px;align-items:center"><label for="fBlack2" class="note" style="flex:1;font-size:12.5px" title="The black raised in HD and any layer set to HD. On both, either screen can print the black, or both can for a taller one, and the two screens can swap jobs.">Raised black and HD layers print on</label><select id="fBlack2" style="flex:none"><option value="h">the first HD screen</option><option value="both">both HD screens</option><option value="h2">the second HD screen</option></select></div>
         <div id="filmH2" class="raise"></div>
         <h3>Raise the black in HD on</h3>
         <p class="note" id="filmRaiseNote"></p>
@@ -2854,9 +2855,9 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
 
   // ---------- options ----------
   var KEY = 'lenticular-shirt-films.v1';
-  var F = { filmW: 24, dpi: 600, choke: 0.1, minRaise: 1.5, v: 2, cmyK: false, mirror: false, on: { W: true, C: true, M: true, Y: true, K: true, H: true, H2: true }, noK: false, raise: {}, under: {}, wlChoke: true, proof: 'print', zoom: 2, layout: 'pages', pos: {}, auto: true, sheetLen: 0, sheetZoom: 'fit', hdClip: true }; // hdClip: a layer set to HD is left off where the ridges are // pos: where each film sits on the single sheet, inches from its top left
+  var F = { filmW: 24, dpi: 600, choke: 0.1, minRaise: 1.5, v: 2, cmyK: false, mirror: false, on: { W: true, C: true, M: true, Y: true, K: true, H: true, H2: true }, noK: false, black2: 'h', raise: {}, under: {}, wlChoke: true, proof: 'print', zoom: 2, layout: 'pages', pos: {}, auto: true, sheetLen: 0, sheetZoom: 'fit', hdClip: true }; // hdClip: a layer set to HD is left off where the ridges are // pos: where each film sits on the single sheet, inches from its top left
   try { var sv = JSON.parse(localStorage.getItem(KEY) || '{}'); Object.keys(F).forEach(function (k) { if (sv[k] !== undefined && typeof sv[k] === typeof F[k]) F[k] = sv[k]; });
-    if (F.on.H2 === undefined) F.on.H2 = true; // settings saved before there was a second HD film
+    if (F.on.H2 === undefined) F.on.H2 = true; if (!/^(h|h2|both)$/.test(F.black2)) F.black2 = 'h'; // settings saved before there was a second HD film
     if (sv.v === undefined && sv.minRaise === 0.5) F.minRaise = 1.5; // settings saved before 17 Nov carry the old 0.5 mm, which also raised halftone dots and thin lines
     F.v = 2; } catch (e) { }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(F)); } catch (e) { } }
@@ -2981,7 +2982,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
   function isWL(n) { return n.assign === 'w'; } // art for the white screen alone: wherever the layer has anything, white is added to the white film
   function isRZ(n) { return n.assign === 'r'; } // says only where ridges go: it is in the ridged area the page hands over, and on no film itself
   function hasHD() { var ART = L.art(); return !!ART && ART.nodes.some(function (n) { return isHD(n) && (n.rgba || n.file); }); }
-  function h2On() { var ART = L.art(); return !!(L.top2 && L.top2()) || (!!ART && ART.nodes.some(function (n) { return isH2(n) && (n.rgba || n.file); })); } // is anything on the second HD screen
+  function h2On() { var ART = L.art(); return F.black2 !== 'h' || !!(L.top2 && L.top2()) || (!!ART && ART.nodes.some(function (n) { return isH2(n) && (n.rgba || n.file); })); } // is anything on the second HD screen
   function inScene(n) { return isHD(n) || isH2(n) || isWL(n) || isRZ(n) ? false : L.multi() ? L.d3Of(n).on : n.assign !== 'off'; }
   function isStatic(n) { return L.multi() ? L.d3Of(n).mm === 0 : n.assign === 'both'; }
   // With an HD layer linked, the HD film is that layer and the ridges and nothing else: no black is raised unless its box is ticked by hand.
@@ -3039,7 +3040,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
       for (y = 0, y0 = -1; y <= Hf; y++) { var v = y < Hf && RUN[o + y]; if (!v && y0 < 0) y0 = y; if (v && y0 >= 0) { if (y0 > 0 && y - y0 < minGap) RUN.fill(1, o + y0, o + y); y0 = -1; } }
       for (y = 0, y0 = -1; y <= Hf; y++) { v = y < Hf && RUN[o + y]; if (v && y0 < 0) y0 = y; if (!v && y0 >= 0) { if (y - y0 < minLen) RUN.fill(0, o + y0, o + y); else { on = true; ridgeLen += y - y0; bx0 = Math.min(bx0, x - wl); bx1 = Math.max(bx1, x + wr); by0 = Math.min(by0, y0); by1 = Math.max(by1, y); } y0 = -1; } }
       if (on) ridges++; }
-    return { ART: ART, dpi: dpi, ppmm: ppmm, Wf: Wf, Hf: Hf, xc: xc, P: P, w: w, g: g, wl: wl, wr: wr, N: N, mu: mu, sel: sel, selDead: selDead, rid: rid, edges: edges, wAdd: wAdd, wUsed: wUsed, wlChoke: F.wlChoke, views: views, used: used, aim: aim, aimMax: aimMax, d0: aD0, d1: aD1, dm: aDm, first: aFirst, nR: nR, hd: hd, hdUsed: hdUsed, hdClip: F.hdClip, hd2: hd2, hd2Used: hd2Used, w2: w2, rid2: rid2, h2on: !!(w2 || hd2.length), noK: F.noK,
+    return { ART: ART, dpi: dpi, ppmm: ppmm, Wf: Wf, Hf: Hf, xc: xc, P: P, w: w, g: g, wl: wl, wr: wr, N: N, mu: mu, sel: sel, selDead: selDead, rid: rid, edges: edges, wAdd: wAdd, wUsed: wUsed, wlChoke: F.wlChoke, views: views, used: used, aim: aim, aimMax: aimMax, d0: aD0, d1: aD1, dm: aDm, first: aFirst, nR: nR, hd: hd, hdUsed: hdUsed, hdClip: F.hdClip, hd2: hd2, hd2Used: hd2Used, w2: w2, rid2: rid2, h2on: !!(w2 || hd2.length || F.black2 !== 'h'), black2: F.black2, noK: F.noK,
       Z: Z, ZW: ZW, zx: zx, zy: zy, nLo: nLo, RUN: RUN, ridges: ridges, ridgeLen: ridgeLen, choke: Math.max(0, Math.round(F.choke * ppmm)), rr: Math.max(0, Math.floor(Math.round(F.minRaise * ppmm) / 2)), cmyK: F.cmyK || F.noK, // with no K screen every black is one black, the three-colour kind included
       bb: bx1 < 0 ? null : [Math.max(0, bx0), Math.min(Wf, bx1), Math.max(0, by0), Math.min(Hf, by1)] };
   }
@@ -3077,7 +3078,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
       if (mD2) for (var h2k = 0; h2k < G.hd2.length; h2k++) { hr.fill(0); paintRow(hr, X0, Wd, G.hd2[h2k], y, G); for (i = 0; i < Wd; i++) if (colIn[i] && (hr[i] & 15)) mD2[o + i] = 1; }
       if (mA) for (var wk = 0; wk < G.wAdd.length; wk++) { hr.fill(0); paintRow(hr, X0, Wd, G.wAdd[wk], y, G); for (i = 0; i < Wd; i++) if (colIn[i] && hr[i] && !(colSel[i] === 255 && G.Z[zr + G.zx[X0 + i]] >= 128)) mA[o + i] = 1; } // any pixel of the layer, whatever its colour; not in the bare band between stripes where the ridges are
       for (i = 0; i < Wd; i++) { if (!colIn[i]) continue; for (v = 0; v < nv; v++) if (vr[v][i]) { mU[o + i] = 1; break; } v = colSel[i]; if (v === 255) { if (G.Z[zr + G.zx[X0 + i]] >= 128) continue; v = colDead[i]; } cls[o + i] = vr[v][i]; } }
-    var mW = new Uint8Array(n), mC = new Uint8Array(n), mM = new Uint8Array(n), mY = new Uint8Array(n), mK = new Uint8Array(n), mR = new Uint8Array(n), mH = new Uint8Array(n), m2 = G.h2on ? new Uint8Array(n) : null, anyR = false, noK = G.noK;
+    var mW = new Uint8Array(n), mC = new Uint8Array(n), mM = new Uint8Array(n), mY = new Uint8Array(n), mK = new Uint8Array(n), mR = new Uint8Array(n), mH = new Uint8Array(n), m2 = G.h2on ? new Uint8Array(n) : null, anyR = false, noK = G.noK, bOnH = G.black2 !== 'h2', bOnH2 = G.black2 === 'both' || G.black2 === 'h2'; // which HD film carries the black: the first, the second, or both
     for (i = 0; i < n; i++) { c = cls[i]; if (!c) continue; k = (c & BK) || (G.cmyK && (c & 7) === 7);
       if (k) { if (noK) mC[i] = mM[i] = mY[i] = 1; /* no K screen: black is the three colours together */ else mK[i] = 1; if (c & BR) { mR[i] = 1; anyR = true; } if (c & BU) mW[i] = 1; /* this layer wants white under all of it, its black included */ } else { mW[i] = 1; if (c & BC) mC[i] = 1; if (c & BM) mM[i] = 1; if (c & BY) mY[i] = 1; } }
     // The white is pulled in only from the outline of the whole print: where no view has any art beside it. That is also what keeps white
@@ -3091,9 +3092,9 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     if (mA && !G.wlChoke) for (i = 0; i < n; i++) if (mA[i]) mW[i] = 1;
     if (anyR && G.rr > 0) mR = morph(morph(mR, Wd, Hd, G.rr, true), Wd, Hd, G.rr, false); // only bold black is raised: halftone dots, hatching and thin lines are narrower than the width set and stay flat
     for (j = 0; j < Hd; j++) { y = Y0 + j; if (y < 0 || y >= G.Hf) continue; o = j * Wd; zr = G.zy[y] * G.ZW;
-      for (i = 0; i < Wd; i++) { var ri = colRid[i]; if (ri >= 0 && G.RUN[ri * G.Hf + y]) mH[o + i] = 1; else if (anyR && mR[o + i] && G.Z[zr + G.zx[X0 + i]] < 128) mH[o + i] = 1;
-        else if (mD && mD[o + i] && (!G.hdClip || G.Z[zr + G.zx[X0 + i]] < 128)) mH[o + i] = 1;
-        if (m2) { var r2 = colR2[i]; if (r2 >= 0 && r2 < G.nR && G.RUN[r2 * G.Hf + y]) m2[o + i] = 1; else if (mD2 && mD2[o + i] && (!G.hdClip || G.Z[zr + G.zx[X0 + i]] < 128)) m2[o + i] = 1; } } } // the second HD film: the ridges' second layer, and layers set to HD2 under the same rule // the HD layer is added as drawn; kept off the ridged area unless told otherwise, or it would fill in between the ridges
+      for (i = 0; i < Wd; i++) { var ri = colRid[i], zo = G.Z[zr + G.zx[X0 + i]] < 128, bk = (anyR && mR[o + i] && zo) || (mD && mD[o + i] && (!G.hdClip || zo)); /* bk: black raised in HD off the ridged area, or a layer set to HD */
+        if (ri >= 0 && G.RUN[ri * G.Hf + y]) mH[o + i] = 1; else if (bk && bOnH) mH[o + i] = 1;
+        if (m2) { var r2 = colR2[i]; if (r2 >= 0 && r2 < G.nR && G.RUN[r2 * G.Hf + y]) m2[o + i] = 1; else if (mD2 && mD2[o + i] && (!G.hdClip || zo)) m2[o + i] = 1; else if (bk && bOnH2) m2[o + i] = 1; } } } // the second HD film: the ridges' second layer, and layers set to HD2 under the same rule // the HD layer is added as drawn; kept off the ridged area unless told otherwise, or it would fill in between the ridges
     function crop(m) { var out = new Uint8Array(w * h); for (var jj = 0; jj < h; jj++) out.set(m.subarray((jj + halo) * Wd + halo, (jj + halo) * Wd + halo + w), jj * w); return out; }
     return { W: crop(mW), C: crop(mC), M: crop(mM), Y: crop(mY), K: crop(mK), H: crop(mH), H2: m2 ? crop(m2) : new Uint8Array(w * h) };
   }
@@ -3204,7 +3205,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
   function sheetLen(PG, dpi) { var m = 0; filmsOn().forEach(function (f) { if (F.pos[f]) m = Math.max(m, Math.round(F.pos[f][1] * dpi) + PG.H); }); return m; } // film pixels
   var thumbs = null, madeSig = null, thumbTimer = 0, zCount = 0, cur = null, sel = null, drag = null;
   function thumbKey() { var ART = L.art(); // everything the small films are made from
-    return [S.views, S.pitch, S.ridge, S.split, S.guard, S.swap, S.printIn, S.zone, S.hd2, S.ridge2, S.grow2, S.aim, S.aim > 0 ? [S.height, S.height2, S.round2].join('/') : '', F.noK, F.filmW, F.choke, F.minRaise, F.cmyK, F.mirror, F.hdClip, JSON.stringify(F.on), JSON.stringify(F.raise), zCount].join('|') + ART.nodes.map(function (n) { var d = L.d3Of(n); return L.keyOf(n) + n.assign + d.on + d.mm + isFull(n); }).join('|'); }
+    return [S.views, S.pitch, S.ridge, S.split, S.guard, S.swap, S.printIn, S.zone, S.hd2, S.ridge2, S.grow2, F.black2, S.aim, S.aim > 0 ? [S.height, S.height2, S.round2].join('/') : '', F.noK, F.filmW, F.choke, F.minRaise, F.cmyK, F.mirror, F.hdClip, JSON.stringify(F.on), JSON.stringify(F.raise), zCount].join('|') + ART.nodes.map(function (n) { var d = L.d3Of(n); return L.keyOf(n) + n.assign + d.on + d.mm + isFull(n); }).join('|'); }
   function ensureThumbs() { // draw the small films if anything they are made from has changed, and pack them again unless they were placed by hand
     var k = thumbKey(); if (k === madeSig) return false; try { makeThumbs(); } catch (e) { thumbs = null; } madeSig = k;
     if (F.auto && cur && cur.PG && pack(cur.PG, cur.G.dpi)) save(); return true; }
@@ -3546,6 +3547,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     if (G.hdUsed.length) h += row('HD layer', G.hdUsed.map(function (u) { return esc(u.n.name); }).join(', '));
     if (G.w2) h += row('Second layer', G.w2 + ' px = ' + mm(G.w2) + ' mm lines down the ridges, on film H2' + (G.w2 > G.w ? ', ' + mm((G.w2 - G.w) / 2) + ' mm wider than the ridge each side' : ''));
     if (G.aim) h += row('Stripes aimed', 'for a ' + Math.round(2500 / S.aim) + ' cm chest: the boundary between the stripes moves by up to ' + G.aimMax + ' px (' + mm(G.aimMax) + ' mm) toward the edges of the print');
+    if (F.black2 !== 'h') h += row('Black in HD', F.black2 === 'both' ? 'on both HD films, H and H2' : 'on the second HD film, H2, in place of H');
     if (G.hd2Used.length) h += row('HD2 layer', G.hd2Used.map(function (u) { return esc(u.n.name); }).join(', '));
     if (G.h2on || F.noK) { var scr = filmsOn(); h += row('Screens', scr.length + ': ' + scr.join(' ')); }
     if (G.wUsed.length) h += row('White layer', G.wUsed.map(function (u) { return esc(u.n.name); }).join(', '));
@@ -3573,10 +3575,10 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     $('filmInks').textContent = px ? 'In the art: ' + combos.map(function (c) { return c[0] + ' ' + (100 * c[1] / px).toFixed(c[1] / px < 0.1 ? 1 : 0) + '%'; }).join(', ') + '.' : '';
   }
   function drawRaise(G) {
-    $('filmHD').innerHTML = G.hdUsed.length ? G.hdUsed.map(function (u) { return '<p class="note"><b>' + esc(u.n.name) + '</b> goes on the HD film exactly as drawn, added to the ridges.</p>'; }).join('') +
+    $('filmHD').innerHTML = G.hdUsed.length ? G.hdUsed.map(function (u) { return '<p class="note"><b>' + esc(u.n.name) + '</b> goes on ' + (F.black2 === 'h2' ? 'the second HD film exactly as drawn; the first keeps only the ridges.' : F.black2 === 'both' ? 'both HD films exactly as drawn, added to the ridges on the first.' : 'the HD film exactly as drawn, added to the ridges.') + '</p>'; }).join('') +
       '<label class="check"><input type="checkbox" id="fHdClip"' + (F.hdClip ? ' checked' : '') + '><span>Leave it off where the ridges are</span></label>'
       : '<p class="note">None. To put your own art on the HD film, link the image and set it to HD under Artwork.</p>';
-    var t2 = L.top2 ? L.top2() : null, h2h = (t2 ? '<p class="note">The second layer of the ridges: a ' + (G.w2 / G.ppmm).toFixed(2) + ' mm line down the centre of each ridge.</p>' : '') + G.hd2Used.map(function (u) { return '<p class="note"><b>' + esc(u.n.name) + '</b> goes on the second HD film exactly as drawn' + (G.hdClip && G.hdUsed.length ? ', left off where the ridges are like the HD layer.' : '.') + '</p>'; }).join('');
+    var t2 = L.top2 ? L.top2() : null, h2h = (F.black2 !== 'h' ? '<p class="note">The black raised in HD' + (G.hdUsed.length ? ' and ' + G.hdUsed.map(function (u) { return '<b>' + esc(u.n.name) + '</b>'; }).join(', ') : '') + (F.black2 === 'both' ? ' go on this film as well as the first, so either screen can print it, or both can.' : ' go on this film in place of the first, which is left with the ridges.') + '</p>' : '') + (t2 ? '<p class="note">The second layer of the ridges: a ' + (G.w2 / G.ppmm).toFixed(2) + ' mm line down the centre of each ridge.</p>' : '') + G.hd2Used.map(function (u) { return '<p class="note"><b>' + esc(u.n.name) + '</b> goes on the second HD film exactly as drawn' + (G.hdClip && G.hdUsed.length ? ', left off where the ridges are like the HD layer.' : '.') + '</p>'; }).join('');
     if (G.hd2Used.length && !G.hdUsed.length) h2h += '<label class="check"><input type="checkbox" id="fHdClip"' + (F.hdClip ? ' checked' : '') + '><span>Leave it off where the ridges are</span></label>';
     $('filmH2').innerHTML = h2h || '<p class="note">Not in use. Set an image to HD2 under Artwork, or tick Second HD layer on top under HD ridges.</p>';
     $('filmWL').innerHTML = G.wUsed.length ? G.wUsed.map(function (u) { return '<p class="note"><b>' + esc(u.n.name) + '</b> is added to the white film: white wherever the layer has anything, on top of the white under the colours.</p>'; }).join('') +
@@ -3615,7 +3617,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
     if (on && cur.PG) { var dd = $('filmSummary').querySelector('[data-sheet]'); if (dd) dd.textContent = F.filmW + ' × ' + (F.sheetLen > 0 ? F.sheetLen : sheetLen(cur.PG, cur.G.dpi) / cur.G.dpi).toFixed(1) + ' in'; }
   }
   function syncInputs() {
-    $('fW').value = F.filmW; $('fDpi').value = F.dpi; $('fChoke').value = F.choke; $('fRaise').value = F.minRaise; $('fCmyK').checked = F.cmyK; $('fCmyK').disabled = F.noK; $('fNoK').checked = F.noK; $('fOnK').disabled = F.noK; $('fMirror').checked = F.mirror; $('fProof').value = F.proof; $('fZoom').value = F.zoom;
+    $('fW').value = F.filmW; $('fDpi').value = F.dpi; $('fChoke').value = F.choke; $('fRaise').value = F.minRaise; $('fCmyK').checked = F.cmyK; $('fCmyK').disabled = F.noK; $('fNoK').checked = F.noK; $('fBlack2').value = F.black2; $('fOnK').disabled = F.noK; $('fMirror').checked = F.mirror; $('fProof').value = F.proof; $('fZoom').value = F.zoom;
     FILMS.forEach(function (f) { $('fOn' + f).checked = F.on[f]; });
     $(F.layout === 'sheet' ? 'fLaySheet' : 'fLayPages').checked = true; $('shLen').value = F.sheetLen > 0 ? F.sheetLen : ''; $('shZoom').value = /^(wide|mid)$/.test(F.sheetZoom) ? F.sheetZoom : 'fit';
   }
@@ -3623,6 +3625,7 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
   num('fW', 'filmW', 8, 60); num('fDpi', 'dpi', 150, 1440); num('fChoke', 'choke', 0, 1); num('fRaise', 'minRaise', 0, 6);
   $('fCmyK').addEventListener('change', function () { F.cmyK = this.checked; save(); refresh(true); });
   $('fNoK').addEventListener('change', function () { F.noK = this.checked; save(); syncInputs(); refresh(true); });
+  ['change', 'input'].forEach(function (ev) { $('fBlack2').addEventListener(ev, function () { if (F.black2 === this.value || !/^(h|h2|both)$/.test(this.value)) return; F.black2 = this.value; save(); refresh(true); }); });
   $('fMirror').addEventListener('change', function () { F.mirror = this.checked; save(); refresh(true); });
   $('fProof').addEventListener('change', function () { F.proof = this.value; save(); refresh(true); });
   $('fZoom').addEventListener('change', function () { F.zoom = parseInt(this.value, 10) || 2; save(); refresh(true); });
