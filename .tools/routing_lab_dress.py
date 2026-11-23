@@ -26,7 +26,7 @@ body.app th { font-size: 12px; }
 body.app pre { padding: 6px; line-height: 1.3; }
 .eyebrow { margin: 0 0 6px; }
 button, input, select { background: var(--bg); }
-@media (max-width: 900px) { main, main.ranking { height: auto; } }
+@media (max-width: 1200px) { main, main.ranking { height: auto; } }
 </style>
 """
 
