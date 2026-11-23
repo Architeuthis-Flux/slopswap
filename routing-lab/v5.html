@@ -42,7 +42,7 @@ h2 { display: flex; align-items: center; gap: 8px; font-family: var(--label); fo
 h2::before { content: ""; flex: none; width: 9px; height: 9px; background: var(--c, var(--accent));
   clip-path: polygon(0 0, 100% 0, 100% 100%, 45% 100%, 0 55%); }
 h2::after { content: ""; flex: 1; height: 1px; background: var(--line); }
-.body > h2:nth-of-type(6n+1) { --c: var(--r1); } .body > h2:nth-of-type(6n+2) { --c: var(--r3); }
+.body > h2:nth-of-type(6n+1) { --c: var(--r2); } .body > h2:nth-of-type(6n+2) { --c: var(--r3); }
 .body > h2:nth-of-type(6n+3) { --c: var(--r7); } .body > h2:nth-of-type(6n+4) { --c: var(--r8); }
 .body > h2:nth-of-type(6n+5) { --c: var(--r10); } .body > h2:nth-of-type(6n+6) { --c: var(--r11); }
 h2.trouble { color: var(--problem); --c: var(--problem); }
@@ -84,7 +84,8 @@ main { display: flex; height: 100vh; }
   clip-path: polygon(0 0, 100% 0, calc(100% - 11px) 100%, 0 100%); }
 .plate b { align-self: stretch; display: inline-flex; align-items: center; padding: 0 7px 0 8px; font-family: var(--display); font-weight: 400;
   font-size: 10px; letter-spacing: 0; color: var(--bg); background: var(--c, var(--accent)); }
-.plate:hover { background: var(--line); }
+.plate:hover, .plate:focus-visible { background: var(--line); }
+.plate:focus-visible { outline: 0; box-shadow: inset 0 0 0 2px var(--focus); }
 .bar-note { flex: 1; min-width: 0; color: var(--dim); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .fold { flex: none; width: 22px; height: 18px; padding: 0; clip-path: none; background: none; color: var(--dim); font-family: var(--mono); font-size: 14px; line-height: 1; }
 .fold::before { content: "\2212"; }
@@ -290,7 +291,9 @@ table.bridges { border-collapse: collapse; width: 100%; }
 #ceiling label.inline { display: inline-flex; gap: 6px; align-items: center; color: var(--dim); margin-top: 3px; }
 #ceiling pre { margin: 4px 0; }
 ul.problems, ul.notes { margin: 0; padding-left: 16px; }
+ul.problems { list-style-type: "\25B2\00A0\00A0"; padding-left: 20px; }      /* a mark as well as the red: the pink is near it */
 ul.problems li { color: var(--problem); }
+ul.problems li::marker { font-size: 9px; }
 ul.notes li { color: var(--dim); }
 summary { cursor: pointer; font-family: var(--label); font-weight: 600; text-transform: uppercase; letter-spacing: .09em; font-size: 12px; margin-top: 12px; }
 summary:hover { color: var(--accent); }
@@ -779,7 +782,8 @@ function cell(col, row) {
   return td;
 }
 
-const CLASS_HUES = [1, 2, 3, 7, 8, 9, 10, 11];        // the rainbow's steps a class row may wear
+const CLASS_HUES = [2, 3, 7, 8, 9, 10, 11];           // the rainbow's steps a class row may wear: no blue, no orange, and not
+                                                      // the first pink, which sits too near the red that means a problem
 
 function classRow(name, rows, at) {
   const worst = (key) => {
@@ -2559,6 +2563,7 @@ function showTab(name) {
   say("");
   for (const button of document.querySelectorAll("#tabs button")) {
     button.classList.toggle("on", button.dataset.tab === name);
+    if (button.dataset.tab) button.setAttribute("aria-pressed", String(button.dataset.tab === name));
   }
   $("fabric").hidden = name === "sheet";           // the ranking is drawn on the fabric too
   $("sheet").hidden = name !== "sheet";
@@ -2829,6 +2834,21 @@ function installPanels() {
       window.addEventListener("keydown", key, true);
     });
     plate.addEventListener("dblclick", resetLayout);
+    // without a drag: with the plate in focus an arrow puts the panel on that side of the view (the view, of the
+    // tests), and Home puts the panels back
+    plate.tabIndex = 0;
+    plate.setAttribute("role", "button");
+    plate.setAttribute("aria-label", "the " + name + " panel: an arrow key moves it to that side of the "
+      + (name === "view" ? "tests" : "view") + ", Home puts the panels back");
+    plate.addEventListener("keydown", (event) => {
+      const side = { ArrowLeft: "left", ArrowRight: "right", ArrowUp: "top", ArrowDown: "bottom" }[event.key];
+      if (!side && event.key !== "Home") return;
+      event.preventDefault();
+      event.stopPropagation();                     // the keys are the plate's here, not a list's
+      if (event.key === "Home") resetLayout();
+      else if (wide()) movePanel(name, name === "view" ? "tests" : "view", side);
+      plate.focus();                               // the panel was taken out and put back: its plate keeps the keys
+    });
     const fold = panel.querySelector(".fold");
     if (fold) {
       fold.addEventListener("click", () => {
@@ -2980,8 +3000,9 @@ async function start() {
   });
   $("filter-unclean").addEventListener("change", renderBattery);
   $("filter-changed").addEventListener("change", renderBattery);
-  for (const button of document.querySelectorAll("#tabs button")) {
+  for (const button of document.querySelectorAll("#tabs button[data-tab]")) {
     button.addEventListener("click", () => showTab(button.dataset.tab));
+    button.setAttribute("aria-pressed", String(button.classList.contains("on")));
   }
   $("compare").addEventListener("change", () => {
     state.compare = $("compare").checked;
