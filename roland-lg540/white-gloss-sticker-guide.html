@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>LG-540: white + colour + gloss sticker</title>
-<meta name="description" content="How to set up and print lentV64_print.pdf in VersaWorks on the Roland LG-540: white ink under the colour, a raised clear layer on top, then kiss cut and perf cut.">
+<meta name="description" content="How to set up and print the lentV64 sticker in VersaWorks 7 on the Roland LG-540: white ink under the colour, a thick glossy clear layer on top, then kiss cut and perf cut. Includes what to check when the gloss does not print.">
 <meta name="short-title" content="LG-540 sticker guide">
 <link rel="stylesheet" href="../styles/jumperless.css">
 <style>
@@ -25,19 +25,19 @@
   ol.steps{padding-left:1.4em}
   ol.steps>li{margin:.7em 0;padding-left:.2em}
   ol.steps>li::marker{color:var(--accent-2);font-weight:700}
+  ol.steps ul{margin:.4em 0 0}
   .ref{font-size:.85rem;color:var(--muted)}
   .ref a{color:var(--muted)}
   .ref a:hover{color:var(--accent)}
   .ui{font-weight:700;white-space:nowrap}
-  .v6{color:var(--muted);font-size:.9em}
 
   /* a layered job drawn as a stack: the top row prints last */
-  .stack{max-width:30rem;margin:0 0 1.4em;font-size:.95rem}
-  .stack div{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding:.55em .8em;border:1px solid var(--line);border-bottom:0;background:var(--surface)}
+  .stack{max-width:34rem;margin:0 0 1.4em;font-size:.95rem}
+  .stack div{display:flex;justify-content:space-between;gap:.3rem 1rem;flex-wrap:wrap;padding:.55em .8em;border:1px solid var(--line);border-bottom:0;background:var(--surface)}
   .stack div:first-of-type{border-radius:6px 6px 0 0}
   .stack div.film{background:var(--surface-2);border-bottom:1px solid var(--line);border-radius:0 0 6px 6px;color:var(--muted)}
   .stack span{color:var(--muted)}
-  .stack code{background:var(--surface-2)}
+  .stack code{background:var(--surface-2);white-space:nowrap}
   .stack p{margin:0 0 .4em;font-family:var(--font-pixel);font-size:.55rem;color:var(--muted)}
 
   .callout.warn{border-left-color:var(--accent)}
@@ -50,23 +50,33 @@
 <main class="page">
 <p class="eyebrow"><a href="../">slopswap</a> / <a href="./">roland-lg540</a></p>
 <h1>LG-540: white + colour + gloss sticker</h1>
-<p class="muted">How to set up and print <code>lentV64_print.pdf</code> in VersaWorks on the Roland LG-540: white ink under the colour, a raised clear layer on top, then kiss cut and perf cut. 20 November 2026.</p>
+<p class="muted">How to set up and print the lentV64 sticker in VersaWorks 7 on the Roland LG-540: white ink under the colour, a thick glossy clear layer on top, then kiss cut and perf cut. Updated 23 November 2026.</p>
+
+<div class="callout warn"><span class="label">Changed on 23 November</span>
+<p>The first print mostly worked, but the gloss barely showed: a few pinkish lines near the top that faded out, and the printer reporting the gloss ink as low. Three things are different now:</p>
+<ul>
+<li><strong>Check the gloss on the printer first.</strong> Section 2 is new. Do it before any gloss job.</li>
+<li><strong>The one-pass run is only an alignment check.</strong> Its gloss coat is thin and matte by design, so it will never look glossy.</li>
+<li><strong>The real print uses two files.</strong> Run B now adds a gloss-only file on top and builds the gloss up in shiny coats.</li>
+</ul>
+</div>
 
 <div class="callout"><span class="label">About the pictures</span>
-<p>The pictures here are rendered from the print file. They are not VersaWorks screenshots. Use them to check that what VersaWorks shows you has the same shapes. Each step links to the Roland manual page that shows the real window.</p>
-<p>Menu names are for VersaWorks 7. Where VersaWorks 6 words it differently, that is in <span class="v6">[brackets]</span>.</p>
+The pictures here are rendered from the print files. They are not VersaWorks screenshots. Use them to check that what VersaWorks shows you has the same shapes. Menu names are for VersaWorks 7, and each step links to the Roland page it came from.
 </div>
 
 <h2>What you need</h2>
 <ul>
-<li>The file <a href="lentV64_print.pdf" download><code>lentV64_print.pdf</code></a> (8.6 MB, download it here). Use that exact file; the older exports have no white or gloss in them as far as VersaWorks is concerned.</li>
-<li>The LG-540 loaded with white and gloss ink as well as CMYK.</li>
-<li>VersaWorks with the printer already registered.</li>
+<li><a href="lentV64_print.pdf" download><code>lentV64_print.pdf</code></a> (8.6 MB): everything. Colour, white, gloss and both cut lines.</li>
+<li><a href="lentV64_gloss.pdf" download><code>lentV64_gloss.pdf</code></a> (4.9 MB): the gloss and the two cut lines only. Same page size, so it lands exactly on top of the first file. Used in Run B.</li>
+<li>The LG-540 loaded with white and gloss ink as well as CMYK, with its firmware up to date. Version 3.60 (7 September 2026) was the newest listed when this was written.</li>
+<li>VersaWorks 7, up to date, with the printer already registered.</li>
 <li>The retroreflective film, loaded the way you load any print-and-cut roll.</li>
 </ul>
+<p class="ref">Roland: <a href="https://www.rolanddga.com/support/products/wide-format-uv-print-cut/truevis-lg-640-64-uv-printer-cutter">LG series support page and user's manual</a> · <a href="https://downloadcenter.rolanddg.com/softwareparts.php?item_id=a66cf75cb26c7394bee897afd3d4391eceb7d69d&amp;software=65d253e07255a6991ee1ff11e45c9779b1746136&amp;id=5b76418f139e85c6e849814f120393313b4cbf28&amp;type=note_history_html">LG firmware history</a> · <a href="https://downloadregion.rolanddg.com/UpdateInfo/Info_En.html">VersaWorks 7 update notes</a></p>
 
-<h2>1. What is in the file</h2>
-<p>The PDF has five layers. VersaWorks does not go by the layer names. It goes by the <strong>spot colour</strong> each layer is painted in, so those names have to be exact.</p>
+<h2>1. What is in the files</h2>
+<p><code>lentV64_print.pdf</code> has five layers. VersaWorks does not go by the layer names. It goes by the <strong>spot colour</strong> each layer is painted in, so those names have to be exact. <code>lentV64_gloss.pdf</code> is the same file with the first two layers taken out.</p>
 
 <div class="plates">
 <figure><img src="plate-cmyk.jpg" width="1349" height="1239" alt="The colour artwork: rainbow pixel lettering reading JUMPERLESS over a standing figure" loading="lazy"><figcaption><b>CMYK</b>: the colour inks. White in this picture means no ink at all.</figcaption></figure>
@@ -77,13 +87,13 @@
 
 <div class="table-wrap">
 <table>
-<thead><tr><th>Layer</th><th>Spot colour in the file</th><th>What the printer does with it</th></tr></thead>
+<thead><tr><th>Layer</th><th>Spot colour in the file</th><th>What the printer does with it</th><th>In the gloss-only file</th></tr></thead>
 <tbody>
-<tr><td>CMYK</td><td>none, ordinary CMYK</td><td>Prints the colour.</td></tr>
-<tr><td>RDG_WHITE</td><td><code>RDG_WHITE</code></td><td>Prints white ink in that shape.</td></tr>
-<tr><td>RDG_GLOSS</td><td><code>RDG_GLOSS</code></td><td>Prints gloss ink, more where the picture is darker.</td></tr>
-<tr><td>CutContour</td><td><code>CutContour</code></td><td>Kiss cut: the sticker outline and the seven holes between the spokes.</td></tr>
-<tr><td>PerfCutContour</td><td><code>PerfCutContour</code></td><td>Perforated cut through the backing, around the outside.</td></tr>
+<tr><td>CMYK</td><td>none, ordinary CMYK</td><td>Prints the colour.</td><td>no</td></tr>
+<tr><td>RDG_WHITE</td><td><code>RDG_WHITE</code></td><td>Prints white ink in that shape.</td><td>no</td></tr>
+<tr><td>RDG_GLOSS</td><td><code>RDG_GLOSS</code></td><td>Prints gloss ink, more where the picture is darker.</td><td>yes</td></tr>
+<tr><td>CutContour</td><td><code>CutContour</code></td><td>Kiss cut: the sticker outline and the seven holes between the spokes.</td><td>yes</td></tr>
+<tr><td>PerfCutContour</td><td><code>PerfCutContour</code></td><td>Perforated cut through the backing, around the outside.</td><td>yes</td></tr>
 </tbody>
 </table>
 </div>
@@ -99,24 +109,48 @@
 <li><i style="background:#3a5bd9"></i><span><b>White under colour</b>The figure, the outlines and the shadows. Ordinary solid colour.</span></li>
 </ul>
 
-<h2>2. Add the file and check VersaWorks read it</h2>
+<h2 id="glosscheck">2. Check the gloss is coming out</h2>
+<p>Do this at the printer before any job that uses gloss. On the first print the gloss came out as a few pinkish lines that faded away, which points at the ink supply more than at VersaWorks. This check shows which it is, and no VersaWorks setting can make up for gloss ink that is not jetting.</p>
+<ol class="steps">
+<li><strong>Look at the gloss ink level on the printer's screen.</strong> A caution mark next to it means the pouch is low, or that it is close to or past its shelf-life date. Tap it to see which.
+  <ul>
+  <li>Low does not stop a print. The printer keeps going until a pouch reads <span class="ui">Empty</span>, then pauses with an error.</li>
+  <li>If the pouch is past its date, or nearly empty before a long gloss job, fit a new one. Old ink thickens and stops jetting properly.</li>
+  </ul>
+</li>
+<li><strong>Print a nozzle test.</strong> Run <span class="ui">Nozzle Drop-out Test</span> from the printer's screen.</li>
+<li><strong>Find the gloss block, marked Gl.</strong> Gloss is clear, so tilt the test print under a bright light and look for it by its shine.</li>
+<li><strong>Read it.</strong>
+  <ul>
+  <li><strong>Complete and clear:</strong> the gloss is fine. Carry on.</li>
+  <li><strong>Gaps, or missing:</strong> the gloss nozzles are blocked or starved. Run <span class="ui">Normal Cleaning</span> on the head group that holds the gloss, then print the test again.</li>
+  <li><strong>Tinted pink or any other colour:</strong> gloss ink has no colour of its own, so another ink has most likely got into the gloss nozzles. Clean and retest until the block prints clear.</li>
+  </ul>
+</li>
+<li><strong>If Normal Cleaning does not bring it back,</strong> try <span class="ui">Medium Cleaning</span>, then <span class="ui">Powerful Cleaning</span>, testing after each.</li>
+</ol>
+<div class="callout warn"><span class="label">Stop if</span>The gloss block is still wrong after Powerful Cleaning. Tell Kevin before going further. The next steps (manual cleaning, <span class="ui">Ink Renewal</span>) use a lot of ink, and Ink Renewal on a pouch that is already low can run it dry part-way through.</div>
+<p class="muted">The menu names and ink warnings in this section come from Roland's manuals for its sister UV printers, because the LG manual pages could not be opened while this was written. The LG's screen may word them slightly differently.</p>
+<p class="ref">Roland manuals for sister models: <a href="https://downloadcenter.rolanddg.com/contents/manuals/MO-240_USE_EN/caj1718330341245.html">what the caution mark on an ink means</a> · <a href="https://downloadcenter.rolanddg.com/contents/manuals/MG-640_USE_EN/lbe1604453011891.html">ink past its shelf life</a> · <a href="https://downloadcenter.rolanddg.com/contents/manuals/BD-8_USE_EN/quk1718926267899.html">the nozzle test, with gloss printed clear</a> · <a href="https://downloadcenter.rolanddg.com/contents/manuals/UG-642_USE_EN.pdf">cleaning menus on a UV printer/cutter</a></p>
+
+<h2>3. Add the file and check VersaWorks read it</h2>
 <ol class="steps">
 <li>Start VersaWorks, pick the LG-540, and drag <code>lentV64_print.pdf</code> into the job list.</li>
-<li>Click the job once. In the preview area, under <span class="ui">Document Information &gt; Special Items</span>, the markers for <strong>white</strong> and <strong>gloss</strong> must both be there.</li>
-<li>Look at the preview. Roland's manuals describe white as pink hatching and gloss as light-blue shading. The shapes should match the picture below.</li>
+<li>Click the job once. Under <span class="ui">Document Information</span>, the <span class="ui">Special Items</span> line must show both <strong>Wh</strong> (white) and <strong>Gl</strong> (gloss). For <code>lentV64_gloss.pdf</code> it shows Gl only.</li>
+<li>Look at the preview. VersaWorks marks white in pink and gloss in light blue. The shapes should match the picture below.</li>
 </ol>
 <figure><img src="preview-marks.jpg" width="1349" height="1239" alt="The artwork with every plate overlaid: pink where white ink prints, a blue haze where gloss prints, and the two cut outlines" loading="lazy">
 <figcaption>Every plate shown at once: pink is white ink, the blue haze is gloss, the magenta line is the kiss cut and the green line is the perf cut. VersaWorks draws its own version of these marks.</figcaption></figure>
-<div class="callout warn"><span class="label">Stop if</span>Special Items shows neither marker, or only one. Do not print: the missing layer would print nothing. Go to <a href="#wrong">If something looks wrong</a>.</div>
-<p class="ref">Roland manual: <a href="https://downloadcenter.rolanddg.com/contents/manuals/VW7_USE_EN/zdk1761199521523.html">Printing using white, gloss and other special inks (VersaWorks 7)</a> · <a href="https://downloadcenter.rolanddg.com/contents/manuals/VW6_English/lrg1716962721626.html">same page for VersaWorks 6</a> · <a href="https://downloadcenter.rolanddg.com/contents/manuals/UV-Guide_USE_EN/bqt1605228634369.html">adding a file to the job list</a></p>
+<div class="callout warn"><span class="label">Stop if</span>A marker is missing. Do not print: the missing layer would print nothing. Go to <a href="#wrong">If something looks wrong</a>.</div>
+<p class="ref">Roland: <a href="https://downloadcenter.rolanddg.com/contents/manuals/VW7_USE_EN/zdk1761199521523.html">printing with white, gloss and other special inks</a> · <a href="https://www.rolanddg.eu/en/blog/uv-printing-tips-for-versaworks">the Wh, Gl and Pr markers explained</a></p>
 
-<h2>3. Where the print modes are</h2>
+<h2>4. Where the print modes are</h2>
 <ol class="steps">
-<li>Double-click the job to open <span class="ui">Settings</span> <span class="v6">[Job Settings]</span>.</li>
+<li>Double-click the job to open <span class="ui">Settings</span>.</li>
 <li>Open <span class="ui">Quality</span>. Three boxes matter: <span class="ui">Media Type</span>, <span class="ui">Print Quality</span> and <span class="ui">Mode</span>.</li>
 <li>The Mode list changes with the Media Type. If you cannot see any white or gloss modes, the Media Type is a plain CMYK one: switch to a type with <em>special effects</em> in its name.</li>
 </ol>
-<p>There is no single mode that prints white, colour and raised gloss together. Each mode below does one part, and a <strong>layered job</strong> (sections 5 and 6) stacks them.</p>
+<p>Matte and shiny gloss are the same ink. The Mode decides which finish you get. No single mode prints white, colour and thick shiny gloss together, so a <strong>layered job</strong> (sections 6 and 7) stacks them.</p>
 <div class="table-wrap">
 <table>
 <thead><tr><th>Mode</th><th>What it prints</th><th>Usually under Media Type</th></tr></thead>
@@ -124,28 +158,30 @@
 <tr><td><code>White -&gt; CMYK(v)</code></td><td>White first, colour on top, in one go.</td><td>Generic with special effects</td></tr>
 <tr><td><code>CMYK(v)</code></td><td>Colour only.</td><td>Generic</td></tr>
 <tr><td><code>White(v)</code></td><td>White only.</td><td>Special effects</td></tr>
-<tr><td><code>MatteVarnish(v)</code></td><td>Gloss ink only, one coat, matte finish.</td><td>Special effects</td></tr>
-<tr><td><code>GlossVarnish(v)</code></td><td>Gloss ink only, one coat, shiny finish.</td><td>Special effects</td></tr>
-<tr><td><code>Embossing(v)</code></td><td>Gloss ink only, built up in several coats for a raised finish.</td><td>Special effects</td></tr>
-<tr><td><code>Wh -&gt; CMYK -&gt; Gl</code></td><td>All three in a single pass. Used by a layered job.</td><td>whichever offers it</td></tr>
+<tr><td><code>GlossVarnish(v)</code></td><td>Gloss ink, <strong>shiny</strong> finish. The one to use for the real print.</td><td>Special effects</td></tr>
+<tr><td><code>MatteVarnish(v)</code></td><td>Gloss ink, matte finish.</td><td>Special effects</td></tr>
+<tr><td><code>CMYK -&gt; GlossVarnish(v)</code></td><td>Colour, then a shiny coat, in one job. No white, so not for this sticker.</td><td>Generic with special effects</td></tr>
+<tr><td><code>Embossing(v)</code></td><td>Gloss ink in several matte coats with one shiny coat on top. May not be offered on the LG.</td><td>Special effects</td></tr>
 </tbody>
 </table>
 </div>
-<p class="muted">Mode names are from Roland's VersaWorks 6 manual and depend on which inks the printer has loaded, so yours may be worded slightly differently. A name ending in <code>16p</code> is the same mode with more passes: slower and finer.</p>
-<p class="ref">Roland manual: <a href="https://downloadcenter.rolanddg.com/contents/manuals/VW6_USE_English/hdv1697781701237.html">Quality settings and the full mode list</a> · media types for the LG series as listed in <a href="https://help.fiery.com/fieryxf/Drivers/Roland/PDS_Roland_TrueVIS_LG_Series_HT.pdf">Fiery's LG driver sheet</a></p>
+<p class="muted">These names are from Fiery's mode list for the LG and Roland's special-ink guide. VersaWorks may space them differently (<code>Gloss Varnish (v)</code>), and the list depends on which inks are loaded. A name with a number and <code>p</code> is the same mode with that many passes: more passes is slower and finer.</p>
+<p class="ref">Mode names for the LG: <a href="https://help.fiery.com/fieryxf/Drivers/Roland/PDS_Roland_TrueVIS_LG_Series_HT.pdf">Fiery's LG driver sheet</a> · what each gloss finish does: <a href="https://downloadcenter.rolanddg.com/contents/manuals/UV-SPC_USE2_EN_R5.pdf">Roland's special colour ink guide</a></p>
 
-<h2>4. Test on a small piece first</h2>
+<h2>5. Test on a small piece first</h2>
 <p>The film is expensive and the gloss takes a long time. Print a strip before the whole sticker.</p>
 <ol class="steps">
-<li>Duplicate the job (right-click, <span class="ui">Edit Design &gt; Duplicate Job</span> <span class="v6">[Duplicate &gt; Duplicate Job]</span>) and rename the copy <em>test</em>. Leave the original alone.</li>
-<li>In the test copy's Settings open <span class="ui">Clip and Tile</span> and tick <span class="ui">Clip Image</span>. Drag the clip box so it covers part of a letter, a piece of the ring and part of the figure. That puts all four areas from the map in section 1 into the strip.</li>
+<li>In the job's Settings open <span class="ui">Clip and Tile</span> and tick <span class="ui">Clip Image</span>. Set the clip box so it covers part of a letter, a piece of the ring and part of the figure. That puts all four areas from the map in section 1 into the strip.</li>
+<li><strong>Every job in the same layered job needs the same clip.</strong> For Run A, clip first and then duplicate, so the copies match. For Run B, type the same position and size numbers into both jobs instead of dragging the box. If the clips differ, the layers will not line up.</li>
 <li>In <span class="ui">Cut Controls</span> set <span class="ui">Operation Mode</span> to Print Only, so the test does not try to cut half an outline.</li>
-<li>Build Run A or Run B below from the test copy. When the strip looks right, build the same thing again from the original for the full print.</li>
+<li>Build Run A or Run B below from the clipped jobs. When the strip looks right, build the same thing again without the clip for the full print.</li>
 </ol>
-<p class="ref">Roland manual: <a href="https://downloadcenter.rolanddg.com/contents/manuals/VW7_USE_EN/tdg1752190197566.html">Clip Image (VersaWorks 7)</a> · <a href="https://downloadcenter.rolanddg.com/contents/manuals/VW6_English/rsr1718868028449.html">VersaWorks 6</a></p>
+<div class="callout"><span class="label">On a clipped strip</span>The gloss can run right up to the end of the print. Roland's firmware notes mention gloss in the last 5 mm or so of a Gloss Varnish print not curing fully. Do not touch or judge that edge.</div>
+<p class="ref">Roland: <a href="https://downloadcenter.rolanddg.com/contents/manuals/VW7_USE_EN/tdg1752190197566.html">Clip Image</a></p>
 
-<h2>5. Run A: quick check, everything in one pass</h2>
-<p>This prints white, colour and one thin matte coat of gloss without pulling the film back. There is no height to the gloss. Use it to confirm the white lands where the map says and the layers line up.</p>
+<h2>6. Run A: alignment check, everything in one pass</h2>
+<p>This prints white, colour and one thin coat of gloss without pulling the film back. Use it to confirm the white lands where the map says and the layers line up.</p>
+<div class="callout warn"><span class="label">Do not judge the gloss by this run</span>Roland lists the one-pass stack as white, colour, then gloss as <em>matte varnish</em>. The coat is thin and matte, so on most of the sticker you will hardly see it. That is how the mode works, not a fault. For gloss you can see and feel, use Run B.</div>
 <div class="stack">
 <p>The layered job, top row prints last</p>
 <div><b>3 gloss</b><span>Mode <code>MatteVarnish(v)</code></span></div>
@@ -154,74 +190,103 @@
 <div class="film">film</div>
 </div>
 <ol class="steps">
-<li>Duplicate the job twice so there are three copies: right-click the job, <span class="ui">Edit Design &gt; Duplicate Job</span> <span class="v6">[Duplicate &gt; Duplicate Job]</span>. Rename them <em>1 white</em>, <em>2 colour</em>, <em>3 gloss</em>.</li>
+<li>Starting from <code>lentV64_print.pdf</code>, duplicate the job twice so there are three copies: right-click the job, <span class="ui">Edit Design &gt; Duplicate Job</span>. Rename them <em>1 white</em>, <em>2 colour</em>, <em>3 gloss</em>.</li>
 <li>Open each copy's Quality settings and set its Mode as in the stack above.</li>
 <li>Select all three (Ctrl-click each), right-click, and choose <span class="ui">Generate Layered Job</span>.</li>
-<li>Double-click the new layered job. Tick <span class="ui">One Pass Multilayer Printing</span> and answer <span class="ui">Yes</span> when it asks to reconfigure the job.</li>
-<li>In Quality, choose the Media Type, the Print Quality and the Mode <code>Wh -&gt; CMYK -&gt; Gl</code>. In the Layers window, check the order is white, then colour, then gloss on top. Click OK.</li>
+<li>Open the new layered job. Tick <span class="ui">One Pass Multilayer Printing</span> and answer <span class="ui">Yes</span> when it asks to reconfigure the job.</li>
+<li>In Quality, choose the Media Type, the Print Quality and the Mode <code>Wh -&gt; CMYK -&gt; Gl</code>. Click <span class="ui">Edit</span> under Mode to see the layers, and check the order is white, then colour, then gloss on top.</li>
 <li>Print.</li>
 </ol>
-<div class="callout"><span class="label">Not confirmed on this printer</span>White → CMYK → Gloss is one of the four stacks Roland lists for one-pass printing, but the only worked example Roland publishes is CMYK → White → CMYK. The modes in step 2 follow that example. If VersaWorks says the layers do not qualify for one pass, go straight to Run B. If the tick box is not there at all, the printer firmware and VersaWorks need updating.</div>
-<p class="ref">Roland manual: <a href="https://downloadcenter.rolanddg.com/contents/manuals/VW6_USE_English/jeq1663635210238.html">making a layered job</a> · <a href="https://downloadcenter.rolanddg.com/contents/manuals/VW6_USE_English/ccp1689659111565.html">one pass multilayer printing</a> · <a href="https://www.rolanddga.com/blog/roland-lg-mg-3-layer-printing-using-white-ink">Roland's three-layer example on the LG</a> · <a href="https://downloadcenter.rolanddg.com/contents/manuals/VW7_STA_EN/lho1758099898270.html">duplicating jobs</a> · <a href="https://www.texintel.com/press-room/roland-dg-uv-printer/cutters-support-one-pass-multilayer-printing">the update that added one-pass printing</a></p>
+<div class="callout"><span class="label">Not confirmed</span>The per-copy modes in step 2 follow Roland's only worked example for the LG, which is a colour, white, colour stack. If VersaWorks says the layers do not qualify for one pass, skip to Run B.</div>
+<p class="ref">Roland: <a href="https://downloadcenter.rolanddg.com/contents/manuals/VW7_USE_EN/uby1740620879711.html">layered jobs, pullback and one-pass printing</a> · <a href="https://www.rolanddg.eu/en/products/printers/truevis-lg-mg-series-uv-printer-cutter">the one-pass stacks the LG supports</a> · <a href="https://www.rolanddga.com/blog/roland-lg-mg-3-layer-printing-using-white-ink">three-layer example on the LG</a> · <a href="https://downloadcenter.rolanddg.com/contents/manuals/VW7_STA_EN/lho1758099898270.html">duplicating jobs</a></p>
 
-<h2>6. Run B: the real print, raised gloss</h2>
-<p>White and colour print together, then the printer pulls the film back and builds the gloss up in coats. The height at any point is how dark the gloss picture is there, times the number of coats.</p>
+<h2 id="runb">7. Run B: the real print, thick shiny gloss</h2>
+<p>White and colour print together from the full file. Then the printer pulls the film back and lays the gloss from the gloss-only file, as many shiny coats as you ask for.</p>
 <div class="stack">
 <p>The layered job, top row prints last</p>
-<div><b>2 gloss</b><span>Mode <code>Embossing(v)</code>, several coats</span></div>
-<div><b>1 white + colour</b><span>Mode <code>White -&gt; CMYK(v)</code></span></div>
+<div><b>2 gloss</b><span><code>lentV64_gloss.pdf</code> · Mode <code>GlossVarnish(v)</code> · Overprint 3 to start</span></div>
+<div><b>1 white + colour</b><span><code>lentV64_print.pdf</code> · Mode <code>White -&gt; CMYK(v)</code></span></div>
 <div class="film">film</div>
 </div>
 <ol class="steps">
-<li>Start from the single original job and duplicate it once. Rename the two copies <em>1 white + colour</em> and <em>2 gloss</em>.</li>
-<li>Copy 1: set Mode to <code>White -&gt; CMYK(v)</code>.</li>
-<li>Copy 2: set Mode to <code>Embossing(v)</code>. Then open <span class="ui">Printer Controls</span>, tick <span class="ui">Use Custom Settings</span> and set <span class="ui">Overprint</span>. The printer lays that many matte coats and then one glossy coat on top. Start with 2 or 3 on the test strip and work up.</li>
-<li>Select both copies, right-click, <span class="ui">Generate Layered Job</span>. Leave One Pass Multilayer Printing unticked.</li>
-<li>Open the layered job and check <em>1 white + colour</em> is number 1. The jobs print in number order.</li>
-<li>Set the cutting on the top copy (section 7), then print.</li>
+<li>Do the gloss check in <a href="#glosscheck">section 2</a>.</li>
+<li>Drag both files into the job list.</li>
+<li><strong><code>lentV64_print.pdf</code>:</strong> in Quality, set Mode to <code>White -&gt; CMYK(v)</code>. In <span class="ui">Cut Controls</span> set <span class="ui">Operation Mode</span> to Print Only.</li>
+<li><strong><code>lentV64_gloss.pdf</code>:</strong> in Quality, set Media Type to the special effects one and Mode to <code>GlossVarnish(v)</code>.</li>
+<li><strong>Still in the gloss job's Quality settings, set <span class="ui">Overprint</span>.</strong> This is the number of gloss coats. Start with 3 on the test strip.</li>
+<li><strong>On both jobs, leave <span class="ui">Marks &gt; Crop Marks</span> unticked.</strong> Roland's firmware notes describe Gloss Varnish coming out matte when crop marks are set to Entire Area.</li>
+<li>Select both jobs, right-click, <span class="ui">Generate Layered Job</span>. Leave One Pass Multilayer Printing unticked.</li>
+<li>Open the layered job and check <code>lentV64_print.pdf</code> is number 1 and the gloss file is on top. The jobs print in number order.</li>
+<li>For the full print, set the cutting on the gloss job (section 8). Then print.</li>
 </ol>
-<div class="callout"><span class="label">If Embossing is not in the list</span>Use <code>GlossVarnish(v)</code> for copy 2. It lays one coat, so for more height add more gloss copies to the layered job, each set the same way.</div>
-<div class="callout"><span class="label">If there is no Generate Layered Job</span>Do the same thing by hand. Print copy 1 with <span class="ui">Cut Controls &gt; Operation Mode</span> set to Print Only and <span class="ui">Return to Origin After Print</span> ticked, which pulls the film back to the start. Then print copy 2.</div>
-<div class="callout warn"><span class="label">Registration</span>Every coat means the film is pulled back and fed again. The more coats, the more chance the fine gloss detail drifts off the colour. If the gloss lands off the artwork, use fewer coats.</div>
-<p class="ref">Roland manual: <a href="https://downloadcenter.rolanddg.com/contents/manuals/VW6_USE_English/vzy1673585990989.html">pullback printing</a> · <a href="https://downloadcenter.rolanddg.com/contents/manuals/UV-Guide_USE_EN/knu1605508188468.html">embossing and the overprint count</a> · <a href="https://www.rolanddg.eu/en/blog/gloss-ink-printing">how gloss darkness becomes thickness</a></p>
 
-<h2>7. Cutting</h2>
+<h3>How thick the gloss comes out</h3>
+<ul>
+<li><strong>Height is darkness times coats.</strong> The black outlines in the gloss picture get a full coat every time. The letter fills are about 44% grey, so they get a little under half as much.</li>
+<li><strong>Too flat:</strong> raise Overprint and print another strip. Doubling it is a sensible step.</li>
+<li><strong>Overprint will not go high enough:</strong> the box has a top limit (7 or 10 on Roland's other UV printers). Drag <code>lentV64_gloss.pdf</code> in again, set it the same way, and add it to the layered job as a third layer.</li>
+<li><strong>Dust shows in shiny gloss.</strong> Wipe the film before printing and keep the front cover shut.</li>
+</ul>
+
+<div class="callout"><span class="label">If Embossing(v) is in the list</span>You can use it for the gloss job instead. Overprint then sets the number of matte coats, and the printer adds one shiny coat on top. Roland suggests it when dust specks spoil a plain gloss coat.</div>
+<div class="callout"><span class="label">If there is no Generate Layered Job</span>Do the same thing by hand. Print <code>lentV64_print.pdf</code> with Operation Mode set to Print Only and <span class="ui">Return to Origin After Print</span> ticked, which pulls the film back to the start. Then print the gloss job.</div>
+<div class="callout warn"><span class="label">Registration</span>The film is pulled back and fed again between the colour and the gloss. If the gloss lands off the artwork, check the film is tracking straight before changing anything else.</div>
+<p class="ref">Roland: <a href="https://downloadcenter.rolanddg.com/contents/manuals/VW7_USE_EN/kwv1752190307832.html">Overprint, including for thick gloss</a> · <a href="https://downloadcenter.rolanddg.com/contents/manuals/VW7_USE_EN/uby1740620879711.html">layered jobs and pullback printing</a> · <a href="https://downloadcenter.rolanddg.com/contents/manuals/UV-Guide_USE_EN/knu1605508188468.html">embossing: matte coats plus one shiny coat</a> · <a href="https://www.rolanddg.eu/en/blog/gloss-ink-printing">how gloss darkness becomes thickness</a> · <a href="https://www.rolanddga.com/support/products/software/versaworks/article?pm=versaworks&amp;articleId=how-do-i-reduce-the-specks-or-imperfections-in-the-uv-gloss-layer-enduser">dust specks in gloss</a></p>
+
+<h2>8. Cutting</h2>
 <ul>
 <li>VersaWorks finds the cut lines by their spot colour names: <code>CutContour</code> is the kiss cut and <code>PerfCutContour</code> is the perforated cut. There is nothing to draw or select.</li>
 <li>In Settings open <span class="ui">Cut Controls</span> and set <span class="ui">Operation Mode</span> to <span class="ui">Print &amp; Cut</span>.</li>
-<li>In a layered job only the <strong>top</strong> copy's cut lines are used. Set Print &amp; Cut on the top copy (the gloss one). Whatever the copies below say about cutting is ignored.</li>
+<li>In a layered job only the <strong>top</strong> job's cut lines are used. Set Print &amp; Cut on the top job, which is the gloss one in both runs. Whatever the jobs below say about cutting is ignored.</li>
 <li>Use the shop's normal blade force and perf settings for this film, and run a test cut first.</li>
 </ul>
-<p class="ref">Roland manual: <a href="https://downloadcenter.rolanddg.com/contents/manuals/VW7_USE_EN/qrl1725609936057.html">Cut Controls</a> · <a href="https://www.rolanddg.eu/en/blog/cut-settings-in-versaworks-explained">cut settings explained</a> · <a href="https://downloadcenter.rolanddg.com/contents/manuals/VW7_USE_EN/xgm1727136762410.html">test cut and cutting conditions</a></p>
+<p class="ref">Roland: <a href="https://downloadcenter.rolanddg.com/contents/manuals/VW7_USE_EN/qrl1725609936057.html">Cut Controls</a> · <a href="https://www.rolanddg.eu/en/blog/cut-settings-in-versaworks-explained">cut settings explained</a> · <a href="https://downloadcenter.rolanddg.com/contents/manuals/VW7_USE_EN/xgm1727136762410.html">test cut and cutting conditions</a></p>
 
 <h2 id="wrong">If something looks wrong</h2>
+<h3>Gloss</h3>
 <div class="table-wrap">
 <table>
 <thead><tr><th>What you see</th><th>Why</th><th>What to do</th></tr></thead>
 <tbody>
-<tr><td>Special Items shows no white, or no gloss</td><td>VersaWorks did not recognise the spot colour name in the file.</td><td><span class="ui">Edit &gt; Spot Color Settings</span>: make a library entry that maps the name in the file to the white or gloss ink. Tell Kevin, so the file gets fixed.</td></tr>
-<tr><td>No white or gloss modes in the Mode list</td><td>The Media Type is a CMYK-only one, or the printer is not loaded with those inks.</td><td>Change Media Type to one with <em>special effects</em> in its name.</td></tr>
-<tr><td>No One Pass Multilayer Printing tick box</td><td>Older printer firmware or VersaWorks.</td><td>Update both, or use Run B.</td></tr>
-<tr><td>The cut lines print as thin coloured lines</td><td>Operation Mode is Print Only, or the top copy of the layered job has no cutting set.</td><td>Set Print &amp; Cut on the top copy.</td></tr>
-<tr><td>The whole sticker reflects, with no solid white ring</td><td>The white did not print: the mode used has no white in it.</td><td>Check copy 1's Mode and that Special Items shows white.</td></tr>
-<tr><td>Nothing reflects, even the letters</td><td>White printed everywhere: a white plate was generated in VersaWorks instead of using the file's own.</td><td>Untick <span class="ui">Generate Special Color Plate</span> under <span class="ui">Special Color</span>. If VersaWorks lets you tick it at all, it has not recognised the file's white: see the first row.</td></tr>
-<tr><td>The gloss sits off to one side of the artwork</td><td>The film shifted between pullbacks.</td><td>Fewer coats, or Run A's single pass.</td></tr>
+<tr><td>No gloss at all, or it starts and fades out</td><td>Either the gloss ink is not reaching the film (blocked nozzles, or a pouch that is empty, expired or not feeding), or it printed as the thin matte coat of a one-pass run.</td><td>Do the check in <a href="#glosscheck">section 2</a> first. If the Gl block on the nozzle test is complete, the ink is fine: print Run B.</td></tr>
+<tr><td>Pink or coloured streaks where the gloss should be</td><td>Gloss ink has no colour, so the tint is most likely another ink that got into the gloss nozzles.</td><td>Clean the head group with the gloss in it and retest until the Gl block prints clear.</td></tr>
+<tr><td>The printer says gloss is low but the pouch looks full</td><td>The caution mark also shows when a pouch is near or past its shelf-life date.</td><td>Tap the mark on the printer's screen to see which. Low on its own does not stop a print.</td></tr>
+<tr><td>The gloss is there but flat and matte</td><td>It was printed in one pass or in a matte mode. Crop marks set to Entire Area can also turn Gloss Varnish matte.</td><td>Use Run B with <code>GlossVarnish(v)</code>, crop marks off and current printer firmware.</td></tr>
+<tr><td>The gloss is shiny but too thin</td><td>Not enough coats.</td><td>Raise Overprint on the gloss job, or add another gloss layer.</td></tr>
+<tr><td>White or gloss missing although the nozzle test is good</td><td>Roland's update notes list white or gloss not printing when the halftone is Error Diffusion.</td><td>Update VersaWorks. In Quality, put the halftone back to its default if it was changed.</td></tr>
+<tr><td>The colour prints twice in Run B</td><td>The gloss job was made from the full file.</td><td>Use <code>lentV64_gloss.pdf</code> for the gloss job.</td></tr>
+<tr><td>Specks or craters in the gloss</td><td>Dust on the film.</td><td>Wipe the film and keep the cover shut. <code>Embossing(v)</code> hides it better if the printer offers it.</td></tr>
+<tr><td>The gloss sits off to one side of the artwork</td><td>The film shifted during the pullback, or the two jobs have different clips.</td><td>Check the film tracks straight. On a test strip, type the same clip numbers into both jobs.</td></tr>
 </tbody>
 </table>
 </div>
-<p class="ref">Roland manual: <a href="https://downloadcenter.rolanddg.com/contents/manuals/VW7_USE_EN/qmd1754545589373.html">assigning white or gloss to a spot colour name</a> · <a href="https://www.rolanddga.com/blog/special-colors-are-special">Spot Color Settings walk-through</a> · <a href="https://downloadcenter.rolanddg.com/contents/manuals/VW6_English/goa1719213513223.html">Special Color settings</a></p>
+<h3>White, modes and cutting</h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>What you see</th><th>Why</th><th>What to do</th></tr></thead>
+<tbody>
+<tr><td>Special Items shows no Wh, or no Gl</td><td>VersaWorks did not recognise the spot colour name in the file.</td><td><span class="ui">Spot Color Settings</span>: make a library entry that maps the name in the file to the white or gloss ink. Tell Kevin, so the file gets fixed.</td></tr>
+<tr><td>No white or gloss modes in the Mode list</td><td>The Media Type is a CMYK-only one, or the printer is not loaded with those inks.</td><td>Change Media Type to one with <em>special effects</em> in its name.</td></tr>
+<tr><td>No One Pass Multilayer Printing tick box</td><td>Older printer firmware or VersaWorks.</td><td>Update both, or go straight to Run B.</td></tr>
+<tr><td>The cut lines print as thin coloured lines</td><td>Operation Mode is Print Only, or the top job of the layered job has no cutting set.</td><td>Set Print &amp; Cut on the top job.</td></tr>
+<tr><td>The whole sticker reflects, with no solid white ring</td><td>The white did not print: the mode used has no white in it.</td><td>Check job 1's Mode and that Special Items shows Wh.</td></tr>
+<tr><td>Nothing reflects, even the letters</td><td>White printed everywhere: a white plate was generated in VersaWorks instead of using the file's own.</td><td>Untick <span class="ui">Generate Special Color Plate</span> under <span class="ui">Special Color</span>. If VersaWorks lets you tick it at all, it has not recognised the file's white: see the first row.</td></tr>
+</tbody>
+</table>
+</div>
+<p class="ref">Roland: <a href="https://downloadcenter.rolanddg.com/contents/manuals/VW7_USE_EN/qmd1754545589373.html">assigning white or gloss to a spot colour name</a> · <a href="https://www.rolanddga.com/blog/special-colors-are-special">Spot Color Settings walk-through</a> · <a href="https://downloadregion.rolanddg.com/UpdateInfo/Info_En.html">VersaWorks 7 update notes</a> · <a href="https://downloadcenter.rolanddg.com/softwareparts.php?item_id=a66cf75cb26c7394bee897afd3d4391eceb7d69d&amp;software=65d253e07255a6991ee1ff11e45c9779b1746136&amp;id=5b76418f139e85c6e849814f120393313b4cbf28&amp;type=note_history_html">LG firmware history</a></p>
 
-<h2>Check these on the first run</h2>
-<p>This guide was written from Roland's manuals and the print file, not at the printer. Four things could not be confirmed and need a look on the real machine:</p>
+<h2>Still to confirm at the printer</h2>
+<p>This guide was written from Roland's manuals, the print files and one report of the first print. It has not been checked at the machine. Write down what you find for each of these and pass it back so the page can be corrected:</p>
 <ol>
-<li>The exact Mode names in your list. They depend on which inks are loaded.</li>
-<li>Whether <code>Embossing(v)</code> is offered on the LG-540 at all.</li>
-<li>The per-copy modes for the one-pass job in Run A.</li>
-<li>How many gloss coats give the height wanted on this film.</li>
+<li>What the Gl block on the nozzle test looked like, and what the caution mark on the gloss ink said when tapped.</li>
+<li>The exact gloss Mode names in your list, and whether <code>Embossing(v)</code> is there.</li>
+<li>Where Overprint sits in the Quality settings and how high it goes.</li>
+<li>How many coats gave the height wanted on this film.</li>
+<li>Which per-copy modes worked for the one-pass job in Run A.</li>
 </ol>
-<p>Write down what worked and pass it back so this page can be corrected.</p>
 <hr>
-<p class="muted">Built 20 November 2026.</p>
+<p class="muted">First written 20 November 2026. Updated 23 November 2026.</p>
 </main>
 </body>
 </html>
