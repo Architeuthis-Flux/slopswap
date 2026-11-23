@@ -917,6 +917,14 @@ function renderShowing() {
     el("div", {}, el("b", { text: "cases" }), String(run.rows.length), classes.map(toClass)));
 }
 
+// A click on a case in the left panel: every view shows that case. With the ranking open the fabric wears the
+// ranking's tint and not the case, so the click leaves the ranking first.
+function openCase(name) {
+  if (ranking()) showSide("case");
+  state.keys = "battery";
+  return selectCase(name);
+}
+
 // The examples: what a visitor sees first. Each is a small case that shows one kind of routing, with its title,
 // a line about it, and how much of it routed. The test battery stays behind the "tests" box.
 function renderExamples(rows) {
@@ -929,9 +937,9 @@ function renderExamples(rows) {
       el("span", { class: "how", title: "jumpers routed, of those asked for",
         text: (bad ? "\u25B2 " : "") + (m.routed_primaries == null ? row.status : m.routed_primaries + "/" + m.primaries) }),
       el("b", { text: title }), el("p", { text: about.join(" ") }));
-    item.addEventListener("click", () => { state.keys = "battery"; selectCase(row.case); });
+    item.addEventListener("click", () => openCase(row.case));
     item.addEventListener("keydown", (event) => {
-      if (event.key === "Enter" || event.key === " ") { event.preventDefault(); selectCase(row.case); }
+      if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openCase(row.case); }
     });
     return item;
   }));
@@ -985,7 +993,7 @@ function renderBattery() {
       listed += 1;
       const tr = el("tr", { class: "case" + (row.case === state.selected ? " on" : ""), "data-case": row.case },
         el("td", { text: row.case, title: row.case }), COLUMNS.map((c) => cell(c, row)));
-      tr.addEventListener("click", () => { state.keys = "battery"; selectCase(row.case); });
+      tr.addEventListener("click", () => openCase(row.case));
       table.append(tr);
     }
     if (!listed) {                                 // the filters hid every case: say so, an empty class reads as a fault
@@ -3175,7 +3183,10 @@ function dragToPlace(handle, skip, dimmed, drop) {
       dropLine = null;
       dimmed().classList.remove("moving");
       document.body.classList.remove("paneldrag");
-      if (on) handle.dataset.dragged = "1";          // the click that ends the drag is not a click on the handle
+      if (on) {                                      // the click that ends the drag is not a click on the handle,
+        handle.dataset.dragged = "1";                // and when the drag ends elsewhere there is no such click to wait for
+        setTimeout(() => { delete handle.dataset.dragged; }, 0);
+      }
       if (done && on && to) drop(to);
     };
     const up = () => end(true);
