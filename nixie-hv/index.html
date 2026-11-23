@@ -540,11 +540,12 @@ function placeByFunction(P, V, W, gap, low) {
 // point (x, y) on board 0 lies under (x, W - y) on board 1. Facing parts must clear each other in the gap,
 // and nothing may face the transformer. Every net with pads on both boards gets one pin post.
 const PIN_FP = "NixieHV:StackPin_P1.27mm", PIN_P = 1.27, PIN_W = 1.5, HV_NETS = ["/HV", "/SEC", "/FBT"];
+const TAIL = 2;        // mm allowed inside the gap for the solder tails of a through-hole part mounted on an outside face
 function placeStack(P, V, W, gap, st, onB1, t1Top) {   // st: {t1:"in"|"slot", nets:Map, t:board thickness}
   const LMAX = 400, EM = 0.4, T = st.t || 0.8, slot = st.t1 === "slot";
   const brd = p => { const z = zoneOf(p); return /^J[1-4]$/.test(p.ref) ? 0 : (z === "fly" || z === "hv" || onB1.includes(z)) ? 1 : 0; };
   const through = p => !!p.f.th && !p.f.edge, outer = p => /:Pads_/.test(p.fpn);   // these sit on, or solder to, the outside face
-  const zin = p => (!p.fit || through(p) || outer(p)) ? 0 : p.f.z, hvRef = p => p.ref === "T1" || HV_REFS.includes(p.ref);
+  const zin = p => (!p.fit || outer(p)) ? 0 : through(p) ? TAIL : p.f.z, hvRef = p => p.ref === "T1" || HV_REFS.includes(p.ref);
   const t1 = P.find(p => p.ref === "T1");
   const need = Math.max(0.2 + Math.max(0, ...P.filter(p => !(slot && p === t1)).map(zin)), slot && t1 ? t1.f.z - T : 0);
   const G = Math.ceil(Math.round(need * 100) / 10) / 10;          // the air gap between the boards
@@ -899,7 +900,7 @@ const DECISIONS = [
   trade:["Two boards with the parts facing inward close the 170 V parts in and leave both outside faces flat. Each board is assembled from one side.",
          "It is usually longer, not shorter: nothing can face the transformer, so that area is lost on the other board, and the pin posts take room. The board tile shows the change.",
          "Every net that crosses the gap needs a pin post: about six 1.27 mm header pins beside the transformer, and ground posts at each end to hold the stack together. The gap is set when you solder them, over a spacer.",
-         "KiCad cannot check clearance between two boards. The generator keeps facing parts 0.2 mm apart, and 0.5 mm from the 170 V parts."],
+         "KiCad cannot check clearance between two boards. The generator keeps facing parts 0.2 mm apart, and 0.5 mm from the 170 V parts, and allows 2 mm for the solder tails of anything mounted on an outside face."],
   opts:[{v:"flat",label:"One board, parts on both sides",facts:""},
         {v:"two",label:"Two stacked boards, parts on the facing sides",facts:"joined by pin posts · USB and every connection on board 1 · flyback and 170 V parts on board 2",
          note:"Through-hole headers and a through-hole pot mount on the outside faces, and solder pads go on the outside of board 1."}]},
@@ -1046,7 +1047,7 @@ function checks(e,m,pk){
     if(st.onB1.includes("cell")) W.push(["note","With the protection on board 2 the cell current crosses the gap twice, through pin posts."]);
     if(e.led==="1") W.push(["note","The charge LED sits between the boards and shows only edge-on. STAT2 is also on the I/O connector."]);
     const outside=NOWP.filter(p=>p.fit&&p.f.th&&!p.f.edge).map(p=>p.ref);
-    if(outside.length) W.push(["note",outside.join(", ")+" mount"+(outside.length>1?"":"s")+" on an outside face, pins or shaft pointing away from the stack."]);
+    if(outside.length) W.push(["note",outside.join(", ")+" mount"+(outside.length>1?"":"s")+" on an outside face, pins or shaft pointing away from the stack. The placement allows 2 mm inside the gap for the solder tails: trim them to that. The board file still draws "+(outside.length>1?"them":"it")+" on the parts side, so flip "+(outside.length>1?"them":"it")+" to the back in KiCad before looking at the stack in 3D."]);
     if(NOWP.some(p=>/:Pads_/.test(p.fpn))) W.push(["note","The solder pads are on the outside face of board 1."]);
     if(st.slot) W.push(["note","Board 1 has a "+st.slot.w.toFixed(1)+" × "+st.slot.h.toFixed(1)+" mm cut-out for the transformer."]);
   }
@@ -1306,7 +1307,7 @@ function modelInfo(p){
   const f=p.f, k=p.fpn;
   if(f.nofp) return ["none yet",k.includes("USB4140")?"No footprint in the project yet. GCT's drawing has the land pattern.":"No footprint in the project. TI's product page offers CAD files for it."];
   if(k.includes("StackPin")) return ["none","A plated hole for a header pin, in the project's own footprint library. The same pin goes through both boards."];
-  if(k.includes("TTRN")) return ["NixieHV.3dshapes/TTRN-060S.step","Cut out of Omnixie's STEP model of the NCH8200HV, where the part is labelled TTRN-060S."];
+  if(k.includes("TTRN")) return ["NixieHV.3dshapes/TTRN-060S.step","Cut out of Omnixie's STEP model of the NCH8200HV, where the part is labelled TTRN-060S. It is not in the zip linked above, so KiCad shows no body for T1 until you add one."];
   if(!f.model) return ["none needed","Copper only."];
   const name=f.model.replace(/^\$\{[A-Z0-9_]+\}\//,"").replace(/\.(wrl|step|stp)$/i,"");
   let src=f.ok3d===false?"Referenced by the footprint, but not found in KiCad's 3D library.":"KiCad's 3D model library.";
