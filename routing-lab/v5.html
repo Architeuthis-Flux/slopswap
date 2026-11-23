@@ -21,8 +21,9 @@
 [hidden] { display: none !important; }
 html, body { height: 100%; margin: 0; background: var(--bg); color: var(--ink);
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
-main { display: grid; grid-template-columns: 490px minmax(0, 1fr) 450px; height: 100vh; }
-main.ranking { grid-template-columns: 490px minmax(0, 1fr) 520px; }
+/* the side panels' widths are the page's to set: the drawing's edges drag (lab.js, installGrips) */
+main { display: grid; grid-template-columns: var(--left-w, 490px) minmax(0, 1fr) var(--right-w, 450px); height: 100vh; }
+main.ranking { grid-template-columns: var(--left-w, 490px) minmax(0, 1fr) var(--rank-w, 520px); }
 section { min-height: 0; overflow: auto; }
 h1 { font-size: 15px; margin: 0 0 8px; font-weight: 600; }
 h2 { font-size: 12px; margin: 14px 0 4px; color: var(--dim); font-weight: 600; text-transform: uppercase; letter-spacing: .06em; }
@@ -197,15 +198,43 @@ ul.notes li { color: var(--dim); }
 details pre, pre.report { background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 6px; overflow: auto;
   max-height: 420px; font-size: 11px; }
 
+/* the drawing's edges drag: the side panels' widths, and in one column the drawing's height */
+.grip { position: absolute; z-index: 6; touch-action: none; }
+.grip.left, .grip.right { top: 0; bottom: 0; width: 7px; cursor: col-resize; }
+.grip.left { left: 0; }
+.grip.right { right: 0; }
+.grip.under { display: none; left: 0; right: 0; bottom: 0; height: 14px; cursor: row-resize; }
+.grip.under::after { content: ""; position: absolute; left: 50%; top: 5px; width: 44px; height: 4px; margin-left: -22px;
+  border-radius: 2px; background: var(--dim); opacity: .7; }
+.grip:hover, .grip.on { background: var(--sel); }
+/* what was clicked, in words: a phone has no pointer to hover with */
+#said { display: flex; gap: 8px; align-items: flex-start; padding: 5px 10px; border-bottom: 1px solid var(--line);
+  background: var(--panel); white-space: pre-wrap; max-height: 7.5em; overflow: auto; font-size: 12px; }
+#said span { flex: 1; min-width: 0; }
+#said button { padding: 0 6px; }
+/* what a click lights: a wire by itself, a bridge's two ends, a pin a problem names. In the ink colour, never red. */
+.wire.pick:not(.short) { stroke: var(--ink); stroke-width: 3.2; filter: drop-shadow(0 0 2.5px #fff); }
+.pad.end > circle:first-child { stroke: var(--ink); stroke-width: 2.5; }
+.spot { fill: none; stroke: var(--ink); stroke-width: 2; filter: drop-shadow(0 0 2.5px #fff); pointer-events: none; }
+.chip { cursor: pointer; }
+.battery th { cursor: pointer; }
+.battery th.on { color: var(--ink); }
+.bridges tr { cursor: pointer; }
+.bridges tr.on td { background: var(--hover); }
+.bridges tr.at td { background: var(--sel); }
+ul.problems li.names, ul.notes li.names { cursor: pointer; text-decoration: underline dotted; text-underline-offset: 3px; }
+
 /* a screen too narrow for three columns (a phone, a small window): they become one page. The drawing comes first and keeps its place at the top
    while the rest scrolls under it: the battery (capped, scrolling inside itself), then the case or the ranking. */
 @media (max-width: 1200px) {
   html, body { height: auto; }
   main, main.ranking { display: flex; flex-direction: column; height: auto; }
   section { overflow: visible; }
-  #centre { order: 1; height: 56vh; position: sticky; top: 0; z-index: 4; background: var(--bg); border-bottom: 1px solid var(--line); }
+  #centre { order: 1; height: var(--view-h, 56vh); position: sticky; top: 0; z-index: 4; background: var(--bg); border-bottom: 1px solid var(--line); }
   #left { order: 2; max-height: 40vh; overflow: auto; border-right: 0; border-bottom: 1px solid var(--line); }
   #case, #ranking { order: 3; border-left: 0; overflow-x: auto; }
+  .grip.left, .grip.right { display: none; }
+  .grip.under { display: block; }
   #tabs { flex-wrap: nowrap; overflow-x: auto; }
   #tabs button { flex: none; }
   #ranking tr.case { scroll-margin-top: 60vh; }    /* clear of the drawing, which stays on top */
@@ -280,6 +309,7 @@ button, input, select { background: var(--bg); }
       <button type="button" data-tab="fabric" class="on">Fabric</button>
       <button type="button" data-tab="sheet">KiCad sheet</button>
       <button type="button" data-tab="ranking" title="What the firmware's router loses without each lane, bounce row and hub lane, and whether any netlist is proved to need it">Ranking</button>
+      <button type="button" id="fit" title="the whole drawing again (a double-click on it does the same)">fit</button>
       <span id="view-title"></span>
       <label id="compare-box" hidden title="copper only this router closes is outlined; copper only the baseline closes is dashed grey"><input id="compare" type="checkbox"> compare with baseline</label>
       <span id="legend">
@@ -294,6 +324,7 @@ button, input, select { background: var(--bg); }
       </span>
     </nav>
     <div id="sheet-note" hidden></div>
+    <div id="said" hidden></div>
     <div id="fabric" class="view"></div>
     <div id="sheet" class="view" hidden></div>
     <div id="tip" hidden></div>
@@ -340,6 +371,11 @@ const state = {
   rankSort: { key: "loss", down: false },
   heat: "loss",      // what the Ranking tab tints the fabric by: "loss" (the router's) or "needed" (the solver's)
   takeAway: [],      // wires picked on the Ranking tab to run without
+  keys: "battery",   // the list the arrow keys move through: "battery", or "case" (the bridges and nets of the case)
+  sort: null,        // {col, down}: the battery's cases in the order of a column, within each class
+  bridge: null,      // "n1-n2" of the bridge picked in the case panel: its row and its two ends are marked
+  pickedWire: null,  // a wire clicked on the Fabric tab that carries no single net: lit by itself
+  pointed: null,     // what a clicked problem or note names: {nets, wires, pins, nodes}
   v5nodes: null,     // V5's nodes, for the name of one the arrangement picked has dropped
   drawn: [],         // the netlist made by clicking nodes: [[node, node]]
   drawnFrom: null,   // {cls, case} whose settings it is routed with, when it started from a case of the battery
@@ -667,7 +703,16 @@ function renderBattery() {
   const onlyUnclean = $("filter-unclean").checked;
   const onlyChanged = $("filter-changed").checked;
   const table = el("table", { class: "battery" },
-    el("tr", {}, el("th", { text: "case" }), COLUMNS.map((c) => el("th", { text: c.head, title: c.tip }))));
+    el("tr", {}, el("th", { text: "case", title: "Click to put the cases back in their own order.",
+      onclick: () => { state.sort = null; renderBattery(); } }),
+      COLUMNS.map((c, i) => el("th", { text: c.head + (state.sort && state.sort.col === i ? (state.sort.down ? " ▾" : " ▴") : ""),
+        title: c.tip + ". Click to sort the cases of each class by it; a third click puts them back.",
+        class: state.sort && state.sort.col === i ? "on" : "",
+        onclick: () => {
+          const now = state.sort;
+          state.sort = !now || now.col !== i ? { col: i, down: true } : now.down ? { col: i, down: false } : null;
+          renderBattery();
+        } }))));
   const classes = [];
   for (const row of state.run.rows) if (!classes.includes(row.cls)) classes.push(row.cls);
   for (const name of classes) {
@@ -676,13 +721,16 @@ function renderBattery() {
     table.append(classRow(name, rows));
     if (state.closed[name]) continue;
     let listed = 0;
-    for (const row of rows) {
+    const column = state.sort && COLUMNS[state.sort.col];
+    const value = (row) => { const v = column.get(row); return v == null ? -Infinity : v; };
+    const shown = column ? rows.slice().sort((x, y) => (state.sort.down ? value(y) - value(x) : value(x) - value(y))) : rows;
+    for (const row of shown) {
       if (onlyUnclean && !unclean(row)) continue;
       if (onlyChanged && !changedFromBase(row)) continue;
       listed += 1;
       const tr = el("tr", { class: "case" + (row.case === state.selected ? " on" : ""), "data-case": row.case },
         el("td", { text: row.case, title: row.case }), COLUMNS.map((c) => cell(c, row)));
-      tr.addEventListener("click", () => selectCase(row.case));
+      tr.addEventListener("click", () => { state.keys = "battery"; selectCase(row.case); });
       table.append(tr);
     }
     if (!listed) {                                 // the filters hid every case: say so, an empty class reads as a fault
@@ -976,6 +1024,10 @@ async function selectCase(name) {
   state.current = current;
   state.base = base;
   state.isolated = null;
+  state.bridge = null;
+  state.pointed = null;
+  state.pickedWire = null;
+  say("");
   showMissed();
   for (const tr of document.querySelectorAll("#battery tr.case")) {
     tr.classList.toggle("on", tr.dataset.case === name);
@@ -1034,6 +1086,119 @@ function applyIsolation() {
   for (const row of document.querySelectorAll("#case .net")) {
     row.classList.toggle("on", Number(row.dataset.net) === state.isolated);
   }
+  for (const row of document.querySelectorAll("#case .bridges tr[data-bridge-key]")) {
+    row.classList.toggle("on", state.isolated != null && Number(row.dataset.net) === state.isolated);
+    row.classList.toggle("at", row.dataset.bridgeKey === state.bridge);
+  }
+  const pointed = state.pointed || { wires: [], pins: [], nodes: [] };
+  const ends = new Set(pointed.nodes);            // the wires of the nodes to ring: a bridge's two ends, or the nodes a note names
+  for (const node of (state.bridge ? state.bridge.split("-") : [])) {
+    if (state.info.nodes[node]) ends.add(state.info.nodes[node].wire);
+  }
+  for (const [wire, g] of Object.entries(fabric.pads)) g.classList.toggle("end", ends.has(wire));
+  for (const [name, path] of Object.entries(fabric.wires)) {
+    path.classList.toggle("pick", name === state.pickedWire || pointed.wires.includes(name));
+  }
+  for (const old of document.querySelectorAll("#fabric-svg .spot")) old.remove();
+  if (fabric.marks) {
+    for (const [chip, axis, pin] of pointed.pins) {
+      const [x, y] = pinPoint(chip, axis, pin);
+      fabric.marks.append(svg("circle", { class: "spot", cx: x, cy: y, r: 9 }));
+    }
+  }
+}
+
+// ---------------------------------------------------------------- a click answers
+
+// What was clicked, in words, under the tabs. A phone has no pointer to hover with, and a click should answer.
+function say(text) {
+  const box = $("said");
+  box.hidden = !text;
+  box.replaceChildren(el("span", { text: text || "" }),
+    el("button", { type: "button", text: "×", title: "close", onclick: () => say("") }));
+}
+
+// Let go of everything a click lit.
+function letGo() {
+  state.isolated = null;
+  state.bridge = null;
+  state.pointed = null;
+  state.pickedWire = null;
+  say("");
+  applyIsolation();
+}
+
+// A click on a wire of the drawing, or on a node of a page that cannot connect nodes: it says what the wire is and
+// carries. A wire with one net lights that net; any other is lit by itself. The same click again lets go.
+function touchWire(name) {
+  const paint = shownPaint();
+  const live = paint && paint.wires[name];
+  const net = live && live.nets.length === 1 ? live.nets[0] : null;
+  const again = net != null ? state.isolated === net && !state.bridge : state.pickedWire === name;
+  letGo();
+  if (again) return;
+  if (net != null) state.isolated = net;
+  else state.pickedWire = name;
+  say(wireTip(name));
+  applyIsolation();
+}
+
+// A click on a chip: what it is, and what the case shown closes on it.
+function touchChip(name) {
+  const paint = shownPaint();
+  const closed = paint ? paint.crosspoints.filter((c) => c.chip === name) : [];
+  const nets = [...new Set(closed.map((c) => netLabel(c.net)))];
+  say("chip " + name + "  (" + (state.info.fabric.chips[name].role === "sf" ? "specials and the Nano header on its X pins"
+    : "breadboard rows on its Y pins") + ")"
+    + (paint ? "\n" + count(closed.length, "crosspoint") + " closed on it in this case"
+      + (nets.length ? ", for " + (nets.length === 1 ? "net " : "nets ") + nets.join(", ") : "") : ""));
+}
+
+// A bridge's row: its net is lit, and the row and the bridge's two ends are marked. The same row again lets go.
+function touchBridge(key, net) {
+  const again = state.bridge === key;
+  letGo();
+  if (again) return;
+  state.bridge = key;
+  state.isolated = net;
+  applyIsolation();
+}
+
+// What a line of text names that the drawing can show: nets ("net 6"), pins ("chip D x7"), wires ("(DJ)"), and in
+// a note about sense taps the nodes it lists.
+function named(text) {
+  const paint = shownPaint();
+  const out = { nets: [], wires: [], pins: [], nodes: [] };
+  for (const m of text.matchAll(/\bnet (\d+)\b/g)) if (paint && paint.nets[m[1]]) out.nets.push(Number(m[1]));
+  for (const m of text.matchAll(/\bchip ([A-Z]) ([xyXY])(\d+)\b/g)) {
+    if (state.info.fabric.chips[m[1]]) out.pins.push([m[1], m[2].toUpperCase(), Number(m[3])]);
+  }
+  for (const m of text.matchAll(/\(([^()\s]+)\)/g)) if (state.info.fabric.wires[m[1]]) out.wires.push(m[1]);
+  const taps = /^no sense-tap route for (.+)$/.exec(text);
+  if (taps) {
+    const wireOf = {};
+    for (const [node, known] of Object.entries(state.info.nodes)) wireOf[nodeName(Number(node))] = known.wire;
+    for (const word of taps[1].split(/\s+/)) if (wireOf[word]) out.nodes.push(wireOf[word]);
+  }
+  return out;
+}
+
+// Show in the drawing what a line names: its first net lit, its wires lit, its pins and nodes ringed.
+function point(what, text) {
+  const again = state.pointed === what;
+  letGo();
+  if (again) return;
+  state.pointed = what;
+  state.isolated = what.nets.length ? what.nets[0] : null;
+  say(text);
+  applyIsolation();
+}
+
+// A problem or a note as a list item: one that names something the drawing can show answers a click.
+function lineItem(text) {
+  const what = named(text);
+  if (!(what.nets.length || what.wires.length || what.pins.length || what.nodes.length)) return el("li", { text: text });
+  return el("li", { text: text, class: "names", title: "click: show in the drawing what this names", onclick: () => point(what, text) });
 }
 
 const STATE_WORDS = { routed: "routed", unrouted: "NOT ROUTED", broken: "LISTED AS ROUTED, NOT CONNECTED",
@@ -1104,7 +1269,7 @@ function renderCase() {
 
   if (paint.problems.length) {
     box.append(el("h2", { text: "problems" }),
-      el("ul", { class: "problems" }, paint.problems.map((p) => el("li", { text: p }))));
+      el("ul", { class: "problems" }, paint.problems.map(lineItem)));
   }
 
   box.append(el("h2", { text: "bridges" }));
@@ -1120,7 +1285,7 @@ function renderCase() {
     const routed = b.state === "routed";
     const old = before[b.n1 + "-" + b.n2];
     const oldRouted = old && old.state === "routed";
-    const tr = el("tr", { class: routed ? "" : (failed(b) ? "unrouted" : "no") },
+    const tr = el("tr", { class: routed ? "" : (failed(b) ? "unrouted" : "no"), "data-net": b.net, "data-bridge-key": b.n1 + "-" + b.n2 },
       el("td", {}, b.net == null ? null : el("span", { class: "swatch", style: "display:inline-block;margin-right:5px;background:" + netColour(b.net) }),
         nodeName(b.n1) + " - " + nodeName(b.n2) + (b.infra ? "  (probe feed)" : ""),
         routed ? null : el("div", { class: "state", text: stateWords(b, paint) }),
@@ -1132,7 +1297,7 @@ function renderCase() {
       b.spare ? el("td", { class: "spare" + (state.spareOf === b.n1 + "-" + b.n2 ? " on" : ""), "data-bridge": b.n1 + "-" + b.n2,
         title: SPARE_TIP, text: "+" + b.spare + " → " + ohmsText(b.r_spare),
         onclick: (event) => { event.stopPropagation(); toggleSpare(b); } }) : el("td", {}));
-    if (b.net != null) tr.addEventListener("click", () => isolate(b.net));
+    tr.addEventListener("click", () => { state.keys = "case"; touchBridge(b.n1 + "-" + b.n2, b.net); });
     bridges.append(tr);
   }
   box.append(bridges);
@@ -1140,13 +1305,14 @@ function renderCase() {
 
   box.append(el("h2", { text: "nets" }));
   for (const [net, info] of Object.entries(paint.nets)) {
-    box.append(el("div", { class: "net", "data-net": net, onclick: () => isolate(Number(net)) },
+    box.append(el("div", { class: "net", "data-net": net,
+      onclick: () => { state.keys = "case"; const again = state.isolated === Number(net) && !state.bridge; letGo(); if (!again) isolate(Number(net)); } },
       el("span", { class: "swatch", style: "background:" + info.colour }),
       el("span", { text: info.label + ":  " + info.nodes.map(nodeName).join(", ") })));
   }
 
   if (paint.notes.length) {
-    box.append(el("h2", { text: "notes" }), el("ul", { class: "notes" }, paint.notes.map((n) => el("li", { text: n }))));
+    box.append(el("h2", { text: "notes" }), el("ul", { class: "notes" }, paint.notes.map(lineItem)));
   }
   box.append(el("details", {}, el("summary", { text: solved ? "b report of the run on " + ranOn().name : "b report" }),
     el("pre", { text: result.b })));
@@ -1343,7 +1509,9 @@ function panZoom(view, full, widest = full[2] * 1.5) {
       event.stopPropagation();
     }
   }, true);
-  view.addEventListener("dblclick", () => { box = full.slice(); apply(); });
+  const whole = () => { box = full.slice(); apply(); };
+  view.addEventListener("dblclick", whole);
+  view.addEventListener("fit", whole);          // the fit button
   apply();
 }
 
@@ -1398,9 +1566,11 @@ function drawFabricBase() {
   const view = svg("svg", { id: "fabric-svg", preserveAspectRatio: "xMidYMid meet" });
   const chips = svg("g", { class: "chips" });
   for (const [name, c] of Object.entries(f.chips)) {
-    chips.append(svg("g", { class: "chip" },
+    const chip = svg("g", { class: "chip" },
       svg("rect", { x: c.x, y: c.y, width: 16 * f.cell, height: 8 * f.cell }),
-      svg("text", { x: c.x + 16 * f.cell + 6, y: c.y + 14, text: name })));
+      svg("text", { x: c.x + 16 * f.cell + 6, y: c.y + 14, text: name }));
+    chip.addEventListener("click", () => { if (state.tab !== "ranking") touchChip(name); });
+    chips.append(chip);
   }
   // What the arrangement changes, on the chip's edge where the pin is: a grey cross for a pin taken away, a thin
   // ring in the ink colour for a pin on another wire than V5 has it on. Neither is a fault, so neither is red.
@@ -1422,10 +1592,12 @@ function drawFabricBase() {
     const hit = svg("path", { class: "hit", d: w.d });
     hover(hit, () => wireTip(name));
     hit.addEventListener("click", () => {
-      if (state.tab === "ranking") return toggleTakeAway(name);
-      const paint = shownPaint();
-      const live = paint && paint.wires[name];
-      if (live && live.nets.length === 1) isolate(live.nets[0]);
+      if (state.tab === "ranking") {
+        toggleTakeAway(name);
+        say(state.takeAway.includes(name) ? rankTip(name) : "");
+        return;
+      }
+      touchWire(name);
     });
     wires.append(path);
     hits.append(hit);
@@ -1440,7 +1612,11 @@ function drawFabricBase() {
       : svg("text", { x: p.x, y: p.y + 13, "text-anchor": "middle", text: p.label });
     const g = svg("g", { class: "pad" }, svg("circle", { cx: p.x, cy: p.y, r: 3.6 }), text);
     hover(g, () => wireTip(name) + (STATIC || state.tab === "ranking" ? "" : "\nclick: connect this node to another"));
-    g.addEventListener("click", () => clickNode(name));
+    g.addEventListener("click", () => {
+      if (state.tab === "ranking") return;
+      if (STATIC) touchWire(name);                 // a page that cannot connect nodes says what the node is on
+      else clickNode(name);
+    });
     pads.append(g);
     fabric.pads[name] = g;
   }
@@ -1449,6 +1625,7 @@ function drawFabricBase() {
   fabric.ghost = svg("g", { class: "ghosts" });
   // the pads lie over the wires' hit areas, so that a click on a node lands on the node and not on its wire
   view.append(chips, wires, fabric.ghost, fabric.dots, fabric.marks, hits, pads, pinMarks);
+  view.addEventListener("click", (event) => { if (event.target === view && state.tab !== "ranking") letGo(); });
   $("fabric").replaceChildren(view);
   markFrom();
   panZoom(view, [0, 0, f.size[0], f.size[1]]);
@@ -1533,9 +1710,17 @@ function drawFabric(paint, base, who) {
     const dot = svg("circle", { class: "xp" + (c.dup ? " dup" : ""), cx: x, cy: y, r: 3.3, fill: colour,
       "data-net": c.net, "data-key": c.chip + "." + c.x + "." + c.y });
     if (c.dup) dot.style.stroke = colour;        // a duplicate path's crosspoint: a ring, not a dot
-    hover(dot, () => c.chip + "  x" + c.x + " y" + c.y + "\nnet " + netLabel(c.net) + ", path " + c.path
-      + (c.dup ? " (a duplicate)" : ""));
-    dot.addEventListener("click", () => isolate(c.net));
+    const words = () => c.chip + "  x" + c.x + " y" + c.y + "\nnet " + netLabel(c.net) + ", path " + c.path
+      + (c.dup ? " (a duplicate)" : "");
+    hover(dot, words);
+    dot.addEventListener("click", () => {
+      const again = state.isolated === c.net && !state.bridge;
+      letGo();
+      if (again) return;
+      state.isolated = c.net;
+      say(words());
+      applyIsolation();
+    });
     fabric.dots.append(dot);
   }
 
@@ -2149,6 +2334,7 @@ function renderRanking() {
 
 function showTab(name) {
   state.tab = name;
+  say("");
   for (const button of document.querySelectorAll("#tabs button")) {
     button.classList.toggle("on", button.dataset.tab === name);
   }
@@ -2165,6 +2351,132 @@ function showTab(name) {
   }
   if (state.current || name === "ranking") redraw();
   else drawHeat();                                 // nothing routed is shown: only the tint, if any, is taken off
+}
+
+// ---------------------------------------------------------------- the panels' sizes
+
+// The drawing's edges drag. Its left and right edges set the side panels' widths; in the one-column page its lower
+// edge sets its height. A double-click puts an edge back. The browser keeps the sizes (when it keeps anything).
+const SIZES = {                                    // the CSS variable, and the least and the most (px, or a share of the page)
+  left: ["--left-w", 260, 0.6], right: ["--right-w", 260, 0.6], rank: ["--rank-w", 300, 0.7], under: ["--view-h", 0.2, 0.8],
+};
+
+function keptSizes() {
+  try { return JSON.parse(localStorage.getItem("lab.sizes") || "{}") || {}; } catch (e) { return {}; }
+}
+
+function keepSize(key, px) {
+  try {
+    const all = keptSizes();
+    if (px == null) delete all[key];
+    else all[key] = px;
+    localStorage.setItem("lab.sizes", JSON.stringify(all));
+  } catch (e) { /* a private window: the size lasts for the visit */ }
+}
+
+function installGrips() {
+  const main = document.querySelector("main");
+  for (const [key, px] of Object.entries(keptSizes())) {
+    if (SIZES[key] && Number.isFinite(px)) main.style.setProperty(SIZES[key][0], px + "px");
+  }
+  for (const side of ["left", "right", "under"]) {
+    const grip = el("div", { class: "grip " + side, title: "drag to resize; double-click to put it back" });
+    const which = () => (side === "right" && state.tab === "ranking" ? "rank" : side);
+    grip.addEventListener("pointerdown", (event) => {
+      event.preventDefault();                      // no text is selected by the drag
+      grip.classList.add("on");
+      const key = which();
+      const [name, least, most] = SIZES[key];
+      const move = (e) => {
+        const box = main.getBoundingClientRect();
+        const whole = side === "under" ? window.innerHeight : box.width;
+        const asked = side === "left" ? e.clientX - box.left : side === "right" ? box.right - e.clientX
+          : e.clientY - $("centre").getBoundingClientRect().top;
+        const px = Math.round(Math.max(least < 1 ? least * whole : least, Math.min(most * whole, asked)));
+        main.style.setProperty(name, px + "px");
+        keepSize(key, px);
+      };
+      const done = () => {                         // on the window: the pointer leaves the thin grip as soon as it moves
+        grip.classList.remove("on");
+        window.removeEventListener("pointermove", move);
+        window.removeEventListener("pointerup", done);
+        window.removeEventListener("pointercancel", done);
+      };
+      window.addEventListener("pointermove", move);
+      window.addEventListener("pointerup", done);
+      window.addEventListener("pointercancel", done);
+    });
+    grip.addEventListener("dblclick", () => {
+      main.style.removeProperty(SIZES[which()][0]);
+      keepSize(which(), null);
+    });
+    $("centre").append(grip);
+  }
+}
+
+// ---------------------------------------------------------------- the arrow keys
+
+// Up and Down move through a list: the battery (another case is shown), the case's bridges and nets (another is
+// lit), or on the Ranking tab its lanes (another is lit). Right goes to the case's list and Left back to the
+// battery. Home and End go to a list's ends. Escape lets go of what is lit.
+function keyList() {
+  if (state.tab === "ranking") {
+    return { rows: [...document.querySelectorAll("#ranking tr.case")], at: (tr) => tr.classList.contains("take"),
+      go: (tr) => {
+        if (state.takeAway.length > 1) return;     // several are picked: they are a set, not a place in the list
+        state.takeAway = [tr.dataset.wire];
+        state.justPicked = tr.dataset.wire;
+        renderRanking();
+        drawHeat();
+        say(rankTip(tr.dataset.wire));
+      } };
+  }
+  if (state.keys === "case") {
+    return { rows: [...document.querySelectorAll("#case .bridges tr[data-bridge-key], #case .net")],
+      at: (row) => (state.bridge ? row.dataset.bridgeKey === state.bridge : row.classList.contains("net") && row.classList.contains("on")),
+      go: (row) => {
+        letGo();
+        if (row.dataset.bridgeKey) state.bridge = row.dataset.bridgeKey;
+        state.isolated = row.dataset.net == null ? null : Number(row.dataset.net);
+        applyIsolation();
+        row.scrollIntoView({ block: "nearest" });
+      } };
+  }
+  return { rows: [...document.querySelectorAll("#battery tr.case")], at: (tr) => tr.classList.contains("on"),
+    go: (tr) => { selectCase(tr.dataset.case); tr.scrollIntoView({ block: "nearest" }); } };
+}
+
+function installKeys() {
+  window.addEventListener("keydown", (event) => {
+    const t = event.target;
+    if (event.metaKey || event.ctrlKey || event.altKey) return;
+    if (t instanceof HTMLTextAreaElement || t instanceof HTMLSelectElement || (t && t.isContentEditable)) return;
+    if (t instanceof HTMLInputElement && !["checkbox", "radio", "button"].includes(t.type)) return;      // typing
+    if (event.key === "Escape") {
+      if (state.tab === "ranking" && state.takeAway.length) {
+        state.takeAway = [];
+        renderRanking();
+        drawHeat();
+        say("");
+      } else letGo();
+      return;
+    }
+    if (event.key === "ArrowRight" || event.key === "ArrowLeft") {
+      if (state.tab === "ranking") return;
+      state.keys = event.key === "ArrowRight" && state.current ? "case" : "battery";
+      event.preventDefault();
+      return;
+    }
+    const step = { ArrowDown: 1, ArrowUp: -1 }[event.key];
+    if (!step && event.key !== "Home" && event.key !== "End") return;
+    const list = keyList();
+    if (!list.rows.length) return;
+    event.preventDefault();
+    const at = list.rows.findIndex(list.at);
+    const to = event.key === "Home" ? 0 : event.key === "End" ? list.rows.length - 1
+      : at < 0 ? (step > 0 ? 0 : list.rows.length - 1) : Math.max(0, Math.min(list.rows.length - 1, at + step));
+    if (to !== at) list.go(list.rows[to]);
+  });
 }
 
 async function start() {
@@ -2198,6 +2510,12 @@ async function start() {
     }
   });
 
+  installGrips();
+  installKeys();
+  $("fit").addEventListener("click", () => {
+    const view = document.querySelector(state.tab === "sheet" ? "#sheet-svg" : "#fabric-svg");
+    if (view) view.dispatchEvent(new Event("fit"));
+  });
   $("controls").addEventListener("submit", (event) => { event.preventDefault(); runBattery(); });
   $("ohms").addEventListener("input", () => {
     state.ohms = Number($("ohms").value) || state.info.ohms;
