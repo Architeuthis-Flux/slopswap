@@ -8,25 +8,23 @@ src, out, title, short, about = sys.argv[1:6]
 html = Path(src).read_text(encoding="utf-8")
 
 OVERRIDE = """<style>
-/* slopswap: the Jumperless theme's greys and fonts on the lab's own layout. Red still means a problem and nothing else. */
-:root {
-  --bg: var(--jl-bg, #27272b); --panel: var(--jl-surface, #323238); --line: var(--jl-line, #4b4b54);
-  --ink: var(--jl-fg, #f3f3f5); --dim: var(--jl-muted, #aaaab5);
-  --wire: #64646f; --chip: #2d2d32; --better: var(--jl-r8, #70f899); --worse: var(--jl-r11, #e8cb40); --changed: var(--jl-accent-2, #00fced);
-  --head: var(--jl-surface-2, #3d3d44); --hover: #39393f; --sel: var(--jl-line, #4b4b54); --btn: var(--jl-surface-2, #3d3d44);
-  --pad: #5a5a65; --tip: var(--jl-surface-2, #3d3d44);
-}
-body.app { padding: 5px 0 0; font-size: 13px; line-height: 1.35; font-family: var(--font-mono, ui-monospace, Menlo, Consolas, monospace); }
+/* slopswap: this site's fonts for the lab's labels and numbers. The colours are the lab's own, under the --jl-* names
+   the Jumperless stylesheet sets. The rest undoes what that stylesheet does to every page's plain tags. */
+@font-face{font-family:"Archivo Narrow";src:url(../styles/fonts/ArchivoNarrow-var.woff2) format("woff2");font-weight:400 700;font-display:swap}
+@font-face{font-family:"IBM Plex Mono";src:url(../styles/fonts/IBMPlexMono-400.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"IBM Plex Mono";src:url(../styles/fonts/IBMPlexMono-500.woff2) format("woff2");font-weight:500;font-display:swap}
+@font-face{font-family:"IBM Plex Mono";src:url(../styles/fonts/IBMPlexMono-600.woff2) format("woff2");font-weight:600;font-display:swap}
+body.app { padding: 5px 0 0; font-size: 13px; line-height: 1.35; font-family: var(--mono); }
 main { height: calc(100vh - 5px); height: calc(100dvh - 5px); }
-body.app h1 { font-size: 1.05rem; margin: 0 0 8px; }
-body.app h2 { font-family: inherit; font-size: 12px; margin: 14px 0 4px; }
+body.app h1 { font-size: 14px; margin: 0 0 8px; }
+body.app h2 { font-family: var(--label); font-size: 12px; margin: 14px 0 5px; }
 body.app p, body.app ul, body.app table, body.app pre { margin-bottom: 0; }
-body.app th, body.app td { border-bottom: 0; vertical-align: baseline; }
-body.app th { font-size: 12px; }
+body.app td { border-bottom: 0; vertical-align: baseline; }
+body.app .battery th, body.app .bridges th { font-family: var(--label); font-size: 11px; background: var(--panel); vertical-align: baseline; }
+body.app .bridges th { background: none; }
 body.app pre { padding: 6px; line-height: 1.3; }
 .eyebrow { margin: 0 0 6px; }
-button, input, select { background: var(--bg); }
-@media (max-width: 1200px) { main, main.ranking { height: auto; } }
+@media (max-width: 1200px) { main { height: auto; } }
 </style>
 """
 
