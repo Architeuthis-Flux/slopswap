@@ -19,10 +19,10 @@
 <main class="page wide">
 <p class="eyebrow"><a href="../">slopswap</a> / <a href="./">V6</a></p>
 <h1>V6 board outline and stack</h1>
-<p class="muted">The readme of <code>JumperlessV6/v6mech</code>, rev A3 2026-11-23. Kevin Cappuccio with Claude.</p>
+<p class="muted">The readme of <code>JumperlessV6/v6mech</code>, rev A4 2026-11-23. Kevin Cappuccio with Claude.</p>
 <ul class="get cycle">
   <li><a href="board-outline.html"><b>Open the 3D viewer</b></a></li>
-  <li><a href="board-outline-v6mech.zip" download><b>Download the folder</b> (.zip, 7.1 MB): parameters, source, KiCad and DXF outlines, STEP</a></li>
+  <li><a href="board-outline-v6mech.zip" download><b>Download the folder</b> (.zip, 8.6 MB): parameters, source, KiCad and DXF outlines, STEP</a></li>
 </ul>
 <figure><a href="board-outline-on-sketch.png"><img src="board-outline-on-sketch.png" alt="The outline (pink) laid over the notebook page it was traced from"></a><figcaption>The outline (pink) laid over the notebook page it was traced from: the viewer's sketch underlay, seen from above.</figcaption></figure>
 <figure><a href="board-outline-inputs.png"><img src="board-outline-inputs.png" alt="From the top edge"></a><figcaption>From the top edge: the click wheel under the top board at the corner, a nav switch through it, two button holes. Left, the pickers and the per-board tick boxes of the selected part.</figcaption></figure>
@@ -31,13 +31,15 @@
 change it; the same code writes a KiCad board and a DXF per board, and a script turns it into a STEP
 assembly. Made 2026-11-23; rev A2 the same day (outline traced from the notebook page, boards spaced
 with parts between them); rev A3 the same day (input parts to choose from, and a per-board switch for what
-each part opens).</p>
+each part opens); rev A4 the same day (a 7.62 mm strip, the Wiiig face board on the shell, the page remembers
+everything between reloads, the parts and options from the other V6 design notes, a painted and lit 3D view,
+and the routing lab's console look).</p>
 <h2>Use it</h2>
 <ol>
 <li>Open <code>V6_outline_viewer.html</code> (double-click; it needs no server and no network).</li>
 <li>Drag parts in the 3D view. Tick <strong>Edit the outline</strong> to drag the outline's vertices, and
    <strong>Lay the notebook sketch over it</strong> to see the pencil drawing under the outline. Checks are on the right.
-   The page keeps your changes in the browser. <strong>Export files</strong> gives every file as text to copy or download.</li>
+   <strong>Export files</strong> gives every file as text to copy or download.</li>
 <li>Under <strong>Parts</strong>, pick a click wheel, directional switch, joystick or buttons. Select any part to move it,
    change the board it sits on, and tick which boards are opened for it.</li>
 <li>To make your changes the defaults: export "Parameters", save it over <code>v6_outline.json</code>, then
@@ -47,6 +49,66 @@ each part opens).</p>
 </ol>
 <p><code>v6_outline.json</code> can also be edited by hand; every dimension has a name, and keys starting with <code>_</code>
 are comments.</p>
+<h2>What the page remembers</h2>
+<p>The design, every view setting, which sections are folded and where the camera stands are written to the
+browser's own storage a quarter of a second after anything changes, and again when the page is left. A reload
+brings all of it back. Nothing is sent anywhere, so a different browser or machine starts from the built-in design.</p>
+<ul>
+<li><strong>Undo / Redo</strong> (the buttons, or Ctrl/Cmd + Z and Shift + Ctrl/Cmd + Z): 80 steps, since the page was opened.</li>
+<li><strong>Saved designs → Save a copy</strong> keeps a named copy in the same storage; Open and Delete are beside each.</li>
+<li><strong>Copy code</strong> gives the design as a short text (only what differs from the built-in design); <strong>Copy link</strong>
+  puts that code after <code>#p=</code> in the page's address where the page is on a web server. Paste either, or the
+  JSON of a <code>v6_outline.json</code>, into the box and press Open. Opening a link keeps the design you had as
+  "before the link".</li>
+<li>A design saved by an older page is brought up to the current one: your outline, stack and parts are kept,
+  new settings start at their defaults, and a line at the top of the panel says so.</li>
+<li><strong>Reset</strong> goes back to the built-in design; Undo brings yours back.</li>
+</ul>
+<p>If the browser refuses storage (some private windows, some embedded frames), the page says so at the top of
+the Design panel, and Copy code or Export is the way to keep a design.</p>
+<h2>The Wiiig face board</h2>
+<p><code>wig.face</code> puts Kevin's face board on the shell. Its outline and all 554 holes are read from
+<code>V6pile/Wig/Wiig/wiigtop.3mf</code> by <code>tools/prep_face.py</code> into <code>ref/wig_ref.json</code>: 78.74 × 58.42 × 0.71 mm, 480
+countersunk holes on the 16 × 30 grid (2.032 at the top face, 1.2 through, which is a 90° countersink 0.416
+deep), four more at the ends of the row beside each rail pair, and 2 × 35 holes of 0.65 at 1.27 mm for the
+wig's card header. Lined up on the header rows, its hole rows land on the WigLEDmag's to 0.03 mm and its
+bottom edge on the WigLEDmag's.</p>
+<ul>
+<li>It is 3.43 mm taller than the breadboard body: the strip with the header holes runs past the body's top
+  edge, over the frame. With the top board level with the shell (the default) that strip lies on the top
+  board. <strong>Keep the strip…</strong> off trims it back to the body.</li>
+<li><strong>It sits → On the shell</strong> adds its thickness: the top of the breadboard is 7.46 and the unit is 9.06 thick.
+  <strong>Let into it</strong> shortens the shell by the board's thickness instead and the top stays at the shell height.</li>
+<li><strong>Level with the shell / with the face</strong> set the gaps for either. Level with the face, the top board is
+  cut back where the face board overlaps it.</li>
+<li>The STEP export cuts the real countersunk holes; the KiCad and DXF files are still the frame boards only.</li>
+</ul>
+<h2>How it is drawn</h2>
+<p><strong>View → Drawn as</strong> picks one of four: <strong>Real</strong> (soldermask, bare FR4 edges, plated holes, gold, a lit room
+to reflect, shadows, tone mapping), <strong>Flat</strong> (one colour per board, as before), <strong>X-ray</strong> and <strong>Lines</strong>.
+Backdrop, bench (shadow, a 0.1 inch grid that lines up with the holes, or nothing), lens, exposure, where the
+light comes from, and a slow turn are beside it; <strong>Save the picture</strong> writes a PNG, with a clear background
+when the backdrop is None. <strong>Look</strong> sets the soldermask of the boards and of the face board, silkscreen,
+copper finish, the shell's colour, LEDs under the holes and whether the display is lit. None of that changes
+the geometry or any exported file.</p>
+<h2>From the other V6 notes</h2>
+<ul>
+<li><strong>Left strip 7.62</strong> (3 pitches; unit pitch 86.36, 4 dead rows). <strong>Outline → Make the left side straight</strong>
+  pulls the top-left block in to the strip edge.</li>
+<li><strong>Edge coupler between units</strong> (edge-coupler notes, v1 and v2): the WingTAT HEE70LP03BK used today needs
+  about 6.4 mm between the two boards, the kiss slot V2 9.2 and V3 7.8. The check compares that with the
+  strip width, and the housing is drawn in the gap when the next unit is shown. 7.62 is the first strip
+  that takes the WingTAT part; the kiss slot V2 needs 10.16.</li>
+<li><strong>Display</strong>: the fifteen candidates from the display library that are shorter than the unit, each with the
+  module size and thickness from its drawing, beside the two modelled 1.47 inch ones.</li>
+<li><strong>Expansion port</strong>: M.2, PCIe x1, two SFP cages, and from the port survey a mini PCIe socket and a DDR4
+  SO-DIMM socket.</li>
+<li><strong>Add part → Chips and tall parts</strong>: CH446Q, CH32H417, RP2350B, TSSOP-16, the 6.3 mm inductor, the FPC
+  connector. <strong>Mechanical</strong>: an M2 screw with a spacer in every gap, as one answer to what holds the boards apart.</li>
+<li><strong>Magnetometer layout</strong>: the WigLEDmag's own sensors, or the planned MMC5603 grid (3 × 6 or 4 × 8, spread
+  evenly over the 76 × 45 hole field). The docked-probe check uses whichever is chosen.</li>
+<li><strong>Shell height</strong> 6.75 or 7.1 at a click.</li>
+</ul>
 <h2>Frame of reference</h2>
 <ul>
 <li>x right, y <strong>down</strong> (KiCad). x = 0 is the wig's left edge, y = 0 the wig body's top edge.
@@ -270,7 +332,16 @@ JumperlessFootprints; the RKJXM has no footprint yet (B25 says so too).</p>
 </div>
 <p><code>node build.mjs --check</code> exits 1 if two parts clash, a part runs into a board kept whole, or a bare
 breadboard no longer fits beside the unit.</p>
-<h2>What rev A3 shows</h2>
+<h2>What rev A4 shows</h2>
+<ul>
+<li>With the Wiiig face board on the shell the unit is 9.06 mm thick and the breadboard's top is 0.71 above the
+  frame's top board. The face board's header strip lies 3.43 mm over the frame.</li>
+<li>At a 7.62 strip (pitch 86.36) a bare breadboard still fits on either side. With the left side made straight,
+  two whole units overlap by 37 mm², all of it the click wheel, which hangs 4.6 mm past the corner; they clear at pitch 91.44.</li>
+<li>Today's WingTAT coupler fits a 7.62 strip with 1.22 mm to spare and does not fit 5.08. The check takes the
+  strip as empty space: on this outline the strip is board, and the coupler's tongue is not drawn.</li>
+</ul>
+<p>Everything under rev A3 still holds:</p>
 <ul>
 <li>The outline lies on the pencil lines to about half a millimetre (turn the sketch on to see it).</li>
 <li>A bare breadboard fits against either side at pitch 83.82 = 33 × 2.54, 3 dead rows. The step under the
@@ -334,12 +405,24 @@ breadboard no longer fits beside the unit.</p>
 <td>the page</td>
 </tr>
 <tr>
+<td><code>src/state.js</code></td>
+<td>what the page remembers: storage, older-design upgrade, undo, named copies, codes and links</td>
+</tr>
+<tr>
+<td><code>src/render.js</code></td>
+<td>lighting, materials and the painted faces of the Real view</td>
+</tr>
+<tr>
+<td><code>src/fonts/</code></td>
+<td>Archivo Narrow, Michroma and IBM Plex Mono (all SIL OFL), inlined into the single file</td>
+</tr>
+<tr>
 <td><code>src/models.js</code>, <code>src/sketch.js</code></td>
 <td>part meshes and the sketch underlay for the viewer, made by <code>tools/prep_models.mjs</code> and <code>tools/prep_sketch.py</code></td>
 </tr>
 <tr>
 <td><code>ref/wig_ref.json</code></td>
-<td>wig outline, hole grid and sensor positions read from <code>WigLEDmag.kicad_pcb</code></td>
+<td>wig outline, hole grid and sensor positions read from <code>WigLEDmag.kicad_pcb</code>; under <code>face</code>, the Wiiig face board from <code>wiigtop.3mf</code> (<code>tools/prep_face.py</code>)</td>
 </tr>
 <tr>
 <td><code>ref/sketch_rectified.jpg</code>, <code>.json</code></td>
@@ -396,8 +479,22 @@ User.Comments. They are a one-way export: edits made in KiCad do not come back i
 <li>USB-C is an 8.94 × 7.35 × 3.26 envelope from memory of an HRO TYPE-C-31-M-12 class part, not from a drawing.</li>
 <li>PCIe x1 right-angle: 9.4 high is from TE's page for 1-1761465-1; the 25 × 11 footprint is assumed.</li>
 <li>The M.2 model is SparkFun's Key E socket standing in for Key M. Same body, different key.</li>
-<li>Shell height is the 6.75 redesign target; the current print is 7.1. Face PCB is off (0).</li>
-<li>The magnetometers drawn are WigLEDmag's (8 MMC5603 on top, 9 TMAG5273 underneath), not the planned 18 MMC.</li>
+<li>Shell height is the 6.75 redesign target; the Wiiig v7 print (<code>Wiiig.step</code>) measures 7.1.</li>
+<li><strong>The face board.</strong> "Use the Wiiig boards as the face PCB" was taken to mean the board in <code>wiigtop.3mf</code>
+  (2026-08-19). Its 0.71 thickness is the model's; a fab makes 0.6 or 0.8. How it sits on the shell (on top
+  or let in) and whether the header strip stays are switches because no file says. The gold land around each
+  hole (0.26 mm wide), the column numbers and the plated look of the hole walls are drawn, not read from a file.</li>
+<li>The Real view is a picture, not a simulation: the LEDs, the image on the display, the part names printed on
+  the boards and the shell's clip glints are made up to make it read. The Flat view shows only geometry.</li>
+<li>Planned magnetometer grids are spread evenly over a 76 × 45 field centred on the holes, on the underside;
+  the notes give the count and the rough pitch, not positions.</li>
+<li>Edge couplers: sizes are from the two coupler notes. Where the tongue goes on this outline, and whether the
+  strip is cut away for the housing, is not drawn; the check only compares widths.</li>
+<li>New parts: the mini PCIe socket's 5.2 height is read off its part number, with no drawing opened; the
+  SO-DIMM is one 73 × 23.5 × 4.0 block; QFN heights (0.9) are typical values; the M2 screw and spacers are a
+  placeholder for an undecided part. Library displays are the module (and cover glass where the drawing has
+  one) with no FPC tail.</li>
+<li>The page's memory was tested in headless Chrome only (reload, undo, named copies, codes, links).</li>
 <li>The docked-magnet field uses a point dipole, 115.4 mT·mm³ per mm³ of N52, magnet axis along the dock.</li>
 <li>The AMOLED's 61.8 mm FPC tail is not drawn. It needs a route and a place for its B2B plug.</li>
 <li>The wig outline's bottom edge is closed with a straight line; on the real board that edge belongs to

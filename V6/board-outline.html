@@ -4,129 +4,220 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>V6 board outline and stack, in 3D</title>
-<meta name="short-title" content="V6 outline 3D">
+<meta name="short-title" content="Board outline 3D">
 <meta name="description" content="The Jumperless V6 board shape traced from the notebook sketch, as three spaced boards with the real parts between them. Drag parts and outline vertices, pick the inputs, choose which boards each part opens, and check the 0.1 inch stacking, clashes and component room.">
+<link rel="stylesheet" href="../styles/jumperless.css">
 <style>
-/* layout: one-screen bench tool. controls left, 3D stack centre, checks right. numbers in mono, mm everywhere. */
+@font-face{font-family:"Archivo Narrow";src:url(../styles/fonts/ArchivoNarrow-var.woff2) format("woff2");font-weight:400 700;font-display:swap}
+@font-face{font-family:"Michroma";src:url(../styles/fonts/Michroma-400.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"IBM Plex Mono";src:url(../styles/fonts/IBMPlexMono-400.woff2) format("woff2");font-weight:400;font-display:swap}
+@font-face{font-family:"IBM Plex Mono";src:url(../styles/fonts/IBMPlexMono-500.woff2) format("woff2");font-weight:500;font-display:swap}
+@font-face{font-family:"IBM Plex Mono";src:url(../styles/fonts/IBMPlexMono-600.woff2) format("woff2");font-weight:600;font-display:swap}
+/* The look is the routing lab's: Jumperless's own greys (never black), its rainbow and its pink, on panels shaped as a
+   ship's console: cut corners, name plates, narrow capital labels, thin lines. The --jl-* values come from the site
+   theme when the page is on slopswap; the fallbacks are the same numbers, so the page looks the same from disk. */
 :root {
-  --bg: #e6e9ec; --panel: #f5f6f7; --ink: #14181c; --muted: #5a656f; --line: #cdd3d9; --field: #ffffff;
-  --accent: #9a6f08; --accent-ink: #ffffff; --viewport: #dce1e5;
-  --ok: #26734a; --warn: #a25f00; --bad: #b83227; --ok-bg: #dcefe4; --warn-bg: #f6e7cf; --bad-bg: #f6dcd8;
-  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    color-scheme: dark;
-    --bg: #131619; --panel: #1b1f23; --ink: #e7eaed; --muted: #98a2ac; --line: #30373e; --field: #111417;
-    --accent: #e2b345; --accent-ink: #1b1400; --viewport: #252a2f;
-    --ok: #6fcf97; --warn: #f0b458; --bad: #ff8576; --ok-bg: #17301f; --warn-bg: #38290f; --bad-bg: #3a1a16;
-  }
-}
-:root[data-theme="dark"] {
   color-scheme: dark;
-  --bg: #131619; --panel: #1b1f23; --ink: #e7eaed; --muted: #98a2ac; --line: #30373e; --field: #111417;
-  --accent: #e2b345; --accent-ink: #1b1400; --viewport: #252a2f;
-  --ok: #6fcf97; --warn: #f0b458; --bad: #ff8576; --ok-bg: #17301f; --warn-bg: #38290f; --bad-bg: #3a1a16;
+  --bg: var(--jl-bg, #27272b); --panel: var(--jl-surface, #323238); --panel-2: var(--jl-surface-2, #3d3d44);
+  --line: var(--jl-line, #4b4b54); --ink: var(--jl-fg, #f3f3f5); --dim: var(--jl-muted, #aaaab5);
+  --accent: var(--jl-accent-3, #fc0289); --focus: var(--jl-accent-2, #00fced);
+  --r1: var(--jl-r1, #f03060); --r2: var(--jl-r2, #f12fbf); --r3: var(--jl-r3, #c728f8); --r4: var(--jl-r4, #7647f2);
+  --r5: var(--jl-r5, #5174ed); --r6: var(--jl-r6, #50beeb); --r7: var(--jl-r7, #68f4d7); --r8: var(--jl-r8, #70f899);
+  --r9: var(--jl-r9, #7af85c); --r10: var(--jl-r10, #c0f848); --r11: var(--jl-r11, #e8cb40); --r12: var(--jl-r12, #e86828);
+  --rainbow: linear-gradient(90deg, var(--r1), var(--r2), var(--r3), var(--r4), var(--r5), var(--r6), var(--r7), var(--r8), var(--r9), var(--r10), var(--r11), var(--r12));
+  --problem: #ff4d3d; --better: var(--r8); --worse: var(--r11); --hover: #39393f; --sel: #4d3a47; --btn: var(--panel-2);
+  --label: "Archivo Narrow", "Arial Narrow", "Helvetica Neue Condensed", sans-serif;
+  --display: Michroma, "Eurostile", "Arial Black", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --cut: 8px;
+  font-size: 13px;
 }
 * { box-sizing: border-box; }
-html, body { height: 100%; margin: 0; }
-body { background: var(--bg); color: var(--ink); font: 13px/1.4 var(--sans); display: grid; grid-template-rows: auto 1fr; overflow: hidden; }
-header { display: flex; align-items: center; gap: 14px; padding: 8px 14px; border-bottom: 1px solid var(--line); background: var(--panel); flex-wrap: wrap; }
-header h1 { font-size: 15px; font-weight: 600; margin: 0; letter-spacing: 0.01em; }
-header .rev { font: 12px var(--mono); color: var(--muted); }
-header .spacer { flex: 1; }
-main { display: grid; grid-template-columns: 336px minmax(0, 1fr) 330px; min-height: 0; }
-aside { background: var(--panel); overflow-y: auto; padding: 4px 12px 24px; min-height: 0; }
-aside.left { border-right: 1px solid var(--line); }
-aside.right { border-left: 1px solid var(--line); }
-#view { position: relative; min-height: 0; background: var(--viewport); }
-#view canvas { display: block; width: 100%; height: 100%; touch-action: none; }
-#hud { position: absolute; left: 10px; bottom: 8px; font: 11px var(--mono); color: var(--muted); pointer-events: none; }
-#tip { position: absolute; display: none; padding: 3px 7px; background: var(--panel); border: 1px solid var(--line); border-radius: 4px; font-size: 12px; pointer-events: none; white-space: nowrap; }
-#viewbar { position: absolute; right: 10px; top: 8px; display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
-h2 { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 16px 0 6px; padding-bottom: 4px; border-bottom: 1px solid var(--line); }
-.row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 8px; margin: 5px 0; }
-.row > label, .row > span.l { color: var(--ink); }
-.row .u { color: var(--muted); font: 11px var(--mono); margin-left: 4px; }
-.hint { color: var(--muted); font-size: 12px; margin: 4px 0 8px; }
-input[type="number"], input[type="text"], select, textarea { font: 12px var(--mono); color: var(--ink); background: var(--field); border: 1px solid var(--line); border-radius: 4px; padding: 3px 6px; }
-input[type="number"] { width: 74px; text-align: right; }
-input[type="text"] { width: 100%; }
-input[type="range"] { width: 130px; accent-color: var(--accent); }
-input[type="checkbox"] { accent-color: var(--accent); }
-button { font: 12px var(--sans); color: var(--ink); background: var(--field); border: 1px solid var(--line); border-radius: 4px; padding: 4px 9px; cursor: pointer; }
-button:hover { border-color: var(--muted); }
-button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 500; }
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
-.seg button { border: 0; border-radius: 0; border-right: 1px solid var(--line); background: var(--field); }
-.seg button:last-child { border-right: 0; }
-.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+html, body { height: 100%; }
+body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: var(--mono); font-size: 13px; font-variant-numeric: tabular-nums; line-height: 1.4;
+  display: grid; grid-template-rows: auto 1fr; overflow: hidden; scrollbar-color: var(--line) transparent; scrollbar-width: thin; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: 3px; background: var(--rainbow); z-index: 10; }
+
+/* the top rail */
+header.top { display: flex; align-items: center; gap: 10px; padding: 9px 12px 6px; border-bottom: 1px solid var(--line); background: var(--bg); flex-wrap: wrap; }
+.eyebrow { margin: 0; line-height: 1.4; font-family: var(--label); font-weight: 600; font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--dim); }
+.eyebrow a { color: inherit; text-decoration: none; } .eyebrow a:hover { color: var(--accent); }
+h1 { font-family: var(--display); font-size: 14px; line-height: 1.4; margin: 0; font-weight: 400; letter-spacing: .02em; }
+.rev { font-size: 11px; color: var(--dim); }
+.spacer { flex: 1; }
+#headline { display: inline-flex; gap: 6px; flex-wrap: wrap; }
+
+/* a heading inside a panel: a small plate on a rule, each the next colour of the rainbow; here it also folds its section */
+h2 { display: flex; align-items: center; gap: 8px; font-family: var(--label); font-size: 12px; margin: 14px 0 5px; color: var(--ink); font-weight: 600; text-transform: uppercase; letter-spacing: .09em; }
+h2::before { content: ""; flex: none; width: 9px; height: 9px; background: var(--c, var(--accent)); clip-path: polygon(0 0, 100% 0, 100% 100%, 45% 100%, 0 55%); }
+h2::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.sec:first-child h2, #checks > h2:first-child { margin-top: 2px; }
+#checks > h2:nth-of-type(6n+1) { --c: var(--r2); } #checks > h2:nth-of-type(6n+2) { --c: var(--r3); } #checks > h2:nth-of-type(6n+3) { --c: var(--r7); }
+#checks > h2:nth-of-type(6n+4) { --c: var(--r8); } #checks > h2:nth-of-type(6n+5) { --c: var(--r10); } #checks > h2:nth-of-type(6n+6) { --c: var(--r11); }
+h2 .sech { all: unset; cursor: pointer; font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit; }
+h2 .sech::after { content: "  \2212"; color: var(--dim); font-family: var(--mono); }
+.sec.shut h2 .sech::after { content: "  +"; }
+h2 .sech:hover { color: var(--accent); } h2 .sech:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.sec.shut .secbody { display: none; }
+.sec.shut h2 { color: var(--dim); }
+
+button, input, select, textarea { font: inherit; color: inherit; background: var(--bg); border: 1px solid var(--line); border-radius: 0; padding: 3px 7px; }
+/* a button is a plate with one corner cut; under the pointer it lights, pressed it turns over */
+button { cursor: pointer; font-family: var(--label); font-weight: 600; text-transform: uppercase; letter-spacing: .07em; font-size: 12px; padding: 3px 12px 3px 9px; border: 0; background: var(--btn); color: var(--ink);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - var(--cut)), calc(100% - var(--cut)) 100%, 0 100%); }
+button:hover { background: var(--line); }
+button:active { background: var(--ink); color: var(--bg); }
+button.on, button[aria-pressed="true"] { background: var(--accent); color: var(--bg); }
+button:disabled { opacity: .4; cursor: default; }
+button.quiet { padding: 2px 7px; clip-path: none; background: none; color: var(--dim); font-size: 11px; }
+button.quiet:hover { background: none; color: var(--ink); }
+input:hover, select:hover { border-color: var(--dim); }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+button:focus-visible { outline: 0; box-shadow: inset 0 0 0 2px var(--focus); }
+input[type="number"] { width: 62px; text-align: right; }
+input[type="text"] { min-width: 0; }
+input[type="range"] { width: 132px; padding: 0; border: 0; background: none; accent-color: var(--accent); }
+input[type="checkbox"] { width: 14px; height: 14px; padding: 0; accent-color: var(--accent); }
+select { max-width: 100%; }
+@media (prefers-reduced-motion: no-preference) { button, input, select, .plate { transition: background-color .12s, color .12s, border-color .12s, opacity .12s; } }
+
+/* the three panels: each has a bar with its plate (its number on its colour, its name beside it, the far corner cut) */
+main { display: grid; grid-template-columns: 348px minmax(0, 1fr) 338px; min-height: 0; gap: 1px; background: var(--line); }
+.panel { position: relative; display: flex; flex-direction: column; min-width: 0; min-height: 0; background: var(--panel); }
+.panel > .body { flex: 1 1 0; min-height: 0; overflow: auto; padding: 10px 11px 24px; scrollbar-color: var(--line) transparent; scrollbar-width: thin; }
+.pbar { flex: none; display: flex; align-items: center; gap: 8px; min-height: 26px; padding-right: 6px; background: var(--bg); border-bottom: 1px solid var(--line); box-shadow: inset 0 -2px 0 -1px var(--c, var(--line)); }
+.plate { flex: none; display: inline-flex; align-items: center; gap: 7px; align-self: stretch; padding: 0 16px 0 0; user-select: none; -webkit-user-select: none; font-family: var(--label); font-weight: 600; font-size: 12px;
+  text-transform: uppercase; letter-spacing: .12em; color: var(--ink); background: var(--panel-2); clip-path: polygon(0 0, 100% 0, calc(100% - 11px) 100%, 0 100%); }
+.plate b { align-self: stretch; display: inline-flex; align-items: center; padding: 0 7px 0 8px; font-family: var(--display); font-weight: 400; font-size: 10px; letter-spacing: 0; color: var(--bg); background: var(--c, var(--accent)); }
+.bar-note { flex: 1; min-width: 0; color: var(--dim); font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fold { flex: none; width: 22px; height: 18px; padding: 0; clip-path: none; background: none; color: var(--dim); font-family: var(--mono); font-size: 14px; line-height: 1; }
+.fold::before { content: "\2212"; } .panel.shut .fold::before { content: "+"; }
+.fold:hover { background: none; color: var(--ink); }
+.panel.shut > .body { display: none; }
+/* a shut panel stands on end */
+main:has(#panel-design.shut) { grid-template-columns: 27px minmax(0, 1fr) 338px; }
+main:has(#panel-checks.shut) { grid-template-columns: 348px minmax(0, 1fr) 27px; }
+main:has(#panel-design.shut):has(#panel-checks.shut) { grid-template-columns: 27px minmax(0, 1fr) 27px; }
+.panel.shut > .pbar { flex: 1; flex-direction: column; writing-mode: vertical-rl; padding: 0 0 6px; border-bottom: 0; box-shadow: inset -2px 0 0 -1px var(--c, var(--line)); }
+.panel.shut .plate { padding: 0 0 16px; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 11px), 0 100%); }
+.panel.shut .plate b { padding: 8px 0 7px; }
+.panel.shut .bar-note { display: none; }
+
+/* the view */
+.viewpanel { background: var(--bg); }
+#viewbar { display: inline-flex; gap: 0; flex: none; }
+#viewbar button { padding: 2px 8px; clip-path: none; background: none; color: var(--dim); font-size: 11px; }
+#viewbar button:hover { color: var(--ink); background: none; box-shadow: inset 0 -2px 0 var(--accent); }
+#view { position: relative; flex: 1 1 0; min-height: 0; min-width: 0; overflow: hidden; }
+#view[data-bg="clear"] { background: repeating-conic-gradient(#2d2d32 0 25%, #36363c 0 50%) 0 0 / 18px 18px; }
+#view canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+#hud { position: absolute; left: 10px; bottom: 8px; right: 10px; color: var(--dim); font-size: 11px; pointer-events: none; text-shadow: 0 0 3px var(--bg), 0 0 3px var(--bg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#view[data-bg="paper"] #hud, #view[data-bg="white"] #hud { color: #3d3d44; text-shadow: none; }
+#tip { position: absolute; display: none; pointer-events: none; z-index: 4; max-width: 300px; padding: 5px 9px 6px; background: var(--panel-2); color: var(--ink); font-size: 11.5px; border-left: 3px solid var(--accent);
+  clip-path: polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, 0 100%); }
+#fallback { padding: 24px; display: none; color: var(--dim); }
+
+/* rows of controls */
+.row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 5px 0; min-height: 24px; }
+.row > label, .row > .hint { flex: 1 1 auto; min-width: 0; }
+.row label { font-family: var(--label); font-size: 13px; letter-spacing: .03em; color: var(--ink); }
+.row > span { display: inline-flex; align-items: center; gap: 4px; flex: none; max-width: 74%; flex-wrap: wrap; justify-content: flex-end; }
+.row select { max-width: 186px; } .row > input[type="text"] { flex: 1 1 auto; }
+.u { color: var(--dim); font-size: 11px; margin-left: 2px; }
+.hint { color: var(--dim); font-size: 11.5px; margin: 3px 0 6px; }
+.hint.bad { color: var(--problem); }
+.notice { display: flex; gap: 8px; align-items: flex-start; justify-content: space-between; margin: 0 0 10px; padding: 6px 9px 7px 11px; background: var(--panel-2); border-left: 3px solid var(--focus); font-size: 11.5px;
+  clip-path: polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, 0 100%); }
+.seg { display: inline-flex; gap: 2px; flex-wrap: wrap; }
+.seg button { padding: 3px 9px 3px 7px; }
 table { border-collapse: collapse; width: 100%; font-size: 12px; }
-td, th { padding: 3px 4px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: middle; }
-th { color: var(--muted); font-weight: 500; }
-td.n, th.n { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
-.stack input[type="number"] { width: 62px; padding: 3px 2px; }
-.stack input[type="text"] { width: 70px; } .stack td:nth-child(4) input { width: 46px; }
-.stack select { width: 56px; padding: 3px 2px; }
-.stack td:first-child { white-space: nowrap; font-family: var(--mono); }
-.stack td, .stack th { padding: 3px 2px; }
-.sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
-.pill { display: inline-block; padding: 1px 7px; border-radius: 9px; font: 500 11px var(--sans); }
-.pill.info { background: var(--line); color: var(--ink); } .pill.ok { background: var(--ok-bg); color: var(--ok); } .pill.warn { background: var(--warn-bg); color: var(--warn); } .pill.bad { background: var(--bad-bg); color: var(--bad); }
-.check { display: grid; grid-template-columns: auto 1fr; gap: 3px 8px; margin: 6px 0; align-items: start; }
-.check .t { font-size: 12.5px; } .check .d { grid-column: 2; color: var(--muted); font-size: 12px; }
-.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
-.partlist button { display: block; width: 100%; text-align: left; margin: 3px 0; }
-.row select { max-width: 178px; } .row input[type="text"] { max-width: 150px; }
-.boardrow { margin: 2px 0; } .boardrow label { font-size: 12px; } .boardrow.bad label { color: var(--bad); }
+td, th { padding: 3px 2px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: middle; }
+th { background: none; color: var(--dim); font-family: var(--label); font-weight: 600; text-transform: uppercase; letter-spacing: .08em; font-size: 11px; }
+td.n, th.n { text-align: right; }
+.stack input[type="number"] { width: 58px; padding: 3px 2px; } .stack td:nth-child(4) input { width: 44px; }
+.stack input[type="text"] { width: 74px; } .stack select { width: 62px; padding: 3px 2px; }
+.stack td:first-child { white-space: nowrap; }
+.sw { display: inline-block; width: 9px; height: 9px; margin-right: 5px; vertical-align: -1px; clip-path: polygon(0 0, 100% 0, 100% 100%, 45% 100%, 0 55%); }
+.partlist { display: flex; flex-direction: column; gap: 3px; margin: 6px 0; }
+.partlist button { display: block; width: 100%; text-align: left; text-transform: none; letter-spacing: .02em; font-weight: 500; padding: 4px 12px 4px 9px; border-left: 3px solid var(--line);
+  clip-path: polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, 0 100%); }
+.partlist button[aria-pressed="true"] { background: var(--sel); color: var(--ink); border-left-color: var(--accent); }
 .vlist { display: flex; flex-wrap: wrap; gap: 3px; margin: 6px 0; }
-.vlist button { min-width: 26px; padding: 2px 4px; font: 11px var(--mono); }
-.vlist button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
-.partlist button[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); }
-.big { font: 500 20px var(--mono); }
-.bar { height: 8px; background: var(--line); border-radius: 4px; overflow: hidden; margin: 4px 0 2px; }
-.bar > i { display: block; height: 100%; background: var(--bad); }
-dialog { background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 16px; width: min(760px, 92vw); }
-dialog::backdrop { background: rgba(0, 0, 0, 0.4); }
-dialog textarea { width: 100%; height: 46vh; white-space: pre; }
-dialog .bar2 { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 8px 0; }
-#fallback { padding: 24px; display: none; }
-@media (max-width: 980px) { main { grid-template-columns: 1fr; grid-template-rows: 60vh auto auto; overflow-y: auto; } body { overflow: auto; } #view { order: -1; min-height: 60vh; } aside { overflow: visible; } }
+.vlist button { min-width: 27px; padding: 2px 6px 2px 5px; font-family: var(--mono); font-weight: 500; font-size: 11px; letter-spacing: 0; }
+.boardrow { margin: 2px 0; } .boardrow label { font-size: 12px; } .boardrow.bad label { color: var(--problem); }
+.savelist .row { border-bottom: 1px solid var(--line); margin: 0; padding: 3px 0; }
+.savename { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* the checks: a verdict plate, what was checked, and the reason under it */
+.pill { display: inline-block; border: 0; border-radius: 0; vertical-align: baseline; padding: 1px 9px 1px 6px; font-family: var(--label); font-weight: 600; font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; color: var(--bg);
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%); }
+.pill.info { background: var(--line); color: var(--ink); } .pill.ok { background: var(--better); } .pill.warn { background: var(--worse); } .pill.bad { background: var(--problem); color: #1b1b1e; }
+.check { display: grid; grid-template-columns: auto 1fr; gap: 3px 8px; margin: 7px 0; align-items: start; }
+.check .t { font-family: var(--label); font-size: 13px; letter-spacing: .02em; } .check .d { grid-column: 2; color: var(--dim); font-size: 11.5px; }
+.mono { font-family: var(--mono); }
+.big { font-family: var(--display); font-size: 17px; }
+.bar { height: 6px; background: var(--line); overflow: hidden; margin: 5px 0 3px; }
+.bar > i { display: block; height: 100%; background: var(--rainbow); }
+
+dialog { background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-top: 3px solid var(--accent); padding: 14px; width: min(780px, 92vw); }
+dialog::backdrop { background: rgba(20, 20, 23, .6); }
+dialog textarea { width: 100%; height: 46vh; white-space: pre; font-size: 12px; }
+dialog .bar2 { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 0 0 8px; }
+dialog strong { font-family: var(--label); text-transform: uppercase; letter-spacing: .12em; }
+
+@media (max-width: 1080px) {
+  body { overflow: auto; display: block; }
+  main, main:has(.shut) { display: flex; flex-direction: column; }
+  .viewpanel { order: -1; height: 62vh; }
+  .panel > .body { overflow: visible; flex: none; }
+  .panel.shut > .pbar { writing-mode: horizontal-tb; flex-direction: row; flex: none; padding: 0 6px 0 0; }
+  .panel.shut .plate { padding: 0 16px 0 0; clip-path: polygon(0 0, 100% 0, calc(100% - 11px) 100%, 0 100%); } .panel.shut .plate b { padding: 0 7px 0 8px; }
+}
 </style>
 <style>
-/* slopswap, by tools/to_slopswap.py: the tokens the converter does not know */
-:root,:root:not([data-theme="light"]),:root[data-theme="dark"]{color-scheme:dark;
-  --field:#3d3d44;--viewport:#27272b;
-  --ok:#70f899;--warn:#e8cb40;--bad:#ff8576;--ok-bg:#2c4a38;--warn-bg:#4d4420;--bad-bg:#55292a}
+/* slopswap, by tools/to_slopswap.py: the tool's own sizes under the site's body.app */
+body.app{font-size:13px;padding:0}
+body.app h1{font-size:14px;margin:0}
+body.app h2{font-size:12px;margin:14px 0 5px}
+body.app .sec:first-child h2,body.app #checks>h2:first-child{margin-top:2px}
+body.app th{font-family:var(--label);font-size:11px;color:var(--dim);background:none}
+body.app table{margin-bottom:0}
 </style>
 </head>
 <body class="app">
-<link rel="stylesheet" href="../styles/jumperless.css">
-<p class="eyebrow"><a href="../">slopswap</a> / <a href="./">V6</a></p>
-<header>
-  <h1>Jumperless V6 outline</h1> <a href="board-outline-readme.html" style="font-size:12px">readme</a>
+<header class="top">
+  <span class="eyebrow" id="crumb"><a href="../">slopswap</a> / <a href="./">V6</a> / <a href="board-outline-readme.html">readme</a></span>
+  <h1>Board outline</h1>
   <span class="rev" id="rev"></span>
   <span id="headline"></span>
   <span class="spacer"></span>
-  <button id="btn-export" class="primary">Export files</button>
+  <button id="btn-undo" class="quiet" title="Undo: Ctrl or Cmd + Z">Undo</button>
+  <button id="btn-redo" class="quiet" title="Redo: Shift + Ctrl or Cmd + Z">Redo</button>
+  <button id="btn-export" class="on">Export files</button>
   <button id="btn-load">Load JSON</button>
-  <button id="btn-reset">Reset</button>
+  <button id="btn-reset" title="Back to the built-in design. Undo brings yours back.">Reset</button>
   <input type="file" id="file" accept=".json,application/json" hidden>
 </header>
 <main>
-  <aside class="left" id="controls" aria-label="Parameters"></aside>
-  <div id="view">
-    <div id="viewbar"></div>
-    <div id="hud">drag: orbit &nbsp; right-drag: pan &nbsp; wheel: zoom &nbsp; drag a part or an outline dot: move it &nbsp; double-click: reset view</div>
-    <div id="tip"></div>
-    <div id="fallback">This browser could not start WebGL, so the 3D view is unavailable. The checks on the right and the exported files still work.</div>
-  </div>
-  <aside class="right" id="checks" aria-label="Checks"></aside>
+  <section class="panel" id="panel-design" style="--c: var(--r2)" aria-label="Design">
+    <div class="pbar"><span class="plate"><b>01</b>Design</span><span class="bar-note">what the unit is made of</span><button class="fold" type="button" aria-label="fold the design panel"></button></div>
+    <div class="body" id="controls"></div>
+  </section>
+  <section class="panel viewpanel" id="centre" style="--c: var(--r7)" aria-label="3D view">
+    <div class="pbar"><span class="plate"><b>02</b>View</span><span id="viewbar"></span><span class="bar-note"></span></div>
+    <div id="view">
+      <div id="hud">drag: orbit &nbsp; right-drag: pan &nbsp; wheel: zoom &nbsp; drag a part or an outline dot: move it &nbsp; double-click: reset the view</div>
+      <div id="tip"></div>
+      <div id="fallback">This browser could not start WebGL, so the 3D view is unavailable. The checks on the right and the exported files still work.</div>
+    </div>
+  </section>
+  <section class="panel" id="panel-checks" style="--c: var(--r10)" aria-label="Checks">
+    <div class="pbar"><span class="plate"><b>03</b>Checks</span><span class="bar-note">what the numbers say</span><button class="fold" type="button" aria-label="fold the checks panel"></button></div>
+    <div class="body" id="checks"></div>
+  </section>
 </main>
 <dialog id="dlg">
-  <div class="bar2"><strong>Export</strong><select id="exp-what"></select><span class="spacer" style="flex:1"></span><button id="exp-copy">Copy</button><button id="exp-save">Download</button><button id="exp-close">Close</button></div>
+  <div class="bar2"><strong>Export</strong><select id="exp-what"></select><span class="spacer" style="flex:1"></span><button id="exp-copy">Copy</button><button id="exp-save">Download</button><button id="exp-close" class="quiet">Close</button></div>
   <textarea id="exp-text" readonly spellcheck="false"></textarea>
   <div class="hint" id="exp-note"></div>
 </dialog>
@@ -8830,8 +8921,8 @@ window.V6_SKETCH = {"x0": -16, "y0": -34, "x1": 104, "y1": 64, "px_per_mm": 12, 
 
 </script>
 <script>
-window.V6_DEFAULTS = {"meta":{"name":"Jumperless V6 board outline","rev":"A3 2026-11-23","units":"mm","frame_of_reference":"x right, y DOWN (KiCad). x=0 is the wig's left edge, y=0 the wig body's top edge, so breadboard column k sits at x = 2.54*k. z=0 is the top face of the main board (= the wig PCB's top face), z up."},"grid":{"pitch":2.54,"cols":30,"dead_rows_left":2,"_dead_rows_left":"width of the left strip in 2.54 mm rows: 0, 1 or 2. Unit pitch = (31 + this) * 2.54 and dead rows between two units = this + 1. The outline's strip edge is expected at x = -this * 2.54."},"wig":{"mode":"integrated","_mode":"integrated = breadboard area is part of the main board; removable = separate wig PCB (real WigLEDmag outline) on a right-angle 1.27 mm header pair","width":78.74,"height":54.991,"pcb_t":1.6,"shell":{"w":78.7,"h":54.6,"t":6.75},"face_pcb_t":0,"_face_pcb_t":"thickness of a PCB front face on top of the shell; 0 = none","fit_gap":0.1,"pcb_gap":0.2,"connector_side":"top"},"frame":{"_outline":"The frame (top band + left strip), clockwise as seen from above, traced from Kevin's notebook page (IMG a384f12f, rectified on the breadboard's four corners; read to about +-0.5 mm). Per vertex: nothing = sharp; r = round corner; c:[cx,cy] + r = rounded chamfer (a chamfer with both ends blended, cx along the more horizontal edge, cy along the more vertical); c:\"wig\" = the WigLEDmag corner itself, point for point. n is a note.","outline":[{"x":-8.3,"y":-23,"c":[8.8,7.7],"r":2,"n":"top-left rounded chamfer, as drawn: from about (1.3, -23) to (-8.3, -14.4)"},{"x":44.2,"y":-23,"r":1.2,"n":"the top edge steps up here in the drawing: left part beside the display at -23.0 ..."},{"x":46.8,"y":-24.7,"r":1.2,"n":"... right part at -24.7. Give both the same y to take the step out."},{"x":78.74,"y":-24.7,"c":[6.7,5.8],"r":2,"n":"top-right rounded chamfer. Drawn right edge is at 79.0-79.3; set on the grid plane 78.74."},{"x":78.74,"y":0,"c":"wig","n":"the band curves in to meet the breadboard's corner, as drawn"},{"x":0,"y":0,"n":"inside corner against the breadboard"},{"x":0,"y":54.991,"n":"strip ends level with the breadboard's bottom edge"},{"x":-5.08,"y":54.991,"c":"wig","n":"bottom-left rounded chamfer"},{"x":-5.08,"y":44.29,"r":2,"n":"the drawn bump on the strip's outer edge (-5.6 from y 28 to 43). Shaped here so it sits in the waist of a breadboard standing against this edge, 0.13 clear. ASSUMPTION about what it is for; delete these four vertices for a straight edge."},{"x":-5.58,"y":42.29,"r":2},{"x":-5.58,"y":30,"r":2},{"x":-5.08,"y":28,"r":2},{"x":-5.08,"y":0,"c":"wig","n":"the top-left block steps out here around the top-right corner of a breadboard standing on the left, as drawn"},{"x":-8.3,"y":0,"r":0.6,"n":"left edge of the top-left block. Drawn at about -8.3: 3.2 mm past the strip."}],"fill_notches":0,"_fill_notches":"integrated only: closes notches in the one-piece bottom board narrower than twice this (0 = leave the outline as drawn)","ring_wall":2,"_ring_wall":"wall width of a board whose kind is ring (a hollow spacer); none in the default stack"},"_stack":"Bottom to top. gap is the space under that board; parts live in the gaps. A board is opened only where a part passes through it, so the bottom and top boards stay whole unless something really goes through them. The gaps here make the top flush with the breadboard (6.75).","stack":[{"id":"L0","name":"Main board","t":1.6,"gap":0,"kind":"base"},{"id":"L1","name":"Mid board","t":1.6,"gap":1.775,"kind":"board"},{"id":"L2","name":"Top board","t":1.6,"gap":1.775,"kind":"board"}],"_parts":"display: where the shaded box is in the drawing. encoder: the click wheel without its cap, at the V5 offsets (5.83 mm from the left and top edges) from the new top-left corner; the top board covers it. usbc: the V5 corner position. port: on top of the bottom board, mouth at the top edge.","_open":"Boards are opened for a part automatically where it passes through them (and, for buttons and the like, above it so it can be reached). A part can override that per board with \"open\": { \"L2\": true } to open one, or false to keep one whole. Input part types are in src/catalog.js: encoder_siq02, encoder_siq02_cap, nav_rkjxm, nav_skrh, nav_k1_1210, tact_ts1187, joy_joycon, custom_control (with \"dims\": { w, d, h, stem, top }).","parts":[{"id":"display","type":"display_amoled147","x":19,"y":-11.8,"rot":90,"mount":{"flush":"top","offset":0}},{"id":"encoder","type":"encoder_siq02","x":-2.47,"y":-17.17,"rot":45,"mount":{"on":"L0","side":"top"}},{"id":"usbc","type":"usbc_16p","x":72.9,"y":-18.86,"rot":315,"mount":{"on":"L0","side":"top"}},{"id":"port","type":"m2_socket","x":56,"y":-15.2,"rot":0,"mount":{"on":"L0","side":"top"}}],"probe":{"dia":3.6,"len":70,"magnet":{"dia":2,"len":1,"from_tip":1},"dock":{"enabled":true,"x":-2.54,"y_tip":1,"z":null,"clearance":0.2},"_dock":"the probe lies in the space between the bottom and top boards; z = height of its axis, null = centred in that space"},"room":{"min_gap":0.6},"_room":"a board face under another board counts as component room when the gap is at least this","features":[],"_features":"manual pockets or tabs: { \"op\": \"cut\" | \"add\", \"layers\": [\"L1\"], \"x\": 0, \"y\": 0, \"w\": 10, \"h\": 5, \"r\": 0.5, \"rot\": 0, \"note\": \"\" } with x, y the rectangle centre","show":{"neighbour":false,"header40":false,"header40_row":8,"header40_col":1,"sensors":true},"area_budget_mm2":9134,"_area_budget_mm2":"courtyard area of the fitted main-board parts, from docs/V6_area.json via the expansion-port doc"};
-window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","datum":{"x0":115.841532,"y0":28.304321,"note":"x0 = wig left edge, y0 = wig body top edge (corner flats)"},"outline":[[69.85,54.991],[76.1812,54.9912],[76.2265,54.9907],[76.3166,54.9827],[76.4057,54.9668],[76.493,54.943],[76.5779,54.9117],[76.6597,54.873],[76.7378,54.8272],[76.7749,54.8013],[77.0118,54.6454],[78.2967,53.7257],[78.3335,53.6998],[78.4029,53.6425],[78.467,53.5793],[78.5253,53.5106],[78.5773,53.4372],[78.6227,53.3594],[78.6611,53.278],[78.6921,53.1935],[78.7156,53.1066],[78.7314,53.0179],[78.7393,52.9283],[78.7398,52.8832],[78.7398,45.2008],[78.7362,45.0538],[78.7255,44.9072],[78.7075,44.7614],[78.6824,44.6165],[78.6503,44.4731],[78.1944,42.6497],[78.1623,42.5063],[78.1372,42.3615],[78.1192,42.2156],[78.1084,42.069],[78.1048,41.9221],[78.1048,13.4507],[78.1084,13.3038],[78.1192,13.1572],[78.1372,13.0114],[78.1623,12.8666],[78.1944,12.7231],[78.6503,10.8997],[78.6824,10.7563],[78.7075,10.6115],[78.7255,10.4656],[78.7362,10.3191],[78.7398,10.1721],[78.74,2.1082],[78.7395,2.0632],[78.7316,1.9735],[78.7158,1.8849],[78.6923,1.798],[78.6613,1.7135],[78.6229,1.632],[78.5775,1.5543],[78.5255,1.4808],[78.4672,1.4122],[78.4031,1.349],[78.3337,1.2917],[78.2968,1.2658],[77.0021,0.339],[76.775,0.1895],[76.7378,0.1637],[76.6598,0.1179],[76.578,0.0792],[76.4931,0.0479],[76.4058,0.0241],[76.3167,0.0082],[76.2273,0.0003],[76.2,0],[71.2353,0],[71.0884,-0.0036],[70.9418,-0.0144],[70.7959,-0.0324],[70.6511,-0.0574],[70.5077,-0.0896],[65.3796,-1.3716],[65.2702,-1.3784],[65.1656,-1.3455],[65.0798,-1.2771],[64.8195,-0.9436],[64.7833,-0.8826],[64.7707,-0.8128],[64.7691,0.5367],[64.7423,0.6367],[64.6691,0.7098],[64.5668,0.7366],[62.43,0.7366],[62.33,0.7098],[62.2568,0.6366],[62.23,0.532],[62.23,-2.8268],[62.212,-2.9427],[62.1595,-3.0476],[62.0776,-3.1316],[61.7474,-3.3274],[61.646,-3.3861],[61.534,-3.4206],[61.4171,-3.429],[39.37,-3.429],[17.3229,-3.429],[17.206,-3.4206],[17.094,-3.3861],[16.9926,-3.3274],[16.6624,-3.1316],[16.5805,-3.0476],[16.528,-2.9427],[16.51,-2.827],[16.51,0.5366],[16.4832,0.6366],[16.41,0.7098],[16.31,0.7366],[14.1709,0.7366],[14.0709,0.7099],[13.9977,0.6367],[13.9709,0.5367],[13.9693,-0.8128],[13.9567,-0.8826],[13.9205,-0.9436],[13.6602,-1.2771],[13.5744,-1.3455],[13.4698,-1.3784],[13.3604,-1.3716],[8.2323,-0.0896],[8.0889,-0.0574],[7.9441,-0.0323],[7.7982,-0.0144],[7.6516,-0.0036],[7.5047,0],[2.5127,0.0003],[2.5127,0.0003],[2.4233,0.0082],[2.3342,0.0241],[2.2469,0.0479],[2.162,0.0792],[2.0802,0.1179],[2.0022,0.1637],[1.965,0.1895],[1.7379,0.339],[0.4432,1.2658],[0.4063,1.2917],[0.3369,1.349],[0.2728,1.4122],[0.2145,1.4808],[0.1625,1.5543],[0.1171,1.632],[0.0787,1.7135],[0.0477,1.798],[0.0242,1.8849],[0.0084,1.9735],[0.0005,2.0632],[0,2.1082],[0.0002,10.1721],[0.0038,10.3191],[0.0145,10.4656],[0.0325,10.6115],[0.0576,10.7563],[0.0897,10.8997],[0.5456,12.7231],[0.5777,12.8666],[0.6028,13.0114],[0.6208,13.1572],[0.6316,13.3038],[0.6352,13.4507],[0.6352,41.9221],[0.6316,42.069],[0.6208,42.2156],[0.6028,42.3615],[0.5777,42.5063],[0.5456,42.6497],[0.0897,44.4731],[0.0576,44.6165],[0.0325,44.7614],[0.0146,44.9072],[0.0038,45.0538],[0.0002,45.2008],[0.0002,52.8832],[0.0007,52.9283],[0.0086,53.0179],[0.0244,53.1066],[0.0479,53.1935],[0.0789,53.278],[0.1173,53.3594],[0.1627,53.4372],[0.2147,53.5106],[0.273,53.5793],[0.3371,53.6425],[0.4065,53.6998],[0.4433,53.7257],[1.7282,54.6454],[1.9651,54.8013],[2.0022,54.8272],[2.0803,54.873],[2.1621,54.9117],[2.247,54.943],[2.3343,54.9668],[2.4234,54.9827],[2.5135,54.9907],[2.5588,54.9912],[8.89,54.9908]],"cols":[2.5405,5.0805,7.6205,10.1605,12.7005,15.2405,17.7805,20.3205,22.8605,25.4005,27.9405,30.4805,33.0205,35.5605,38.1005,40.6405,43.1805,45.7205,48.2605,50.8005,53.3405,55.8805,58.4205,60.9605,63.5005,66.0405,68.5805,71.1205,73.6605,76.2005],"rows":[3.5557,6.0957,13.7157,16.2557,18.7957,21.3357,23.8757,26.4157,28.9557,31.4957,34.0357,36.5757,39.1157,41.6557,49.2757,51.8157],"mmc":[{"ref":"U9","x":71.12,"y":8.636,"side":"F"},{"ref":"U5","x":24.13,"y":8.636,"side":"F"},{"ref":"U8","x":54.61,"y":46.736,"side":"F"},{"ref":"U2","x":7.62,"y":8.636,"side":"F"},{"ref":"U7","x":54.61,"y":8.636,"side":"F"},{"ref":"U6","x":24.13,"y":46.736,"side":"F"},{"ref":"U10","x":71.12,"y":46.736,"side":"F"},{"ref":"U4","x":7.62,"y":46.736,"side":"F"}],"tmag":[{"ref":"M54","x":39.37,"y":4.826,"side":"B"},{"ref":"M55","x":8.89,"y":50.546,"side":"B"},{"ref":"M59","x":69.85,"y":50.546,"side":"B"},{"ref":"M58","x":2.54,"y":27.686,"side":"B"},{"ref":"M56","x":69.85,"y":4.826,"side":"B"},{"ref":"M53","x":76.2,"y":27.686,"side":"B"},{"ref":"M57","x":39.37,"y":50.546,"side":"B"},{"ref":"M51","x":39.37,"y":27.706,"side":"B"},{"ref":"M52","x":8.89,"y":4.826,"side":"B"}],"footprints":[{"name":"PinHeader_2x35_P1.27_wiig_card","ref":"J2","x":17.78,"y":-0.254,"rot":90,"side":"F","pads_local":[[1.27,2.54],[1.27,3.81],[1.27,5.08],[1.27,6.35],[1.27,7.62],[1.27,8.89],[1.27,10.16],[1.27,11.43],[1.27,12.7],[1.27,13.97],[1.27,15.24],[1.27,16.51],[1.27,17.78],[1.27,19.05],[1.27,20.32],[1.27,22.86],[1.27,24.13],[1.27,25.4],[1.27,26.67],[1.27,27.94],[1.27,29.21],[1.27,30.48],[1.27,31.75],[1.27,33.02],[1.27,34.29],[1.27,35.56],[1.27,36.83],[1.27,38.1],[1.27,39.37],[1.27,40.64],[0,2.54],[0,3.81],[0,5.08],[0,6.35],[0,7.62],[0,8.89],[0,10.16],[0,11.43],[0,12.7],[0,13.97],[0,15.24],[0,16.51],[0,17.78],[0,19.05],[0,20.32],[0,22.86],[0,24.13],[0,25.4],[0,26.67],[0,27.94],[0,29.21],[0,30.48],[0,31.75],[0,33.02],[0,34.29],[0,35.56],[0,36.83],[0,38.1],[0,39.37],[0,40.64],[1.27,41.91],[1.27,43.18],[0,1.27],[0,0],[0,21.59],[0,41.91],[0,43.18],[-2.286,21.59],[1.27,21.59],[1.27,0],[1.27,1.27]]},{"name":"Breadboard_6NonHoles","ref":"J11","x":39.37,"y":27.686,"rot":0,"side":"F","pads_local":null},{"name":"SideConnect_sparserrr_Bottom_tighter","ref":"J3","x":39.37,"y":54.991,"rot":0,"side":"F","pads_local":null},{"name":"fulledge_gap","ref":"J13","x":78.105,"y":27.686,"rot":0,"side":"F","pads_local":null},{"name":"fulledge_gap","ref":"J12","x":0.635,"y":27.686,"rot":180,"side":"B","pads_local":null}]};
+window.V6_DEFAULTS = {"meta":{"name":"Jumperless V6 board outline","rev":"A4 2026-11-23","units":"mm","frame_of_reference":"x right, y DOWN (KiCad). x=0 is the wig's left edge, y=0 the wig body's top edge, so breadboard column k sits at x = 2.54*k. z=0 is the top face of the main board (= the wig PCB's top face), z up."},"grid":{"pitch":2.54,"cols":30,"dead_rows_left":2,"coupler":"none","_coupler":"an edge coupler between two units, for the check only: none, wingtat (HEE70LP03BK, boards about 6.4 apart), kiss (custom kiss slot V2, 9.2 between shoulders) or kiss_short (V3, 7.8)","_dead_rows_left":"width of the left strip in 2.54 mm rows: 0, 1, 2 or 3 (0 / 2.54 / 5.08 / 7.62). Unit pitch = (31 + this) * 2.54 and dead rows between two units = this + 1. The outline's strip edge is expected at x = -this * 2.54."},"wig":{"mode":"integrated","_mode":"integrated = breadboard area is part of the main board; removable = separate wig PCB (real WigLEDmag outline) on a right-angle 1.27 mm header pair","width":78.74,"height":54.991,"pcb_t":1.6,"shell":{"w":78.7,"h":54.6,"t":6.75},"_shell":"t: 6.75 is the injection-moulding target and the older print (Body95); the current Wiiig v7 print measures 7.1.","face":{"on":true,"t":0.71,"sits":"on","header_strip":true},"_face":"the Wiiig face board on the shell (outline and 554 holes read from wiigtop.3mf into ref/wig_ref.json). t = its thickness (0.71 as modelled). sits: on = it lies on the shell and adds t; inset = the shell is t shorter and the top stays at shell.t. header_strip: false trims the 3.43 mm that runs past the body's top edge with the 2 x 35 header holes.","fit_gap":0.1,"pcb_gap":0.2,"connector_side":"top"},"frame":{"_outline":"The frame (top band + left strip), clockwise as seen from above, traced from Kevin's notebook page (IMG a384f12f, rectified on the breadboard's four corners; read to about +-0.5 mm). Per vertex: nothing = sharp; r = round corner; c:[cx,cy] + r = rounded chamfer (a chamfer with both ends blended, cx along the more horizontal edge, cy along the more vertical); c:\"wig\" = the WigLEDmag corner itself, point for point. n is a note.","outline":[{"x":-8.3,"y":-23,"c":[8.8,7.7],"r":2,"n":"top-left rounded chamfer, as drawn: from about (1.3, -23) to (-8.3, -14.4)"},{"x":44.2,"y":-23,"r":1.2,"n":"the top edge steps up here in the drawing: left part beside the display at -23.0 ..."},{"x":46.8,"y":-24.7,"r":1.2,"n":"... right part at -24.7. Give both the same y to take the step out."},{"x":78.74,"y":-24.7,"c":[6.7,5.8],"r":2,"n":"top-right rounded chamfer. Drawn right edge is at 79.0-79.3; set on the grid plane 78.74."},{"x":78.74,"y":0,"c":"wig","n":"the band curves in to meet the breadboard's corner, as drawn"},{"x":0,"y":0,"n":"inside corner against the breadboard"},{"x":0,"y":54.991,"n":"strip ends level with the breadboard's bottom edge"},{"x":-5.08,"y":54.991,"c":"wig","n":"bottom-left rounded chamfer"},{"x":-5.08,"y":44.29,"r":2,"n":"the drawn bump on the strip's outer edge (-5.6 from y 28 to 43). Shaped here so it sits in the waist of a breadboard standing against this edge, 0.13 clear. ASSUMPTION about what it is for; delete these four vertices for a straight edge."},{"x":-5.58,"y":42.29,"r":2},{"x":-5.58,"y":30,"r":2},{"x":-5.08,"y":28,"r":2},{"x":-5.08,"y":0,"c":"wig","n":"the top-left block steps out here around the top-right corner of a breadboard standing on the left, as drawn"},{"x":-8.3,"y":0,"r":0.6,"n":"left edge of the top-left block. Drawn at about -8.3: 3.2 mm past the strip."}],"fill_notches":0,"_fill_notches":"integrated only: closes notches in the one-piece bottom board narrower than twice this (0 = leave the outline as drawn)","ring_wall":2,"_ring_wall":"wall width of a board whose kind is ring (a hollow spacer); none in the default stack"},"_stack":"Bottom to top. gap is the space under that board; parts live in the gaps. A board is opened only where a part passes through it, so the bottom and top boards stay whole unless something really goes through them. The gaps here make the top flush with the breadboard (6.75).","stack":[{"id":"L0","name":"Main board","t":1.6,"gap":0,"kind":"base"},{"id":"L1","name":"Mid board","t":1.6,"gap":1.775,"kind":"board"},{"id":"L2","name":"Top board","t":1.6,"gap":1.775,"kind":"board"}],"_parts":"display: where the shaded box is in the drawing. encoder: the click wheel without its cap, at the V5 offsets (5.83 mm from the left and top edges) from the new top-left corner; the top board covers it. usbc: the V5 corner position. port: on top of the bottom board, mouth at the top edge.","_open":"Boards are opened for a part automatically where it passes through them (and, for buttons and the like, above it so it can be reached). A part can override that per board with \"open\": { \"L2\": true } to open one, or false to keep one whole. Input part types are in src/catalog.js: encoder_siq02, encoder_siq02_cap, nav_rkjxm, nav_skrh, nav_k1_1210, tact_ts1187, joy_joycon, custom_control (with \"dims\": { w, d, h, stem, top }).","parts":[{"id":"display","type":"display_amoled147","x":19,"y":-11.8,"rot":90,"mount":{"flush":"top","offset":0}},{"id":"encoder","type":"encoder_siq02","x":-2.47,"y":-17.17,"rot":45,"mount":{"on":"L0","side":"top"}},{"id":"usbc","type":"usbc_16p","x":72.9,"y":-18.86,"rot":315,"mount":{"on":"L0","side":"top"}},{"id":"port","type":"m2_socket","x":56,"y":-15.2,"rot":0,"mount":{"on":"L0","side":"top"}}],"probe":{"dia":3.6,"len":70,"magnet":{"dia":2,"len":1,"from_tip":1},"dock":{"enabled":true,"x":-2.54,"y_tip":1,"z":null,"clearance":0.2},"_dock":"the probe lies in the space between the bottom and top boards; z = height of its axis, null = centred in that space"},"room":{"min_gap":0.6},"_room":"a board face under another board counts as component room when the gap is at least this","features":[],"_features":"manual pockets or tabs: { \"op\": \"cut\" | \"add\", \"layers\": [\"L1\"], \"x\": 0, \"y\": 0, \"w\": 10, \"h\": 5, \"r\": 0.5, \"rot\": 0, \"note\": \"\" } with x, y the rectangle centre","show":{"neighbour":false,"header40":false,"header40_row":8,"header40_col":1,"sensors":true,"sensor_layout":"wigledmag","_sensor_layout":"wigledmag = the test board's 9 TMAG5273 + 8 MMC5603; plan18 / plan32 = the planned MMC5603 grid, 3 x 6 or 4 x 8, spread evenly over the 76 x 45 hole field","coupler":false},"look":{"mask":"black","silk":"white","finish":"enig","shell":"black","face_mask":"black","leds":"off","screen":true},"_look":"how the 3D view paints things; no effect on the geometry. mask / face_mask: black, white, green, purple, blue, red. finish: enig or hasl. shell: black, white, clear. leds: off, rainbow, rails, probe.","area_budget_mm2":9134,"_area_budget_mm2":"courtyard area of the fitted main-board parts, from docs/V6_area.json via the expansion-port doc"};
+window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","datum":{"x0":115.841532,"y0":28.304321,"note":"x0 = wig left edge, y0 = wig body top edge (corner flats)"},"outline":[[69.85,54.991],[76.1812,54.9912],[76.2265,54.9907],[76.3166,54.9827],[76.4057,54.9668],[76.493,54.943],[76.5779,54.9117],[76.6597,54.873],[76.7378,54.8272],[76.7749,54.8013],[77.0118,54.6454],[78.2967,53.7257],[78.3335,53.6998],[78.4029,53.6425],[78.467,53.5793],[78.5253,53.5106],[78.5773,53.4372],[78.6227,53.3594],[78.6611,53.278],[78.6921,53.1935],[78.7156,53.1066],[78.7314,53.0179],[78.7393,52.9283],[78.7398,52.8832],[78.7398,45.2008],[78.7362,45.0538],[78.7255,44.9072],[78.7075,44.7614],[78.6824,44.6165],[78.6503,44.4731],[78.1944,42.6497],[78.1623,42.5063],[78.1372,42.3615],[78.1192,42.2156],[78.1084,42.069],[78.1048,41.9221],[78.1048,13.4507],[78.1084,13.3038],[78.1192,13.1572],[78.1372,13.0114],[78.1623,12.8666],[78.1944,12.7231],[78.6503,10.8997],[78.6824,10.7563],[78.7075,10.6115],[78.7255,10.4656],[78.7362,10.3191],[78.7398,10.1721],[78.74,2.1082],[78.7395,2.0632],[78.7316,1.9735],[78.7158,1.8849],[78.6923,1.798],[78.6613,1.7135],[78.6229,1.632],[78.5775,1.5543],[78.5255,1.4808],[78.4672,1.4122],[78.4031,1.349],[78.3337,1.2917],[78.2968,1.2658],[77.0021,0.339],[76.775,0.1895],[76.7378,0.1637],[76.6598,0.1179],[76.578,0.0792],[76.4931,0.0479],[76.4058,0.0241],[76.3167,0.0082],[76.2273,0.0003],[76.2,0],[71.2353,0],[71.0884,-0.0036],[70.9418,-0.0144],[70.7959,-0.0324],[70.6511,-0.0574],[70.5077,-0.0896],[65.3796,-1.3716],[65.2702,-1.3784],[65.1656,-1.3455],[65.0798,-1.2771],[64.8195,-0.9436],[64.7833,-0.8826],[64.7707,-0.8128],[64.7691,0.5367],[64.7423,0.6367],[64.6691,0.7098],[64.5668,0.7366],[62.43,0.7366],[62.33,0.7098],[62.2568,0.6366],[62.23,0.532],[62.23,-2.8268],[62.212,-2.9427],[62.1595,-3.0476],[62.0776,-3.1316],[61.7474,-3.3274],[61.646,-3.3861],[61.534,-3.4206],[61.4171,-3.429],[39.37,-3.429],[17.3229,-3.429],[17.206,-3.4206],[17.094,-3.3861],[16.9926,-3.3274],[16.6624,-3.1316],[16.5805,-3.0476],[16.528,-2.9427],[16.51,-2.827],[16.51,0.5366],[16.4832,0.6366],[16.41,0.7098],[16.31,0.7366],[14.1709,0.7366],[14.0709,0.7099],[13.9977,0.6367],[13.9709,0.5367],[13.9693,-0.8128],[13.9567,-0.8826],[13.9205,-0.9436],[13.6602,-1.2771],[13.5744,-1.3455],[13.4698,-1.3784],[13.3604,-1.3716],[8.2323,-0.0896],[8.0889,-0.0574],[7.9441,-0.0323],[7.7982,-0.0144],[7.6516,-0.0036],[7.5047,0],[2.5127,0.0003],[2.5127,0.0003],[2.4233,0.0082],[2.3342,0.0241],[2.2469,0.0479],[2.162,0.0792],[2.0802,0.1179],[2.0022,0.1637],[1.965,0.1895],[1.7379,0.339],[0.4432,1.2658],[0.4063,1.2917],[0.3369,1.349],[0.2728,1.4122],[0.2145,1.4808],[0.1625,1.5543],[0.1171,1.632],[0.0787,1.7135],[0.0477,1.798],[0.0242,1.8849],[0.0084,1.9735],[0.0005,2.0632],[0,2.1082],[0.0002,10.1721],[0.0038,10.3191],[0.0145,10.4656],[0.0325,10.6115],[0.0576,10.7563],[0.0897,10.8997],[0.5456,12.7231],[0.5777,12.8666],[0.6028,13.0114],[0.6208,13.1572],[0.6316,13.3038],[0.6352,13.4507],[0.6352,41.9221],[0.6316,42.069],[0.6208,42.2156],[0.6028,42.3615],[0.5777,42.5063],[0.5456,42.6497],[0.0897,44.4731],[0.0576,44.6165],[0.0325,44.7614],[0.0146,44.9072],[0.0038,45.0538],[0.0002,45.2008],[0.0002,52.8832],[0.0007,52.9283],[0.0086,53.0179],[0.0244,53.1066],[0.0479,53.1935],[0.0789,53.278],[0.1173,53.3594],[0.1627,53.4372],[0.2147,53.5106],[0.273,53.5793],[0.3371,53.6425],[0.4065,53.6998],[0.4433,53.7257],[1.7282,54.6454],[1.9651,54.8013],[2.0022,54.8272],[2.0803,54.873],[2.1621,54.9117],[2.247,54.943],[2.3343,54.9668],[2.4234,54.9827],[2.5135,54.9907],[2.5588,54.9912],[8.89,54.9908]],"cols":[2.5405,5.0805,7.6205,10.1605,12.7005,15.2405,17.7805,20.3205,22.8605,25.4005,27.9405,30.4805,33.0205,35.5605,38.1005,40.6405,43.1805,45.7205,48.2605,50.8005,53.3405,55.8805,58.4205,60.9605,63.5005,66.0405,68.5805,71.1205,73.6605,76.2005],"rows":[3.5557,6.0957,13.7157,16.2557,18.7957,21.3357,23.8757,26.4157,28.9557,31.4957,34.0357,36.5757,39.1157,41.6557,49.2757,51.8157],"mmc":[{"ref":"U9","x":71.12,"y":8.636,"side":"F"},{"ref":"U5","x":24.13,"y":8.636,"side":"F"},{"ref":"U8","x":54.61,"y":46.736,"side":"F"},{"ref":"U2","x":7.62,"y":8.636,"side":"F"},{"ref":"U7","x":54.61,"y":8.636,"side":"F"},{"ref":"U6","x":24.13,"y":46.736,"side":"F"},{"ref":"U10","x":71.12,"y":46.736,"side":"F"},{"ref":"U4","x":7.62,"y":46.736,"side":"F"}],"tmag":[{"ref":"M54","x":39.37,"y":4.826,"side":"B"},{"ref":"M55","x":8.89,"y":50.546,"side":"B"},{"ref":"M59","x":69.85,"y":50.546,"side":"B"},{"ref":"M58","x":2.54,"y":27.686,"side":"B"},{"ref":"M56","x":69.85,"y":4.826,"side":"B"},{"ref":"M53","x":76.2,"y":27.686,"side":"B"},{"ref":"M57","x":39.37,"y":50.546,"side":"B"},{"ref":"M51","x":39.37,"y":27.706,"side":"B"},{"ref":"M52","x":8.89,"y":4.826,"side":"B"}],"footprints":[{"name":"PinHeader_2x35_P1.27_wiig_card","ref":"J2","x":17.78,"y":-0.254,"rot":90,"side":"F","pads_local":[[1.27,2.54],[1.27,3.81],[1.27,5.08],[1.27,6.35],[1.27,7.62],[1.27,8.89],[1.27,10.16],[1.27,11.43],[1.27,12.7],[1.27,13.97],[1.27,15.24],[1.27,16.51],[1.27,17.78],[1.27,19.05],[1.27,20.32],[1.27,22.86],[1.27,24.13],[1.27,25.4],[1.27,26.67],[1.27,27.94],[1.27,29.21],[1.27,30.48],[1.27,31.75],[1.27,33.02],[1.27,34.29],[1.27,35.56],[1.27,36.83],[1.27,38.1],[1.27,39.37],[1.27,40.64],[0,2.54],[0,3.81],[0,5.08],[0,6.35],[0,7.62],[0,8.89],[0,10.16],[0,11.43],[0,12.7],[0,13.97],[0,15.24],[0,16.51],[0,17.78],[0,19.05],[0,20.32],[0,22.86],[0,24.13],[0,25.4],[0,26.67],[0,27.94],[0,29.21],[0,30.48],[0,31.75],[0,33.02],[0,34.29],[0,35.56],[0,36.83],[0,38.1],[0,39.37],[0,40.64],[1.27,41.91],[1.27,43.18],[0,1.27],[0,0],[0,21.59],[0,41.91],[0,43.18],[-2.286,21.59],[1.27,21.59],[1.27,0],[1.27,1.27]]},{"name":"Breadboard_6NonHoles","ref":"J11","x":39.37,"y":27.686,"rot":0,"side":"F","pads_local":null},{"name":"SideConnect_sparserrr_Bottom_tighter","ref":"J3","x":39.37,"y":54.991,"rot":0,"side":"F","pads_local":null},{"name":"fulledge_gap","ref":"J13","x":78.105,"y":27.686,"rot":0,"side":"F","pads_local":null},{"name":"fulledge_gap","ref":"J12","x":0.635,"y":27.686,"rot":180,"side":"B","pads_local":null}],"face":{"source":"V6pile/Wig/Wiig/wiigtop.3mf (Fusion export, 2026-08-19)","w":78.74,"h":58.42,"t":0.71,"csk_depth":0.416,"y0":-3.429,"y1":54.991,"outline":[[0.273,1.412],[0.337,1.349],[0.406,1.292],[0.443,1.266],[1.738,0.339],[1.965,0.19],[2.002,0.164],[2.08,0.118],[2.162,0.079],[2.247,0.048],[2.334,0.024],[2.423,0.008],[2.513,0],[2.54,0],[7.505,0],[7.749,-0.01],[7.992,-0.04],[8.232,-0.089],[13.36,-1.371],[13.407,-1.379],[13.454,-1.38],[13.501,-1.373],[13.546,-1.359],[13.588,-1.338],[13.627,-1.31],[13.66,-1.277],[13.92,-0.943],[13.938,-0.921],[13.951,-0.896],[13.961,-0.869],[13.967,-0.841],[13.969,-0.813],[13.971,1.172],[13.974,1.207],[13.983,1.24],[13.998,1.272],[14.018,1.3],[14.042,1.325],[14.071,1.345],[14.102,1.36],[14.136,1.369],[14.171,1.372],[16.31,1.372],[16.345,1.369],[16.378,1.36],[16.41,1.345],[16.439,1.325],[16.463,1.3],[16.483,1.272],[16.498,1.24],[16.507,1.206],[16.51,1.172],[16.51,-2.827],[16.515,-2.885],[16.528,-2.943],[16.55,-2.997],[16.58,-3.047],[16.618,-3.093],[16.662,-3.131],[16.993,-3.327],[17.067,-3.373],[17.149,-3.406],[17.235,-3.425],[17.323,-3.429],[39.37,-3.429],[61.417,-3.429],[61.505,-3.425],[61.591,-3.406],[61.673,-3.373],[61.747,-3.327],[62.078,-3.131],[62.122,-3.093],[62.159,-3.048],[62.19,-2.997],[62.212,-2.943],[62.225,-2.886],[62.23,-2.827],[62.23,1.172],[62.232,1.203],[62.24,1.234],[62.252,1.263],[62.268,1.289],[62.289,1.313],[62.312,1.334],[62.339,1.35],[62.368,1.362],[62.399,1.369],[62.43,1.372],[64.569,1.372],[64.604,1.369],[64.638,1.36],[64.669,1.345],[64.698,1.325],[64.722,1.3],[64.742,1.272],[64.757,1.24],[64.766,1.207],[64.769,1.172],[64.771,-0.813],[64.773,-0.841],[64.779,-0.869],[64.789,-0.896],[64.802,-0.921],[64.82,-0.943],[65.08,-1.277],[65.113,-1.31],[65.152,-1.338],[65.194,-1.359],[65.239,-1.373],[65.286,-1.38],[65.333,-1.379],[65.38,-1.371],[70.508,-0.089],[70.748,-0.04],[70.991,-0.01],[71.235,0],[76.2,0],[76.227,0],[76.317,0.008],[76.406,0.024],[76.493,0.048],[76.578,0.079],[76.66,0.118],[76.738,0.164],[76.775,0.19],[77.002,0.339],[78.297,1.266],[78.334,1.292],[78.403,1.349],[78.467,1.412],[78.525,1.481],[78.578,1.554],[78.623,1.632],[78.661,1.714],[78.692,1.798],[78.716,1.885],[78.732,1.974],[78.739,2.063],[78.74,2.108],[78.74,10.172],[78.73,10.417],[78.7,10.66],[78.65,10.9],[78.194,12.723],[78.145,12.963],[78.115,13.206],[78.105,13.451],[78.105,41.922],[78.115,42.167],[78.145,42.41],[78.194,42.65],[78.65,44.473],[78.7,44.713],[78.73,44.956],[78.74,45.201],[78.74,52.883],[78.739,52.928],[78.731,53.018],[78.716,53.107],[78.692,53.194],[78.661,53.278],[78.623,53.36],[78.577,53.437],[78.525,53.511],[78.467,53.579],[78.403,53.643],[78.333,53.7],[78.297,53.726],[77.012,54.646],[76.775,54.801],[76.738,54.827],[76.66,54.873],[76.578,54.912],[76.493,54.943],[76.406,54.967],[76.317,54.983],[76.226,54.991],[76.181,54.991],[64.751,54.991],[39.37,54.991],[13.989,54.991],[2.559,54.991],[2.514,54.991],[2.423,54.983],[2.334,54.967],[2.247,54.943],[2.162,54.912],[2.08,54.873],[2.002,54.827],[1.965,54.801],[1.728,54.646],[0.443,53.726],[0.407,53.7],[0.337,53.643],[0.273,53.579],[0.215,53.511],[0.163,53.437],[0.117,53.36],[0.079,53.278],[0.048,53.194],[0.024,53.107],[0.009,53.018],[0.001,52.928],[0,52.883],[0,45.201],[0.01,44.956],[0.04,44.713],[0.09,44.473],[0.546,42.65],[0.595,42.41],[0.625,42.167],[0.635,41.922],[0.635,13.451],[0.625,13.206],[0.595,12.963],[0.546,12.723],[0.09,10.9],[0.04,10.66],[0.01,10.417],[0,10.172],[0,2.108],[0.001,2.063],[0.008,1.974],[0.024,1.885],[0.048,1.798],[0.079,1.714],[0.117,1.632],[0.162,1.554],[0.215,1.481]],"holes":[[17.78,-1.524,0.65,0.65],[19.05,-1.524,0.65,0.65],[20.32,-1.524,0.65,0.65],[21.59,-1.524,0.65,0.65],[22.86,-1.524,0.65,0.65],[24.13,-1.524,0.65,0.65],[25.4,-1.524,0.65,0.65],[26.67,-1.524,0.65,0.65],[27.94,-1.524,0.65,0.65],[29.21,-1.524,0.65,0.65],[30.48,-1.524,0.65,0.65],[31.75,-1.524,0.65,0.65],[33.02,-1.524,0.65,0.65],[34.29,-1.524,0.65,0.65],[35.56,-1.524,0.65,0.65],[36.83,-1.524,0.65,0.65],[38.1,-1.524,0.65,0.65],[39.37,-1.524,0.65,0.65],[40.64,-1.524,0.65,0.65],[41.91,-1.524,0.65,0.65],[43.18,-1.524,0.65,0.65],[44.45,-1.524,0.65,0.65],[45.72,-1.524,0.65,0.65],[46.99,-1.524,0.65,0.65],[48.26,-1.524,0.65,0.65],[49.53,-1.524,0.65,0.65],[50.8,-1.524,0.65,0.65],[52.07,-1.524,0.65,0.65],[53.34,-1.524,0.65,0.65],[54.61,-1.524,0.65,0.65],[55.88,-1.524,0.65,0.65],[57.15,-1.524,0.65,0.65],[58.42,-1.524,0.65,0.65],[59.69,-1.524,0.65,0.65],[60.96,-1.524,0.65,0.65],[17.78,-0.254,0.65,0.65],[19.05,-0.254,0.65,0.65],[20.32,-0.254,0.65,0.65],[21.59,-0.254,0.65,0.65],[22.86,-0.254,0.65,0.65],[24.13,-0.254,0.65,0.65],[25.4,-0.254,0.65,0.65],[26.67,-0.254,0.65,0.65],[27.94,-0.254,0.65,0.65],[29.21,-0.254,0.65,0.65],[30.48,-0.254,0.65,0.65],[31.75,-0.254,0.65,0.65],[33.02,-0.254,0.65,0.65],[34.29,-0.254,0.65,0.65],[35.56,-0.254,0.65,0.65],[36.83,-0.254,0.65,0.65],[38.1,-0.254,0.65,0.65],[39.37,-0.254,0.65,0.65],[40.64,-0.254,0.65,0.65],[41.91,-0.254,0.65,0.65],[43.18,-0.254,0.65,0.65],[44.45,-0.254,0.65,0.65],[45.72,-0.254,0.65,0.65],[46.99,-0.254,0.65,0.65],[48.26,-0.254,0.65,0.65],[49.53,-0.254,0.65,0.65],[50.8,-0.254,0.65,0.65],[52.07,-0.254,0.65,0.65],[53.34,-0.254,0.65,0.65],[54.61,-0.254,0.65,0.65],[55.88,-0.254,0.65,0.65],[57.15,-0.254,0.65,0.65],[58.42,-0.254,0.65,0.65],[59.69,-0.254,0.65,0.65],[60.96,-0.254,0.65,0.65],[2.54,3.556,2.032,1.2],[5.08,3.556,2.032,1.2],[7.62,3.556,2.032,1.2],[10.16,3.556,2.032,1.2],[12.7,3.556,2.032,1.2],[15.24,3.556,2.032,1.2],[17.78,3.556,2.032,1.2],[20.32,3.556,2.032,1.2],[22.86,3.556,2.032,1.2],[25.4,3.556,2.032,1.2],[27.94,3.556,2.032,1.2],[30.48,3.556,2.032,1.2],[33.02,3.556,2.032,1.2],[35.56,3.556,2.032,1.2],[38.1,3.556,2.032,1.2],[40.64,3.556,2.032,1.2],[43.18,3.556,2.032,1.2],[45.72,3.556,2.032,1.2],[48.26,3.556,2.032,1.2],[50.8,3.556,2.032,1.2],[53.34,3.556,2.032,1.2],[55.88,3.556,2.032,1.2],[58.42,3.556,2.032,1.2],[60.96,3.556,2.032,1.2],[63.5,3.556,2.032,1.2],[66.04,3.556,2.032,1.2],[68.58,3.556,2.032,1.2],[71.12,3.556,2.032,1.2],[73.66,3.556,2.032,1.2],[76.2,3.556,2.032,1.2],[2.54,6.096,2.032,1.2],[5.08,6.096,2.032,1.2],[7.62,6.096,2.032,1.2],[10.16,6.096,2.032,1.2],[12.7,6.096,2.032,1.2],[15.24,6.096,2.032,1.2],[17.78,6.096,2.032,1.2],[20.32,6.096,2.032,1.2],[22.86,6.096,2.032,1.2],[25.4,6.096,2.032,1.2],[27.94,6.096,2.032,1.2],[30.48,6.096,2.032,1.2],[33.02,6.096,2.032,1.2],[35.56,6.096,2.032,1.2],[38.1,6.096,2.032,1.2],[40.64,6.096,2.032,1.2],[43.18,6.096,2.032,1.2],[45.72,6.096,2.032,1.2],[48.26,6.096,2.032,1.2],[50.8,6.096,2.032,1.2],[53.34,6.096,2.032,1.2],[55.88,6.096,2.032,1.2],[58.42,6.096,2.032,1.2],[60.96,6.096,2.032,1.2],[63.5,6.096,2.032,1.2],[66.04,6.096,2.032,1.2],[68.58,6.096,2.032,1.2],[71.12,6.096,2.032,1.2],[73.66,6.096,2.032,1.2],[76.2,6.096,2.032,1.2],[2.54,8.636,2.032,1.2],[76.2,8.636,2.032,1.2],[2.54,13.716,2.032,1.2],[5.08,13.716,2.032,1.2],[7.62,13.716,2.032,1.2],[10.16,13.716,2.032,1.2],[12.7,13.716,2.032,1.2],[15.24,13.716,2.032,1.2],[17.78,13.716,2.032,1.2],[20.32,13.716,2.032,1.2],[22.86,13.716,2.032,1.2],[25.4,13.716,2.032,1.2],[27.94,13.716,2.032,1.2],[30.48,13.716,2.032,1.2],[33.02,13.716,2.032,1.2],[35.56,13.716,2.032,1.2],[38.1,13.716,2.032,1.2],[40.64,13.716,2.032,1.2],[43.18,13.716,2.032,1.2],[45.72,13.716,2.032,1.2],[48.26,13.716,2.032,1.2],[50.8,13.716,2.032,1.2],[53.34,13.716,2.032,1.2],[55.88,13.716,2.032,1.2],[58.42,13.716,2.032,1.2],[60.96,13.716,2.032,1.2],[63.5,13.716,2.032,1.2],[66.04,13.716,2.032,1.2],[68.58,13.716,2.032,1.2],[71.12,13.716,2.032,1.2],[73.66,13.716,2.032,1.2],[76.2,13.716,2.032,1.2],[2.54,16.256,2.032,1.2],[5.08,16.256,2.032,1.2],[7.62,16.256,2.032,1.2],[10.16,16.256,2.032,1.2],[12.7,16.256,2.032,1.2],[15.24,16.256,2.032,1.2],[17.78,16.256,2.032,1.2],[20.32,16.256,2.032,1.2],[22.86,16.256,2.032,1.2],[25.4,16.256,2.032,1.2],[27.94,16.256,2.032,1.2],[30.48,16.256,2.032,1.2],[33.02,16.256,2.032,1.2],[35.56,16.256,2.032,1.2],[38.1,16.256,2.032,1.2],[40.64,16.256,2.032,1.2],[43.18,16.256,2.032,1.2],[45.72,16.256,2.032,1.2],[48.26,16.256,2.032,1.2],[50.8,16.256,2.032,1.2],[53.34,16.256,2.032,1.2],[55.88,16.256,2.032,1.2],[58.42,16.256,2.032,1.2],[60.96,16.256,2.032,1.2],[63.5,16.256,2.032,1.2],[66.04,16.256,2.032,1.2],[68.58,16.256,2.032,1.2],[71.12,16.256,2.032,1.2],[73.66,16.256,2.032,1.2],[76.2,16.256,2.032,1.2],[2.54,18.796,2.032,1.2],[5.08,18.796,2.032,1.2],[7.62,18.796,2.032,1.2],[10.16,18.796,2.032,1.2],[12.7,18.796,2.032,1.2],[15.24,18.796,2.032,1.2],[17.78,18.796,2.032,1.2],[20.32,18.796,2.032,1.2],[22.86,18.796,2.032,1.2],[25.4,18.796,2.032,1.2],[27.94,18.796,2.032,1.2],[30.48,18.796,2.032,1.2],[33.02,18.796,2.032,1.2],[35.56,18.796,2.032,1.2],[38.1,18.796,2.032,1.2],[40.64,18.796,2.032,1.2],[43.18,18.796,2.032,1.2],[45.72,18.796,2.032,1.2],[48.26,18.796,2.032,1.2],[50.8,18.796,2.032,1.2],[53.34,18.796,2.032,1.2],[55.88,18.796,2.032,1.2],[58.42,18.796,2.032,1.2],[60.96,18.796,2.032,1.2],[63.5,18.796,2.032,1.2],[66.04,18.796,2.032,1.2],[68.58,18.796,2.032,1.2],[71.12,18.796,2.032,1.2],[73.66,18.796,2.032,1.2],[76.2,18.796,2.032,1.2],[2.54,21.336,2.032,1.2],[5.08,21.336,2.032,1.2],[7.62,21.336,2.032,1.2],[10.16,21.336,2.032,1.2],[12.7,21.336,2.032,1.2],[15.24,21.336,2.032,1.2],[17.78,21.336,2.032,1.2],[20.32,21.336,2.032,1.2],[22.86,21.336,2.032,1.2],[25.4,21.336,2.032,1.2],[27.94,21.336,2.032,1.2],[30.48,21.336,2.032,1.2],[33.02,21.336,2.032,1.2],[35.56,21.336,2.032,1.2],[38.1,21.336,2.032,1.2],[40.64,21.336,2.032,1.2],[43.18,21.336,2.032,1.2],[45.72,21.336,2.032,1.2],[48.26,21.336,2.032,1.2],[50.8,21.336,2.032,1.2],[53.34,21.336,2.032,1.2],[55.88,21.336,2.032,1.2],[58.42,21.336,2.032,1.2],[60.96,21.336,2.032,1.2],[63.5,21.336,2.032,1.2],[66.04,21.336,2.032,1.2],[68.58,21.336,2.032,1.2],[71.12,21.336,2.032,1.2],[73.66,21.336,2.032,1.2],[76.2,21.336,2.032,1.2],[2.54,23.876,2.032,1.2],[5.08,23.876,2.032,1.2],[7.62,23.876,2.032,1.2],[10.16,23.876,2.032,1.2],[12.7,23.876,2.032,1.2],[15.24,23.876,2.032,1.2],[17.78,23.876,2.032,1.2],[20.32,23.876,2.032,1.2],[22.86,23.876,2.032,1.2],[25.4,23.876,2.032,1.2],[27.94,23.876,2.032,1.2],[30.48,23.876,2.032,1.2],[33.02,23.876,2.032,1.2],[35.56,23.876,2.032,1.2],[38.1,23.876,2.032,1.2],[40.64,23.876,2.032,1.2],[43.18,23.876,2.032,1.2],[45.72,23.876,2.032,1.2],[48.26,23.876,2.032,1.2],[50.8,23.876,2.032,1.2],[53.34,23.876,2.032,1.2],[55.88,23.876,2.032,1.2],[58.42,23.876,2.032,1.2],[60.96,23.876,2.032,1.2],[63.5,23.876,2.032,1.2],[66.04,23.876,2.032,1.2],[68.58,23.876,2.032,1.2],[71.12,23.876,2.032,1.2],[73.66,23.876,2.032,1.2],[76.2,23.876,2.032,1.2],[2.54,26.416,2.032,1.2],[5.08,26.416,2.032,1.2],[7.62,26.416,2.032,1.2],[10.16,26.416,2.032,1.2],[12.7,26.416,2.032,1.2],[15.24,26.416,2.032,1.2],[17.78,26.416,2.032,1.2],[20.32,26.416,2.032,1.2],[22.86,26.416,2.032,1.2],[25.4,26.416,2.032,1.2],[27.94,26.416,2.032,1.2],[30.48,26.416,2.032,1.2],[33.02,26.416,2.032,1.2],[35.56,26.416,2.032,1.2],[38.1,26.416,2.032,1.2],[40.64,26.416,2.032,1.2],[43.18,26.416,2.032,1.2],[45.72,26.416,2.032,1.2],[48.26,26.416,2.032,1.2],[50.8,26.416,2.032,1.2],[53.34,26.416,2.032,1.2],[55.88,26.416,2.032,1.2],[58.42,26.416,2.032,1.2],[60.96,26.416,2.032,1.2],[63.5,26.416,2.032,1.2],[66.04,26.416,2.032,1.2],[68.58,26.416,2.032,1.2],[71.12,26.416,2.032,1.2],[73.66,26.416,2.032,1.2],[76.2,26.416,2.032,1.2],[2.54,28.986,2.032,1.2],[5.08,28.986,2.032,1.2],[7.62,28.986,2.032,1.2],[10.16,28.986,2.032,1.2],[12.7,28.986,2.032,1.2],[15.24,28.986,2.032,1.2],[17.78,28.986,2.032,1.2],[20.32,28.986,2.032,1.2],[22.86,28.986,2.032,1.2],[25.4,28.986,2.032,1.2],[27.94,28.986,2.032,1.2],[30.48,28.986,2.032,1.2],[33.02,28.986,2.032,1.2],[35.56,28.986,2.032,1.2],[38.1,28.986,2.032,1.2],[40.64,28.986,2.032,1.2],[43.18,28.986,2.032,1.2],[45.72,28.986,2.032,1.2],[48.26,28.986,2.032,1.2],[50.8,28.986,2.032,1.2],[53.34,28.986,2.032,1.2],[55.88,28.986,2.032,1.2],[58.42,28.986,2.032,1.2],[60.96,28.986,2.032,1.2],[63.5,28.986,2.032,1.2],[66.04,28.986,2.032,1.2],[68.58,28.986,2.032,1.2],[71.12,28.986,2.032,1.2],[73.66,28.986,2.032,1.2],[76.2,28.986,2.032,1.2],[2.54,31.526,2.032,1.2],[5.08,31.526,2.032,1.2],[7.62,31.526,2.032,1.2],[10.16,31.526,2.032,1.2],[12.7,31.526,2.032,1.2],[15.24,31.526,2.032,1.2],[17.78,31.526,2.032,1.2],[20.32,31.526,2.032,1.2],[22.86,31.526,2.032,1.2],[25.4,31.526,2.032,1.2],[27.94,31.526,2.032,1.2],[30.48,31.526,2.032,1.2],[33.02,31.526,2.032,1.2],[35.56,31.526,2.032,1.2],[38.1,31.526,2.032,1.2],[40.64,31.526,2.032,1.2],[43.18,31.526,2.032,1.2],[45.72,31.526,2.032,1.2],[48.26,31.526,2.032,1.2],[50.8,31.526,2.032,1.2],[53.34,31.526,2.032,1.2],[55.88,31.526,2.032,1.2],[58.42,31.526,2.032,1.2],[60.96,31.526,2.032,1.2],[63.5,31.526,2.032,1.2],[66.04,31.526,2.032,1.2],[68.58,31.526,2.032,1.2],[71.12,31.526,2.032,1.2],[73.66,31.526,2.032,1.2],[76.2,31.526,2.032,1.2],[2.54,34.066,2.032,1.2],[5.08,34.066,2.032,1.2],[7.62,34.066,2.032,1.2],[10.16,34.066,2.032,1.2],[12.7,34.066,2.032,1.2],[15.24,34.066,2.032,1.2],[17.78,34.066,2.032,1.2],[20.32,34.066,2.032,1.2],[22.86,34.066,2.032,1.2],[25.4,34.066,2.032,1.2],[27.94,34.066,2.032,1.2],[30.48,34.066,2.032,1.2],[33.02,34.066,2.032,1.2],[35.56,34.066,2.032,1.2],[38.1,34.066,2.032,1.2],[40.64,34.066,2.032,1.2],[43.18,34.066,2.032,1.2],[45.72,34.066,2.032,1.2],[48.26,34.066,2.032,1.2],[50.8,34.066,2.032,1.2],[53.34,34.066,2.032,1.2],[55.88,34.066,2.032,1.2],[58.42,34.066,2.032,1.2],[60.96,34.066,2.032,1.2],[63.5,34.066,2.032,1.2],[66.04,34.066,2.032,1.2],[68.58,34.066,2.032,1.2],[71.12,34.066,2.032,1.2],[73.66,34.066,2.032,1.2],[76.2,34.066,2.032,1.2],[2.54,36.606,2.032,1.2],[5.08,36.606,2.032,1.2],[7.62,36.606,2.032,1.2],[10.16,36.606,2.032,1.2],[12.7,36.606,2.032,1.2],[15.24,36.606,2.032,1.2],[17.78,36.606,2.032,1.2],[20.32,36.606,2.032,1.2],[22.86,36.606,2.032,1.2],[25.4,36.606,2.032,1.2],[27.94,36.606,2.032,1.2],[30.48,36.606,2.032,1.2],[33.02,36.606,2.032,1.2],[35.56,36.606,2.032,1.2],[38.1,36.606,2.032,1.2],[40.64,36.606,2.032,1.2],[43.18,36.606,2.032,1.2],[45.72,36.606,2.032,1.2],[48.26,36.606,2.032,1.2],[50.8,36.606,2.032,1.2],[53.34,36.606,2.032,1.2],[55.88,36.606,2.032,1.2],[58.42,36.606,2.032,1.2],[60.96,36.606,2.032,1.2],[63.5,36.606,2.032,1.2],[66.04,36.606,2.032,1.2],[68.58,36.606,2.032,1.2],[71.12,36.606,2.032,1.2],[73.66,36.606,2.032,1.2],[76.2,36.606,2.032,1.2],[2.54,39.146,2.032,1.2],[5.08,39.146,2.032,1.2],[7.62,39.146,2.032,1.2],[10.16,39.146,2.032,1.2],[12.7,39.146,2.032,1.2],[15.24,39.146,2.032,1.2],[17.78,39.146,2.032,1.2],[20.32,39.146,2.032,1.2],[22.86,39.146,2.032,1.2],[25.4,39.146,2.032,1.2],[27.94,39.146,2.032,1.2],[30.48,39.146,2.032,1.2],[33.02,39.146,2.032,1.2],[35.56,39.146,2.032,1.2],[38.1,39.146,2.032,1.2],[40.64,39.146,2.032,1.2],[43.18,39.146,2.032,1.2],[45.72,39.146,2.032,1.2],[48.26,39.146,2.032,1.2],[50.8,39.146,2.032,1.2],[53.34,39.146,2.032,1.2],[55.88,39.146,2.032,1.2],[58.42,39.146,2.032,1.2],[60.96,39.146,2.032,1.2],[63.5,39.146,2.032,1.2],[66.04,39.146,2.032,1.2],[68.58,39.146,2.032,1.2],[71.12,39.146,2.032,1.2],[73.66,39.146,2.032,1.2],[76.2,39.146,2.032,1.2],[2.54,41.686,2.032,1.2],[5.08,41.686,2.032,1.2],[7.62,41.686,2.032,1.2],[10.16,41.686,2.032,1.2],[12.7,41.686,2.032,1.2],[15.24,41.686,2.032,1.2],[17.78,41.686,2.032,1.2],[20.32,41.686,2.032,1.2],[22.86,41.686,2.032,1.2],[25.4,41.686,2.032,1.2],[27.94,41.686,2.032,1.2],[30.48,41.686,2.032,1.2],[33.02,41.686,2.032,1.2],[35.56,41.686,2.032,1.2],[38.1,41.686,2.032,1.2],[40.64,41.686,2.032,1.2],[43.18,41.686,2.032,1.2],[45.72,41.686,2.032,1.2],[48.26,41.686,2.032,1.2],[50.8,41.686,2.032,1.2],[53.34,41.686,2.032,1.2],[55.88,41.686,2.032,1.2],[58.42,41.686,2.032,1.2],[60.96,41.686,2.032,1.2],[63.5,41.686,2.032,1.2],[66.04,41.686,2.032,1.2],[68.58,41.686,2.032,1.2],[71.12,41.686,2.032,1.2],[73.66,41.686,2.032,1.2],[76.2,41.686,2.032,1.2],[2.54,46.736,2.032,1.2],[76.201,46.736,2.032,1.2],[2.54,49.276,2.032,1.2],[5.08,49.276,2.032,1.2],[7.62,49.276,2.032,1.2],[10.16,49.276,2.032,1.2],[12.7,49.276,2.032,1.2],[15.24,49.276,2.032,1.2],[17.78,49.276,2.032,1.2],[20.32,49.276,2.032,1.2],[22.86,49.276,2.032,1.2],[25.4,49.276,2.032,1.2],[27.94,49.276,2.032,1.2],[30.48,49.276,2.032,1.2],[33.02,49.276,2.032,1.2],[35.56,49.276,2.032,1.2],[38.1,49.276,2.032,1.2],[40.64,49.276,2.032,1.2],[43.18,49.276,2.032,1.2],[45.72,49.276,2.032,1.2],[48.26,49.276,2.032,1.2],[50.8,49.276,2.032,1.2],[53.34,49.276,2.032,1.2],[55.88,49.276,2.032,1.2],[58.42,49.276,2.032,1.2],[60.96,49.276,2.032,1.2],[63.5,49.276,2.032,1.2],[66.04,49.276,2.032,1.2],[68.58,49.276,2.032,1.2],[71.12,49.276,2.032,1.2],[73.66,49.276,2.032,1.2],[76.2,49.276,2.032,1.2],[2.54,51.816,2.032,1.2],[5.08,51.816,2.032,1.2],[7.62,51.816,2.032,1.2],[10.16,51.816,2.032,1.2],[12.7,51.816,2.032,1.2],[15.24,51.816,2.032,1.2],[17.78,51.816,2.032,1.2],[20.32,51.816,2.032,1.2],[22.86,51.816,2.032,1.2],[25.4,51.816,2.032,1.2],[27.94,51.816,2.032,1.2],[30.48,51.816,2.032,1.2],[33.02,51.816,2.032,1.2],[35.56,51.816,2.032,1.2],[38.1,51.816,2.032,1.2],[40.64,51.816,2.032,1.2],[43.18,51.816,2.032,1.2],[45.72,51.816,2.032,1.2],[48.26,51.816,2.032,1.2],[50.8,51.816,2.032,1.2],[53.34,51.816,2.032,1.2],[55.88,51.816,2.032,1.2],[58.42,51.816,2.032,1.2],[60.96,51.816,2.032,1.2],[63.5,51.816,2.032,1.2],[66.04,51.816,2.032,1.2],[68.58,51.816,2.032,1.2],[71.12,51.816,2.032,1.2],[73.66,51.816,2.032,1.2],[76.2,51.816,2.032,1.2]]}};
 </script>
 <script>
 // Jumperless V6 outline tool - part catalogue.
@@ -9014,11 +9105,83 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
   };
 
   // What the "port" selector in the viewer swaps between.
+
+  // ---- the candidate displays from Kevin's library (V6pile/display/Jumperless_V6_Displays/src/displays_data.py, read from the
+  //      vendor drawings there). Each is its module outline and thickness, plus the cover glass where the drawing has one.
+  //      [key, label, module w, h, thickness, corner r, active area w, h, AA top margin, cover glass [w, h, t, y offset] or 0]
+  //      The FPC tails are not drawn. The two long IPS bars (7.84 and 10.11 inch, 206 and 266 mm) are left out: longer than the unit.
+  var DISPLAY_LIB = [
+    ['oled147b2b', '1.47" AMOLED 194x368, QSPI, B2B (library drawing)', 19.36, 36.17, 0.96, 3.5, 17.46, 33.12, 0.75, [22.0, 40.66, 2.09, 0.275]],
+    ['tft147t16', '1.47" TFT 172x320 + touch, 16P (library drawing)', 19.75, 36.86, 1.56, 2.5, 17.65, 32.83, 1.1, [23.9, 39.9, 1.27, 0.12]],
+    ['ips165bar', '1.65" IPS bar 142x428, 13P (ER-TFT1.65-2)', 16.3, 44.96, 2.23, 0, 13.16, 39.68, 1.5, 0],
+    ['tft169t', '1.69" TFT 240x280 + touch, B2B', 30.07, 37.43, 2.1, 2.5, 27.97, 32.63, 0.8, [33.9, 42.7, 1.1, 0.505]],
+    ['tft190', '1.9" TFT 170x320, 30P', 25.8, 49.72, 2.03, 0, 22.695, 42.72, 1.5, 0],
+    ['tft201', '2.01" TFT 240x296, 8P', 34.04, 43.32, 1.56, 9.0, 32.04, 39.51, 1.1, 0],
+    ['tft213r', '2.13" reflective TFT 122x250, 24P', 27.07, 56.2, 1.1, 0, 23.67, 48.5, 1.7, 0],
+    ['tft220bar', '2.2" bar TFT 116x420, 8P (LTN220TF-PF09)', 17.6, 60.11, 1.62, 0, 14.964, 54.36, 1.5, 0],
+    ['ips220m', '2.2" IPS 200x480, 20P MIPI', 23.72, 57.79, 2.0, 0, 21.72, 52.42, 1.4, 0],
+    ['ips223m', '2.23" IPS 200x480, 24P MIPI', 23.82, 57.39, 1.56, 0, 21.72, 52.42, 1.2, 0],
+    ['ips223t', '2.23" IPS 200x480 + touch glass, 24P MIPI', 23.82, 57.39, 1.56, 0, 21.72, 52.42, 1.2, [28.82, 62.39, 1.35, 0.5]],
+    ['tft225bar', '2.25" bar TFT 76x284, 8P', 17.9, 62.5, 2.36, 0, 14.797, 55.295, 1.61, 0],
+    ['ips279bar', '2.79" IPS bar 142x428, 12P (ER-TFT2.79-2)', 24.38, 69.43, 2.1, 0, 21.2787, 64.1358, 1.4, 0],
+    ['tft290r', '2.9" reflective TFT 210x480, 24P', 31.1, 70.95, 0.8, 0, 29.1, 66.85, 1.0, 0],
+    ['tft300', '3.0" TFT 268x800, 40P RGB (ST7701S)', 26.96, 80.08, 1.76, 0, 24.12, 72.0, 1.38, 0]
+  ];
+  catalog.display_amoled147.group = 'display'; catalog.display_amoled147.screen = { w: 17.46, h: 33.12, cy: -0.775 };
+  catalog.display_tft147.group = 'display'; catalog.display_tft147.screen = { w: 17.65, h: 32.83, cy: -0.915 };
+  DISPLAY_LIB.forEach(function (d) {
+    var w = d[2], h = d[3], t = d[4], cg = d[9], bodies = [body(R(-w / 2, -h / 2, w / 2, h / 2), 0, t, { name: 'module' })];
+    if (cg) bodies.push(body(R(-cg[0] / 2, -cg[1] / 2 - cg[3], cg[0] / 2, cg[1] / 2 - cg[3]), t, t + cg[2], { name: 'cover glass' }));
+    catalog['display_' + d[0]] = { label: d[1], group: 'display', color: 0x0a0a0c, height: +(t + (cg ? cg[2] : 0)).toFixed(2), clearance: 0.2, bodies: bodies,
+      screen: { w: d[6], h: d[7], cy: -(h / 2 - d[8] - d[7] / 2) },
+      source: 'displays_data.py (vendor drawing): module ' + w + ' x ' + h + ' x ' + t + (cg ? ', cover glass ' + cg[0] + ' x ' + cg[1] + ' x ' + cg[2] : '') + '. FPC tail not drawn.' };
+  });
+
+  // ---- expansion-port families from the port survey (V6_expansion_port_and_current_sense.md, section 5)
+  catalog.minipcie = {
+    label: 'mini PCIe socket, 52 pads (SOFNG PCIE-52P52H class)', group: 'port', color: 0x1c1c1c, height: 5.2, clearance: 0.3,
+    bodies: [body(R(-15.75, -6.0, 15.75, 0), 0, 5.2, { name: 'socket' })], ghosts: [body(R(-15, -32.5, 15, -2.5), 2.2, 3.2, { name: '30 x 30 half card' })], mouth: [0, -1],
+    source: 'Port survey: 31.5 x 6 mm host footprint + 2 latch posts, 1.0 mm card 30 wide. ASSUMPTION: 5.2 high, read off the part number (52H), no drawing opened; latch posts not drawn.' };
+  catalog.sodimm_ddr4 = {
+    label: 'DDR4 SO-DIMM socket, 260 pads, 4.0 high (Lotes ADDR0205)', group: 'port', color: 0x1c1c1c, height: 4.0, clearance: 0.3,
+    bodies: [body(R(-36.5, -23.5, 36.5, 0), 0, 4.0, { name: 'socket + latches' })], ghosts: [body(R(-34.8, -30, 34.8, -1), 1.4, 2.6, { name: '69.6 x 30 module' })], mouth: [0, -1],
+    source: 'Port survey: 73 x 23.5 mm with latches, 4.0 high, 1.2 mm card 69.6 wide. The envelope is the whole 73 x 23.5 block; the real part is a socket bar and two latch arms.' };
+
+  // ---- chips and other tall or large parts, to try where they fit. Bodies are the package outlines over the leads.
+  function chip(label, w, d, h, src) { return { label: label, group: 'chip', on: 'base', color: 0x18181b, height: h, clearance: 0.25, cut: true, bodies: [body(R(-w / 2, -d / 2, w / 2, d / 2), 0, h, { name: 'package' })], source: src }; }
+  catalog.ic_ch446q = chip('CH446Q crossbar, LQFP-44 (12 x 12 over leads)', 12.0, 12.0, 1.6, 'LQFP-44 10 x 10 body, 12 x 12 over the leads, 1.6 max high (JEDEC MS-026). V6 has 12 + 5 lane + 1 port. Courtyard in V6_area.json: 13.4 x 13.4.');
+  catalog.ic_ch32h417 = chip('CH32H417QEU6, QFN-128 12.3 x 12.3', 12.3, 12.3, 0.9, 'Footprint QFN-128-1EP_12.3x12.3mm_P0.35mm (V6_area.json). ASSUMPTION: 0.9 high, typical for the package; not from the datasheet.');
+  catalog.ic_rp2350b = chip('RP2350B, QFN-80 10 x 10', 10.0, 10.0, 0.9, 'Footprint RP2350-QFN-80-1EP_10x10 (V6_area.json). ASSUMPTION: 0.9 high.');
+  catalog.ic_tssop16 = chip('74HC595 / 74HC238, TSSOP-16 (6.4 over leads)', 5.0, 6.4, 1.2, 'TSSOP-16 4.4 x 5 body, 6.4 over the leads, 1.2 max high. V6 has 25 x 74HC595 and 4 x 74HC238.');
+  catalog.ind_6x6 = chip('Inductor 6.3 x 6.3, 3 high (TPS65131 rails)', 6.3, 6.3, 3.0, 'Footprint L_6.3x6.3_H3 (V6_area.json, 2 fitted). The tallest part of the power block.');
+  catalog.usb_fpc20 = chip('FPC connector 20P (FC05-S20FCT class)', 15.4, 4.7, 2.0, 'Footprint courtyard 15.4 x 4.7 (V6_area.json). ASSUMPTION: 2.0 high.');
+  // a screw through the whole stack with a spacer in every gap: what could hold the boards apart
+  catalog.standoff_m2 = {
+    label: 'M2 screw + spacers through the stack', group: 'mech', on: 'base', color: 0xb9bcc2, height: 0, clearance: 0.1,
+    dims: { screw: 2.0, spacer: 3.5, head: 3.8 }, dimLabels: { screw: 'Screw diameter', spacer: 'Spacer diameter', head: 'Head diameter' },
+    make: function (d, ctx) {
+      var L = (ctx && ctx.layers) || [{ z0: -1.6, z1: 0 }], zb = L[0].z0, zt = L[L.length - 1].z1, b = [body(C(0, 0, d.screw / 2), zb, zt, { name: 'screw', clearance: 0.1 })];
+      for (var i = 1; i < L.length; i++) if (L[i].z0 - L[i - 1].z1 > 0.05) b.push(body(C(0, 0, d.spacer / 2), L[i - 1].z1, L[i].z0, { name: 'spacer', cut: false }));
+      b.push(body(C(0, 0, d.head / 2), zt, zt + 1.3, { name: 'head', cut: false }));
+      return { bodies: b, height: zt + 1.3 };
+    },
+    source: 'ASSUMPTION: a plain M2 pan-head screw (head 3.8 x 1.3) with a 3.5 mm round spacer in each gap. What holds the boards apart is not decided.' };
+
+  // ---- edge couplers between two units (claude_V6_edge_coupler_connector_design.md and ..._v2_kiss_slot.md)
+  //      gap = distance between the two boards' shoulders when mated; across = the housing in that direction; thick = across the board faces
+  var couplers = {
+    wingtat: { label: 'WingTAT HEE70LP03BK (today)', len: 50.55, across: 18.3, thick: 8.88, gap: 6.4, tongue: 7.62, tip_gap: null, source: 'Housing 50.55 x 8.88 x 14.0 + 4.3 of tails = 18.3 end to end; boards about 6.4 apart; 45.47 x 7.62 tongue.' },
+    kiss: { label: 'Kiss slot V2 (custom, 9.2)', len: 50.55, across: 9.2, thick: 5.0, gap: 9.2, tongue: 4.5, tip_gap: 0.2, source: 'Housing 50.55 x 5.0 x 9.2, one through slot; 4.5 mm tongues meet in the middle about 0.2 apart; shoulders seat on the faces.' },
+    kiss_short: { label: 'Kiss slot V3 short (7.8)', len: 50.55, across: 7.8, thick: 5.0, gap: 7.8, tongue: 3.8, tip_gap: 0.2, source: 'Housing 50.55 x 5.0 x 7.8, 3.8 mm tongues; needs tight tolerances (card +-0.10, gap +-0.03).' }
+  };
+
   var portTypes = {
     none: { label: 'none', parts: [] },
     m2: { label: 'M.2 socket', parts: ['m2_socket'] },
     pcie: { label: 'PCIe x1 right-angle', parts: ['pcie_x1_ra'] },
-    sfp2: { label: '2 x SFP cage', parts: ['sfp_cage', 'sfp_cage'] }
+    sfp2: { label: '2 x SFP cage', parts: ['sfp_cage', 'sfp_cage'] },
+    minipcie: { label: 'mini PCIe socket', parts: ['minipcie'] },
+    sodimm: { label: 'DDR4 SO-DIMM socket', parts: ['sodimm_ddr4'] }
   };
 
   // The "Controls" selectors in the viewer: one slot each, swapped in place. at = [x, y, rot] for a part added fresh.
@@ -9034,16 +9197,16 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
   ];
 
   // a user part -> its catalogue entry, with the bodies of a parametric part made from the part's own numbers
-  function get(u) {
+  function get(u, ctx) {
     var c = catalog[u.type];
     if (!c) return null;
     if (!c.make) return c;
     var d = {}, k; for (k in c.dims) d[k] = u.dims && u.dims[k] != null ? +u.dims[k] : c.dims[k];
-    var m = c.make(d), o = {}; for (k in c) o[k] = c[k]; for (k in m) o[k] = m[k];
+    var m = c.make(d, ctx), o = {}; for (k in c) o[k] = c[k]; for (k in m) o[k] = m[k];
     return o;
   }
 
-  return { parts: catalog, portTypes: portTypes, controls: controls, get: get };
+  return { parts: catalog, portTypes: portTypes, controls: controls, couplers: couplers, displays: Object.keys(catalog).filter(function (k) { return catalog[k].group === 'display'; }), get: get };
 });
 
 </script>
@@ -9213,8 +9376,9 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     });
     return { pts: pts, spans: spans };
   }
+  var MAX_DEAD = 3;                 // the left strip is 0, 1, 2 or 3 pitches wide (0 / 2.54 / 5.08 / 7.62)
   function legacyOutline(P) {                         // parameter files from rev A1: a band height and two plain chamfers
-    var f = P.frame, g = P.grid, xl = -Math.max(0, Math.min(2, Math.round(g.dead_rows_left))) * g.pitch, xr = (g.cols + 1) * g.pitch, yt = -(f.band_h || 24), r = f.corner_r || 0;
+    var f = P.frame, g = P.grid, xl = -Math.max(0, Math.min(MAX_DEAD, Math.round(g.dead_rows_left))) * g.pitch, xr = (g.cols + 1) * g.pitch, yt = -(f.band_h || 24), r = f.corner_r || 0;
     var v = [{ x: xl, y: yt, c: [f.chamfer_tl || 0, f.chamfer_tl || 0], r: r }, { x: xr, y: yt, c: [f.chamfer_tr || 0, f.chamfer_tr || 0], r: r }, { x: xr, y: 0, r: r }, { x: 0, y: 0 }];
     if (xl < 0) v.push({ x: 0, y: P.wig.height, r: r }, { x: xl, y: P.wig.height, r: r });
     return v;
@@ -9225,7 +9389,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     ref = ref || {};
     var g = P.grid, w = P.wig, f = P.frame;
     var pitch = g.pitch;
-    var dead = Math.max(0, Math.min(2, Math.round(g.dead_rows_left)));
+    var dead = Math.max(0, Math.min(MAX_DEAD, Math.round(g.dead_rows_left)));
     var xl = -dead * pitch, xr = (g.cols + 1) * pitch, unitPitch = xr - xl;
     var removable = w.mode === 'removable';
     var notes = [];
@@ -9240,7 +9404,12 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     });
     var top = layers[layers.length - 1];
     var zTop = top.z1, zBot = layers[0].z0;
-    var bbTop = w.shell.t + (w.face_pcb_t || 0);
+    // The face board on the shell. wig.face = { on, t, sits: 'on' | 'inset', header_strip }; a rev A3 file's face_pcb_t still works.
+    // 'on': it lies on the shell and adds its thickness. 'inset': the shell is that much shorter and the top stays at shell.t.
+    var faceP = w.face && w.face.on ? w.face : (w.face_pcb_t > 0 ? { on: true, t: w.face_pcb_t, sits: 'on', plain: true } : null);
+    var faceT = faceP ? Math.max(0.2, +faceP.t || 0.71) : 0, faceInset = !!(faceP && faceP.sits === 'inset');
+    var shellTop = faceInset ? Math.max(1, w.shell.t - faceT) : w.shell.t;
+    var bbTop = shellTop + faceT;
     function layerById(id) { for (var i = 0; i < layers.length; i++) if (layers[i].id === id) return layers[i]; return null; }
 
     // --- outlines ---
@@ -9259,6 +9428,16 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     if (fill > 0) fullOutline = offset(offset(fullOutline, fill), -fill);
     // slots of the wig's own edge that the band closes off (the two link notches beside the tongue) are not holes in one board
     fullOutline = fullOutline.filter(function (pth) { var a = ClipperLib.Clipper.Area(pth) / (SC * SC); return !(a < 0 && a > -6); });
+
+    // --- magnetometers: the WigLEDmag's own (9 TMAG5273 + 8 MMC5603), or a planned MMC5603 grid spread evenly over the
+    //     76 x 45 mm hole field (claude_WigLEDmag_I2C_addressing_and_magnetometers.md: 3 x 6 = 18 parts, or 4 x 8 = 32) ---
+    var sensLayout = (P.show && P.show.sensor_layout) || 'wigledmag', sensorSet = { layout: sensLayout, mmc: ref.mmc || [], tmag: ref.tmag || [] };
+    var grids = { plan18: [3, 6], plan32: [4, 8] };
+    if (grids[sensLayout]) {
+      var gr0 = grids[sensLayout], fw = 76, fh = 45, fx0 = w.width / 2 - fw / 2, fy0 = (ref.rows && ref.rows.length ? (ref.rows[0] + ref.rows[ref.rows.length - 1]) / 2 : w.height / 2) - fh / 2, planned = [];
+      for (var gy = 0; gy < gr0[0]; gy++) for (var gx = 0; gx < gr0[1]; gx++) planned.push({ ref: 'M' + (planned.length + 1), x: round(fx0 + (gx + 0.5) * fw / gr0[1], 2), y: round(fy0 + (gy + 0.5) * fh / gr0[0], 2), side: 'B' });
+      sensorSet = { layout: sensLayout, mmc: planned, tmag: [], pitch: [round(fw / gr0[1], 2), round(fh / gr0[0], 2)] };
+    }
 
     // --- parts ---
     var parts = [];
@@ -9299,10 +9478,20 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     var shellShape = expolys(inter(region([rectPts(sx0, sy0, sx0 + w.shell.w, sy0 + w.shell.h)]), wigRegion));
     var shellPts = shellShape.length ? shellShape[0].outer : rectPts(sx0, sy0, sx0 + w.shell.w, sy0 + w.shell.h);
     addPart({ id: 'shell', type: 'bb_shell', label: 'Breadboard shell', x: 0, y: 0, rot: 0, plane: { z: 0, dir: 1 }, system: true, movable: false, color: 0x161616,
-      clearance: w.fit_gap, bodies: [{ shape: { poly: shellPts }, z0: 0, z1: w.shell.t, name: 'shell' }],
+      clearance: w.fit_gap, bodies: [{ shape: { poly: shellPts }, z0: 0, z1: shellTop, name: 'shell' }],
       noClash: ['face', 'wig_pcb', 'wig_hdr'], source: 'claude_V6_breadboard_shell_DFM.md: 78.7 x 54.6 envelope, 6.75 tall (redesign target; the current print is 7.1), rail blocks 0.6 past the body.' });
-    if (w.face_pcb_t > 0) addPart({ id: 'face', type: 'bb_face', label: 'Breadboard face PCB', x: 0, y: 0, rot: 0, plane: { z: w.shell.t, dir: 1 }, system: true, movable: false, color: 0xc9a227,
-      clearance: w.fit_gap, bodies: [{ shape: { rect: [0, 0, w.width, w.height] }, z0: 0, z1: w.face_pcb_t, name: 'face PCB' }], noClash: ['shell'] });
+    var facePts = null;
+    if (faceP) {
+      // Kevin's Wiiig face board (ref.face, read from wiigtop.3mf): the real outline, which runs 3.43 mm past the body's top
+      // edge to carry the 2 x 35 header holes. header_strip: false trims it back to the body.
+      var fr = ref.face && !faceP.plain ? ref.face : null;
+      var faceReg = region([fr ? fr.outline : rectPts(0, 0, w.width, w.height)]);
+      if (fr && faceP.header_strip === false) faceReg = inter(faceReg, region([rectPts(-1, 0, w.width + 1, w.height + 1)]));
+      var fe = expolys(faceReg); facePts = fe.length ? fe[0].outer : rectPts(0, 0, w.width, w.height);
+      addPart({ id: 'face', type: 'bb_face', label: fr ? 'Wiiig face board' : 'Breadboard face PCB', x: 0, y: 0, rot: 0, plane: { z: shellTop, dir: 1 }, system: true, movable: false, color: 0x101012,
+        clearance: w.fit_gap, bodies: [{ shape: { poly: facePts }, z0: 0, z1: faceT, name: 'face board' }], noClash: ['shell', 'wig_pcb', 'wig_hdr', 'wig_skt'],
+        source: fr ? fr.source + ': ' + fr.w + ' x ' + fr.h + ' x ' + fr.t + ', ' + fr.holes.length + ' holes.' : 'a plain rectangle (no face board data)' });
+    }
 
     // removable wig: its own PCB (real outline) and the right-angle 1.27 mm header pair. Both halves sit on the top
     // faces, so the mated pair is inside the sandwich under the upper boards.
@@ -9338,7 +9527,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
 
     // user parts
     (P.parts || []).forEach(function (u) {
-      var cat = Catalog.get ? Catalog.get(u) : Catalog.parts[u.type];
+      var cat = Catalog.get ? Catalog.get(u, { zBot: zBot, zTop: zTop, layers: layers }) : Catalog.parts[u.type];
       if (!cat) { notes.push('unknown part type ' + u.type + ' (' + u.id + ')'); return; }
       var pl = plane(u.mount, cat.height);
       addPart({ id: u.id, type: u.type, label: u.name || cat.label, x: u.x, y: u.y, rot: u.rot || 0, plane: pl, mountLayer: pl.layer, color: cat.color, model: cat.model, bodies: cat.bodies, ghosts: cat.ghosts,
@@ -9394,7 +9583,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     var checks = { grid: {}, flush: {}, clashes: [], neighbours: [], faces: [], probe: null, notes: notes };
     checks.grid = { pitch: round(unitPitch), dead_rows: dead + 1, cols: g.cols, left_plane: round(xl), right_plane: round(xr), strip_w: round(-xl), on_grid: Math.abs(unitPitch / pitch - Math.round(unitPitch / pitch)) < 1e-6,
       dead_x: (function () { var a = []; for (var j = 0; j <= dead; j++) a.push(round(-j * pitch)); return a; })() };
-    checks.flush = { frame_top: round(zTop), bb_top: round(bbTop), delta: round(zTop - bbTop), total: round(zTop - zBot), stack_above_base: round(zTop),
+    checks.flush = { frame_top: round(zTop), bb_top: round(bbTop), shell_top: round(shellTop), face_t: round(faceT), delta: round(zTop - bbTop), delta_shell: round(zTop - shellTop), total: round(zTop - zBot), stack_above_base: round(zTop),
       gaps: layers.slice(1).map(function (L) { return { below: L.id, gap: round(L.gap) }; }) };
 
     parts.forEach(function (p) {
@@ -9430,6 +9619,15 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     var clearAt = null;
     for (var kx = 0; kx <= 8 && clearAt == null; kx++) if (area(inter(unitPlan, offset(shiftX(unitPlan, unitPitch + kx * pitch), -0.02))) <= 0.02) clearAt = kx;
     checks.grid.units_clear_at = clearAt == null ? null : { pitch: round(unitPitch + clearAt * pitch), dead_rows: dead + 1 + clearAt, extra_rows: clearAt };
+
+    // an edge coupler between this unit and the next: what it needs between the two boards' shoulders, against the rows on hand
+    var cpl = Catalog.couplers && g.coupler && Catalog.couplers[g.coupler];
+    if (cpl) {
+      var have = dead * pitch, needRows = Math.ceil((cpl.gap - 1e-6) / pitch);
+      checks.grid.coupler = { key: g.coupler, label: cpl.label, gap: cpl.gap, across: cpl.across, len: cpl.len, thick: cpl.thick, tongue: cpl.tongue, tip_gap: cpl.tip_gap, have: round(have), fits: have + 1e-6 >= cpl.gap,
+        spare: round(have - cpl.gap, 2), rows_needed: needRows, strip_needed: round(needRows * pitch), source: cpl.source,
+        x0: round(xr), x1: round(xr + have), yc: round(w.height / 2, 2), zc: round(-layers[0].t / 2, 2) };
+    }
 
     // parts that reach past the edge of the board they sit on (wanted for an edge wheel or a connector mouth; worth seeing either way)
     checks.overhang = [];
@@ -9518,8 +9716,8 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
       var innerX = sx0 - w.fit_gap;      // where the upper boards' strip ends against the shell
       var wl = (probe.x - probe.channel_w / 2) - xl, wr = innerX - (probe.x + probe.channel_w / 2);
       var sens = [];
-      (ref.mmc || []).forEach(function (s) { sens.push({ kind: 'MMC5603', ref: s.ref, x: s.x, y: s.y, z: s.side === 'F' ? 0 : -w.pcb_t, range: 3 }); });
-      (ref.tmag || []).forEach(function (s) { sens.push({ kind: 'TMAG5273', ref: s.ref, x: s.x, y: s.y, z: s.side === 'F' ? 0 : -w.pcb_t, range: 40 }); });
+      sensorSet.mmc.forEach(function (s) { sens.push({ kind: 'MMC5603', ref: s.ref, x: s.x, y: s.y, z: s.side === 'F' ? 0 : -w.pcb_t, range: 3 }); });
+      sensorSet.tmag.forEach(function (s) { sens.push({ kind: 'TMAG5273', ref: s.ref, x: s.x, y: s.y, z: s.side === 'F' ? 0 : -w.pcb_t, range: 40 }); });
       var m = probe.magnet, mom = 115.4 * Math.PI * Math.pow(m.dia / 2, 2) * m.len;     // mT*mm^3, Br 1.45 T (N52), the convention in wireless-probe-sensing.md
       var near = null;
       sens.forEach(function (s) {
@@ -9542,12 +9740,12 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     return {
       params: P, removable: removable,
       planes: { xl: round(xl), xr: round(xr), yt: yt, yb: yb, pitch: round(unitPitch), dead: dead, x0: round(fb.x0), x1: round(Math.max(fb.x1, xr)) },
-      z: { top: round(zTop), bottom: round(zBot), bbTop: round(bbTop) },
+      z: { top: round(zTop), bottom: round(zBot), bbTop: round(bbTop), shellTop: round(shellTop) },
       outline: { verts: verts.map(function (v, i) { return { x: v.x, y: v.y, from: built.spans[i].from, count: built.spans[i].count }; }), pts: built.pts },
       layers: layers, parts: parts, probe: probe, checks: checks,
-      wig: { x0: 0, y0: 0, w: w.width, h: w.height, pcb_t: w.pcb_t, shell: { x0: sx0, y0: sy0, w: w.shell.w, h: w.shell.h, t: w.shell.t }, face_t: w.face_pcb_t || 0,
+      wig: { x0: 0, y0: 0, w: w.width, h: w.height, pcb_t: w.pcb_t, shell: { x0: sx0, y0: sy0, w: w.shell.w, h: w.shell.h, t: round(shellTop) }, face_t: faceT, face: faceP ? { t: faceT, z0: round(shellTop), z1: round(bbTop), inset: faceInset, real: !!(ref.face && !faceP.plain), pts: facePts, y0: round(bbox(region([facePts])).y0), holes: ref.face && !faceP.plain ? ref.face.holes.filter(function (q) { return faceP.header_strip !== false || q[1] >= 0; }) : null } : null,
         outline: wigPts, rows: rows, cols: cols,
-        sensors: { mmc: ref.mmc || [], tmag: ref.tmag || [] } }
+        sensors: sensorSet }
     };
   }
 
@@ -9691,7 +9889,9 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     });
     if (c.grid.units_clear_at && c.grid.units_clear_at.extra_rows > 0) o.push('       two whole units clear each other at pitch ' + c.grid.units_clear_at.pitch + ' (' + c.grid.units_clear_at.dead_rows + ' dead rows). Plan view only.');
     o.push('');
-    o.push('STACK  top board z = ' + c.flush.frame_top + ', breadboard top z = ' + c.flush.bb_top + ' (' + (c.flush.delta >= 0 ? '+' : '') + c.flush.delta + '), total thickness ' + c.flush.total + ' mm; gaps ' + c.flush.gaps.map(function (q) { return q.gap + ' under ' + q.below; }).join(', '));
+    if (c.grid.coupler) { var q = c.grid.coupler; o.push((q.fits ? '   ok  ' : '   !!  ') + 'edge coupler ' + q.label + ': needs ' + q.gap + ' mm between the boards, the strip leaves ' + q.have + (q.fits ? ' (' + q.spare + ' spare)' : '; first fits with a ' + q.strip_needed + ' mm strip')); }
+    if (R.wig.face) o.push('FACE   ' + (R.wig.face.real ? 'Wiiig face board (wiigtop.3mf), ' + R.wig.face.holes.length + ' holes' : 'plain face board') + ', ' + R.wig.face.t + ' thick, z ' + R.wig.face.z0 + ' .. ' + R.wig.face.z1 + (R.wig.face.inset ? ' (let into the shell)' : ' (on the shell)') + '; it reaches y = ' + R.wig.face.y0 + ', so ' + (R.wig.face.y0 < -0.01 ? (-R.wig.face.y0).toFixed(2) + ' mm of it lies over the frame' : 'none of it lies over the frame'));
+    o.push('STACK  top board z = ' + c.flush.frame_top + ', ' + (R.wig.face ? 'shell top z = ' + c.flush.shell_top + ' (' + (c.flush.delta_shell >= 0 ? '+' : '') + c.flush.delta_shell + '), ' : '') + 'breadboard top z = ' + c.flush.bb_top + ' (' + (c.flush.delta >= 0 ? '+' : '') + c.flush.delta + '), boards ' + c.flush.total + ' mm thick in all' + (R.wig.face ? ', ' + (Math.max(c.flush.frame_top, c.flush.bb_top) - R.z.bottom).toFixed(2) + ' to the top of the face board' : '') + '; gaps ' + c.flush.gaps.map(function (q) { return q.gap + ' under ' + q.below; }).join(', '));
     R.layers.forEach(function (L) { o.push('       ' + L.id + ' ' + (L.name + '              ').slice(0, 14) + ' ' + L.kind + (L.kind.length < 5 ? ' ' : '') + ' t ' + L.t + '  z ' + L.z0 + ' .. ' + L.z1 + '   net ' + L.area + ' mm2 (openings ' + L.pocketArea + ')' + (L.islands !== 1 ? '  !! in ' + L.islands + ' pieces' : '') + (L.cutBy.length ? '   opened for ' + L.cutBy.join(', ') : '   whole')); });
     o.push('');
     o.push('CLASHES ' + (c.clashes.length ? '' : 'none'));
@@ -9726,6 +9926,354 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
 
 </script>
 <script>
+// Jumperless V6 outline tool - what the page remembers between reloads.
+// Everything is kept in this browser's own storage (localStorage, keys v6mech.*). Nothing is sent anywhere.
+//   v6mech.state  { params, ui, cam, t }   the working design, the view settings and the camera
+//   v6mech.saves  { name: { params, t } }  named copies
+// A design can also travel as a code (the differences from the built-in design, base64) in a link's #p= part.
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.V6State = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+  var K = { state: 'v6mech.state', saves: 'v6mech.saves', old: 'v6mech.params' };
+  var store = null;
+  try { store = typeof localStorage !== 'undefined' ? localStorage : null; if (store) { store.setItem('v6mech.t', '1'); store.removeItem('v6mech.t'); } } catch (e) { store = null; }
+  function get(k) { try { var s = store && store.getItem(k); return s ? JSON.parse(s) : null; } catch (e) { return null; } }
+  function put(k, v) { try { if (!store) return false; store.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
+  function clone(o) { return JSON.parse(JSON.stringify(o)); }
+  function isObj(o) { return o && typeof o === 'object' && !Array.isArray(o); }
+
+  // merge(defaults, saved): saved wins; objects merge key by key; arrays and plain values are taken whole from saved.
+  // Comment keys (starting with "_") always come from the defaults, so a newer page explains itself.
+  function merge(d, s) {
+    if (!isObj(d) || !isObj(s)) return s === undefined ? clone(d) : clone(s);
+    var o = {}, k;
+    for (k in d) o[k] = k.charAt(0) === '_' ? d[k] : (k in s ? merge(d[k], s[k]) : clone(d[k]));
+    for (k in s) if (!(k in o) && k.charAt(0) !== '_') o[k] = clone(s[k]);
+    return o;
+  }
+  // diff(defaults, params): only what differs, for a short code. Arrays that differ go whole.
+  function diff(d, p) {
+    if (!isObj(d) || !isObj(p)) return JSON.stringify(d) === JSON.stringify(p) ? undefined : p;
+    var o = {}, n = 0, k;
+    for (k in p) { if (k.charAt(0) === '_') continue; var v = diff(d[k], p[k]); if (v !== undefined) { o[k] = v; n++; } }
+    return n ? o : undefined;
+  }
+  // bring a design made by an older page up to this one
+  function migrate(p, defaults) {
+    var o = merge(defaults, p), old = p.meta && p.meta.rev;
+    o.meta = clone(defaults.meta);
+    if (p.wig && p.wig.face === undefined && p.wig.face_pcb_t !== undefined) {      // rev A3 and older: a plain face of a given thickness
+      if (p.wig.face_pcb_t > 0) o.wig.face = { on: true, t: p.wig.face_pcb_t, sits: 'on', header_strip: true, plain: true };       // 0 was the old default: the new default (the Wiiig face board) stands
+    }
+    delete o.wig.face_pcb_t;
+    return { params: o, from_rev: old && old !== defaults.meta.rev ? old : null };
+  }
+  function valid(p) { return !!(p && p.stack && p.stack.length && p.grid && p.wig && p.frame); }
+
+  function b64e(s) { var b = typeof btoa === 'function' ? btoa(unescape(encodeURIComponent(s))) : Buffer.from(s, 'utf8').toString('base64'); return b.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+  function b64d(s) { s = s.replace(/-/g, '+').replace(/_/g, '/'); while (s.length % 4) s += '='; return typeof atob === 'function' ? decodeURIComponent(escape(atob(s))) : Buffer.from(s, 'base64').toString('utf8'); }
+  function encode(params, defaults) { return b64e(JSON.stringify(diff(defaults, params) || {})); }
+  // accepts a code, a whole link with #p=, or the JSON of a v6_outline.json
+  function decode(text, defaults) {
+    text = String(text || '').trim();
+    if (!text) throw new Error('nothing to read');
+    var o;
+    if (text.charAt(0) === '{') o = JSON.parse(text);
+    else { var m = text.match(/[#&?]p=([A-Za-z0-9_\-]+)/); o = JSON.parse(b64d(m ? m[1] : text)); }
+    var r = migrate(o, defaults);
+    if (!valid(r.params)) throw new Error('that is not a V6 outline');
+    return r.params;
+  }
+
+  function load(defaults, hash) {
+    var note = null, from = 'built-in', p = null, st = get(K.state) || {};
+    if (hash && /[#&]p=/.test(hash)) { try { p = decode(hash, defaults); from = 'link'; note = 'Opened from a link. Your own last design is kept under Saved designs as "before the link".'; if (valid(st.params)) putSave('before the link', st.params); } catch (e) { note = 'The link could not be read (' + e.message + ').'; p = null; } }
+    if (!p && valid(st.params)) { var r = migrate(st.params, defaults); p = r.params; from = 'saved'; if (r.from_rev) note = 'Your saved design was made with rev ' + r.from_rev + '; it has been brought up to ' + defaults.meta.rev + '. New settings start at their defaults.'; }
+    if (!p) { var o = get(K.old); if (valid(o)) { var r2 = migrate(o, defaults); p = r2.params; from = 'saved'; note = 'Your design from the earlier page (rev ' + (r2.from_rev || '?') + ') has been brought up to ' + defaults.meta.rev + '.'; } }
+    if (!p) p = clone(defaults);
+    return { params: p, ui: st.ui || null, cam: from === 'link' ? null : (st.cam || null), from: from, note: note, storage: !!store };
+  }
+  function save(params, ui, cam) { return put(K.state, { params: params, ui: ui, cam: cam, t: Date.now() }); }
+
+  function saves() { var s = get(K.saves) || {}; return Object.keys(s).map(function (n) { return { name: n, t: s[n].t, rev: s[n].params && s[n].params.meta && s[n].params.meta.rev }; }).sort(function (a, b) { return b.t - a.t; }); }
+  function putSave(name, params) { var s = get(K.saves) || {}; s[name] = { params: clone(params), t: Date.now() }; return put(K.saves, s); }
+  function getSave(name, defaults) { var s = get(K.saves) || {}; return s[name] ? migrate(s[name].params, defaults).params : null; }
+  function delSave(name) { var s = get(K.saves) || {}; delete s[name]; return put(K.saves, s); }
+
+  // undo: snapshots of the design as text; a step is recorded when the design has stopped changing for a moment
+  function History(max) { this.max = max || 80; this.list = []; this.at = -1; }
+  History.prototype.push = function (params) {
+    var s = JSON.stringify(params);
+    if (this.at >= 0 && this.list[this.at] === s) return false;
+    this.list = this.list.slice(0, this.at + 1); this.list.push(s);
+    if (this.list.length > this.max) this.list.shift();
+    this.at = this.list.length - 1; return true;
+  };
+  History.prototype.canUndo = function () { return this.at > 0; };
+  History.prototype.canRedo = function () { return this.at < this.list.length - 1; };
+  History.prototype.undo = function () { return this.canUndo() ? JSON.parse(this.list[--this.at]) : null; };
+  History.prototype.redo = function () { return this.canRedo() ? JSON.parse(this.list[++this.at]) : null; };
+
+  return { load: load, save: save, saves: saves, putSave: putSave, getSave: getSave, delSave: delSave, encode: encode, decode: decode, merge: merge, diff: diff, migrate: migrate, valid: valid, History: History, available: function () { return !!store; } };
+});
+
+</script>
+<script>
+// Jumperless V6 outline tool - how the 3D view is lit and painted. No geometry is decided here: it only dresses what
+// V6Geo.resolve() returned. What is drawn rather than read from a file (the gold lands on the face board, the column
+// numbers, the picture on the screen, the LEDs) is listed in the README under "Not verified".
+(function (root) {
+  'use strict';
+  var T = root.THREE;
+  if (!T) { root.V6Render = null; return; }
+
+  var MASK = { black: '#17171a', white: '#dcd9d0', green: '#0e5a3a', purple: '#3b1f66', blue: '#123f7d', red: '#8c1d1d' };
+  var SILK = { white: '#f2f2ee', black: '#111113', yellow: '#e8d44d' };
+  var FINISH = { enig: ['#d9b441', '#8a6a1a'], hasl: ['#cfd3d8', '#7c8187'] };
+  var SHELL = { black: 0x1c1d20, white: 0xe4e2dc, clear: 0xc9d2da };
+  var BG = { console: '#27272b', deep: '#1b1b1e', studio: 'studio', paper: '#dfe3e6', white: '#ffffff', clear: null };
+  var RAINBOW = ['#f03060', '#f12fbf', '#c728f8', '#7647f2', '#5174ed', '#50beeb', '#68f4d7', '#70f899', '#7af85c', '#c0f848', '#e8cb40', '#e86828'];      // Jumperless's own, from the site theme
+  function hex(c) { return typeof c === 'number' ? c : parseInt(String(c).replace('#', ''), 16); }
+  function canvas(w, h) { var c = document.createElement('canvas'); c.width = Math.max(2, Math.round(w)); c.height = Math.max(2, Math.round(h)); return c; }
+  function tex(c) { var t = new T.CanvasTexture(c); t.encoding = T.sRGBEncoding; t.anisotropy = 8; t.minFilter = T.LinearMipmapLinearFilter; t.needsUpdate = true; return t; }
+
+  var R = { renderer: null, scene: null, lights: {}, env: null, ground: null, bgTex: null, cache: {}, mats: {} };
+
+  // a small lit room, rendered once into an environment map, so metal and gloss have something to reflect
+  function makeEnv(renderer) {
+    try {
+      var s = new T.Scene(), box = new T.Mesh(new T.BoxGeometry(40, 24, 40), new T.MeshBasicMaterial({ color: 0x1c1c20, side: T.BackSide })); s.add(box);
+      function panel(w, h, x, y, z, rx, ry, c) { var m = new T.Mesh(new T.PlaneGeometry(w, h), new T.MeshBasicMaterial({ color: c, side: T.DoubleSide })); m.position.set(x, y, z); m.rotation.set(rx, ry, 0); s.add(m); }
+      panel(13, 8, -3, 11.5, 2, Math.PI / 2, 0, 0xffffff);          // ceiling soft box
+      panel(8, 6, -19.5, 4, 4, 0, Math.PI / 2, 0x9db8e8);          // cool window, left
+      panel(5, 8, 19.5, 3, -6, 0, Math.PI / 2, 0xffc890);          // warm lamp, right
+      panel(14, 2.5, 0, 0, -19.5, 0, 0, 0x6a6f79);                   // low strip, back
+      var floor = new T.Mesh(new T.PlaneGeometry(40, 40), new T.MeshBasicMaterial({ color: 0x0e0e10 })); floor.rotation.x = -Math.PI / 2; floor.position.y = -11.9; s.add(floor);
+      var pm = new T.PMREMGenerator(renderer), rt = pm.fromScene(s, 0.03);
+      pm.dispose(); return rt.texture;
+    } catch (e) { return null; }
+  }
+
+  function setup(renderer, scene) {
+    R.renderer = renderer; R.scene = scene;
+    renderer.outputEncoding = T.sRGBEncoding;
+    renderer.shadowMap.enabled = true; renderer.shadowMap.type = T.PCFSoftShadowMap;
+    var L = R.lights;
+    L.hemi = new T.HemisphereLight(0xffffff, 0x8c9299, 0.95); scene.add(L.hemi);
+    L.key = new T.DirectionalLight(0xffffff, 0.75); L.key.position.set(-70, 190, 110);
+    L.key.shadow.mapSize.set(2048, 2048); L.key.shadow.bias = -0.0006; L.key.shadow.normalBias = 0.05; L.key.shadow.radius = 4;
+    var sc = L.key.shadow.camera; sc.left = -140; sc.right = 140; sc.top = 140; sc.bottom = -140; sc.near = 10; sc.far = 600;
+    scene.add(L.key); scene.add(L.key.target);
+    L.fill = new T.DirectionalLight(0xffffff, 0.3); L.fill.position.set(160, 60, -120); scene.add(L.fill);
+    R.env = makeEnv(renderer);
+    R.ground = new T.Group(); scene.add(R.ground);
+  }
+
+  function studioTexture() {
+    if (R.bgTex) return R.bgTex;
+    var c = canvas(16, 512), g = c.getContext('2d'), gr = g.createLinearGradient(0, 0, 0, 512);
+    gr.addColorStop(0, '#4a4b52'); gr.addColorStop(0.55, '#2c2c31'); gr.addColorStop(1, '#17171a');
+    g.fillStyle = gr; g.fillRect(0, 0, 16, 512);
+    R.bgTex = new T.CanvasTexture(c); R.bgTex.encoding = T.sRGBEncoding; return R.bgTex;
+  }
+
+  // S: { mode, bg, ground, shadows, exposure, light, sun } ; box: { x0, x1, y0, y1, zb } the unit's extent in plan and its underside
+  function apply(S, box) {
+    var r = R.renderer, sc = R.scene, L = R.lights, real = S.mode === 'real';
+    r.toneMapping = real ? T.ACESFilmicToneMapping : T.NoToneMapping;
+    r.toneMappingExposure = real ? (S.exposure || 1) : 1;
+    sc.environment = real ? R.env : null;
+    var k = S.light != null ? S.light : 1;
+    L.hemi.intensity = (real ? 0.55 : 1.0) * k; L.key.intensity = (real ? 1.9 : 1.0) * k; L.fill.intensity = (real ? 0.45 : 0.45) * k;
+    var az = ((S.sun != null ? S.sun : 215) * Math.PI) / 180, cx = (box.x0 + box.x1) / 2, cy = (box.y0 + box.y1) / 2;
+    L.key.position.set(cx + Math.sin(az) * 120, 190, cy + Math.cos(az) * 120); L.key.target.position.set(cx, 0, cy); L.key.target.updateMatrixWorld();
+    L.key.castShadow = real && S.shadows !== false;
+    var bg = BG[S.bg] !== undefined ? BG[S.bg] : BG.console;
+    if (S.mode === 'lines' && S.bg !== 'clear' && S.bg !== 'paper' && S.bg !== 'white') bg = BG.deep;
+    if (bg === null) { sc.background = null; r.setClearColor(0x000000, 0); }
+    else if (bg === 'studio') { sc.background = studioTexture(); }
+    else { sc.background = new T.Color(bg); }
+    // the bench: a shadow catcher, or a 0.1 inch grid that lines up with the breadboard's holes
+    var G = R.ground; while (G.children.length) { var c = G.children.pop(); if (c.geometry) c.geometry.dispose(); }
+    var z = box.zb - (S.ground === 'grid' ? 0.02 : 0.02), light = S.bg === 'paper' || S.bg === 'white';
+    if (S.ground === 'shadow' && real && S.shadows !== false) {
+      var pl = new T.Mesh(new T.PlaneGeometry(900, 900), new T.ShadowMaterial({ opacity: light ? 0.22 : 0.42 })); pl.rotation.x = -Math.PI / 2; pl.position.set(cx, z, cy); pl.receiveShadow = true; G.add(pl);
+    } else if (S.ground === 'grid') {
+      var p = 2.54, n0 = Math.floor((box.x0 - 30) / p), n1 = Math.ceil((box.x1 + 30) / p), m0 = Math.floor((box.y0 - 30) / p), m1 = Math.ceil((box.y1 + 30) / p), a = [], b = [], i;
+      for (i = n0; i <= n1; i++) (i % 10 === 0 ? b : a).push(i * p, z, m0 * p, i * p, z, m1 * p);
+      for (i = m0; i <= m1; i++) (i % 10 === 0 ? b : a).push(n0 * p, z, i * p, n1 * p, z, i * p);
+      [[a, 0.16], [b, 0.4]].forEach(function (q) { var ge = new T.BufferGeometry(); ge.setAttribute('position', new T.Float32BufferAttribute(q[0], 3)); G.add(new T.LineSegments(ge, new T.LineBasicMaterial({ color: light ? 0x30333a : 0xaaaab5, transparent: true, opacity: q[1] }))); });
+      if (real && S.shadows !== false) { var p2 = new T.Mesh(new T.PlaneGeometry(900, 900), new T.ShadowMaterial({ opacity: light ? 0.2 : 0.36 })); p2.rotation.x = -Math.PI / 2; p2.position.set(cx, z - 0.01, cy); p2.receiveShadow = true; G.add(p2); }
+    }
+  }
+
+  // ---------- materials ----------
+  function std(key, make) { if (!R.mats[key]) R.mats[key] = make(); return R.mats[key]; }
+  function plain(color, o) {
+    o = o || {};
+    var key = 'p:' + color + ':' + (o.opacity || 1) + ':' + (o.metal || 0) + ':' + (o.rough != null ? o.rough : '') + ':' + (o.side || 0);
+    return std(key, function () { return new T.MeshStandardMaterial({ color: color, roughness: o.rough != null ? o.rough : 0.7, metalness: o.metal || 0.05, transparent: (o.opacity || 1) < 1, opacity: o.opacity || 1, depthWrite: (o.opacity || 1) >= 1, side: o.side ? T.DoubleSide : T.FrontSide }); });
+  }
+  // a board: [faces, cut edge]. real = soldermask gloss over the faces and bare FR4 on the edge; otherwise the layer's flat colour
+  function board(mode, layerColor, look) {
+    if (mode !== 'real') return plain(hex(layerColor), { rough: 0.75 });
+    var mk = MASK[look.mask] || MASK.black, key = 'b:' + mk + ':' + (look.plated ? look.finish || 'enig' : '');
+    return std(key, function () {
+      var face = new T.MeshPhysicalMaterial({ color: hex(mk), roughness: 0.5, metalness: 0.0, clearcoat: 0.2, clearcoatRoughness: 0.4, envMapIntensity: 0.35 });
+      // the cut edge: bare FR4. On the face board (plated: true) it is mostly hole wall, so it is drawn as plating instead.
+      var edge = look.plated ? new T.MeshStandardMaterial({ color: hex((FINISH[look.finish] || FINISH.enig)[1]), roughness: 0.5, metalness: 0.7, envMapIntensity: 0.5 }) : new T.MeshStandardMaterial({ color: look.mask === 'white' ? 0xa89f7c : 0x5f5738, roughness: 0.9, metalness: 0 });
+      return [face, edge];
+    });
+  }
+  function shell(mode, look) {
+    var k = look.shell || 'black';
+    if (mode !== 'real') return plain(0x26282c, { rough: 0.9 });
+    return std('s:' + k, function () { return k === 'clear' ? new T.MeshPhysicalMaterial({ color: SHELL.clear, roughness: 0.25, metalness: 0, transparent: true, opacity: 0.42, depthWrite: false, clearcoat: 0.4 }) : new T.MeshStandardMaterial({ color: SHELL[k] || SHELL.black, roughness: 0.62, metalness: 0.02 }); });
+  }
+  function part(mode, color, o) {
+    o = o || {};
+    if (mode !== 'real') return plain(color, o);
+    var c = new T.Color(color), lum = Math.max(c.r, c.g, c.b), metal = o.metal != null ? o.metal : (lum > 0.6 ? 0.85 : 0.1);
+    return std('q:' + color + ':' + metal + ':' + (o.rough != null ? o.rough : ''), function () { return new T.MeshStandardMaterial({ color: color, roughness: o.rough != null ? o.rough : (metal > 0.5 ? 0.28 : 0.55), metalness: metal, envMapIntensity: metal > 0.5 ? 1.0 : 0.6 }); });
+  }
+
+  // ---------- painted faces ----------
+  function decalMesh(texture, x0, y0, x1, y1, z, o) {
+    o = o || {};
+    var g = new T.PlaneGeometry(x1 - x0, y1 - y0); g.rotateX(-Math.PI / 2);
+    var m = new T.MeshStandardMaterial({ map: texture, transparent: true, alphaTest: o.alphaTest != null ? o.alphaTest : 0.02, roughness: o.rough != null ? o.rough : 0.4, metalness: o.metal || 0, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
+    if (o.emissiveMap) { m.emissiveMap = o.emissiveMap; m.emissive = new T.Color(0xffffff); m.emissiveIntensity = o.emissive || 1; }
+    var mesh = new T.Mesh(g, m); mesh.position.set((x0 + x1) / 2, z, (y0 + y1) / 2); mesh.userData.decal = true; mesh.renderOrder = 2; return mesh;
+  }
+  function ledColor(mode, x, y, face) {
+    if (mode === 'rainbow') return RAINBOW[Math.max(0, Math.min(11, Math.floor((x / 78.74) * 12)))];
+    if (mode === 'rails') { var top = y < 9, bot = y > 46; if (top || bot) return (y < 5 || (bot && y < 50.5)) ? '#ff3b30' : '#3aa0ff'; return null; }
+    if (mode === 'probe') { var d = Math.hypot(x - 40.64, y - 23.9); return d < 9 ? (d < 3 ? '#ffffff' : d < 6 ? '#fc0289' : '#7a1d6a') : null; }
+    return null;
+  }
+  // the Wiiig face board, from the same hole list as the geometry. px per mm = s.
+  function faceDecal(face, look, z) {
+    if (!face || !face.holes) return null;
+    var key = 'face:' + (look.face_mask || 'black') + ':' + (look.finish || 'enig') + ':' + (look.silk || 'white') + ':' + (look.leds || 'off') + ':' + face.holes.length + ':' + face.y0;
+    var e = R.cache[key];
+    if (!e) {
+      var s = 24, xs = face.pts.map(function (q) { return q[0]; }), ys = face.pts.map(function (q) { return q[1]; });
+      var x0 = Math.min.apply(0, xs), x1 = Math.max.apply(0, xs), y0 = Math.min.apply(0, ys), y1 = Math.max.apply(0, ys);
+      var c = canvas((x1 - x0) * s, (y1 - y0) * s), g = c.getContext('2d'), gold = FINISH[look.finish] || FINISH.enig, mask = MASK[look.face_mask] || MASK.black;
+      var em = look.leds && look.leds !== 'off' ? canvas(c.width / 2, c.height / 2) : null, ge = em && em.getContext('2d');
+      if (ge) { ge.fillStyle = '#000'; ge.fillRect(0, 0, em.width, em.height); }
+      function X(x) { return (x - x0) * s; } function Y(y) { return (y - y0) * s; }
+      g.beginPath(); face.pts.forEach(function (q, i) { if (i) g.lineTo(X(q[0]), Y(q[1])); else g.moveTo(X(q[0]), Y(q[1])); }); g.closePath(); g.fillStyle = mask; g.fill();
+      // column numbers in the two clear bands between the rails and the rows (drawn, not from a file)
+      var big = face.holes.filter(function (h) { return h[2] > 1.5; }), rows = []; big.forEach(function (h) { if (rows.indexOf(h[1]) < 0) rows.push(h[1]); }); rows.sort(function (a, b) { return a - b; });
+      var bands = []; for (var i = 1; i < rows.length; i++) if (rows[i] - rows[i - 1] > 5) bands.push((rows[i] + rows[i - 1]) / 2);
+      g.fillStyle = SILK[look.silk] || SILK.white; g.font = '600 ' + Math.round(1.5 * s) + 'px "IBM Plex Mono", ui-monospace, monospace'; g.textAlign = 'center'; g.textBaseline = 'middle';
+      bands.forEach(function (by) { for (var k = 1; k <= 30; k++) if (k === 1 || k % 5 === 0) g.fillText(String(k), X(k * 2.54), Y(by)); });
+      face.holes.forEach(function (h) {
+        var cx = X(h[0]), cy = Y(h[1]), rt = h[2] / 2 * s, rb = h[3] / 2 * s, csk = h[2] > h[3] + 0.05;
+        g.beginPath(); g.arc(cx, cy, rt + (csk ? 0.26 : 0.19) * s, 0, 6.2832); g.fillStyle = gold[0]; g.fill();          // the gold land
+        if (csk) { var gr = g.createRadialGradient(cx, cy, rb, cx, cy, rt); gr.addColorStop(0, gold[1]); gr.addColorStop(1, gold[0]); g.beginPath(); g.arc(cx, cy, rt, 0, 6.2832); g.fillStyle = gr; g.fill(); }
+        g.globalCompositeOperation = 'destination-out'; g.beginPath(); g.arc(cx, cy, rb, 0, 6.2832); g.fill(); g.globalCompositeOperation = 'source-over';
+        if (ge && csk) { var col = ledColor(look.leds, h[0], h[1]); if (col) { var ex = cx / 2, ey = cy / 2, rr = 1.25 * s / 2, eg = ge.createRadialGradient(ex, ey, 0, ex, ey, rr); eg.addColorStop(0, col); eg.addColorStop(0.45, col); eg.addColorStop(1, 'rgba(0,0,0,0)'); ge.fillStyle = eg; ge.beginPath(); ge.arc(ex, ey, rr, 0, 6.2832); ge.fill(); } }
+      });
+      e = R.cache[key] = { map: tex(c), em: em ? tex(em) : null, box: [x0, y0, x1, y1] };
+    }
+    return decalMesh(e.map, e.box[0], e.box[1], e.box[2], e.box[3], z, { alphaTest: 0.5, rough: 0.38, metal: 0.25, emissiveMap: e.em, emissive: 1.6 });
+  }
+  // the bare shell's top: the 16 x 30 square holes with a glint of the clip in each (when there is no face board)
+  function shellDecal(wig, look, z) {
+    var key = 'shell:' + (look.shell || 'black') + ':' + (look.leds || 'off');
+    var e = R.cache[key], sh = wig.shell;
+    if (!e) {
+      var s = 20, c = canvas(sh.w * s, sh.h * s), g = c.getContext('2d'), dark = look.shell === 'white' ? '#55565a' : '#050506';
+      wig.cols.forEach(function (cx) { wig.rows.forEach(function (cy) {
+        var x = (cx - sh.x0) * s, y = (cy - sh.y0) * s, h = 1.0 * s, col = ledColor(look.leds, cx, cy);
+        g.fillStyle = dark; g.fillRect(x - h, y - h, 2 * h, 2 * h);
+        g.fillStyle = col || '#7d6a35'; g.globalAlpha = col ? 0.95 : 0.55; g.fillRect(x - h * 0.28, y - h * 0.8, h * 0.56, h * 1.6); g.globalAlpha = 1;
+      }); });
+      e = R.cache[key] = { map: tex(c) };
+    }
+    return decalMesh(e.map, sh.x0, sh.y0, sh.x0 + sh.w, sh.y0 + sh.h, z, { rough: 0.6 });
+  }
+  // silkscreen on a board's top face: an outline and a name for each part that sits on it
+  function boardDecal(L, parts, box, look) {
+    var mine = parts.filter(function (p) { return !p.system && p.mountLayer === L.id && !p.bottom && p.bodies.length; });
+    if (!mine.length) return null;
+    var s = 10, c = canvas((box.x1 - box.x0) * s, (box.y1 - box.y0) * s), g = c.getContext('2d');
+    g.strokeStyle = g.fillStyle = SILK[look.silk] || SILK.white; g.lineWidth = 0.15 * s; g.lineJoin = 'round';
+    g.font = '600 ' + Math.round(1.25 * s) + 'px "Archivo Narrow", "Arial Narrow", sans-serif'; g.textAlign = 'center'; g.textBaseline = 'top';
+    mine.forEach(function (p) {
+      var b = p.bodies[0].pts, ymax = -1e9, xa = 0;
+      g.beginPath(); b.forEach(function (q, i) { var x = (q[0] - box.x0) * s, y = (q[1] - box.y0) * s; if (i) g.lineTo(x, y); else g.moveTo(x, y); ymax = Math.max(ymax, q[1]); xa += q[0] / b.length; }); g.closePath(); g.stroke();
+      g.fillText(String(p.id).toUpperCase(), (xa - box.x0) * s, (ymax + 0.35 - box.y0) * s);
+    });
+    var t = tex(c);
+    return decalMesh(t, box.x0, box.y0, box.x1, box.y1, L.z1 + 0.012, { rough: 0.9 });
+  }
+  // a lit screen: a made-up picture in the display's active area, so it reads as a display
+  function screenMesh(p, scr, z) {
+    var key = 'scr:' + scr.w + 'x' + scr.h, e = R.cache[key];
+    if (!e) {
+      var s = 16, c = canvas(scr.w * s, scr.h * s), g = c.getContext('2d'), W = c.width, H = c.height;
+      g.fillStyle = '#0b0b0d'; g.fillRect(0, 0, W, H);
+      g.strokeStyle = '#2a2a30'; g.lineWidth = 1; for (var i = 1; i < 8; i++) { g.beginPath(); g.moveTo(0, H * i / 8); g.lineTo(W, H * i / 8); g.stroke(); }
+      for (i = 1; i < 4; i++) { g.beginPath(); g.moveTo(W * i / 4, 0); g.lineTo(W * i / 4, H); g.stroke(); }
+      function trace(col, f, ph, amp, mid) { g.strokeStyle = col; g.lineWidth = Math.max(2, s * 0.12); g.beginPath(); for (var y = 0; y <= H; y += 2) { var x = W * mid + Math.sin(y / H * 6.2832 * f + ph) * W * amp; if (y) g.lineTo(x, y); else g.moveTo(x, y); } g.stroke(); }
+      trace('#00fced', 3, 0.4, 0.16, 0.32); trace('#fc0289', 5, 1.2, 0.1, 0.7);
+      g.fillStyle = '#f3f3f5'; g.font = '600 ' + Math.round(s * 1.5) + 'px "Archivo Narrow", "Arial Narrow", sans-serif'; g.save(); g.translate(W - s * 0.6, s * 0.8); g.rotate(Math.PI / 2); g.fillText('V6  ROW 14  3.30 V', 0, 0); g.restore();
+      e = R.cache[key] = { map: tex(c) };
+    }
+    var ge = new T.PlaneGeometry(scr.w, scr.h); ge.rotateX(-Math.PI / 2);
+    var m = new T.Mesh(ge, new T.MeshBasicMaterial({ map: e.map, toneMapped: false, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3 }));
+    var grp = new T.Group(); grp.position.set(p.x, z, p.y); grp.rotation.y = p.rot * Math.PI / 180; m.position.set(0, 0, scr.cy); grp.add(m); m.userData.decal = true; m.userData.noLines = true; return grp;
+  }
+
+  // ---------- after the scene is built: dress it for the chosen way of looking ----------
+  var xray = {}, hidden = null, lineMats = {};
+  function finish(groups, S) {
+    var mode = S.mode;
+    if (!hidden) hidden = new T.MeshBasicMaterial({ visible: false });
+    groups.forEach(function (grp) { grp.traverse(function (o) {
+      if (o.isLineSegments && o.userData.edge) { o.visible = mode !== 'real' || S.edges === true; if (mode === 'lines') { var lc = o.userData.lineColor || 0xf3f3f5; o.material = lineMats[lc] || (lineMats[lc] = new T.LineBasicMaterial({ color: lc })); } return; }
+      if (!o.isMesh) return;
+      if (o.userData.decal) { o.visible = mode === 'real'; return; }
+      o.castShadow = o.receiveShadow = mode === 'real' && !o.material.transparent;
+      if (mode === 'xray') {
+        var src = Array.isArray(o.material) ? o.material[0] : o.material, c = src.color ? src.color.getHex() : 0x999999;
+        if (!xray[c]) { xray[c] = new T.MeshStandardMaterial({ color: c, transparent: true, opacity: 0.2, depthWrite: false, roughness: 0.9, side: T.DoubleSide }); xray[c].userData.lin = !!src.userData.lin; }
+        o.material = xray[c];
+      } else if (mode === 'lines') {
+        if (!o.userData.hasEdges && o.geometry && !o.userData.noLines) {
+          var eg = o.geometry.userData.edges || (o.geometry.userData.edges = new T.EdgesGeometry(o.geometry, 32));
+          var src2 = Array.isArray(o.material) ? o.material[0] : o.material, lc2 = o.userData.lineColor || (src2.color && src2.color.getHex() > 0x303030 ? src2.color.getHex() : 0xaaaab5);
+          var ls = new T.LineSegments(eg, lineMats[lc2] || (lineMats[lc2] = new T.LineBasicMaterial({ color: lc2 }))); ls.userData.edge = true; ls.userData.extra = true; o.add(ls); o.userData.hasEdges = true;
+        }
+        o.material = hidden;
+      }
+    }); });
+  }
+  // three r128 takes a material's colour as linear light, while every colour in this tool is written the way a screen shows it
+  // (sRGB). Each material is converted once, the first time it is seen, so black soldermask is black and not grey.
+  function linear(groups) {
+    groups.forEach(function (grp) { if (grp) grp.traverse(function (o) { if (!o.material) return; (Array.isArray(o.material) ? o.material : [o.material]).forEach(function (m) {
+      if (m.userData.lin || !m.color) return; m.userData.lin = true; if (!m.map || !m.userData.keepWhite) m.color.convertSRGBToLinear();
+    }); }); });
+  }
+  function refreshMaterials(scene) { scene.traverse(function (o) { if (o.material) (Array.isArray(o.material) ? o.material : [o.material]).forEach(function (m) { m.needsUpdate = true; }); }); }
+  function png(renderer, scene, camera, scale) {
+    var el = renderer.domElement, w = el.width, h = el.height, pr = renderer.getPixelRatio();
+    try { if (scale && scale !== 1) { renderer.setPixelRatio(pr * scale); renderer.setSize(el.clientWidth, el.clientHeight, false); } renderer.render(scene, camera); var url = el.toDataURL('image/png'); return url; }
+    finally { if (scale && scale !== 1) { renderer.setPixelRatio(pr); renderer.setSize(el.clientWidth, el.clientHeight, false); renderer.render(scene, camera); } }
+  }
+
+  root.V6Render = { setup: setup, apply: apply, plain: plain, board: board, shell: shell, part: part, faceDecal: faceDecal, shellDecal: shellDecal, boardDecal: boardDecal, screenMesh: screenMesh, finish: finish, linear: linear, refreshMaterials: refreshMaterials, png: png,
+    MASK: MASK, SILK: SILK, FINISH: FINISH, RAINBOW: RAINBOW, BG: BG, clearCache: function () { R.cache = {}; } };
+})(typeof self !== 'undefined' ? self : this);
+
+</script>
+<script>
 // Jumperless V6 outline tool - the viewer. Everything it draws comes from V6Geo.resolve(params); it holds no geometry of its own.
 (function () {
   'use strict';
@@ -9741,14 +10289,23 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     return e;
   }
 
-  // ---------- state ----------
-  var P = (function () {
-    try { var s = localStorage.getItem(KEY); if (s) { var o = JSON.parse(s); if (o && o.stack && o.grid && o.meta && o.meta.rev === DEFAULTS.meta.rev) return o; } } catch (e) { /* storage may be unavailable */ }
-    return clone(DEFAULTS);
-  })();
+  // ---------- state: the design (P), how it is being looked at (ui) and the camera all come back after a reload ----------
+  var State = window.V6State, Rn = window.V6Render;
+  var boot = State.load(DEFAULTS, location.hash);
+  var P = boot.params;
   var R = null;
-  var ui = { sel: null, vsel: null, editOutline: false, sketch: false, sketchOpacity: 0.6, explode: 0, clipAxis: 'off', clipPos: 0.5, envelopes: false, planes: true, hidden: {}, hideShell: false };
-  function save() { try { localStorage.setItem(KEY, JSON.stringify(P)); } catch (e) { /* ignore */ } }
+  var ui = { sel: null, vsel: null, editOutline: false, sketch: false, sketchOpacity: 0.6, explode: 0, clipAxis: 'off', clipPos: 0.5, envelopes: false, planes: true, hidden: {}, hideShell: false,
+    render: { mode: 'real', bg: 'console', ground: 'shadow', shadows: true, exposure: 1, light: 1, sun: 215, fov: 30, rotate: false, edges: false, decals: true }, fold: { 'Look': true, 'Probe dock': true, 'Saved designs': true }, panels: {} };
+  if (boot.ui) Object.keys(ui).forEach(function (k) { var v = boot.ui[k]; if (v === undefined) return; if (ui[k] && typeof ui[k] === 'object') { for (var j in v) ui[k][j] = v[j]; } else ui[k] = v; });
+  if (boot.from === 'link') { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* a file:// page may refuse */ } }
+  var hist = new State.History(80), saveT = null, histT = null, notice = boot.note || (State.available() ? null : 'This browser is not letting the page keep anything, so the design will not survive a reload here. Use Copy code or Export to keep it.');
+  function camState() { return camera ? { p: camera.position.toArray(), t: controls.target.toArray() } : null; }
+  function saveView() { clearTimeout(saveT); saveT = setTimeout(function () { State.save(P, ui, camState()); }, 250); }
+  function save() { saveView(); clearTimeout(histT); histT = setTimeout(function () { if (hist.push(P)) syncUndo(); }, 400); }
+  function syncUndo() { var u = $('btn-undo'), r = $('btn-redo'); if (u) u.disabled = !hist.canUndo(); if (r) r.disabled = !hist.canRedo(); }
+  function adopt(p) { P = p; if (ui.sel && !P.parts.some(function (q) { return q.id === ui.sel; })) ui.sel = null; if (ui.vsel != null && ui.vsel >= P.frame.outline.length) ui.vsel = null; rebuild(true); }
+  function undo() { clearTimeout(histT); hist.push(P); var p = hist.undo(); if (p) { adopt(p); syncUndo(); } }
+  function redo() { var p = hist.redo(); if (p) { adopt(p); syncUndo(); } }
 
   // ---------- three ----------
   var view = $('view'), renderer = null, scene, camera, controls, unit, ghost, deco, handles, sketchTex = null;
@@ -9757,31 +10314,36 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
   function cssVar(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
   function initThree() {
     if (!T) return false;
-    try { renderer = new T.WebGLRenderer({ antialias: true }); } catch (e) { renderer = null; }
+    try { renderer = new T.WebGLRenderer({ antialias: true, alpha: true }); } catch (e) { renderer = null; }
     if (!renderer) { $('fallback').style.display = 'block'; return false; }
     renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
     renderer.localClippingEnabled = true;
     view.insertBefore(renderer.domElement, view.firstChild);
     scene = new T.Scene();
-    camera = new T.PerspectiveCamera(30, 1, 1, 3000);
+    camera = new T.PerspectiveCamera(ui.render.fov || 30, 1, 1, 3000);
     controls = new T.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true; controls.dampingFactor = 0.12; controls.screenSpacePanning = true;
-    scene.add(new T.HemisphereLight(0xffffff, 0x8c9299, 0.95));
-    var d1 = new T.DirectionalLight(0xffffff, 0.75); d1.position.set(-80, 200, 120); scene.add(d1);
-    var d2 = new T.DirectionalLight(0xffffff, 0.3); d2.position.set(160, 60, -120); scene.add(d2);
+    Rn.setup(renderer, scene);
+    controls.addEventListener('end', saveView);
+    var camT = null; controls.addEventListener('change', function () { if (ui.render.rotate) return; clearTimeout(camT); camT = setTimeout(saveView, 350); });      // the view coasts on after the pointer lets go
     unit = new T.Group(); ghost = new T.Group(); deco = new T.Group(); handles = new T.Group();
     scene.add(unit); scene.add(ghost); scene.add(deco); scene.add(handles);
-    theme();
     window.addEventListener('resize', resize);
     if (window.ResizeObserver) new ResizeObserver(resize).observe(view);
-    if (window.matchMedia) { var mq = window.matchMedia('(prefers-color-scheme: dark)'); if (mq.addEventListener) mq.addEventListener('change', theme); }
-    if (window.MutationObserver) new MutationObserver(theme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
     resize();
     bindPointer();
-    (function loop() { requestAnimationFrame(loop); controls.update(); renderer.render(scene, camera); })();
+    (function loop() { requestAnimationFrame(loop); controls.autoRotate = !!ui.render.rotate && !drag; controls.autoRotateSpeed = 1.2; controls.update(); renderer.render(scene, camera); })();
     return true;
   }
-  function theme() { if (scene) scene.background = new T.Color(cssVar('--viewport') || '#dce1e5'); }
+  var lastMode = null;
+  function applyRender() {
+    if (!renderer || !R) return;
+    var pl = R.planes, wide = P.show.neighbour ? pl.pitch : 0;
+    Rn.apply(ui.render, { x0: pl.x0, x1: pl.x1 + wide, y0: pl.yt, y1: pl.yb, zb: R.z.bottom - (R.wig.face ? 0 : 0) - 1.5 });
+    if (camera.fov !== ui.render.fov) { camera.fov = ui.render.fov || 30; camera.updateProjectionMatrix(); }
+    if (lastMode !== ui.render.mode) { lastMode = ui.render.mode; Rn.refreshMaterials(scene); }
+    view.setAttribute('data-bg', ui.render.bg);
+  }
   function resize() {
     if (!renderer) return;
     var w = Math.max(1, view.clientWidth), h = Math.max(1, view.clientHeight);
@@ -9798,7 +10360,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     var half = camera.fov * Math.PI / 360, fit = Math.min(half, Math.atan(Math.tan(half) * camera.aspect));
     var dist = rad / Math.sin(fit) * 1.02;
     camera.position.set(t[0] + dir[0] / len * dist, t[1] + dir[1] / len * dist, t[2] + dir[2] / len * dist);
-    controls.target.set(t[0], t[1], t[2]); controls.update();
+    controls.target.set(t[0], t[1], t[2]); controls.update(); saveView();
   }
 
   // materials
@@ -9806,7 +10368,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
   function mat(color, o) {
     o = o || {};
     var key = color + ':' + (o.opacity || 1) + ':' + (o.metal || 0) + ':' + (o.side || 0);
-    if (!mats[key]) mats[key] = new T.MeshStandardMaterial({ color: color, roughness: o.rough != null ? o.rough : 0.7, metalness: o.metal || 0.05, transparent: (o.opacity || 1) < 1, opacity: o.opacity || 1, depthWrite: (o.opacity || 1) >= 1, side: o.side ? T.DoubleSide : T.FrontSide });
+    if (!mats[key]) mats[key] = new T.MeshStandardMaterial({ envMapIntensity: 0.6, color: color, roughness: o.rough != null ? o.rough : 0.7, metalness: o.metal || 0.05, transparent: (o.opacity || 1) < 1, opacity: o.opacity || 1, depthWrite: (o.opacity || 1) >= 1, side: o.side ? T.DoubleSide : T.FrontSide });
     return mats[key];
   }
   var lineMat = T ? new T.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.35 }) : null;
@@ -9821,7 +10383,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     var g = new T.ExtrudeGeometry(shapes, { depth: Math.max(0.001, z1 - z0), bevelEnabled: false, curveSegments: 1 });
     g.rotateX(-Math.PI / 2); g.translate(0, z0, 0);          // world: X = x, Y = z (up), Z = plan y
     var m = new T.Mesh(g, material);
-    if (edges !== false) m.add(new T.LineSegments(new T.EdgesGeometry(g, 30), lineMat));
+    if (edges !== false) { var ls = new T.LineSegments(new T.EdgesGeometry(g, 30), lineMat); ls.userData.edge = true; m.add(ls); m.userData.hasEdges = true; }
     return m;
   }
   function b64(s) { var bin = atob(s), n = bin.length, u = new Uint8Array(n); for (var i = 0; i < n; i++) u[i] = bin.charCodeAt(i); return u.buffer; }
@@ -9837,7 +10399,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
       g.computeVertexNormals(); g.userData.keep = true;
       var c = gr.color, lum = Math.max(c[0], c[1], c[2]);
       var col = new T.Color(Math.max(c[0], 0.045), Math.max(c[1], 0.045), Math.max(c[2], 0.05));
-      return { geo: g, mat: new T.MeshStandardMaterial({ color: col, roughness: lum > 0.5 ? 0.35 : 0.6, metalness: (c[0] > c[2] * 1.5 && lum > 0.4) || lum > 0.7 ? 0.7 : 0.1 }) };
+      return { geo: g, mat: new T.MeshStandardMaterial({ color: col, roughness: lum > 0.5 ? 0.3 : 0.55, metalness: (c[0] > c[2] * 1.5 && lum > 0.4) || lum > 0.7 ? 0.85 : 0.1 }) };
     });
     var grp = new T.Group();
     geoCache[name].forEach(function (e) { grp.add(new T.Mesh(e.geo, e.mat)); });
@@ -9859,12 +10421,31 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     var grp = new T.Group(); grp.userData.partId = p.id;
     var selected = ui.sel === p.id;
     function bodies(material, list) { (list || p.bodies).forEach(function (b) { if (!b.slot) grp.add(extrude([{ outer: b.pts, holes: [] }], b.z0, b.z1, material)); }); }
+    var mode = ui.render.mode, real = mode === 'real';
     if (p.type === 'bb_shell') {
-      if (!ui.hideShell) { bodies(mat(0x26282c, { rough: 0.9 })); grp.add(holesMesh(0, 0, p.z1 + 0.02, R.wig.face_t > 0 ? 0x26282c : 0xa67c2e)); }
+      if (!ui.hideShell) {
+        bodies(Rn.shell(mode, P.look));
+        if (!R.wig.face) { if (real) grp.add(Rn.shellDecal(R.wig, P.look, p.z1 + 0.012)); else grp.add(holesMesh(0, 0, p.z1 + 0.02, 0xa67c2e)); }
+        grp.traverse(function (o) { o.userData.lineColor = 0x8c8c98; });
+      }
     } else if (p.type === 'bb_face') {
-      if (!ui.hideShell) { bodies(mat(0xc9a43a, { metal: 0.6, rough: 0.4 })); grp.add(holesMesh(0, 0, p.z1 + 0.02, 0x1a1a1a)); }
+      if (!ui.hideShell) {
+        var fc = R.wig.face, b0 = p.bodies[0];
+        if (fc.holes) {              // the real board: every hole cut through at its small diameter; the countersinks and lands are painted on
+          var key = 'face:' + fc.holes.length + ':' + fc.y0 + ':' + b0.z0 + ':' + b0.z1;
+          if (!geoCache[key]) {
+            var holes = fc.holes.map(function (h) { var a = [], n = h[3] > 1 ? 14 : 8; for (var i = 0; i < n; i++) a.push([h[0] + Math.cos(i / n * 6.2832) * h[3] / 2, h[1] - Math.sin(i / n * 6.2832) * h[3] / 2]); return a; });
+            var fm = extrude([{ outer: b0.pts, holes: holes }], b0.z0, b0.z1, null, false); fm.geometry.userData.keep = true; geoCache[key] = fm.geometry;
+          }
+          var mk = Rn.MASK[P.look.face_mask] || Rn.MASK.black;
+          var face = new T.Mesh(geoCache[key], real ? Rn.board(mode, mk, { mask: P.look.face_mask, plated: true, finish: P.look.finish }) : mat(0xc9a43a, { metal: 0.6, rough: 0.4 }));
+          face.userData.lineColor = 0xd9b441; grp.add(face);
+          if (real) grp.add(Rn.faceDecal(fc, P.look, b0.z1 + 0.012));
+          var ol = new T.LineSegments(new T.EdgesGeometry(new T.ExtrudeGeometry(new T.Shape(b0.pts.map(function (q) { return new T.Vector2(q[0], -q[1]); })), { depth: 0.001, bevelEnabled: false }).rotateX(-Math.PI / 2).translate(0, b0.z1, 0), 30), lineMat); ol.userData.edge = true; face.add(ol); face.userData.hasEdges = true;
+        } else { bodies(mat(0xc9a43a, { metal: 0.6, rough: 0.4 })); grp.add(holesMesh(0, 0, p.z1 + 0.02, 0x1a1a1a)); }
+      }
     } else if (p.type === 'wig_pcb') {
-      bodies(mat(0x15201a, { rough: 0.6 }));
+      bodies(real ? Rn.board(mode, '#15201a', P.look) : mat(0x15201a, { rough: 0.6 }));
     } else if (p.type === 'probe') {
       var pr = R.probe, len = pr.y1 - pr.y0;
       var c = new T.Mesh(new T.CylinderGeometry(pr.dia / 2, pr.dia / 2, len - 3, 24), mat(0xd9dcdf, { metal: 0.5, rough: 0.35 }));
@@ -9884,10 +10465,12 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
         outer.add(inner); grp.add(outer);
         if (ui.envelopes || selected) bodies(new T.MeshBasicMaterial({ color: selected ? 0xffb300 : 0x2277dd, wireframe: true, transparent: true, opacity: 0.5 }));
       } else {
-        bodies(mat(p.color != null ? p.color : 0x888888, { metal: 0.3, rough: 0.5 }));
+        bodies(real ? Rn.part(mode, p.color != null ? p.color : 0x888888) : mat(p.color != null ? p.color : 0x888888, { metal: 0.3, rough: 0.5 }));
         if (selected) bodies(new T.MeshBasicMaterial({ color: 0xffb300, wireframe: true, transparent: true, opacity: 0.6 }));
       }
       bodies(mat(0x2d7fd0, { opacity: 0.28, side: 1 }), p.ghosts);
+      var pc = Cat.parts[p.type];
+      if (real && pc && pc.screen && P.look.screen !== false) grp.add(Rn.screenMesh(p, pc.screen, p.z1 + 0.015));
     }
     return grp;
   }
@@ -9918,8 +10501,11 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     var idx = {}; R.layers.forEach(function (L, i) { idx[L.id] = i; });
     R.layers.forEach(function (L, i) {
       if (ui.hidden[L.id] || !L.shape.length) return;
-      var m = extrude(L.shape, L.z0, L.z1, mat(parseInt(Exp.LAYER_COLORS[i % Exp.LAYER_COLORS.length].slice(1), 16), { rough: 0.75 }));
-      m.position.y = i * ui.explode; m.userData.layerId = L.id; unit.add(m);
+      var lc = Exp.LAYER_COLORS[i % Exp.LAYER_COLORS.length];
+      var m = extrude(L.shape, L.z0, L.z1, Rn.board(ui.render.mode, lc, P.look));
+      m.position.y = i * ui.explode; m.userData.layerId = L.id; m.userData.lineColor = parseInt(lc.slice(1), 16); m.children.forEach(function (ch) { ch.userData.lineColor = m.userData.lineColor; });
+      if (ui.render.mode === 'real' && ui.render.decals !== false && !(drag && drag.moved)) { var dc = Rn.boardDecal(L, R.parts, { x0: R.planes.x0 - 2, x1: R.planes.x1 + 2, y0: R.planes.yt - 2, y1: R.planes.yb + 2 }, P.look); if (dc) m.add(dc); }
+      unit.add(m);
     });
     R.parts.forEach(function (p) {
       var o = partObject(p), li = p.mountLayer != null && idx[p.mountLayer] != null ? idx[p.mountLayer] : 0;
@@ -9931,12 +10517,18 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
       s.mmc.forEach(function (q) { var b = new T.Mesh(new T.BoxGeometry(0.9, 0.5, 0.9), mat(0x18b7c9)); b.position.set(q.x, q.side === 'F' ? zt + 0.25 : -R.wig.pcb_t - 0.25, q.y); unit.add(b); });
       s.tmag.forEach(function (q) { var b = new T.Mesh(new T.BoxGeometry(2.9, 1.1, 1.6), mat(0xc0399f)); b.position.set(q.x, q.side === 'F' ? zt + 0.55 : -R.wig.pcb_t - 0.55, q.y); unit.add(b); });
     }
+    Rn.finish([unit], ui.render);
     if (P.show.neighbour) {
       var g = unit.clone(true);
-      g.traverse(function (o) { if (o.isMesh) o.material = ghostMat; if (o.isLineSegments) o.visible = false; });
+      g.traverse(function (o) { if (o.isMesh) { o.material = ghostMat; o.castShadow = false; if (o.userData.decal) o.visible = false; } if (o.isLineSegments) o.visible = false; });
       g.position.x = R.planes.pitch; ghost.add(g);
     }
     if (P.show.header40) deco.add(header40());
+    var cp = R.checks.grid.coupler;
+    if (cp && (P.show.coupler || P.show.neighbour)) {          // the edge coupler, centred in the space between this unit's breadboard and the next
+      var cm = new T.Mesh(new T.BoxGeometry(cp.across, cp.thick, cp.len), new T.MeshStandardMaterial({ color: cp.fits ? 0xfc0289 : 0xff4d3d, transparent: true, opacity: 0.55, roughness: 0.5, depthWrite: false }));
+      cm.position.set((cp.x0 + cp.x1) / 2, cp.zc, cp.yc); cm.add(new T.LineSegments(new T.EdgesGeometry(cm.geometry), new T.LineBasicMaterial({ color: 0xfc0289 }))); deco.add(cm);
+    }
     if (ui.planes) {
       [R.planes.xl, R.planes.xr].forEach(function (x) {
         var pl = new T.Mesh(new T.PlaneGeometry(R.planes.yb - R.planes.yt + 10, 18), new T.MeshBasicMaterial({ color: 0xd43c2f, transparent: true, opacity: 0.1, side: T.DoubleSide, depthWrite: false }));
@@ -9950,7 +10542,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
       }); }); });
     }
     if (ui.sketch && SKETCH) {                         // Kevin's notebook page, rectified, lying just above the top face
-      if (!sketchTex) { sketchTex = new T.TextureLoader().load(SKETCH.src); sketchTex.minFilter = T.LinearFilter; }
+      if (!sketchTex) { sketchTex = new T.TextureLoader().load(SKETCH.src); sketchTex.minFilter = T.LinearFilter; sketchTex.encoding = T.sRGBEncoding; }
       var sw = SKETCH.x1 - SKETCH.x0, sh = SKETCH.y1 - SKETCH.y0, sg = new T.PlaneGeometry(sw, sh);
       sg.rotateX(-Math.PI / 2);
       var sm = new T.Mesh(sg, new T.MeshBasicMaterial({ map: sketchTex, transparent: true, opacity: ui.sketchOpacity, depthWrite: false, depthTest: false }));
@@ -9970,7 +10562,8 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
         hm.position.set(q.x, hy2, q.y); hm.renderOrder = 7; hm.userData.vertex = i; handles.add(hm);
       });
     }
-    applyClip();
+    Rn.linear([unit, ghost, deco, handles]);
+    applyClip(); applyRender();
   }
   function applyClip() {
     if (!renderer) return;
@@ -10055,6 +10648,8 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     dom.addEventListener('dblclick', function (ev) { if (!pickPart(ev)) setView('iso'); });
     window.addEventListener('keydown', function (ev) {
       if (/INPUT|SELECT|TEXTAREA/.test((ev.target.tagName || ''))) return;
+      if ((ev.ctrlKey || ev.metaKey) && (ev.key === 'z' || ev.key === 'Z')) { ev.preventDefault(); if (ev.shiftKey) redo(); else undo(); return; }
+      if ((ev.ctrlKey || ev.metaKey) && ev.key === 'y') { ev.preventDefault(); redo(); return; }
       var u = ui.editOutline && ui.vsel != null ? P.frame.outline[ui.vsel] : (ui.sel ? userPart(ui.sel) : null); if (!u) return;
       var s = ev.shiftKey ? 1.27 : 0.1, d = { ArrowLeft: [-s, 0], ArrowRight: [s, 0], ArrowUp: [0, -s], ArrowDown: [0, s] }[ev.key];
       if (!d) return;
@@ -10096,7 +10691,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     var x = old ? old.x : 56, mount = old ? clone(old.mount) : { on: R.layers[0].id, side: 'top' };
     P.parts = P.parts.filter(function (p) { return !/^port/.test(p.id); });
     var yt = R.planes.yt, types = Cat.portTypes[kind].parts;
-    var back = { m2_socket: 8.35, pcie_x1_ra: 11, sfp_cage: 0 };
+    var back = { m2_socket: 8.35, pcie_x1_ra: 11, sfp_cage: 0, minipcie: 6.0, sodimm_ddr4: 23.5 };
     types.forEach(function (t, i) {
       P.parts.push({ id: i ? 'port' + (i + 1) : 'port', type: t, x: +(x + (types.length > 1 ? (i - (types.length - 1) / 2) * 15.5 : 0)).toFixed(2), y: +(yt + 1.15 + back[t]).toFixed(2), rot: 0, mount: clone(mount) });
     });
@@ -10123,18 +10718,38 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
   }
 
   function renderControls() {
-    var c = $('controls'), keepScroll = c.scrollTop;
-    c.innerHTML = '';
+    var root = $('controls'), c = root, keepScroll = root.scrollTop, nsec = 0;
+    root.innerHTML = '';
+    function sect(title) {
+      var shut = !!ui.fold[title], body = el('div', { class: 'secbody' });
+      var h = el('h2', {}, [el('button', { type: 'button', class: 'sech', 'aria-expanded': String(!shut), text: title, onclick: function () { ui.fold[title] = !ui.fold[title]; saveView(); renderControls(); } })]);
+      var sec = el('section', { class: 'sec' + (shut ? ' shut' : ''), style: '--c: var(--r' + [2, 3, 7, 8, 10, 11, 5, 9, 12, 1][nsec++ % 10] + ')' }, [h, body]);
+      root.appendChild(sec); return body;
+    }
+    function viewRow(label, control, forId) { return row(label, control, '', forId); }
+    function vset(k, v, sceneToo) { ui.render[k] = v; applyRender(); if (sceneToo) buildScene(); saveView(); }
+    if (notice) root.appendChild(el('div', { class: 'notice', role: 'status' }, [el('span', { text: notice }), el('button', { type: 'button', class: 'quiet', text: 'ok', onclick: function () { notice = null; renderControls(); } })]));
     var g = P.grid, w = P.wig, f = P.frame;
-    c.appendChild(el('h2', { text: 'Breadboard' }));
+    c = sect('Breadboard');
     c.appendChild(row('Wig', seg([['integrated', 'Integrated'], ['removable', 'Removable']], w.mode, function (v) { w.mode = v; })));
     if (w.mode === 'removable') c.appendChild(row('1.27 mm header pair', seg([['top', 'Top side'], ['bottom', 'Bottom side']], w.connector_side, function (v) { w.connector_side = v; })));
-    c.appendChild(row('Shell height', num(w.shell.t, 0.05, function (v) { w.shell.t = v; }, { min: 1, max: 20, id: 'c-shell' }), 'mm', 'c-shell'));
-    c.appendChild(row('Face PCB on the shell', num(w.face_pcb_t, 0.2, function (v) { w.face_pcb_t = v; }, { min: 0, max: 3, id: 'c-face' }), 'mm', 'c-face'));
+    c.appendChild(row('Shell height', el('span', {}, [num(w.shell.t, 0.05, function (v) { w.shell.t = v; }, { min: 1, max: 20, id: 'c-shell' }), ' ', seg([[6.75, '6.75'], [7.1, '7.1']], w.shell.t, function (v) { w.shell.t = v; })]), 'mm', 'c-shell'));
+    c.appendChild(el('div', { class: 'hint', text: '6.75 is the moulding target and the older print; the Wiiig v7 print measures 7.1.' }));
+    var fc = w.face = w.face || { on: false, t: 0.71, sits: 'on', header_strip: true };
+    c.appendChild(check('c-faceon', 'Wiiig face board on the shell', fc.on, function (v) { fc.on = v; delete fc.plain; }));
+    if (fc.on) {
+      c.appendChild(row('Face thickness', el('span', {}, [num(fc.t, 0.01, function (v) { fc.t = v; }, { min: 0.2, max: 3, id: 'c-face' }), ' ', seg([[0.6, '0.6'], [0.71, '0.71'], [0.8, '0.8']], fc.t, function (v) { fc.t = v; })]), 'mm', 'c-face'));
+      c.appendChild(row('It sits', seg([['on', 'On the shell'], ['inset', 'Let into it']], fc.sits === 'inset' ? 'inset' : 'on', function (v) { fc.sits = v; })));
+      c.appendChild(check('c-facehs', 'Keep the strip with the 2 x 35 header holes', fc.header_strip !== false, function (v) { fc.header_strip = v; }));
+      c.appendChild(el('div', { class: 'hint', text: R.wig.face && R.wig.face.real ? 'From wiigtop.3mf: 78.74 x 58.42, 484 countersunk holes (2.03 down to 1.2) and 70 header holes. It runs 3.43 mm past the body\'s top edge' + (fc.header_strip !== false ? ', over the frame\'s top board.' : '; trimmed here.') + ' Top of the breadboard is now z = ' + R.z.bbTop + '.' : 'A plain rectangle of that thickness.' }));
+    }
 
-    c.appendChild(el('h2', { text: '0.1 inch grid' }));
-    c.appendChild(row('Left strip', seg([[0, 'none'], [1, '2.54'], [2, '5.08']], g.dead_rows_left, function (v) { var shift = (g.dead_rows_left - v) * g.pitch; g.dead_rows_left = v; P.frame.outline.forEach(function (q) { if (q.x < -0.01 || q.sx) { q.sx = 1; q.x = +(q.x + shift).toFixed(3); } }); P.parts.forEach(function (p) { if (p.x < 5) p.x = +(p.x + shift).toFixed(3); }); P.probe.dock.x = -v * g.pitch / 2; if (v === 0) P.probe.dock.enabled = false; })));
+    c = sect('0.1 inch grid');
+    c.appendChild(row('Left strip', seg([[0, 'none'], [1, '2.54'], [2, '5.08'], [3, '7.62']], g.dead_rows_left, function (v) { var shift = (g.dead_rows_left - v) * g.pitch; g.dead_rows_left = v; P.frame.outline.forEach(function (q) { if (q.x < -0.01 || q.sx) { q.sx = 1; q.x = +(q.x + shift).toFixed(3); } }); P.parts.forEach(function (p) { if (p.x < 5) p.x = +(p.x + shift).toFixed(3); }); P.probe.dock.x = -v * g.pitch / 2; if (v === 0) P.probe.dock.enabled = false; })));
     c.appendChild(el('div', { class: 'hint', text: 'Unit pitch ' + R.planes.pitch + ' mm = ' + Math.round(R.planes.pitch / g.pitch) + ' rows, ' + R.checks.grid.dead_rows + ' dead row' + (R.checks.grid.dead_rows > 1 ? 's' : '') + ' between units.' }));
+    c.appendChild(row('Edge coupler between units', sel([['none', 'none']].concat(Object.keys(Cat.couplers).map(function (k) { return [k, Cat.couplers[k].label]; })), g.coupler || 'none', function (v) { g.coupler = v; if (v !== 'none') P.show.coupler = true; }, 'c-cpl'), '', 'c-cpl'));
+    var cq = R.checks.grid.coupler;
+    if (cq) c.appendChild(el('div', { class: 'hint' + (cq.fits ? '' : ' bad'), text: 'Needs ' + cq.gap + ' mm between the two boards; the strip leaves ' + cq.have + (cq.fits ? ' (' + cq.spare + ' spare).' : '. It first fits at ' + cq.strip_needed + ' mm (' + cq.rows_needed + ' rows).') }));
     c.appendChild(check('c-nb', 'Show the next unit', P.show.neighbour, function (v) { P.show.neighbour = v; setTimeout(function () { setView('iso'); }, 0); }));
     c.appendChild(check('c-h40', 'Show a 1x40 header', P.show.header40, function (v) { P.show.header40 = v; }));
     if (P.show.header40) {
@@ -10144,7 +10759,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     var pc = el('input', { type: 'checkbox', id: 'c-planes', onchange: function (e) { ui.planes = e.target.checked; buildScene(); } }); pc.checked = ui.planes;
     c.appendChild(el('div', { class: 'row' }, [el('label', { for: 'c-planes', text: 'Show the grid planes' }), pc]));
 
-    c.appendChild(el('h2', { text: 'Outline' }));
+    c = sect('Outline');
     var eo = el('input', { type: 'checkbox', id: 'c-eo', onchange: function (e) { ui.editOutline = e.target.checked; if (!ui.editOutline) ui.vsel = null; else setTimeout(function () { setView('top'); }, 0); rebuild(true); } }); eo.checked = ui.editOutline;
     c.appendChild(el('div', { class: 'row' }, [el('label', { for: 'c-eo', text: 'Edit the outline (drag the dots)' }), eo]));
     if (SKETCH) { var sk = el('input', { type: 'checkbox', id: 'c-sk', onchange: function (e) { ui.sketch = e.target.checked; if (ui.sketch) setView('top'); rebuild(true); } }); sk.checked = ui.sketch;
@@ -10168,10 +10783,14 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
         el('button', { type: 'button', text: 'Add after', onclick: function () { var nx = ov[(ui.vsel + 1) % ov.length]; ov.splice(ui.vsel + 1, 0, { x: +((q.x + nx.x) / 2).toFixed(2), y: +((q.y + nx.y) / 2).toFixed(2) }); ui.vsel++; rebuild(true); } }), ' ',
         el('button', { type: 'button', text: 'Delete', onclick: function () { if (ov.length < 4) return; ov.splice(ui.vsel, 1); ui.vsel = null; rebuild(true); } })])]));
     } else c.appendChild(el('div', { class: 'hint', text: ov.length + ' vertices, clockwise from the top-left corner. Pick one to edit it. The strip edge belongs on x = ' + R.planes.xl + '.' }));
+    if (ov.some(function (q) { return q.x < R.planes.xl - 0.01; })) c.appendChild(el('div', { class: 'row' }, [el('span', { class: 'hint', text: 'The top-left block stands ' + (+(R.planes.xl - R.planes.x0).toFixed(2)) + ' mm past the strip.' }), el('button', { type: 'button', text: 'Make the left side straight', title: 'pull the block in to the strip edge and drop the vertices that no longer turn a corner', onclick: function () {
+      var xl = R.planes.xl; ov.forEach(function (q) { if (q.x < xl) q.x = xl; });
+      for (var pass = 0; pass < 3; pass++) for (var i = ov.length - 1; i >= 0 && ov.length > 4; i--) { var a = ov[(i + ov.length - 1) % ov.length], b = ov[i], n2 = ov[(i + 1) % ov.length]; if (Math.abs((b.x - a.x) * (n2.y - b.y) - (b.y - a.y) * (n2.x - b.x)) < 1e-6) ov.splice(i, 1); }
+      ui.vsel = null; rebuild(true); } })]));
     if (w.mode === 'integrated') c.appendChild(row('Fill notches in the one board', num(f.fill_notches || 0, 0.25, function (v) { f.fill_notches = v; }, { min: 0, max: 6, id: 'c-fn' }), 'mm', 'c-fn'));
     if (P.stack.some(function (L) { return L.kind === 'ring'; })) c.appendChild(row('Spacer ring wall', num(f.ring_wall || 2, 0.25, function (v) { f.ring_wall = v; }, { min: 0.5, max: 12, id: 'c-ring' }), 'mm', 'c-ring'));
 
-    c.appendChild(el('h2', { text: 'Stack, bottom to top' }));
+    c = sect('Stack, bottom to top');
     var tb = el('table', { class: 'stack' }, [el('tr', {}, [el('th', { text: '' }), el('th', { text: 'Name' }), el('th', { text: 'Kind' }), el('th', { class: 'n', text: 't' }), el('th', { class: 'n', text: 'gap' })])]);
     P.stack.forEach(function (L, i) {
       var eye = el('input', { type: 'checkbox', 'aria-label': 'show ' + L.id, onchange: function (e) { ui.hidden[L.id] = !e.target.checked; buildScene(); } }); eye.checked = !ui.hidden[L.id];
@@ -10186,16 +10805,20 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     });
     c.appendChild(tb);
     c.appendChild(el('div', { class: 'hint', text: 'gap = space under that board, where parts live. A board is opened only where a part passes through it.' }));
-    c.appendChild(el('div', { class: 'row' }, [el('button', { type: 'button', text: 'Level with the breadboard', title: 'share the space out so the top board is flush with the breadboard top', onclick: function () {
-      var n = P.stack.length - 1; if (n < 1) return; var tt = 0; P.stack.slice(1).forEach(function (L) { tt += L.t; }); var each = (R.z.bbTop - tt) / n; if (each < 0) return; P.stack.slice(1).forEach(function (L) { L.gap = +each.toFixed(3); }); rebuild(true); } }), el('span', {}, [
+    function level(target) { var n = P.stack.length - 1; if (n < 1) return; var tt = 0; P.stack.slice(1).forEach(function (L) { tt += L.t; }); var each = (target - tt) / n; if (each < 0) return; P.stack.slice(1).forEach(function (L) { L.gap = +each.toFixed(3); }); rebuild(true); }
+    c.appendChild(el('div', { class: 'row' }, [el('span', {}, [el('button', { type: 'button', text: R.wig.face ? 'Level with the shell' : 'Level with the breadboard', title: 'share the space out so the top board is flush with the top of the shell', onclick: function () { level(R.z.shellTop); } }),
+      R.wig.face && !R.wig.face.inset ? ' ' : null, R.wig.face && !R.wig.face.inset ? el('button', { type: 'button', text: 'with the face', title: 'flush with the top of the face board instead; the top board is then cut back where the face board overlaps it', onclick: function () { level(R.z.bbTop); } }) : null]), el('span', {}, [
       el('button', { type: 'button', text: '+ board', onclick: function () { var n = P.stack.length, id = 'L' + n; while (P.stack.some(function (s) { return s.id === id; })) id = 'L' + (++n); P.stack.push({ id: id, name: 'Board ' + n, t: 1.6, gap: 1.0, kind: 'board' }); rebuild(true); } }),
       ' ',
       el('button', { type: 'button', text: '- top', onclick: function () { if (P.stack.length < 2) return; var gone = P.stack.pop().id, top = P.stack[P.stack.length - 1].id; P.parts.forEach(function (p) { if (p.mount && p.mount.on === gone) p.mount.on = top; }); rebuild(true); } })
     ])]));
 
-    c.appendChild(el('h2', { text: 'Parts' }));
+    c = sect('Parts');
     var dsp = userPart('display');
-    if (dsp) c.appendChild(row('Display', sel([['display_amoled147', '1.47" AMOLED'], ['display_tft147', '1.47" TFT']], dsp.type, function (v) { dsp.type = v; }, 'c-dsp'), '', 'c-dsp'));
+    c.appendChild(row('Display', sel([['none', 'none']].concat(Cat.displays.map(function (k) { return [k, Cat.parts[k].label]; })), dsp ? dsp.type : 'none', function (v) {
+      if (v === 'none') { P.parts = P.parts.filter(function (q) { return q.id !== 'display'; }); if (ui.sel === 'display') ui.sel = null; }
+      else if (dsp) dsp.type = v; else P.parts.unshift({ id: 'display', type: v, x: 19, y: -11.8, rot: 90, mount: { flush: 'top', offset: 0 } });
+    }, 'c-dsp'), '', 'c-dsp'));
     c.appendChild(row('Expansion port', sel(Object.keys(Cat.portTypes).map(function (k) { return [k, Cat.portTypes[k].label]; }), currentPort(), function (v) { setPort(v); }, 'c-port'), '', 'c-port'));
     (Cat.controls || []).forEach(function (ctl) {
       c.appendChild(row(ctl.label, sel(ctl.options, controlValue(ctl), function (v) { setControl(ctl, v); }, 'c-ctl-' + ctl.key), '', 'c-ctl-' + ctl.key));
@@ -10239,10 +10862,13 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
       }
       c.appendChild(el('div', { class: 'row' }, [el('span', { class: 'hint', text: 'Arrow keys nudge 0.1 mm, with Shift 1.27 mm.' }), el('button', { type: 'button', text: 'Remove', onclick: function () { P.parts = P.parts.filter(function (p) { return p.id !== u.id; }); ui.sel = null; rebuild(true); } })]));
     }
-    var addSel = el('select', { id: 'c-add', 'aria-label': 'part type to add' }, Object.keys(Cat.parts).map(function (k) { return el('option', { value: k, text: Cat.parts[k].label }); }));
-    c.appendChild(el('div', { class: 'row' }, [addSel, el('button', { type: 'button', text: 'Add', onclick: function () { var t = addSel.value, n = 1, id; do { id = t.split('_')[0] + (n++); } while (P.parts.some(function (p) { return p.id === id; })); P.parts.push({ id: id, type: t, x: 60, y: +(R.planes.yt / 2).toFixed(1), rot: 0, mount: { on: boardFor(Cat.parts[t].on), side: 'top' } }); ui.sel = id; rebuild(true); } })]));
+    var groups = {}, gname = { display: 'Displays', wheel: 'Inputs', nav: 'Inputs', joy: 'Inputs', button: 'Inputs', custom: 'Inputs', port: 'Expansion ports', chip: 'Chips and tall parts', mech: 'Mechanical' };
+    Object.keys(Cat.parts).forEach(function (k) { var gn = gname[Cat.parts[k].group] || 'Connectors'; (groups[gn] = groups[gn] || []).push(k); });
+    var addSel = el('select', { id: 'c-add', 'aria-label': 'part type to add' }, Object.keys(groups).map(function (gn) { return el('optgroup', { label: gn }, groups[gn].map(function (k) { return el('option', { value: k, text: Cat.parts[k].label }); })); }));
+    addSel.value = ui.lastAdd && Cat.parts[ui.lastAdd] ? ui.lastAdd : 'ic_ch446q';
+    c.appendChild(el('div', { class: 'row' }, [addSel, el('button', { type: 'button', text: 'Add', onclick: function () { var t = addSel.value, n = 1, id; ui.lastAdd = t; do { id = t.split('_')[0] + (n++); } while (P.parts.some(function (p) { return p.id === id; })); P.parts.push({ id: id, type: t, x: 60, y: +(R.planes.yt / 2).toFixed(1), rot: 0, mount: { on: boardFor(Cat.parts[t].on), side: 'top' } }); ui.sel = id; rebuild(true); } })]));
 
-    c.appendChild(el('h2', { text: 'Probe dock' }));
+    c = sect('Probe dock');
     var pd = P.probe.dock;
     c.appendChild(check('c-dock', 'Dock in the left strip, between the boards', pd.enabled, function (v) { pd.enabled = v; }));
     if (pd.enabled) {
@@ -10255,8 +10881,26 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
       c.appendChild(row('Magnet dia x length', el('span', {}, [num(P.probe.magnet.dia, 0.5, function (v) { P.probe.magnet.dia = v; }, { min: 0.5, max: 10, label: 'magnet diameter' }), ' ', num(P.probe.magnet.len, 0.5, function (v) { P.probe.magnet.len = v; }, { min: 0.5, max: 10, label: 'magnet length' })]), 'mm'));
     }
 
-    c.appendChild(el('h2', { text: 'View' }));
-    var ex = el('input', { type: 'range', min: 0, max: 14, step: 0.5, value: ui.explode, id: 'c-ex', oninput: function (e) { ui.explode = parseFloat(e.target.value); buildScene(); } });
+    c = sect('View');
+    var rs = ui.render;
+    c.appendChild(viewRow('Drawn as', el('span', { class: 'seg', role: 'group' }, [['real', 'Real'], ['tech', 'Flat'], ['xray', 'X-ray'], ['lines', 'Lines']].map(function (o) { return el('button', { type: 'button', 'aria-pressed': String(rs.mode === o[0]), text: o[1], onclick: function () { vset('mode', o[0], true); renderControls(); } }); }))));
+    function vsel(id, k, opts, scene) { var x = el('select', { id: id, onchange: function (e) { var v = e.target.value; vset(k, isNaN(+v) || v === '' ? v : +v, scene); } }, opts.map(function (o) { return el('option', { value: o[0], text: o[1] }); })); x.value = String(rs[k]); return x; }
+    function vrange(id, k, min, max, step) { return el('input', { type: 'range', id: id, min: min, max: max, step: step, value: rs[k], oninput: function (e) { vset(k, parseFloat(e.target.value)); } }); }
+    function vchk(id, label, k, scene) { var x = el('input', { type: 'checkbox', id: id, onchange: function (e) { vset(k, e.target.checked, scene); } }); x.checked = !!rs[k]; return el('div', { class: 'row' }, [el('label', { for: id, text: label }), x]); }
+    c.appendChild(viewRow('Backdrop', vsel('c-bg', 'bg', [['console', 'Console grey'], ['deep', 'Dark'], ['studio', 'Studio fade'], ['paper', 'Paper'], ['white', 'White'], ['clear', 'None (clear PNG)']]), 'c-bg'));
+    c.appendChild(viewRow('Bench', vsel('c-ground', 'ground', [['shadow', 'Shadow only'], ['grid', '0.1 inch grid'], ['none', 'Nothing']]), 'c-ground'));
+    c.appendChild(viewRow('Lens', vsel('c-fov', 'fov', [[12, 'Flat (12 deg)'], [30, 'Normal (30 deg)'], [50, 'Wide (50 deg)']]), 'c-fov'));
+    if (rs.mode === 'real') {
+      c.appendChild(vchk('c-shadow', 'Shadows', 'shadows'));
+      c.appendChild(viewRow('Exposure', vrange('c-exp', 'exposure', 0.4, 2, 0.05), 'c-exp'));
+      c.appendChild(viewRow('Light from', vrange('c-sun', 'sun', 0, 360, 5), 'c-sun'));
+      c.appendChild(vchk('c-decals', 'Part outlines printed on the boards', 'decals', true));
+      c.appendChild(vchk('c-edges', 'Draw edges', 'edges', true));
+    }
+    c.appendChild(viewRow('Light level', vrange('c-light', 'light', 0.3, 2, 0.05), 'c-light'));
+    c.appendChild(vchk('c-rot', 'Turn slowly', 'rotate'));
+    c.appendChild(el('div', { class: 'row' }, [el('span', { class: 'hint', text: 'Save the picture as a PNG:' }), el('span', {}, [el('button', { type: 'button', text: 'As shown', onclick: function () { savePng(1); } }), ' ', el('button', { type: 'button', text: '2x', onclick: function () { savePng(2); } })])]));
+    var ex = el('input', { type: 'range', min: 0, max: 14, step: 0.5, value: ui.explode, id: 'c-ex', oninput: function (e) { ui.explode = parseFloat(e.target.value); buildScene(); saveView(); } });
     c.appendChild(row('Explode', ex, '', 'c-ex'));
     var cs = el('select', { id: 'c-clip', onchange: function (e) { ui.clipAxis = e.target.value; applyClip(); } }, [['off', 'off'], ['x', 'across (x)'], ['y', 'down the board (y)'], ['z', 'by height (z)']].map(function (o) { return el('option', { value: o[0], text: o[1] }); })); cs.value = ui.clipAxis;
     c.appendChild(row('Section cut', cs, '', 'c-clip'));
@@ -10266,7 +10910,39 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     var en = el('input', { type: 'checkbox', id: 'c-env', onchange: function (e) { ui.envelopes = e.target.checked; buildScene(); } }); en.checked = ui.envelopes;
     c.appendChild(el('div', { class: 'row' }, [el('label', { for: 'c-env', text: 'Show pocket envelopes' }), en]));
     c.appendChild(check('c-sens', 'Show the magnetometers', P.show.sensors, function (v) { P.show.sensors = v; }));
-    c.scrollTop = keepScroll;
+    c.appendChild(row('Magnetometer layout', sel([['wigledmag', 'WigLEDmag: 9 TMAG + 8 MMC'], ['plan18', 'Plan: 3 x 6 MMC5603'], ['plan32', 'Plan: 4 x 8 MMC5603']], P.show.sensor_layout || 'wigledmag', function (v) { P.show.sensor_layout = v; P.show.sensors = true; }, 'c-sensl'), '', 'c-sensl'));
+    c = sect('Look');
+    var lk = P.look = P.look || {};
+    function lsel(id, k, opts) { return sel(opts, lk[k] || opts[0][0], function (v) { lk[k] = v; }, id); }
+    var colours = [['black', 'black'], ['white', 'white'], ['green', 'green'], ['purple', 'purple'], ['blue', 'blue'], ['red', 'red']];
+    c.appendChild(row('Board soldermask', lsel('c-mask', 'mask', colours), '', 'c-mask'));
+    c.appendChild(row('Face board soldermask', lsel('c-fmask', 'face_mask', colours), '', 'c-fmask'));
+    c.appendChild(row('Silkscreen', lsel('c-silk', 'silk', [['white', 'white'], ['black', 'black'], ['yellow', 'yellow']]), '', 'c-silk'));
+    c.appendChild(row('Copper finish', seg([['enig', 'ENIG gold'], ['hasl', 'HASL']], lk.finish || 'enig', function (v) { lk.finish = v; })));
+    c.appendChild(row('Shell', seg([['black', 'Black'], ['white', 'White'], ['clear', 'Clear']], lk.shell || 'black', function (v) { lk.shell = v; })));
+    c.appendChild(row('LEDs under the holes', lsel('c-leds', 'leds', [['off', 'off'], ['rainbow', 'rainbow'], ['rails', 'rails lit'], ['probe', 'probe cursor']]), '', 'c-leds'));
+    c.appendChild(check('c-scr', 'Light the display', lk.screen !== false, function (v) { lk.screen = v; }));
+    c.appendChild(el('div', { class: 'hint', text: 'How the Real view paints things. None of it changes the geometry or the files.' }));
+
+    c = sect('Saved designs');
+    c.appendChild(el('div', { class: 'hint', text: State.available() ? 'The design, the view settings and the camera are kept in this browser and come back when the page is reloaded. Nothing is sent anywhere.' : 'This browser is not letting the page keep anything. Use Copy code or Export to keep a design.' }));
+    var nameIn = el('input', { type: 'text', id: 'c-savename', placeholder: 'name this design', 'aria-label': 'name for a saved copy', value: ui.saveName || '' });
+    c.appendChild(el('div', { class: 'row' }, [nameIn, el('button', { type: 'button', text: 'Save a copy', onclick: function () { var n = (nameIn.value || '').trim() || ('design ' + new Date().toISOString().slice(0, 16).replace('T', ' ')); ui.saveName = n; notice = State.putSave(n, P) ? null : 'The copy could not be kept (the browser refused the storage).'; saveView(); renderControls(); } })]));
+    var sv = State.saves();
+    if (sv.length) { var sl = el('div', { class: 'savelist' }); sv.forEach(function (e) {
+      sl.appendChild(el('div', { class: 'row' }, [el('span', { class: 'savename', text: e.name, title: (e.rev || '') + '  ' + new Date(e.t).toLocaleString() }), el('span', {}, [
+        el('button', { type: 'button', text: 'Open', onclick: function () { var q = State.getSave(e.name, DEFAULTS); if (q) { ui.saveName = e.name; adopt(q); } } }), ' ',
+        el('button', { type: 'button', class: 'quiet', text: 'Delete', 'aria-label': 'delete ' + e.name, onclick: function () { State.delSave(e.name); renderControls(); } })])]));
+    }); c.appendChild(sl); }
+    var canLink = /^https?:$/.test(location.protocol) && (function () { try { return window.top === window; } catch (e) { return false; } })();
+    var codeIn = el('input', { type: 'text', id: 'c-code', placeholder: 'paste a link, a code or the JSON', 'aria-label': 'a link, a code or JSON to open' });
+    function copy(text, what) { var done = function () { notice = what + ' copied.'; renderControls(); }; try { navigator.clipboard.writeText(text).then(done, function () { codeIn.value = text; codeIn.select(); }); } catch (e2) { codeIn.value = text; codeIn.select(); } }
+    c.appendChild(el('div', { class: 'row' }, [el('span', { class: 'hint', text: 'Hand it to someone, or to another browser:' }), el('span', {}, [
+      canLink ? el('button', { type: 'button', text: 'Copy link', onclick: function () { copy(location.href.split('#')[0] + '#p=' + State.encode(P, DEFAULTS), 'Link'); } }) : null, canLink ? ' ' : null,
+      el('button', { type: 'button', text: 'Copy code', onclick: function () { copy(State.encode(P, DEFAULTS), 'Code'); } })])]));
+    c.appendChild(el('div', { class: 'row' }, [codeIn, el('button', { type: 'button', text: 'Open', onclick: function () { try { var q = State.decode(codeIn.value, DEFAULTS); notice = null; adopt(q); } catch (e3) { notice = 'That could not be read: ' + e3.message + '.'; renderControls(); } } })]));
+    c.appendChild(el('div', { class: 'row' }, [el('span', {}, [el('button', { type: 'button', text: 'Undo', onclick: undo }), ' ', el('button', { type: 'button', text: 'Redo', onclick: redo })]), el('button', { type: 'button', text: 'Back to the built-in design', onclick: function () { adopt(clone(DEFAULTS)); } })]));
+    root.scrollTop = keepScroll;
   }
 
   // ---------- checks ----------
@@ -10293,9 +10969,12 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     });
     if (!unitsFit && g.units_clear_at) box.appendChild(line('warn', g.units_clear_at.dead_rows + ' rows', 'Two whole units clear each other at pitch ' + g.units_clear_at.pitch, 'That is ' + g.units_clear_at.extra_rows + ' more dead row' + (g.units_clear_at.extra_rows > 1 ? 's' : '') + ' than the strip gives. Plan view only; heights are not considered.'));
 
+    var cq = g.coupler;
+    if (cq) box.appendChild(line(cq.fits ? 'ok' : 'bad', cq.fits ? 'fits' : 'short', cq.label + ' between two units', 'Needs ' + cq.gap + ' mm between the two boards (housing ' + cq.across + ' x ' + cq.len + ' x ' + cq.thick + '). The strip leaves ' + cq.have + ' mm' + (cq.fits ? ', ' + cq.spare + ' spare. ' : '; it first fits with a ' + cq.strip_needed + ' mm strip. ') + (cq.tip_gap != null ? 'Its ' + cq.tongue + ' mm tongues meet about ' + cq.tip_gap + ' apart inside it. ' : 'Tongue ' + cq.tongue + ' long. ') + 'The tongue is not part of the outline yet, and the strip is board where the coupler would sit.'));
+
     box.appendChild(el('h2', { text: 'Stack height' }));
-    var d = c.flush.delta, fk = Math.abs(d) <= 0.1 ? 'ok' : Math.abs(d) <= 0.5 ? 'warn' : 'bad';
-    box.appendChild(line(fk, (d >= 0 ? '+' : '') + d + ' mm', 'Top board at ' + c.flush.frame_top + ', breadboard top ' + c.flush.bb_top, 'Total ' + c.flush.total + ' mm from the main board underside. Gaps: ' + c.flush.gaps.map(function (q) { return q.gap + ' under ' + q.below; }).join(', ') + '.'));
+    var hasFace = !!R.wig.face, d = hasFace ? c.flush.delta_shell : c.flush.delta, fk = Math.abs(d) <= 0.1 ? 'ok' : Math.abs(d) <= 0.5 ? 'warn' : 'bad';
+    box.appendChild(line(fk, (d >= 0 ? '+' : '') + d + ' mm', 'Top board at ' + c.flush.frame_top + (hasFace ? ', shell top ' + c.flush.shell_top + ', face board top ' + c.flush.bb_top : ', breadboard top ' + c.flush.bb_top), 'Total ' + (+(Math.max(c.flush.frame_top, c.flush.bb_top) - R.z.bottom).toFixed(2)) + ' mm from the main board underside' + (hasFace ? ' to the top of the ' + c.flush.face_t + ' mm face board' : '') + '. Gaps: ' + c.flush.gaps.map(function (q) { return q.gap + ' under ' + q.below; }).join(', ') + '.'));
     R.layers.forEach(function (L) { if (L.cutBy.length) box.appendChild(line(L.index === 0 || L.index === R.layers.length - 1 ? 'warn' : 'ok', L.id, L.name + ' is opened for ' + L.cutBy.join(', '), L.pocketArea + ' mm² removed' + (L.islands !== 1 ? ', which leaves it in ' + L.islands + ' pieces' : '') + '.')); else box.appendChild(line('ok', L.id, L.name + ' is whole')); });
 
     box.appendChild(el('h2', { text: 'Clashes' }));
@@ -10377,10 +11056,11 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     $('file').addEventListener('change', function (e) {
       var f = e.target.files[0]; if (!f) return;
       var rd = new FileReader();
-      rd.onload = function () { try { var o = JSON.parse(rd.result); if (!o.stack || !o.grid || !o.wig) throw new Error('not a v6_outline.json'); P = o; ui.sel = null; ui.vsel = null; rebuild(true); } catch (err) { $('rev').textContent = 'Could not load that file: ' + err.message; } };
+      rd.onload = function () { try { ui.sel = null; ui.vsel = null; adopt(State.decode(rd.result, DEFAULTS)); } catch (err) { $('rev').textContent = 'Could not load that file: ' + err.message; } };
       rd.readAsText(f); e.target.value = '';
     });
-    $('btn-reset').addEventListener('click', function () { P = clone(DEFAULTS); ui.sel = null; ui.vsel = null; ui.hidden = {}; rebuild(true); });
+    $('btn-reset').addEventListener('click', function () { ui.hidden = {}; adopt(clone(DEFAULTS)); });
+    $('btn-undo').addEventListener('click', undo); $('btn-redo').addEventListener('click', redo);
   }
 
   // ---------- go ----------
@@ -10393,50 +11073,35 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     if (full && !sceneOnly) renderControls();
     save();
   }
+  function savePng(scale) {
+    if (!renderer) return;
+    try { var url = Rn.png(renderer, scene, camera, scale), a = el('a', { href: url, download: 'jumperless_v6_' + ui.render.mode + '.png' }); document.body.appendChild(a); a.click(); a.remove(); }
+    catch (e) { notice = 'The picture could not be saved here (' + e.message + ').'; renderControls(); }
+  }
   function viewbar() {
     var vb = $('viewbar');
     [['iso', 'Iso'], ['top', 'Top'], ['under', 'Underside'], ['topedge', 'Top edge'], ['left', 'Left edge']].forEach(function (v) { vb.appendChild(el('button', { type: 'button', text: v[1], onclick: function () { setView(v[0]); } })); });
   }
+  function panels() {
+    ['panel-design', 'panel-checks'].forEach(function (id) {
+      var pn = $(id); if (!pn) return;
+      if (ui.panels[id]) pn.classList.add('shut');
+      var f = pn.querySelector('.fold'); if (f) { f.setAttribute('aria-expanded', String(!ui.panels[id])); f.addEventListener('click', function () { ui.panels[id] = !ui.panels[id]; pn.classList.toggle('shut', !!ui.panels[id]); f.setAttribute('aria-expanded', String(!ui.panels[id])); saveView(); setTimeout(resize, 0); }); }
+    });
+  }
   initThree();
   viewbar();
+  panels();
   bindExport();
   rebuild(true);
-  resize(); setView('iso');
-  window.V6App = { get params() { return P; }, get model() { return R; }, get camera() { return camera; }, get unit() { return unit; }, rebuild: rebuild, setView: setView, ui: ui };
+  resize();
+  if (boot.cam && camera && boot.cam.p && boot.cam.t) { camera.position.fromArray(boot.cam.p); controls.target.fromArray(boot.cam.t); controls.update(); } else setView('iso');
+  clearTimeout(histT); hist.push(P); syncUndo();
+  function flush() { clearTimeout(saveT); State.save(P, ui, camState()); }       // whatever is still waiting to be written goes out when the page is left
+  window.addEventListener('pagehide', flush); document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') flush(); });
+  window.V6App = { get params() { return P; }, get model() { return R; }, get camera() { return camera; }, get unit() { return unit; }, get scene() { return scene; }, rebuild: rebuild, setView: setView, ui: ui, undo: undo, redo: redo, state: State, boot: boot, savePng: savePng };
 })();
 
 </script>
-<style>
-/* slopswap: the artifact's own tokens now point at the Jumperless theme */
-:root,:root:not([data-theme="light"]),:root[data-theme="dark"]{--bg:var(--jl-bg,#27272b);--panel:var(--jl-surface,#323238);--ink:var(--jl-fg,#f3f3f5);--muted:var(--jl-muted,#aaaab5);--line:var(--jl-line,#4b4b54);--accent:var(--jl-accent,#f03060);--accent-ink:var(--jl-bg,#27272b);--sans:var(--jl-font-body,Lato,'Helvetica Neue',Arial,sans-serif);--mono:var(--jl-font-mono,ui-monospace,Menlo,Consolas,monospace);}
-/* phones: a control panel keeps at most 40% of the screen and scrolls inside itself; rows of chips scroll sideways */
-@media (max-width:700px){
-header,.topbar,.filters,aside.side{max-height:40vh;max-height:40svh;overflow-y:auto;overscroll-behavior:contain}
-.frow,.seg,.chips,.tabs,.toc,.lang{display:flex;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
-.frow::-webkit-scrollbar,.seg::-webkit-scrollbar,.chips::-webkit-scrollbar,.tabs::-webkit-scrollbar,.toc::-webkit-scrollbar{display:none}
-.frow>*,.seg>*,.chips>*,.tabs>*,.toc>*{flex:0 0 auto;width:auto;max-width:none}
-.frow>input,.frow>select{width:11rem}
-}
-</style>
-<style>
-/* slopswap, by tools/to_slopswap.py: the tool's own layout under the site's body.app (after the theme, so it wins) */
-html,body{height:100%}
-.stack input,.stack select,.stack td:first-child{font-size:12px}
-body.app{padding:0;font-size:13px;grid-template-rows:auto auto 1fr}
-body.app>.eyebrow{margin:.75rem .9rem .4rem}
-body.app h1{font-size:15px;margin:0}
-body.app h2{font-size:11px;margin:16px 0 6px;padding-bottom:4px}
-body.app table{margin-bottom:0}
-body.app .pill{font:500 11px var(--sans);padding:1px 7px;border-radius:9px;border:0}
-body.app .pill.info{background:var(--jl-surface-2,#3d3d44);color:var(--jl-fg,#f3f3f5)}
-@media (max-width:980px){body.app{grid-template-rows:auto auto auto}}
-@media (max-width:700px){
-  main{grid-template-rows:55vh auto auto;grid-template-rows:55svh auto auto}
-  #view{min-height:55vh;min-height:55svh}
-  aside.left{max-height:40vh;max-height:40svh;overflow-y:auto;overscroll-behavior:contain}
-  .vlist,#viewbar{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
-  #hud{display:none}
-}
-</style>
 </body>
 </html>
