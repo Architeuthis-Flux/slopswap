@@ -19,10 +19,10 @@
 <main class="page wide">
 <p class="eyebrow"><a href="../">slopswap</a> / <a href="./">V6</a></p>
 <h1>V6 board outline and stack</h1>
-<p class="muted">The readme of <code>JumperlessV6/v6mech</code>, rev A7 2026-11-24. Kevin Cappuccio with Claude.</p>
+<p class="muted">The readme of <code>JumperlessV6/v6mech</code>, rev A8b 2026-11-24. Kevin Cappuccio with Claude.</p>
 <ul class="get cycle">
   <li><a href="board-outline.html"><b>Open the 3D viewer</b></a></li>
-  <li><a href="board-outline-v6mech.zip" download><b>Download the folder</b> (.zip, 11.9 MB): parameters, source, KiCad and DXF outlines, STEP</a></li>
+  <li><a href="board-outline-v6mech.zip" download><b>Download the folder</b> (.zip, 12.0 MB): parameters, source, KiCad and DXF outlines, STEP</a></li>
 </ul>
 <figure><a href="board-outline-on-sketch.png"><img src="board-outline-on-sketch.png" alt="The outline (pink) laid over the notebook page it was traced from"></a><figcaption>The outline (pink) laid over the notebook page it was traced from: the viewer's sketch underlay, seen from above.</figcaption></figure>
 <figure><a href="board-outline-inputs.png"><img src="board-outline-inputs.png" alt="From the top edge"></a><figcaption>From the top edge: the click wheel under the top board at the corner, a nav switch through it, two button holes. Left, the pickers and the per-board tick boxes of the selected part.</figcaption></figure>
@@ -40,7 +40,10 @@ rev A6 the same day (a Magnetometers tab: the probe tracker's sensors as a list 
 face, dragged about on a plan with every hole coloured by how well the layout places the probe there);
 rev A7 the same day (the 2.2 inch bar display, a parts library with footprints and models from the parts
 inventory, a parts browser, cantilevered buttons, hiding what is plugged into a socket, and a KiCad export
-with the outline as lines and arcs and the parts as footprints).</p>
+with the outline as lines and arcs and the parts as footprints);
+rev A8 the same day (a display can sit behind a window: under the top board, the board cut to the active area
+with chamfered corners, glass let into the cut; and each bar display says what drives it, what it costs and
+where to get it).</p>
 <h2>Use it</h2>
 <ol>
 <li>Open <code>V6_outline_viewer.html</code> (double-click; it needs no server and no network).</li>
@@ -391,6 +394,53 @@ JumperlessFootprints; the RKJXM has no footprint yet (B25 says so too).</p>
 </div>
 <p><code>node build.mjs --check</code> exits 1 if two parts clash, a part runs into a board kept whole, or a bare
 breadboard no longer fits beside the unit.</p>
+<h2>Rev A8b: the tongue belongs to the top board</h2>
+<p>In A7 and A8 a cantilevered button's slot was cut by the same rule as any button's opening: in every board on
+the free side of the switch. So a switch on the underside of a board put the slot in the boards below it (a key
+hanging under the mid board cut the main board, with the tongue running the other way because the part was
+mirrored), a switch on the main board put it in the mid board as well as the top one, and a fourth board put it
+in two boards. Now:</p>
+<ul>
+<li>The slot is cut in the top board and in no other, whatever the stack and whichever board or face the switch is
+  on, and it stays where it is when the switch is turned over (Other side).</li>
+<li>A board between the switch and the top board gets the switch's plain opening. A board ticked open by hand
+  gets the plain opening too, never the slot.</li>
+<li>The switch can be on the board under the top board (pressed from above, the default) or on the underside of
+  the top board, riding the tongue and pressing on the board below. Anywhere else the checks say the tongue
+  cannot work it; they also say when the switch stops more than 1 mm short of the tongue.</li>
+<li><code>node tools/tonguecheck.mjs</code> tries seven arrangements in both wig variants and fails if a slot is in any
+  board but the top one.</li>
+</ul>
+<h2>What rev A8 adds</h2>
+<ul>
+<li><strong>A display behind a window.</strong> Select the display in the Parts list and tick <strong>Behind a window</strong>. The module then
+  hangs under the top board instead of coming up through it, and the top board is cut to the active area only:
+  <strong>Cut inside the active area by</strong> (0.3 mm all round by default, so the dead border is covered) and <strong>Corner
+  chamfer</strong> (2.0 mm) set the cut. <strong>Glass let into the cut</strong> adds a pane as thick as the top board, the cut less
+  the <strong>Gap round the glass</strong> (0.1 mm), ending flush with the top face; the lit picture is drawn under it.
+  In the JSON it is <code>"window": { "crop": 0.3, "chamfer": 2.0, "glass": 1, "gap": 0.1 }</code> on the display part
+  (an empty <code>{}</code> takes those defaults). A routed cut has a 0.4 to 0.5 mm radius in each of its eight corners,
+  which is not drawn; the pane needs the same radius.</li>
+<li><strong>Checks → Display window</strong> gives the cut, the share of the active area that shows, the pane's size, and the
+  room left under the module. <code>checks.txt</code> has the same under DISPLAY WINDOW, and <code>resolved.json</code> under
+  <code>checks.windows</code>. The pane is a body of the display part (<code>glass: true</code>), so the STEP export has it.</li>
+<li><strong>What it shows for the default design</strong> (the window is off by default, so nothing built-in has moved):</li>
+<li>2.2 inch bar, 1.6 mm top board: the cut is 14.36 x 53.76 and 93.9 % of the active area shows. The module
+    runs from z 3.53 to 5.15, 0.155 mm above the mid board, and runs into the click wheel (0.47 mm) and the
+    4.2 mm M.2 socket (0.57 mm). The top board keeps 325 mm² more than with the module through it.</li>
+<li>The same with a 1.0 mm top board (gap under it 2.375): no clashes, 0.755 mm under the module. With 0.8 mm
+    (gap 2.575): no clashes, 0.955 mm under it, which is room for a metal dome but not for a 1.7 mm tact.</li>
+<li>The 2.79 inch bar does not fit where the 2.2 sits, window or not: 24.4 mm wide, it overlaps the
+    breadboard shell by 134 mm².</li>
+<li><strong>Display → the line under the selector</strong>: pixels, controller, the bus the stock FPC brings out, prices on
+  2026-11-24, whole-screen frame rate on 50 MHz SPI, and links to the listings and the controller datasheet
+  (<code>DISPLAY_INFO</code> in <code>src/catalog.js</code>; the survey is <code>V6pile/notes/README_v6BarDisplay.md</code>).</li>
+<li>Two numbers in the display library disagree with the vendors and were left as they are: the 2.2 inch bar's
+  active area is 54.36 long in <code>displays_data.py</code> and 54.18 at EastRising (420 x 0.129), and its module is
+  60.11 long here against 59.11 on Shineworld's and EastRising's sheets. The window is cut from the library's
+  numbers, so with the vendors' figure the cut is 0.21 mm inside the active area at each end, not 0.3.</li>
+<li>Not run here: <code>tools/verify.py</code> (needs ezdxf) and <code>step_export.py</code> (needs cadquery).</li>
+</ul>
 <h2>What rev A7 adds</h2>
 <p>Rev A6 (the Magnetometers tab, next section down) was made in another session the same morning while this
 one was under way; A7 is the two merged, with nothing of A6 taken out.</p>
@@ -408,7 +458,7 @@ one was under way; A7 is the two merged, with nothing of A6 taken out.</p>
   "only what is in my parts inventory". Add drops the part in the middle of the view, selected, to be
   dragged. A selected part has Turn 90, Turn 45, Other side, Duplicate and Remove (keys R, Shift+R, F, D,
   Delete).</li>
-<li><strong>Cantilevered buttons.</strong> Any button can be given a tongue: a U-shaped slot cut in the board above it, so
+<li><strong>Cantilevered buttons.</strong> Any button can be given a tongue: a U-shaped slot cut in the top board over it, so
   the board is the key top. The default design has two beside the display (TS-1187A on the mid board, tongue
   16.5 × 3 mm in the top board). The checks give the force to click each one, and say when a slot breaks
   out at an edge or comes within 0.8 mm of another opening. <strong>In the 1.6 mm top board those two take about
