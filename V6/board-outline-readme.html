@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>V6 board outline and stack: the readme</title>
+<meta name="short-title" content="V6 outline readme">
+<meta name="description" content="How the V6 board outline tool works and what it found: the outline traced from the sketch, the 0.1 inch stacking rule, spaced boards, the input parts and where each lands, the checks, and what is not verified.">
+<link rel="stylesheet" href="../styles/jumperless.css">
+<style>
+  figure{margin:0 0 1.4em} figure img{display:block;border:1px solid var(--line);border-radius:6px}
+  .get{display:flex;flex-wrap:wrap;gap:.6rem 1rem;margin:0 0 1.6em;padding:0;list-style:none}
+  .get a{display:inline-block;padding:.5em .9em;border:1px solid var(--line);border-radius:6px;background:var(--surface);text-decoration:none;color:var(--fg)}
+  .get a:hover{border-color:var(--c,var(--accent))} .get a b{color:var(--c,var(--accent))}
+  td,th{vertical-align:top}
+</style>
+</head>
+<body>
+<main class="page wide">
+<p class="eyebrow"><a href="../">slopswap</a> / <a href="./">V6</a></p>
+<h1>V6 board outline and stack</h1>
+<p class="muted">The readme of <code>JumperlessV6/v6mech</code>, rev A3 2026-11-23. Kevin Cappuccio with Claude.</p>
+<ul class="get cycle">
+  <li><a href="board-outline.html"><b>Open the 3D viewer</b></a></li>
+  <li><a href="board-outline-v6mech.zip" download><b>Download the folder</b> (.zip, 7.1 MB): parameters, source, KiCad and DXF outlines, STEP</a></li>
+</ul>
+<figure><a href="board-outline-on-sketch.png"><img src="board-outline-on-sketch.png" alt="The outline (pink) laid over the notebook page it was traced from"></a><figcaption>The outline (pink) laid over the notebook page it was traced from: the viewer's sketch underlay, seen from above.</figcaption></figure>
+<figure><a href="board-outline-inputs.png"><img src="board-outline-inputs.png" alt="From the top edge"></a><figcaption>From the top edge: the click wheel under the top board at the corner, a nav switch through it, two button holes. Left, the pickers and the per-board tick boxes of the selected part.</figcaption></figure>
+
+<p>One parameter file describes the whole mechanical stack. A browser page shows it in 3D and lets you
+change it; the same code writes a KiCad board and a DXF per board, and a script turns it into a STEP
+assembly. Made 2026-11-23; rev A2 the same day (outline traced from the notebook page, boards spaced
+with parts between them); rev A3 the same day (input parts to choose from, and a per-board switch for what
+each part opens).</p>
+<h2>Use it</h2>
+<ol>
+<li>Open <code>V6_outline_viewer.html</code> (double-click; it needs no server and no network).</li>
+<li>Drag parts in the 3D view. Tick <strong>Edit the outline</strong> to drag the outline's vertices, and
+   <strong>Lay the notebook sketch over it</strong> to see the pencil drawing under the outline. Checks are on the right.
+   The page keeps your changes in the browser. <strong>Export files</strong> gives every file as text to copy or download.</li>
+<li>Under <strong>Parts</strong>, pick a click wheel, directional switch, joystick or buttons. Select any part to move it,
+   change the board it sits on, and tick which boards are opened for it.</li>
+<li>To make your changes the defaults: export "Parameters", save it over <code>v6_outline.json</code>, then
+   <code>node build.mjs</code>. That rewrites <code>out/</code> and the viewer.</li>
+<li>For Fusion: <code>pip install cadquery</code>, then <code>python3 step_export.py</code> writes
+   <code>out/&lt;variant&gt;/V6_stack_&lt;variant&gt;.step</code>.</li>
+</ol>
+<p><code>v6_outline.json</code> can also be edited by hand; every dimension has a name, and keys starting with <code>_</code>
+are comments.</p>
+<h2>Frame of reference</h2>
+<ul>
+<li>x right, y <strong>down</strong> (KiCad). x = 0 is the wig's left edge, y = 0 the wig body's top edge.
+  Breadboard column k is at x = 2.54 × k (k = 1..30).</li>
+<li>z = 0 is the top face of the main board, which is also the wig PCB's top face. z is up.</li>
+</ul>
+<h2>The outline</h2>
+<p><code>frame.outline</code> is a list of vertices, clockwise from the top-left corner, traced from the notebook page
+(photo a384f12f, warped so the drawn breadboard's corners land on the WigLEDmag's; read to about ±0.5 mm).
+Each vertex can carry a corner:</p>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>In the JSON</th>
+<th>Corner</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>nothing</td>
+<td>sharp</td>
+</tr>
+<tr>
+<td><code>"r": 2</code></td>
+<td>round</td>
+</tr>
+<tr>
+<td><code>"c": [cx, cy], "r": 2</code></td>
+<td>rounded chamfer: a chamfer with both ends blended. <code>cx</code> is the leg along the more horizontal edge, <code>cy</code> along the more vertical one</td>
+</tr>
+<tr>
+<td><code>"c": "wig"</code></td>
+<td>the WigLEDmag corner itself (2.51 × 2.11), copied point for point from its Edge.Cuts</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The WigLEDmag corner is a 2.21 × 1.58 chamfer with 1.0 mm blends; the bigger corners use the same
+construction with bigger numbers.</p>
+<p>Where the drawing and a hard reference disagree by less than the pencil's width, the reference wins: the
+strip's edge is on x = −5.08 (drawn −4.8 to −5.0), the band's right edge on x = 78.74 (drawn 79.0 to 79.3),
+the strip's end on the breadboard's bottom edge (drawn 0.5 lower). Everything else is as drawn, including
+the 1.7 mm step in the top edge at x ≈ 45 and the 0.5 mm bump on the strip's outer edge.</p>
+<p>In <code>integrated</code> mode the bottom board is this outline plus the breadboard's own outline as one piece; the
+seam along the strip is filled, and <code>frame.fill_notches</code> closes the notch at the top-right if wanted.</p>
+<h2>The 0.1 inch rule</h2>
+<ul>
+<li>Unit pitch = (31 + n) × 2.54, n = <code>grid.dead_rows_left</code> (0, 1 or 2): the strip's width in rows.
+  Two units side by side then have n + 1 dead rows between column 30 of one and column 1 of the next.</li>
+<li>The check places a neighbour one unit pitch away on each side and looks for overlap in plan:
+  a bare breadboard (the WigLEDmag outline), and a second whole unit. Edges that just touch are fine.</li>
+<li>A 1×40 header from column 1 puts pins 31 to 31 + n on dead rows and the rest in the next unit's holes.
+  Turn on "Show the next unit" and "Show a 1x40 header" to see it.</li>
+</ul>
+<h2>How the stack is built</h2>
+<ul>
+<li><code>stack</code> lists the boards bottom to top, each with its thickness and the <strong>gap</strong> under it. Parts live in
+  the gaps. The default is three 1.6 mm boards with 1.775 mm between them, which puts the top board flush
+  with the breadboard at 6.75. "Level with the breadboard" shares the space out again after a change.</li>
+<li>The bottom board is the main board. In <code>removable</code> mode it is the frame alone and the wig is its own PCB
+  (the real WigLEDmag outline) on a 2×35 1.27 mm right-angle header and socket, both on the top faces, so
+  the mated pair is inside the sandwich.</li>
+<li><strong>Openings are automatic, and only where needed.</strong> Each part has bodies with a plan shape and a height
+  range. A board is cut only where a body passes through it. The probe lies between the bottom and top
+  boards, so only a board in between is opened for it. A part that has to be reached from outside (a button,
+  a flat nav pad) also opens the boards above it, with a hole the size of its actuator.</li>
+<li><strong>Every part can overrule that, board by board.</strong> <code>"open": { "L2": true }</code> on a part opens that board for
+  it even though it stops short; <code>false</code> keeps the board whole even though the part runs into it, and the
+  check then says so. In the viewer these are the tick boxes under a selected part.</li>
+<li>Kind <code>ring</code> turns a board into a hollow spacer with <code>frame.ring_wall</code> of wall. None in the default stack.</li>
+<li><code>features</code> in the JSON adds manual cuts or tabs.</li>
+</ul>
+<h2>Controls</h2>
+<p>The input parts in the catalogue, with where each lands in the default stack (main board top at 0, mid
+board 1.775 to 3.375, top board 5.15 to 6.75). "Top" is the part's highest point against the top face.</p>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>Size</th>
+<th>Put on</th>
+<th>Top</th>
+<th>Boards opened</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Click wheel SIQ-02FVS3, no cap (default)</td>
+<td>base 10.3 × 11.1 × 2.0, wheel Ø14.5 from 2.0 to 4.0</td>
+<td>main</td>
+<td>2.75 below</td>
+<td>mid; <strong>the top board covers it</strong></td>
+</tr>
+<tr>
+<td>same, top board opened by hand</td>
+<td></td>
+<td>main</td>
+<td>2.75 below</td>
+<td>mid, top (Ø15 well)</td>
+</tr>
+<tr>
+<td>same, on the mid board</td>
+<td></td>
+<td>mid</td>
+<td>0.63 above</td>
+<td>top</td>
+</tr>
+<tr>
+<td>Click wheel with the V5 cap</td>
+<td>cap top at 5.75</td>
+<td>main</td>
+<td>1.0 below</td>
+<td>mid, top</td>
+</tr>
+<tr>
+<td>Nav stick ALPS RKJXM1015004 (through-hole, the bench part)</td>
+<td>11 × 11 × 6.6, lever Ø2.2 to 15</td>
+<td>main</td>
+<td>lever 8.25 above; body 0.15 below</td>
+<td>mid, top (11 × 11)</td>
+</tr>
+<tr>
+<td>Nav switch ALPS SKRHADE010 (SMD)</td>
+<td>7.45 × 7.5 × 1.85, stem to 5.0</td>
+<td>mid</td>
+<td>stem 1.63 above</td>
+<td>top (the body reaches 0.075 into it)</td>
+</tr>
+<tr>
+<td>same, on the main board</td>
+<td></td>
+<td>main</td>
+<td>1.75 below</td>
+<td>mid; top for access (Ø6.3)</td>
+</tr>
+<tr>
+<td>Nav pad Hroparts K1-1210UN-01 (SMD, flat)</td>
+<td>9.9 × 9.9 × 1.7</td>
+<td>mid</td>
+<td>1.68 below</td>
+<td>top for access (Ø8.4)</td>
+</tr>
+<tr>
+<td>same, on the top board</td>
+<td></td>
+<td>top</td>
+<td>1.7 above</td>
+<td>none</td>
+</tr>
+<tr>
+<td>Tact 5.1 × 5.1, 1.7 high (TS-1187A-C-C-B)</td>
+<td></td>
+<td>mid</td>
+<td>1.68 below</td>
+<td>top for access (Ø4.0)</td>
+</tr>
+<tr>
+<td>same, on the top board</td>
+<td></td>
+<td>top</td>
+<td>1.7 above</td>
+<td>none</td>
+</tr>
+<tr>
+<td>Thumbstick, Joy-Con type (Adafruit 5628)</td>
+<td>can 17.9 × 19.9 × 5.25, cap Ø15 to 13.7</td>
+<td>main</td>
+<td>cap 6.93 above</td>
+<td>mid, top</td>
+</tr>
+<tr>
+<td>Custom control</td>
+<td>body w × d × h, actuator Ø and top height, typed in</td>
+<td>main</td>
+<td>as typed</td>
+<td>as it falls</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Sources are in <code>src/catalog.js</code> beside each part. The SKRHADE010 and K1-1210UN footprints are already in
+JumperlessFootprints; the RKJXM has no footprint yet (B25 says so too).</p>
+<h2>Checks</h2>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Check</th>
+<th>What it tells you</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.1 inch stacking</td>
+<td>pitch on grid; a bare breadboard on either side; a second whole unit on either side; the pitch at which two units clear</td>
+</tr>
+<tr>
+<td>Stack height</td>
+<td>top board against breadboard top; which boards are opened, for what, and whether that leaves them in pieces</td>
+</tr>
+<tr>
+<td>Clashes</td>
+<td>parts that share space (plan overlap × height overlap); a part that runs into a board it was told not to open; parts that reach past the edge of their board</td>
+</tr>
+<tr>
+<td>Standing out</td>
+<td>how far each part stands above the top face</td>
+</tr>
+<tr>
+<td>Component room</td>
+<td>per board face, the area with nothing standing in front of it, against the 9,134 mm² of main-board courtyard from <code>docs/V6_area.json</code></td>
+</tr>
+<tr>
+<td>Probe dock</td>
+<td>that it stays between the outer boards; wall left in a cut board; the docked magnet's field at the nearest magnetometer; whether a dead-row pin line runs down the channel</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><code>node build.mjs --check</code> exits 1 if two parts clash, a part runs into a board kept whole, or a bare
+breadboard no longer fits beside the unit.</p>
+<h2>What rev A3 shows</h2>
+<ul>
+<li>The outline lies on the pencil lines to about half a millimetre (turn the sketch on to see it).</li>
+<li>A bare breadboard fits against either side at pitch 83.82 = 33 × 2.54, 3 dead rows. The step under the
+  top-left block is the WigLEDmag corner, so the neighbour's corner nests in it exactly.</li>
+<li><strong>A second whole unit does not fit at that pitch.</strong> The top-left block reaches x = −8.3, 3.2 mm past the
+  strip, and meets the other unit's band (51 mm² of board, plus the encoder wheel). Two units clear at
+  5 dead rows (pitch 88.9). Either of these brings it back to 3: pull the block in to −5.08 and move the
+  encoder 1.6 mm right; or keep the block and end the band 4.8 mm short on the right (which takes the USB-C corner with it).</li>
+<li>The click wheel has no cap and the top board covers it; it is reached from the corner. At its V5 offsets
+  from the new corner (5.83 mm from the left and top edges) its wheel, which tops out at 4.0, still meets
+  the underside of the display (3.7) by 0.3 mm where the two overlap in plan. A 7.1 shell clears it by 0.05.
+  The glass's square top-left corner also reaches about 1.2 mm past the top-left chamfer.</li>
+<li>The top edge left of the step is 0.2 mm above the display glass, so the top board has no rim there.</li>
+<li>USB-C at the V5 corner and a 21.9 mm M.2 socket use all of the top edge right of the step.</li>
+<li>Component room: about 11,600 mm² integrated (4,600 of it on the breadboard's part of the main board) and 5,800 mm² removable,
+  for 9,134 mm² of parts. Gaps of 1.775 mm take parts up to about 1.5 mm.</li>
+<li>A Ø3.6 probe between the outer boards opens the mid board along the strip and leaves 0.46 and 0.54 mm
+  walls. The strip's centreline is also a dead-row pin line. At 70 mm long with its tip at y = 1 it sticks
+  out 16 mm at the bottom.</li>
+</ul>
+<h2>Files</h2>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>What</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>v6_outline.json</code></td>
+<td>the parameters; the source of truth</td>
+</tr>
+<tr>
+<td><code>V6_outline_viewer.html</code></td>
+<td>the viewer, one file, built by <code>build.mjs</code></td>
+</tr>
+<tr>
+<td><code>build.mjs</code></td>
+<td>writes <code>out/</code> and the viewer; plain Node, no packages</td>
+</tr>
+<tr>
+<td><code>step_export.py</code></td>
+<td>STEP assembly from <code>out/&lt;variant&gt;/resolved.json</code> (CadQuery)</td>
+</tr>
+<tr>
+<td><code>src/geometry.js</code></td>
+<td>parameters → outline, boards, openings, parts, checks (browser and Node)</td>
+</tr>
+<tr>
+<td><code>src/catalog.js</code></td>
+<td>part definitions: bodies, clearances, models, where each number came from</td>
+</tr>
+<tr>
+<td><code>src/exporters.js</code></td>
+<td>DXF, KiCad, SVG and the text report</td>
+</tr>
+<tr>
+<td><code>src/viewer.js</code>, <code>src/viewer.html</code></td>
+<td>the page</td>
+</tr>
+<tr>
+<td><code>src/models.js</code>, <code>src/sketch.js</code></td>
+<td>part meshes and the sketch underlay for the viewer, made by <code>tools/prep_models.mjs</code> and <code>tools/prep_sketch.py</code></td>
+</tr>
+<tr>
+<td><code>ref/wig_ref.json</code></td>
+<td>wig outline, hole grid and sensor positions read from <code>WigLEDmag.kicad_pcb</code></td>
+</tr>
+<tr>
+<td><code>ref/sketch_rectified.jpg</code>, <code>.json</code></td>
+<td>the notebook page warped to mm, and its window</td>
+</tr>
+<tr>
+<td><code>models/</code></td>
+<td>the STEP models the STEP export places; see <code>models/SOURCES.md</code></td>
+</tr>
+<tr>
+<td><code>out/integrated/</code>, <code>out/removable/</code></td>
+<td>per board <code>.kicad_pcb</code> and <code>.dxf</code>, <code>plan.svg</code>, <code>checks.txt</code>, <code>resolved.json</code>, the STEP</td>
+</tr>
+<tr>
+<td><code>docs/</code></td>
+<td>the two figures the slopswap readme page shows</td>
+</tr>
+<tr>
+<td><code>tools/to_slopswap.py</code></td>
+<td>publishes the viewer, this readme and a zip of the folder to slopswap.org/V6 (usage at the top of the file)</td>
+</tr>
+<tr>
+<td><code>tools/</code></td>
+<td>dev scripts: STEP → mesh, model and sketch prep, <code>silhouette.py</code> (a model's plan outline per height band, where the input parts' bodies come from), and <code>verify.py</code>, which re-reads every output with another parser and redoes the neighbour check with shapely</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The KiCad boards put the datum at (100, 100) on the sheet in every file, so they overlay. They carry the
+outline on Edge.Cuts, the parts on that board as outlines on User.Drawings, and the grid planes on
+User.Comments. They are a one-way export: edits made in KiCad do not come back into the JSON.</p>
+<h2>Not verified</h2>
+<ul>
+<li><strong>The KiCad files have not been opened in KiCad.</strong> They are written to the v8 format and were parsed
+  back with a separate reader, but no KiCad was available where they were made. The DXFs are the
+  fallback: File → Import → Graphics into Edge.Cuts.</li>
+<li>The sketch was read from one photo of a curled page. Near the breadboard it is good to 0.2 mm (the
+  traced wig lands on the real outline); at the top of the band the notebook's 5 mm dots come out 4.93 to
+  5.0 apart, so allow 0.5 mm there.</li>
+<li>The bump on the strip's edge is drawn; what it is for is a guess (it is shaped to sit in the waist of a
+  breadboard standing against that edge).</li>
+<li>Two things in the drawing are not modelled: the second, lighter box in the right half of the band
+  (about 27 × 21 mm), and the faint lines a few millimetres outside the left and right edges.</li>
+<li>What holds the boards 1.775 mm apart is not decided: the gap is a number, not a part.</li>
+<li>The neighbour check is plan only. Heights are ignored.</li>
+<li>The shell's plan is the 78.7 × 54.6 envelope trimmed to the wig's edge, on the shell doc's statement that
+  the rail blocks run 0.6 mm past the body. Its corners are assumed to match the PCB's.</li>
+<li>Input parts: the SKRHADE010's 2.34 mm square stem is from SparkFun's model of a same-size switch, not the
+  ALPS drawing. The K1-1210UN-01 is SparkFun's model of that part; the Hroparts drawing was not read. The
+  tact switch is KiCad's TL3342 model stretched from 1.54 to the 1.7 of the TS-1187A-C-C-B. The RKJXM is
+  drawn as an 11 × 11 square with a lever; its terminals (3.2 below the board) are not drawn. The thumbstick
+  is Adafruit's Joy-Con type because the bench joystick is unidentified. Access holes (Ø of the actuator plus
+  a margin) are a first guess at what a cap needs.</li>
+<li>USB-C is an 8.94 × 7.35 × 3.26 envelope from memory of an HRO TYPE-C-31-M-12 class part, not from a drawing.</li>
+<li>PCIe x1 right-angle: 9.4 high is from TE's page for 1-1761465-1; the 25 × 11 footprint is assumed.</li>
+<li>The M.2 model is SparkFun's Key E socket standing in for Key M. Same body, different key.</li>
+<li>Shell height is the 6.75 redesign target; the current print is 7.1. Face PCB is off (0).</li>
+<li>The magnetometers drawn are WigLEDmag's (8 MMC5603 on top, 9 TMAG5273 underneath), not the planned 18 MMC.</li>
+<li>The docked-magnet field uses a point dipole, 115.4 mT·mm³ per mm³ of N52, magnet axis along the dock.</li>
+<li>The AMOLED's 61.8 mm FPC tail is not drawn. It needs a route and a place for its B2B plug.</li>
+<li>The wig outline's bottom edge is closed with a straight line; on the real board that edge belongs to
+  the side-connect footprint.</li>
+<li>The header-to-socket mated distance (8.59 mm row to row) comes from the KiCad models, not a mated pair.</li>
+</ul>
+<hr>
+<p class="muted">Jumperless V6 is a work in progress. Part models in the viewer and the zip: KiCad library (CC-BY-SA 4.0 with the library exception), SparkFun (CC-BY 4.0), Adafruit (MIT); <code>models/SOURCES.md</code> in the zip says which is which.</p>
+</main>
+</body>
+</html>
