@@ -19,10 +19,10 @@
 <main class="page wide">
 <p class="eyebrow"><a href="../">slopswap</a> / <a href="./">V6</a></p>
 <h1>V6 board outline and stack</h1>
-<p class="muted">The readme of <code>JumperlessV6/v6mech</code>, rev A5b 2026-11-24. Kevin Cappuccio with Claude.</p>
+<p class="muted">The readme of <code>JumperlessV6/v6mech</code>, rev A7 2026-11-24. Kevin Cappuccio with Claude.</p>
 <ul class="get cycle">
   <li><a href="board-outline.html"><b>Open the 3D viewer</b></a></li>
-  <li><a href="board-outline-v6mech.zip" download><b>Download the folder</b> (.zip, 8.5 MB): parameters, source, KiCad and DXF outlines, STEP</a></li>
+  <li><a href="board-outline-v6mech.zip" download><b>Download the folder</b> (.zip, 11.9 MB): parameters, source, KiCad and DXF outlines, STEP</a></li>
 </ul>
 <figure><a href="board-outline-on-sketch.png"><img src="board-outline-on-sketch.png" alt="The outline (pink) laid over the notebook page it was traced from"></a><figcaption>The outline (pink) laid over the notebook page it was traced from: the viewer's sketch underlay, seen from above.</figcaption></figure>
 <figure><a href="board-outline-inputs.png"><img src="board-outline-inputs.png" alt="From the top edge"></a><figcaption>From the top edge: the click wheel under the top board at the corner, a nav switch through it, two button holes. Left, the pickers and the per-board tick boxes of the selected part.</figcaption></figure>
@@ -35,7 +35,12 @@ each part opens); rev A4 the same day (a 7.62 mm strip, the Wiiig face board on 
 everything between reloads, the parts and options from the other V6 design notes, a painted and lit 3D view,
 and the routing lab's console look); rev A5 on 2026-11-24 (panels that resize, fold and dock; scrolling
 moves the view and pinching zooms it; the inside corner follows the breadboard's chamfer; the top-left block
-slopes in with no flat under it; the wig's top board has no card edge; straightening the left side can be put back).</p>
+slopes in with no flat under it; the wig's top board has no card edge; straightening the left side can be put back);
+rev A6 the same day (a Magnetometers tab: the probe tracker's sensors as a list of their own, each on a board and a
+face, dragged about on a plan with every hole coloured by how well the layout places the probe there);
+rev A7 the same day (the 2.2 inch bar display, a parts library with footprints and models from the parts
+inventory, a parts browser, cantilevered buttons, hiding what is plugged into a socket, and a KiCad export
+with the outline as lines and arcs and the parts as footprints).</p>
 <h2>Use it</h2>
 <ol>
 <li>Open <code>V6_outline_viewer.html</code> (double-click; it needs no server and no network).</li>
@@ -123,10 +128,46 @@ the geometry or any exported file.</p>
   SO-DIMM socket.</li>
 <li><strong>Add part → Chips and tall parts</strong>: CH446Q, CH32H417, RP2350B, TSSOP-16, the 6.3 mm inductor, the FPC
   connector. <strong>Mechanical</strong>: an M2 screw with a spacer in every gap, as one answer to what holds the boards apart.</li>
-<li><strong>Magnetometer layout</strong>: the WigLEDmag's own sensors, or the planned MMC5603 grid (3 × 6 or 4 × 8, spread
-  evenly over the 76 × 45 hole field). The docked-probe check uses whichever is chosen.</li>
+<li><strong>Magnetometers</strong>: since rev A6 a list of their own with a tab to edit them (next section). The 3D view and
+  the docked-probe check use that list.</li>
 <li><strong>Shell height</strong> 6.75 or 7.1 at a click.</li>
 </ul>
+<h2>The Magnetometers tab</h2>
+<p>The second tab in the top rail (the page's address ends in <code>#magnetometers</code> while it is open). The view becomes a
+plan of the unit: the frame, the breadboard's outline, the parts and the dock as thin outlines, the sensors as
+dots, and every breadboard hole coloured by the error of the probe's fix there. The Design panel becomes the
+sensor list and the probe's settings, the Checks panel the numbers. It is the same design: undo, the saved
+state, codes, the 3D view, the docked-probe check and the exported files all follow.</p>
+<ul>
+<li><strong>Move them.</strong> Drag a sensor (Shift keeps it on a 1.27 mm grid). Double-click the plan to add one, Delete
+  removes the selected one, the arrow keys nudge it 0.5 mm (Shift 2.54). Dragged under the breadboard it rides the
+  board under the breadboard (<code>on: "wig"</code>: the wig's PCB when removable, the main board when integrated); dragged
+  off it, the bottom board. Board, face (a dot is the top face, a ring the underside) and part (MMC5603 or
+  TMAG5273) are set per sensor in the panel. A sensor that is off its board there, or under a part standing on
+  the same face, is drawn red and listed.</li>
+<li><strong>Arrangements.</strong> Eight to load: 6 under the breadboard + 6 on the frame (the built-in default), 6 + 3, 4 + 8,
+  3 + 9, the frame only, 12 under (3 × 4), 18 under (3 × 6, the earlier plan) and the WigLEDmag as built. The
+  Accuracy panel shows all eight under the current probe settings; click one to put it on the plan. <strong>Hold for
+  comparison</strong> keeps one layout's numbers beside the next one's.</li>
+<li><strong>Improve</strong> nudges every sensor a little at a time, each kept on its own side of the breadboard's edge, on
+  its board and off the parts, and keeps a move only if the error over the holes drops. It finds the nearest
+  better layout, not the best one.</li>
+<li><strong>Probe</strong>: the magnet (the bench probe as measured, 1900 mT·mm³, by default; the cylinder drawn in the dock;
+  3 × 6 mm N42; the clip magnet; or any strength), how far its centre is above the breadboard's top, and how far
+  the probe leans. <strong>Readings</strong>: noise, how well each zero is known, gain error, whether the fit solves for the
+  ambient field too, and whether it holds the magnet's strength.</li>
+<li><strong>Colour by</strong>: the error; how far the fix moves when the ambient field changes by 10 µT and the zero is not
+  taken again; or how many sensors are past full scale at that hole.</li>
+</ul>
+<p>What the number is: the error bound (Cramér–Rao) of a dipole fit to the sensors' readings, in the plane of the
+board, 1 sigma, per frame, rms over the probe upright and leaning four ways. The model is Testolomew's
+(<code>MagFit.h</code>: positions in mm, fields in mT, moment in mT·mm³, strength held). Each reading's error is its noise,
+the doubt in its zero and its gain error (0.4 µT, 1 µT and 1 % for the MMC5603, from the 2026-11-01 bench);
+a sensor past 95 % of full scale is left out. <code>src/magmodel.js</code> is the whole of it and runs in Node too:
+<code>node tools/magcheck.mjs --check</code> prints the arrangements' numbers and checks the model against reference values
+from the Python study in <code>V6pile/maglayout</code>. The bound is a floor: Testolomew's own fit, run on these
+arrangements, comes out 1.3 to 1.5 times it at the median hole and two to three times at the worst with the
+bench magnet, and about twice it everywhere with the 2 × 1 mm one (the figures are under What rev A6 shows).</p>
 <h2>Frame of reference</h2>
 <ul>
 <li>x right, y <strong>down</strong> (KiCad). x = 0 is the wig's left edge, y = 0 the wig body's top edge.
@@ -350,6 +391,115 @@ JumperlessFootprints; the RKJXM has no footprint yet (B25 says so too).</p>
 </div>
 <p><code>node build.mjs --check</code> exits 1 if two parts clash, a part runs into a board kept whole, or a bare
 breadboard no longer fits beside the unit.</p>
+<h2>What rev A7 adds</h2>
+<p>Rev A6 (the Magnetometers tab, next section down) was made in another session the same morning while this
+one was under way; A7 is the two merged, with nothing of A6 taken out.</p>
+<ul>
+<li><strong>The 2.2 inch bar display is the default</strong> (LTN220TF-PF09, 17.6 × 60.11 × 1.62, lying along the band at
+  x 30, y −9.9, flush with the top board). It overlaps the M.2 socket and one corner of the click wheel in
+  plan but is 1 mm above both.</li>
+<li><strong>Parts library.</strong> <code>src/partlib.js</code> holds 34 parts from Kevin's parts inventory (<code>~/Documents/Parts/
+  INVENTORY.md</code>) and a few near them: 16 buttons, 6 directional switches, 3 joysticks, the click wheel and
+  an encoder, 7 connectors. Each was fetched from EasyEDA by its LCSC number (<code>tools/prep_parts.py</code>, which
+  runs <code>easyeda2kicad</code>): the footprint as pads and drawings, and the 3D model, which is shown in the view
+  (<code>src/partmodels.js</code>) and measured for the part's size and height. The part's frame is the footprint's
+  frame. Two 5 mm and 7 mm metal domes are entered by hand (no footprint, height assumed).</li>
+<li><strong>Add a part</strong> (Parts section): a list of all 77 catalogue parts with a search box, a row of kinds and
+  "only what is in my parts inventory". Add drops the part in the middle of the view, selected, to be
+  dragged. A selected part has Turn 90, Turn 45, Other side, Duplicate and Remove (keys R, Shift+R, F, D,
+  Delete).</li>
+<li><strong>Cantilevered buttons.</strong> Any button can be given a tongue: a U-shaped slot cut in the board above it, so
+  the board is the key top. The default design has two beside the display (TS-1187A on the mid board, tongue
+  16.5 × 3 mm in the top board). The checks give the force to click each one, and say when a slot breaks
+  out at an edge or comes within 0.8 mm of another opening. <strong>In the 1.6 mm top board those two take about
+  8.7 N</strong> (a tact alone is 1.6 N): stiff. The same tongue in a 0.8 mm board is about 2.5 N; a 0.2 mm bump
+  under the tongue brings 1.6 mm down to about 5.7 N. A third key does not fit beside the display: its slot
+  runs out through the corner chamfer above the USB-C.</li>
+<li><strong>Hide what is plugged into the sockets</strong> (Parts section): the blue M.2 card, mini PCIe card or SO-DIMM.</li>
+<li><strong>KiCad export.</strong> Each board's <code>.kicad_pcb</code> now has its outline and openings on Edge.Cuts as <code>gr_line</code>,
+  <code>gr_arc</code> and <code>gr_circle</code> (no polygons): fillets and offset corners are found again in the polygon and
+  written as one arc each, every primitive starting on the exact point where the last one ended. Parts
+  mounted on the board are placed as footprints at their position, rotation and side: the EasyEDA footprint
+  where the library has one, otherwise the part's outline on the courtyard layer as a footprint with no
+  pads. <code>out/&lt;variant&gt;/v6mech.pretty/</code> holds the library footprints used, and <code>WT_wig_top_board.kicad_pcb</code>
+  is the wig's top board: outline plus its 484 holes as plated pads (the countersink is a fab note, the
+  0.26 mm ring is a guess).</li>
+</ul>
+<h2>What rev A6 shows</h2>
+<p>With the bench probe's magnet (1900 mT·mm³) 2 mm above the surface, error bound in mm as median / 90th
+percentile / worst hole, and how far a 10 µT ambient change moves the fix (median / worst):</p>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Arrangement</th>
+<th>Error</th>
+<th>Holes within half a pitch</th>
+<th>10 µT shift</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>6 under + 6 on the frame</td>
+<td>0.10 / 0.14 / 0.21</td>
+<td>480</td>
+<td>0.47 / 1.6</td>
+</tr>
+<tr>
+<td>6 under + 3 on the frame</td>
+<td>0.11 / 0.15 / 0.21</td>
+<td>480</td>
+<td>0.52 / 1.6</td>
+</tr>
+<tr>
+<td>4 under + 8 on the frame</td>
+<td>0.11 / 0.15 / 0.29</td>
+<td>480</td>
+<td>0.71 / 2.3</td>
+</tr>
+<tr>
+<td>3 under + 9 on the frame</td>
+<td>0.14 / 0.18 / 0.25</td>
+<td>480</td>
+<td>0.94 / 3.2</td>
+</tr>
+<tr>
+<td>Frame only, 8 top + 4 left</td>
+<td>0.29 / 1.34 / 4.07</td>
+<td>427</td>
+<td>3.5 / 61</td>
+</tr>
+<tr>
+<td>12 under, 3 × 4</td>
+<td>0.08 / 0.13 / 0.21</td>
+<td>480</td>
+<td>0.59 / 1.6</td>
+</tr>
+<tr>
+<td>18 under, 3 × 6</td>
+<td>0.07 / 0.10 / 0.16</td>
+<td>480</td>
+<td>0.52 / 1.4</td>
+</tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>Nine to twelve sensors with three to six of them under the breadboard are within a few hundredths of a
+  millimetre of twelve under it. The sensors under the breadboard carry the far corner; the frame's carry the
+  top rows and the left columns, and steady the fix against the ambient field.</li>
+<li>With the 2 × 1 mm magnet drawn in the dock (363) the same layouts give 0.23 / 0.34 / 0.76 (6 + 6) to
+  0.42 / 0.69 / 0.95 (3 + 9), every hole still within half a pitch by the bound, against 0.15 / 0.29 / 0.64 for
+  twelve under.</li>
+<li>Testolomew's own fit on the same layouts (<code>V6pile/maglayout</code>'s harness, cold on every frame, 12 boards × 4
+  frames a hole): with the bench magnet 0.13 / 0.23 / 0.43 (6 + 6), 0.14 / 0.25 / 0.45 (6 + 3), 0.16 / 0.28 / 0.87
+  (4 + 8) and 0.20 / 0.31 / 0.73 (3 + 9), every hole within half a pitch, against 0.08 / 0.17 / 0.43 for twelve
+  under. With the 2 × 1 mm magnet it is about twice the bound: 0.50 / 0.71 / 1.38 and 456 of 480 holes (6 + 6),
+  0.71 / 1.02 / 2.18 and 367 holes (3 + 9), 0.34 / 0.65 / 1.19 and 475 for twelve under.</li>
+<li>20 mm above the surface with the bench magnet: 0.46 / 0.60 / 0.83 (6 + 6), 0.56 / 0.68 / 0.95 (3 + 9).</li>
+<li>The default frame sensors sit on the main board's underside: a row at y = −6 (clear of the wig's card edge,
+  which is cut out of the main board when the wig is removable) and two in the left strip under the dock.</li>
+</ul>
 <h2>What rev A5 shows</h2>
 <ul>
 <li><strong>Inside corner.</strong> The frame's inside corner copies the breadboard's own corner (2.51 × 2.11, the same
@@ -393,6 +543,12 @@ breadboard no longer fits beside the unit.</p>
   out 16 mm at the bottom.</li>
 </ul>
 <h2>Files</h2>
+<ul>
+<li><code>src/partlib.js</code>, <code>src/partmodels.js</code>: the parts library (footprints, sizes) and its 3D models, written by
+  <code>tools/prep_parts.py</code>; edit the table in that script, not these.</li>
+<li><code>out/&lt;variant&gt;/v6mech.pretty/</code>, <code>out/&lt;variant&gt;/WT_wig_top_board.kicad_pcb</code>: the library footprints used and
+  the wig's top board.</li>
+</ul>
 <div class="table-wrap">
 <table>
 <thead>
@@ -421,6 +577,18 @@ breadboard no longer fits beside the unit.</p>
 <tr>
 <td><code>src/geometry.js</code></td>
 <td>parameters → outline, boards, openings, parts, checks (browser and Node)</td>
+</tr>
+<tr>
+<td><code>src/magmodel.js</code></td>
+<td>the magnetometers: where each sits, the field model, the error bound at every hole, the arrangements, Improve (browser and Node)</td>
+</tr>
+<tr>
+<td><code>src/magtab.js</code></td>
+<td>the Magnetometers tab: the plan, dragging, its two panels</td>
+</tr>
+<tr>
+<td><code>tools/magcheck.mjs</code></td>
+<td>prints the arrangements' numbers for <code>v6_outline.json</code> and checks the model against reference values</td>
 </tr>
 <tr>
 <td><code>src/catalog.js</code></td>
@@ -486,9 +654,29 @@ outline on Edge.Cuts, the parts on that board as outlines on User.Drawings, and 
 User.Comments. They are a one-way export: edits made in KiCad do not come back into the JSON.</p>
 <h2>Not verified</h2>
 <ul>
-<li><strong>The KiCad files have not been opened in KiCad.</strong> They are written to the v8 format and were parsed
-  back with a separate reader, but no KiCad was available where they were made. The DXFs are the
-  fallback: File → Import → Graphics into Edge.Cuts.</li>
+<li><strong>The KiCad files have not been opened in KiCad.</strong> They are written to the v8 format and read back two
+  ways (<code>tools/verify.py</code>'s own reader and the <code>kiutils</code> library): every end point on Edge.Cuts is shared
+  by exactly two primitives, the rebuilt loops match the resolved shape (polygon corners within 0.007 mm of
+  the outline), and on a test board with six library parts on both faces at odd angles all 99 pads land
+  within 0.0001 mm of where the engine puts them. No KiCad was available where they were made, so whether
+  KiCad 8 or 10 opens them without complaint is not known. The DXFs are the fallback: File → Import →
+  Graphics into Edge.Cuts.</li>
+<li><strong>The library footprints and models are EasyEDA's</strong>, taken by LCSC number and not checked against the
+  makers' drawings. EasyEDA's own SMD / through-hole flag is wrong on several, so the export goes by the
+  pads. Known doubts: the K1-1502SA-03's model sits 3.8 mm off its pads' centre; the ALPS SRBD110401 came
+  back with a footprint named SRBD150201; the TS-1187B's model is 0.75 mm high; the Kailh Choc model
+  includes a keycap; the M.2 4.8H socket and the TS2245 have no model (heights from the part numbers).
+  Not at EasyEDA at all: both metal domes, the Panasonic EVQWJN005, the SAM-L2-LR12SP joystick, the
+  FC05-S20FCT-00.</li>
+<li>A bottom-side part is the footprint mirrored left to right, then turned. KiCad's own Flip turns a
+  further 180° for the same number, so check the rotation of anything on the underside after import.</li>
+<li><strong>The cantilever force is an estimate</strong>: a plain cantilever loaded at the switch, E = 22 GPa for FR4, a
+  1.6 N tact with 0.25 mm travel, square slot ends, no stress raiser at the root. Nothing was bent.</li>
+<li>The STEP file draws library parts as blocks, not their models.</li>
+<li><strong>The new parts and the magnetometers have not been looked at together.</strong> The default frame sensors sit on
+  the main board's underside at y = −6 (x 10, 32, 54, 76); the bar display lies over three of them and key2's
+  switch is about 5.5 mm from the fourth in plan. A tact switch's dome and frame are steel and a display has a
+  metal back; what they do to the probe fix is not in the magnetometer model.</li>
 <li>The sketch was read from one photo of a curled page. Near the breadboard it is good to 0.2 mm (the
   traced wig lands on the real outline); at the top of the band the notebook's 5 mm dots come out 4.93 to
   5.0 apart, so allow 0.5 mm there.</li>
@@ -519,8 +707,12 @@ User.Comments. They are a one-way export: edits made in KiCad do not come back i
   Safari (which reports a pinch differently; that path is written but untested).</li>
 <li>The Real view is a picture, not a simulation: the LEDs, the image on the display, the part names printed on
   the boards and the shell's clip glints are made up to make it read. The Flat view shows only geometry.</li>
-<li>Planned magnetometer grids are spread evenly over a 76 × 45 field centred on the holes, on the underside;
-  the notes give the count and the rough pitch, not positions.</li>
+<li>The Magnetometers tab's numbers are a bound from a model, not a measurement: nothing here has run on a
+  board, and fields from the frame's own parts (the rail supply's inductors, an expansion card, the click wheel)
+  and from the circuit on the breadboard are not in it. The frame sensors' places are a first guess that the
+  schematic and the routing will move. Dragging was tested with a mouse in headless Chrome, not by touch.</li>
+<li>The grid arrangements (3 × 4, 3 × 6) are spread evenly over a 76 × 45 field centred on the holes, on the
+  underside; the notes give the count and the rough pitch, not positions.</li>
 <li>Edge couplers: sizes are from the two coupler notes. Where the tongue goes on this outline, and whether the
   strip is cut away for the housing, is not drawn; the check only compares widths.</li>
 <li>New parts: the mini PCIe socket's 5.2 height is read off its part number, with no drawing opened; the
@@ -535,7 +727,7 @@ User.Comments. They are a one-way export: edits made in KiCad do not come back i
 <li>The header-to-socket mated distance (8.59 mm row to row) comes from the KiCad models, not a mated pair.</li>
 </ul>
 <hr>
-<p class="muted">Jumperless V6 is a work in progress. Part models in the viewer and the zip: KiCad library (CC-BY-SA 4.0 with the library exception), SparkFun (CC-BY 4.0), Adafruit (MIT); <code>models/SOURCES.md</code> in the zip says which is which.</p>
+<p class="muted">Jumperless V6 is a work in progress. Part models in the viewer and the zip: KiCad library (CC-BY-SA 4.0 with the library exception), SparkFun (CC-BY 4.0), Adafruit (MIT); the parts library's footprints and models are EasyEDA's, by LCSC number, unchecked; <code>models/SOURCES.md</code> in the zip says which is which.</p>
 </main>
 </body>
 </html>
