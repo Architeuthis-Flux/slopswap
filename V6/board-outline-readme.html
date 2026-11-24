@@ -19,10 +19,10 @@
 <main class="page wide">
 <p class="eyebrow"><a href="../">slopswap</a> / <a href="./">V6</a></p>
 <h1>V6 board outline and stack</h1>
-<p class="muted">The readme of <code>JumperlessV6/v6mech</code>, rev A4 2026-11-23. Kevin Cappuccio with Claude.</p>
+<p class="muted">The readme of <code>JumperlessV6/v6mech</code>, rev A5 2026-11-24. Kevin Cappuccio with Claude.</p>
 <ul class="get cycle">
   <li><a href="board-outline.html"><b>Open the 3D viewer</b></a></li>
-  <li><a href="board-outline-v6mech.zip" download><b>Download the folder</b> (.zip, 8.6 MB): parameters, source, KiCad and DXF outlines, STEP</a></li>
+  <li><a href="board-outline-v6mech.zip" download><b>Download the folder</b> (.zip, 8.4 MB): parameters, source, KiCad and DXF outlines, STEP</a></li>
 </ul>
 <figure><a href="board-outline-on-sketch.png"><img src="board-outline-on-sketch.png" alt="The outline (pink) laid over the notebook page it was traced from"></a><figcaption>The outline (pink) laid over the notebook page it was traced from: the viewer's sketch underlay, seen from above.</figcaption></figure>
 <figure><a href="board-outline-inputs.png"><img src="board-outline-inputs.png" alt="From the top edge"></a><figcaption>From the top edge: the click wheel under the top board at the corner, a nav switch through it, two button holes. Left, the pickers and the per-board tick boxes of the selected part.</figcaption></figure>
@@ -33,7 +33,9 @@ assembly. Made 2026-11-23; rev A2 the same day (outline traced from the notebook
 with parts between them); rev A3 the same day (input parts to choose from, and a per-board switch for what
 each part opens); rev A4 the same day (a 7.62 mm strip, the Wiiig face board on the shell, the page remembers
 everything between reloads, the parts and options from the other V6 design notes, a painted and lit 3D view,
-and the routing lab's console look).</p>
+and the routing lab's console look); rev A5 on 2026-11-24 (panels that resize, fold and dock; scrolling
+moves the view and pinching zooms it; the inside corner follows the breadboard's chamfer; the top-left block
+slopes in with no flat under it; the wig's top board has no card edge; straightening the left side can be put back).</p>
 <h2>Use it</h2>
 <ol>
 <li>Open <code>V6_outline_viewer.html</code> (double-click; it needs no server and no network).</li>
@@ -66,21 +68,33 @@ brings all of it back. Nothing is sent anywhere, so a different browser or machi
 </ul>
 <p>If the browser refuses storage (some private windows, some embedded frames), the page says so at the top of
 the Design panel, and Copy code or Export is the way to keep a design.</p>
-<h2>The Wiiig face board</h2>
-<p><code>wig.face</code> puts Kevin's face board on the shell. Its outline and all 554 holes are read from
-<code>V6pile/Wig/Wiig/wiigtop.3mf</code> by <code>tools/prep_face.py</code> into <code>ref/wig_ref.json</code>: 78.74 × 58.42 × 0.71 mm, 480
-countersunk holes on the 16 × 30 grid (2.032 at the top face, 1.2 through, which is a 90° countersink 0.416
-deep), four more at the ends of the row beside each rail pair, and 2 × 35 holes of 0.65 at 1.27 mm for the
-wig's card header. Lined up on the header rows, its hole rows land on the WigLEDmag's to 0.03 mm and its
-bottom edge on the WigLEDmag's.</p>
+<h2>Layout, and moving the view</h2>
 <ul>
-<li>It is 3.43 mm taller than the breadboard body: the strip with the header holes runs past the body's top
-  edge, over the frame. With the top board level with the shell (the default) that strip lies on the top
-  board. <strong>Keep the strip…</strong> off trims it back to the body.</li>
-<li><strong>It sits → On the shell</strong> adds its thickness: the top of the breadboard is 7.46 and the unit is 9.06 thick.
-  <strong>Let into it</strong> shortens the shell by the board's thickness instead and the top stays at the shell height.</li>
-<li><strong>Level with the shell / with the face</strong> set the gaps for either. Level with the face, the top board is
-  cut back where the face board overlaps it.</li>
+<li><strong>Resize:</strong> drag the line between a panel and the view. Double-click it for the usual size; with the line
+  focused, the arrow keys move it (Shift for bigger steps).</li>
+<li><strong>Fold:</strong> the mark at the end of a panel's bar, or a click on its name. A folded panel is only its bar.</li>
+<li><strong>Dock:</strong> the three small pictures in a panel's bar put it on the left, under the view, or on the right.
+  Two panels in one dock share it, with a line between them to drag.</li>
+<li><strong>Layout</strong> (top right) has five arrangements, View only (also the <code>\</code> key), text size, fold or unfold all
+  the Design sections, and Usual layout to go back. All of it is remembered.</li>
+<li><strong>In the view:</strong> drag turns it, scrolling moves it, a pinch (or Ctrl/Cmd + scroll) zooms about the pointer,
+  right-drag moves it too. With a mouse, <strong>View → Scrolling → Zooms</strong> gives the wheel its old job.</li>
+</ul>
+<h2>The wig's two boards</h2>
+<p>The wig is a sandwich: a <strong>top board</strong> with the countersunk holes, the shell with its clips, and a <strong>bottom
+board</strong> with the card edge (the tongue with the 2 × 35 holes of the 1.27 mm header) along its top.</p>
+<ul>
+<li><strong>Top board</strong> (<code>wig.face</code>): the 484 countersunk holes read from <code>V6pile/Wig/Wiig/wiigtop.3mf</code> by
+  <code>tools/prep_face.py</code> (2.032 at the top face, 1.2 through: a 90° countersink 0.416 deep; 480 on the 16 × 30
+  grid and four at the ends of the row beside each rail pair), on the breadboard body's own outline, 78.74 ×
+  54.99, 0.71 thick. <code>wiigtop.3mf</code> itself also has the 3.43 mm card-edge strip with the 70 holes along its
+  top; rev A4 drew that on the top board, which was wrong. It is trimmed; <code>header_strip: true</code> puts it back.</li>
+<li><strong>Bottom board:</strong> with a removable wig it is the wig's own PCB (WigLEDmag outline, tongue included, with
+  the header on it), under the shell and under the frame's upper boards. With an integrated wig it is the
+  main board itself, and there is no card edge.</li>
+<li><strong>It sits → On the shell</strong> adds the top board's thickness: the top of the breadboard is 7.46 and the unit
+  is 9.06 thick. <strong>Let into it</strong> shortens the shell instead and the top stays at the shell height.</li>
+<li><strong>Level with the shell / with the face</strong> set the gaps so the frame's top board is flush with either.</li>
 <li>The STEP export cuts the real countersunk holes; the KiCad and DXF files are still the frame boards only.</li>
 </ul>
 <h2>How it is drawn</h2>
@@ -94,7 +108,8 @@ the geometry or any exported file.</p>
 <h2>From the other V6 notes</h2>
 <ul>
 <li><strong>Left strip 7.62</strong> (3 pitches; unit pitch 86.36, 4 dead rows). <strong>Outline → Make the left side straight</strong>
-  pulls the top-left block in to the strip edge.</li>
+  pulls the top-left block in to the strip edge and keeps the outline as drawn under <code>frame.outline_drawn</code>;
+  <strong>Put it back as drawn</strong> restores it (Undo does too).</li>
 <li><strong>Edge coupler between units</strong> (edge-coupler notes, v1 and v2): the WingTAT HEE70LP03BK used today needs
   about 6.4 mm between the two boards, the kiss slot V2 9.2 and V3 7.8. The check compares that with the
   strip width, and the housing is drawn in the gap when the next unit is shown. 7.62 is the first strip
@@ -332,12 +347,18 @@ JumperlessFootprints; the RKJXM has no footprint yet (B25 says so too).</p>
 </div>
 <p><code>node build.mjs --check</code> exits 1 if two parts clash, a part runs into a board kept whole, or a bare
 breadboard no longer fits beside the unit.</p>
-<h2>What rev A4 shows</h2>
+<h2>What rev A5 shows</h2>
 <ul>
-<li>With the Wiiig face board on the shell the unit is 9.06 mm thick and the breadboard's top is 0.71 above the
-  frame's top board. The face board's header strip lies 3.43 mm over the frame.</li>
+<li><strong>Inside corner.</strong> The frame's inside corner copies the breadboard's own corner (2.51 × 2.11, the same
+  points), so the mid and top boards close up to the shell there, less the fit gap.</li>
+<li><strong>Top-left block.</strong> It now slopes in to the strip along the corner chamfer of a breadboard standing on the
+  left (2.211 × 1.583, r 1.0), carried on in a straight line to the block's left edge at x = −8.3, with no
+  flat under the block. On the sketch the drawn slope is steeper by about 5° and within 0.5 mm of this line.</li>
+<li>With the wig's top board on the shell the unit is 9.06 mm thick and the breadboard's top is 0.71 above the
+  frame's top board.</li>
 <li>At a 7.62 strip (pitch 86.36) a bare breadboard still fits on either side. With the left side made straight,
-  two whole units overlap by 37 mm², all of it the click wheel, which hangs 4.6 mm past the corner; they clear at pitch 91.44.</li>
+  two whole units overlap by 37 mm², all of it the click wheel, which hangs 4.6 mm past the corner; they clear
+  at pitch 91.44.</li>
 <li>Today's WingTAT coupler fits a 7.62 strip with 1.22 mm to spare and does not fit 5.08. The check takes the
   strip as empty space: on this outline the strip is board, and the coupler's tongue is not drawn.</li>
 </ul>
@@ -480,10 +501,13 @@ User.Comments. They are a one-way export: edits made in KiCad do not come back i
 <li>PCIe x1 right-angle: 9.4 high is from TE's page for 1-1761465-1; the 25 × 11 footprint is assumed.</li>
 <li>The M.2 model is SparkFun's Key E socket standing in for Key M. Same body, different key.</li>
 <li>Shell height is the 6.75 redesign target; the Wiiig v7 print (<code>Wiiig.step</code>) measures 7.1.</li>
-<li><strong>The face board.</strong> "Use the Wiiig boards as the face PCB" was taken to mean the board in <code>wiigtop.3mf</code>
-  (2026-08-19). Its 0.71 thickness is the model's; a fab makes 0.6 or 0.8. How it sits on the shell (on top
-  or let in) and whether the header strip stays are switches because no file says. The gold land around each
-  hole (0.26 mm wide), the column numbers and the plated look of the hole walls are drawn, not read from a file.</li>
+<li><strong>The wig's boards.</strong> The top board is the countersunk holes of <code>wiigtop.3mf</code> (2026-08-19) on the body's
+  outline; its 0.71 thickness is the model's (a fab makes 0.6 or 0.8). The bottom board is the WigLEDmag
+  outline; its clip slots and parts are not drawn, only the 70 card-edge holes in the Real view. How the top
+  board is fixed to the shell is not known. The gold land around each hole (0.26 mm wide), the column numbers
+  and the plated look of the hole walls are drawn, not read from a file.</li>
+<li>Scrolling and pinching were tested with synthetic wheel events in headless Chrome, not on a trackpad or in
+  Safari (which reports a pinch differently; that path is written but untested).</li>
 <li>The Real view is a picture, not a simulation: the LEDs, the image on the display, the part names printed on
   the boards and the shell's clip glints are made up to make it read. The Flat view shows only geometry.</li>
 <li>Planned magnetometer grids are spread evenly over a 76 × 45 field centred on the holes, on the underside;
