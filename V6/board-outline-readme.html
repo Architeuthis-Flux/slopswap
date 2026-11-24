@@ -19,10 +19,10 @@
 <main class="page wide">
 <p class="eyebrow"><a href="../">slopswap</a> / <a href="./">V6</a></p>
 <h1>V6 board outline and stack</h1>
-<p class="muted">The readme of <code>JumperlessV6/v6mech</code>, rev A5 2026-11-24. Kevin Cappuccio with Claude.</p>
+<p class="muted">The readme of <code>JumperlessV6/v6mech</code>, rev A5b 2026-11-24. Kevin Cappuccio with Claude.</p>
 <ul class="get cycle">
   <li><a href="board-outline.html"><b>Open the 3D viewer</b></a></li>
-  <li><a href="board-outline-v6mech.zip" download><b>Download the folder</b> (.zip, 8.4 MB): parameters, source, KiCad and DXF outlines, STEP</a></li>
+  <li><a href="board-outline-v6mech.zip" download><b>Download the folder</b> (.zip, 8.5 MB): parameters, source, KiCad and DXF outlines, STEP</a></li>
 </ul>
 <figure><a href="board-outline-on-sketch.png"><img src="board-outline-on-sketch.png" alt="The outline (pink) laid over the notebook page it was traced from"></a><figcaption>The outline (pink) laid over the notebook page it was traced from: the viewer's sketch underlay, seen from above.</figcaption></figure>
 <figure><a href="board-outline-inputs.png"><img src="board-outline-inputs.png" alt="From the top edge"></a><figcaption>From the top edge: the click wheel under the top board at the corner, a nav switch through it, two button holes. Left, the pickers and the per-board tick boxes of the selected part.</figcaption></figure>
@@ -77,6 +77,9 @@ the Design panel, and Copy code or Export is the way to keep a design.</p>
   Two panels in one dock share it, with a line between them to drag.</li>
 <li><strong>Layout</strong> (top right) has five arrangements, View only (also the <code>\</code> key), text size, fold or unfold all
   the Design sections, and Usual layout to go back. All of it is remembered.</li>
+<li><strong>By the window's width:</strong> until a panel has been docked by hand, a window narrower than 1180 px gets
+  Design on the left and Checks under the view, and a wider one gets them either side. Narrower than 700 px
+  there are no docks: the view, then the panels one under the other at their own height.</li>
 <li><strong>In the view:</strong> drag turns it, scrolling moves it, a pinch (or Ctrl/Cmd + scroll) zooms about the pointer,
   right-drag moves it too. With a mouse, <strong>View → Scrolling → Zooms</strong> gives the wheel its old job.</li>
 </ul>
@@ -351,6 +354,12 @@ breadboard no longer fits beside the unit.</p>
 <ul>
 <li><strong>Inside corner.</strong> The frame's inside corner copies the breadboard's own corner (2.51 × 2.11, the same
   points), so the mid and top boards close up to the shell there, less the fit gap.</li>
+<li><strong>Along the breadboard.</strong> Wherever the frame runs along the breadboard, the spaces the breadboard's own
+  outline leaves against it (the corner chamfers and the 0.635 mm waist between y = 13.45 and 41.92) are
+  frame. Each board is then cut by whatever part of the wig is at its height, less the fit gap, so the
+  strip's inner edge follows the breadboard's contour: 0.1 mm off the shell on the mid and top boards, 0.2 mm
+  off the wig's own PCB on a removable wig's main board. The far side and the two short link notches beside
+  the tongue are left alone; the shell is drawn without those notches.</li>
 <li><strong>Top-left block.</strong> It now slopes in to the strip along the corner chamfer of a breadboard standing on the
   left (2.211 × 1.583, r 1.0), carried on in a straight line to the block's left edge at x = −8.3, with no
   flat under the block. On the sketch the drawn slope is steeper by about 5° and within 0.5 mm of this line.</li>
