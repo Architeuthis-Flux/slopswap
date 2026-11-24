@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LG-540: Fluxation sticker</title>
+<meta name="description" content="Print file for the Fluxation sticker on the Roland LG-540: black on retroreflective film, a white window frame, and a stepped gloss height map built up in layers.">
+<meta name="short-title" content="Fluxation sticker">
+<link rel="stylesheet" href="../styles/jumperless.css">
+<style>
+  figure{margin:0 0 1.4em}
+  figure img{display:block;width:100%;height:auto;border-radius:6px;border:1px solid var(--line);background:#fff}
+  figcaption{margin-top:.5em}
+  .plates{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;margin-bottom:.4em}
+  .plates figure{margin:0}
+  .plates b{color:var(--fg)}
+  @media (max-width:640px){.plates{grid-template-columns:1fr}}
+
+  .legend{list-style:none;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.6rem 1.2rem}
+  .legend li{display:grid;grid-template-columns:1.5rem 1fr;gap:.6rem;align-items:start;margin:0}
+  .legend i{width:1.5rem;height:1.5rem;border-radius:4px;border:1px solid var(--line);margin-top:.15em}
+  .legend b{display:block}
+  @media (max-width:640px){.legend{grid-template-columns:1fr}}
+
+  ol.steps{padding-left:1.4em}
+  ol.steps>li{margin:.7em 0;padding-left:.2em}
+  ol.steps>li::marker{color:var(--accent-2);font-weight:700}
+  .ref{font-size:.85rem;color:var(--muted)}
+  .ref a{color:var(--muted)}
+  .ref a:hover{color:var(--accent)}
+  .ui{font-weight:700;white-space:nowrap}
+
+  .stack{max-width:34rem;margin:0 0 1.4em;font-size:.95rem}
+  .stack div{display:flex;justify-content:space-between;gap:.3rem 1rem;flex-wrap:wrap;padding:.55em .8em;border:1px solid var(--line);border-bottom:0;background:var(--surface)}
+  .stack div:first-of-type{border-radius:6px 6px 0 0}
+  .stack div.film{background:var(--surface-2);border-bottom:1px solid var(--line);border-radius:0 0 6px 6px;color:var(--muted)}
+  .stack span{color:var(--muted)}
+  .stack code{background:var(--surface-2);white-space:nowrap}
+  .stack p{margin:0 0 .4em;font-family:var(--font-pixel);font-size:.55rem;color:var(--muted)}
+
+  .callout.warn{border-left-color:var(--accent)}
+  .callout.warn .label{color:var(--accent)}
+  td code,li code{white-space:nowrap}
+</style>
+</head>
+<body>
+<main class="page">
+<p class="eyebrow"><a href="../">slopswap</a> / <a href="./">roland-lg540</a></p>
+<h1>LG-540: Fluxation sticker</h1>
+<p class="muted">Print file for the Fluxation sticker on the Roland LG-540: black on retroreflective film, a white window frame, and a stepped gloss height map built up in layers. 23 November 2026.</p>
+
+<div class="callout warn"><span class="label">Not printed yet</span>
+Every plate in this file was compared with the Photoshop and Illustrator sources and matches them. It has not been through VersaWorks or the printer. Print a test strip before a full sheet.
+</div>
+
+<h2>The file</h2>
+<ul>
+<li><a href="fluxation_print.pdf" download><code>fluxation_print.pdf</code></a> (91 KB): colour, white, gloss and both cut lines in one file, built the same way as <code>lentV64_print.pdf</code>.</li>
+<li><strong>Size at 100%:</strong> the sticker is 6.02 × 2.59 in, the backing piece 6.11 × 2.69 in, the page 6.70 × 3.27 in. Change <span class="ui">Scale</span> in VersaWorks for another size.</li>
+<li>For the gloss check, test strips and what to do when something looks wrong, use the <a href="white-gloss-sticker-guide.html">Jumperless sticker guide</a>.</li>
+</ul>
+
+<h2>1. What is in the file</h2>
+<div class="plates">
+<figure><img src="fluxation-plate-cmyk.png" width="1509" height="691" alt="The colour plate: a black panel with the word FLUXATION left open, a small close box, and a black drop shadow" loading="lazy"><figcaption><b>CMYK</b>: black ink only. White in this picture means no ink at all.</figcaption></figure>
+<figure><img src="fluxation-plate-white.png" width="1509" height="691" alt="The white plate: a solid frame with a large rectangular opening over the panel and a small opening at the close box" loading="lazy"><figcaption><b>RDG_WHITE</b>: black here is where white ink prints. The panel and the close box are left open.</figcaption></figure>
+<figure><img src="fluxation-plate-gloss.png" width="1509" height="691" alt="The gloss plate: black letters, a dark grey frame and three lighter steps along the right and bottom" loading="lazy"><figcaption><b>RDG_GLOSS</b>: clear ink. Darker means more gloss, in five steps.</figcaption></figure>
+<figure><img src="fluxation-plate-cuts.png" width="1509" height="691" alt="Two cut outlines: a magenta outline with stepped corners close to the art and a green rectangle around it" loading="lazy"><figcaption><b>Cut lines</b>: magenta is <code>CutContour</code> (kiss cut), green is <code>PerfCutContour</code> (perf cut).</figcaption></figure>
+</div>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Layer</th><th>Spot colour</th><th>What the printer does with it</th><th>Came from</th></tr></thead>
+<tbody>
+<tr><td>CMYK</td><td>none, ordinary CMYK</td><td>Prints the black.</td><td>Print</td></tr>
+<tr><td>RDG_WHITE</td><td><code>RDG_WHITE</code></td><td>Prints white ink in that shape.</td><td>printWhite, plus the white flood drawn in Illustrator</td></tr>
+<tr><td>RDG_GLOSS</td><td><code>RDG_GLOSS</code></td><td>Prints gloss ink, more where the picture is darker.</td><td>Clear Emboss copy</td></tr>
+<tr><td>CutContour</td><td><code>CutContour</code></td><td>Kiss cut: the sticker outline, with its stepped corners.</td><td>Score</td></tr>
+<tr><td>PerfCutContour</td><td><code>PerfCutContour</code></td><td>Perforated cut through the backing, about 1 mm outside the kiss cut.</td><td>Cut</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>2. What ends up where</h2>
+<figure><img src="fluxation-ink-map.png" width="1509" height="691" alt="Map of the finished sticker: orange letters, a white frame and margin, a black panel, and a violet shadow" loading="lazy">
+<figcaption>The finished sticker by area. Magenta is the kiss cut and green is the perf cut.</figcaption></figure>
+<ul class="legend">
+<li><i style="background:#ff9f1c"></i><span><b>The letters</b>Bare film under the thickest gloss. Reflective and raised.</span></li>
+<li><i style="background:#fff"></i><span><b>Frame, title bar and margin</b>White ink, so not reflective. The margin runs past the kiss cut.</span></li>
+<li><i style="background:#18181c"></i><span><b>The panel</b>Black straight on the film, no gloss. Flat black.</span></li>
+<li><i style="background:#463c6e"></i><span><b>The drop shadow</b>Black over white, with thin gloss steps.</span></li>
+</ul>
+
+<h3>The gloss height map</h3>
+<figure><img src="fluxation-gloss-levels.png" width="1509" height="691" alt="The gloss plate in false colour: red letters, an orange frame, and yellow, green and blue steps along the right and bottom" loading="lazy">
+<figcaption>The five gloss levels in false colour.</figcaption></figure>
+<div class="table-wrap">
+<table>
+<thead><tr><th>Level</th><th>Colour above</th><th>Where</th></tr></thead>
+<tbody>
+<tr><td>100%</td><td>red</td><td>The letters and the dots in the close box.</td></tr>
+<tr><td>80%</td><td>orange</td><td>The title bar and the window frame.</td></tr>
+<tr><td>60% and 40%</td><td>yellow, green</td><td>The two steps of the black drop shadow.</td></tr>
+<tr><td>20%</td><td>blue</td><td>The thin white line outside the shadow.</td></tr>
+</tbody>
+</table>
+</div>
+<p>Every gloss coat lays these proportions, so the letters always end up highest and the outer line lowest. More coats make the whole map taller.</p>
+
+<h2>3. Print it with layered gloss</h2>
+<p>This is the layered job that worked for the Jumperless sticker on 23 November, with this file in place of that one. Every layer is a copy of the same job.</p>
+<div class="stack">
+<p>The layered job, top row prints last</p>
+<div><b>3 and up: gloss</b><span>Mode <code>Embossing (v)</code>, one copy per gloss layer</span></div>
+<div><b>2 colour</b><span>a CMYK-only mode</span></div>
+<div><b>1 white</b><span>a white-only mode</span></div>
+<div class="film">film</div>
+</div>
+<ol class="steps">
+<li>Do the <a href="white-gloss-sticker-guide.html#glosscheck">gloss check</a> at the printer first.</li>
+<li>Drag <code>fluxation_print.pdf</code> into the job list. <span class="ui">Special Items</span> should show four markers: the two cut lines, white and gloss.</li>
+<li>Set <span class="ui">Scale</span> and the position now, before duplicating, so every copy gets the same.</li>
+<li>Duplicate the job until there is one copy for white, one for colour and one for each gloss layer.</li>
+<li>Give the white and colour copies the same modes as in the Jumperless layered job.</li>
+<li><strong>Gloss copies:</strong> in Quality, set Media Type to <span class="ui">Special Effects</span> and Mode to <code>Embossing (v)</code>.</li>
+<li>Select all the copies, right-click, <span class="ui">Generate Layered Job</span>. Check the order: white, colour, then gloss on top.</li>
+<li>Set <span class="ui">Print &amp; Cut</span> in Cut Controls on the top copy. Only the top copy's cut lines are used.</li>
+</ol>
+<div class="callout"><span class="label">How many gloss layers</span>
+<p>Three <code>Embossing (v)</code> layers at Overprint 1 worked on the Jumperless sticker, but came out thinner than wanted. For more height there are two ways:</p>
+<ul>
+<li><strong>More copies</strong> of the gloss layer. This is the way already proven.</li>
+<li><strong>A higher Overprint on one gloss copy.</strong> In Quality open <span class="ui">Details</span>, tick <span class="ui">Ignore Default Settings</span>, then set Overprint. Not tried yet on this printer.</li>
+</ul>
+</div>
+<p class="ref">Roland: <a href="https://downloadcenter.rolanddg.com/contents/manuals/VW7_USE_EN/kwv1752190307832.html">Overprint in VersaWorks 7</a> · <a href="https://downloadcenter.rolanddg.com/contents/manuals/VW7_USE_EN/uby1740620879711.html">layered jobs</a></p>
+
+<h2>4. What was changed from the source files</h2>
+<p>The plates come from <code>fluxation_Sticker_gloss.psd</code>. The white flood and the two outlines come from <code>fluxation_Sticker_gloss.ai</code>.</p>
+<ul>
+<li><strong>The two outlines were given jobs.</strong> Score became the kiss cut and Cut became the perforated cut. If they are meant the other way round, the file needs rebuilding.</li>
+<li><strong>The white flood was trimmed.</strong> In Illustrator it ran to the edge of the page. It now stops 1 mm outside the perf cut. Nothing inside the cut changed.</li>
+<li><strong>The outlines were squared up.</strong> They now sit on the artwork's pixel grid, within about 0.1 mm of the Illustrator paths.</li>
+<li><strong>The white mask is the Photoshop one.</strong> It is newer, and has one more block of white at the inner corner of the shadow than the Illustrator copy.</li>
+<li><strong>The black is as drawn:</strong> C75 M68 Y67 K90.</li>
+</ul>
+<hr>
+<p class="muted">Written 23 November 2026.</p>
+</main>
+</body>
+</html>
