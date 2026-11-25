@@ -32,9 +32,9 @@ Tools (the routing lab, the board outline, the cost explorer, the V6 notebook) w
 
 | Tool | Source | How it gets here |
 |---|---|---|
-| Routing lab | `~/Documents/GitHub/Jimulator/Routing` (`web/console.css` is the copy) | `lab.py export`, then `.tools/routing_lab_dress.py` (takes the copy out, links the sheet) |
-| Cost explorer | `~/Desktop/V6pile/notes/v6_cost_explorer.html` (copy inline) | `.tools/console_dress.py <source> V6/cost-explorer.html "<short title>" "<description>"` |
-| Board outline | `~/Documents/GitHub/JumperlessV6/v6mech` | its own `tools/to_slopswap.py`. It still carries its own copy of the look (its colours follow the sheet, its fonts and cut do not yet) |
+| Routing lab | the Jimulator repo, `Routing/` (`web/console.css` is the copy) | `lab.py export`, then `.tools/routing_lab_dress.py` (takes the copy out, links the sheet) |
+| Cost explorer | the V6 pile, `notes/v6_cost_explorer.html` (copy inline) | `.tools/console_dress.py <source> V6/cost-explorer.html "<short title>" "<description>"` |
+| Board outline | the JumperlessV6 folder, `v6mech/` | its own `tools/to_slopswap.py`. It still carries its own copy of the look (its colours follow the sheet, its fonts and cut do not yet) |
 | V6 notebook | `V6/notebook.html`, written here | nothing: it links the sheet |
 
 After a change to the look, run `console_copy.py` on the two copies if the tools should also follow from disk, then `python3 build.py` and look at one page of each tool.
