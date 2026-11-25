@@ -223,6 +223,8 @@ body.app hr{height:1px;background:var(--line);margin:1rem 0}
 :where(.console) body{margin:0;padding:0;background:var(--bg);color:var(--ink);font:13px/1.35 var(--mono);
   font-variant-numeric:tabular-nums;scrollbar-color:var(--line) transparent;scrollbar-width:thin}
 :where(.console) body::before{content:"";position:fixed;inset:0 0 auto;height:3px;background:var(--rainbow);z-index:10}
+/* a tool shown inside the V6 notebook (which adds .embedded) leaves the stripe and the crumb to the notebook's bar */
+:where(.console.embedded) body::before,:where(.console.embedded) .eyebrow{display:none}
 
 /* words: the page's name, a heading inside a panel (a small plate on a rule, in the colour its panel or its
    turn gives it as --c), and the plain tags at a tool's size */
