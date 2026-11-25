@@ -19,10 +19,10 @@
 <main class="page wide">
 <p class="eyebrow"><a href="../">slopswap</a> / <a href="./">V6</a></p>
 <h1>V6 board outline and stack</h1>
-<p class="muted">The readme of <code>JumperlessV6/v6mech</code>, rev A8b 2026-11-24. Kevin Cappuccio with Claude.</p>
+<p class="muted">The readme of <code>JumperlessV6/v6mech</code>, rev A8c 2026-11-24. Kevin Cappuccio with Claude.</p>
 <ul class="get cycle">
   <li><a href="board-outline.html"><b>Open the 3D viewer</b></a></li>
-  <li><a href="board-outline-v6mech.zip" download><b>Download the folder</b> (.zip, 12.0 MB): parameters, source, KiCad and DXF outlines, STEP</a></li>
+  <li><a href="board-outline-v6mech.zip" download><b>Download the folder</b> (.zip, 12.7 MB): parameters, source, KiCad and DXF outlines, STEP</a></li>
 </ul>
 <figure><a href="board-outline-on-sketch.png"><img src="board-outline-on-sketch.png" alt="The outline (pink) laid over the notebook page it was traced from"></a><figcaption>The outline (pink) laid over the notebook page it was traced from: the viewer's sketch underlay, seen from above.</figcaption></figure>
 <figure><a href="board-outline-inputs.png"><img src="board-outline-inputs.png" alt="From the top edge"></a><figcaption>From the top edge: the click wheel under the top board at the corner, a nav switch through it, two button holes. Left, the pickers and the per-board tick boxes of the selected part.</figcaption></figure>
@@ -394,6 +394,193 @@ JumperlessFootprints; the RKJXM has no footprint yet (B25 says so too).</p>
 </div>
 <p><code>node build.mjs --check</code> exits 1 if two parts clash, a part runs into a board kept whole, or a bare
 breadboard no longer fits beside the unit.</p>
+<h2>Rev A8c: the long-travel push switches, and buttons drawn pressed</h2>
+<p>Sixteen push switches with a real travel (0.7 to 1.7 mm, a spring and a click, not a dome under a film) are in
+the parts list under Buttons. They are the candidates for the keys, from the '93 Grand Cherokee head unit's
+buttons onward:</p>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Part</th>
+<th>Over all, mm</th>
+<th>Travel</th>
+<th>Force</th>
+<th>Footprint</th>
+<th>LCSC</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>btn_spej</code></td>
+<td>ALPS SPEJ push switch</td>
+<td>8.4 x 7 x 8</td>
+<td>1.7</td>
+<td>3.5 N</td>
+<td>SW_Push_Alps_SPEJ110100</td>
+<td>C97447</td>
+</tr>
+<tr>
+<td><code>btn_speh</code></td>
+<td>ALPS SPEH push switch</td>
+<td>6.54 x 6 x 5</td>
+<td>1.6</td>
+<td>1.96 to 3 N</td>
+<td>SW_Push_Alps_SPEH</td>
+<td>C97448</td>
+</tr>
+<tr>
+<td><code>btn_evpasac</code></td>
+<td>Panasonic EVP-AS</td>
+<td>7 x 6.11 x 5</td>
+<td>1.3</td>
+<td>1.6 to 3.5 N</td>
+<td>SW_Push_Panasonic_EVPAS</td>
+<td>C4365033, C2915187, C2915191, C5119011</td>
+</tr>
+<tr>
+<td><code>btn_evpas_10</code></td>
+<td>Panasonic EVP-AS</td>
+<td>7 x 6.11 x 5</td>
+<td>1</td>
+<td>2.2 to 4.0 N</td>
+<td>SW_Push_Panasonic_EVPAS</td>
+<td>none found</td>
+</tr>
+<tr>
+<td><code>btn_evqpv_13</code></td>
+<td>Panasonic EVQ-PV through-hole</td>
+<td>6 x 6.1 x 5</td>
+<td>1.3</td>
+<td>1.6 to 3.5 N</td>
+<td>SW_Push_Panasonic_EVQPV</td>
+<td>C5736850</td>
+</tr>
+<tr>
+<td><code>btn_evqpv_10</code></td>
+<td>Panasonic EVQ-PV through-hole</td>
+<td>6 x 6.1 x 5</td>
+<td>1</td>
+<td>2.2 N</td>
+<td>SW_Push_Panasonic_EVQPV</td>
+<td>none found</td>
+</tr>
+<tr>
+<td><code>btn_evpbd</code></td>
+<td>Panasonic EVP-BD / 0B</td>
+<td>7 x 6 x 4</td>
+<td>0.75</td>
+<td>3.5 to 7.0 N</td>
+<td>SW_Push_Panasonic_EVPBD</td>
+<td>C4364307</td>
+</tr>
+<tr>
+<td><code>btn_evpcd</code></td>
+<td>Panasonic EVP-CD</td>
+<td>7 x 6 x 4</td>
+<td>1</td>
+<td>4.0 to 5.0 N</td>
+<td>SW_Push_Panasonic_EVPCD</td>
+<td>none found</td>
+</tr>
+<tr>
+<td><code>btn_sksu_bb</code></td>
+<td>ALPS SKSUBBE010</td>
+<td>5.4 x 5.4 x 4.34</td>
+<td>1.04</td>
+<td>5 N</td>
+<td>SW_Push_Alps_SKSU_H4.34</td>
+<td>C726003</td>
+</tr>
+<tr>
+<td><code>btn_sksu_bc</code></td>
+<td>ALPS SKSUBCE010</td>
+<td>5.4 x 5.4 x 4.34</td>
+<td>0.9</td>
+<td>3 N</td>
+<td>SW_Push_Alps_SKSU_H4.34</td>
+<td>C470481</td>
+</tr>
+<tr>
+<td><code>btn_sksu_aa</code></td>
+<td>ALPS SKSUAAE010</td>
+<td>5.4 x 5.4 x 3.85</td>
+<td>0.7</td>
+<td>3.5 N</td>
+<td>SW_Push_Alps_SKSU_H3.85</td>
+<td>C262410</td>
+</tr>
+<tr>
+<td><code>btn_skps</code></td>
+<td>ALPS SKPS</td>
+<td>6.6 x 6 x 5.01</td>
+<td>1.05</td>
+<td>3.0 to 3.6 N</td>
+<td>SW_Push_Alps_SKPS</td>
+<td>C358623, C2925580, C278358</td>
+</tr>
+<tr>
+<td><code>btn_b3al</code></td>
+<td>Omron B3AL</td>
+<td>6.6 x 6.9 x 5.01</td>
+<td>1.3</td>
+<td>1.96 to 5.00 N</td>
+<td>SW_Push_Omron_B3AL</td>
+<td>C4364511, C5950094</td>
+</tr>
+<tr>
+<td><code>btn_b3al_ms</code></td>
+<td>Omron B3AL -MS</td>
+<td>6.6 x 6.9 x 5.01</td>
+<td>1</td>
+<td>3.00 to 3.50 N</td>
+<td>SW_Push_Omron_B3AL</td>
+<td>none found</td>
+</tr>
+<tr>
+<td><code>btn_kscslt_j</code></td>
+<td>C&amp;K KSC SLT J-bend</td>
+<td>6.8 x 6.2 x 5</td>
+<td>1.35</td>
+<td>2.4 to 3.5 N</td>
+<td>SW_Push_CK_KSC-SLT_J</td>
+<td>C2801879</td>
+</tr>
+<tr>
+<td><code>btn_kscslt_g</code></td>
+<td>C&amp;K KSC SLT gullwing</td>
+<td>10 x 6.2 x 5</td>
+<td>1.35</td>
+<td>2.4 to 3.5 N</td>
+<td>SW_Push_CK_KSC-SLT_G</td>
+<td>C2801904, C2801527</td>
+</tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>Each has the maker's land pattern as its footprint, a model in three bodies (housing, terminals, actuator)
+  and a travel. Select one and tick <strong>Pressed</strong> (or press P): the actuator is drawn down by the travel.
+  <strong>Show the buttons pressed</strong>, under the expansion port, does it for all of them at once. Both are kept with
+  the design. Neither changes a check or an export: heights, clashes and Standing out always use the released
+  part.</li>
+<li>Pressed is drawn from the released mesh: every point of the actuator goes down by the travel and stops at
+  the housing's top, so a plunger's wall shortens and a cap that travels further than it stands proud ends
+  flush. The STEP models in the KiCad library are cut properly instead (the SPEH's cap ends 0.1 below its
+  frame there, flush here).</li>
+<li><code>btn_spej</code> and <code>btn_evpasac</code> were in the parts library already, with EasyEDA's footprint and a one-body
+  model. The new entries take their place under the same keys, so a saved design keeps its parts. The EVP-AS
+  footprint changes with that: pads 2.0 x 2.0 at +-3.0, which is Panasonic's land pattern; EasyEDA's has them
+  at +-2.8.</li>
+<li>The travel in the table is the one the model is pressed by. Where a family has two travels there are two
+  entries (EVP-AS, EVQ-PV, B3AL, SKSU); where the force grades differ by 0.1 mm (EVP-BD 0.7 to 0.8) there is
+  one, at 0.75. The part numbers and forces of a family are listed under the selected part.</li>
+<li><code>src/switchlib.js</code> and <code>src/switchmodels.js</code> are written by <code>V6pile/switches/src/build_viewer.py</code> from the
+  same table that writes the KiCad library, so the footprint here is the one in
+  <code>JumperlessV6footprints.pretty</code> (KiCad 8.0 folder), and the mesh is the tessellated STEP in
+  <code>3dmodels/JumperlessV6.3dshapes/</code>. Edit <code>V6pile/switches/src/switches_data.py</code>, not these two files.</li>
+</ul>
 <h2>Rev A8b: the tongue belongs to the top board</h2>
 <p>In A7 and A8 a cantilevered button's slot was cut by the same rule as any button's opening: in every board on
 the free side of the switch. So a switch on the underside of a board put the slot in the boards below it (a key
@@ -596,6 +783,10 @@ percentile / worst hole, and how far a 10 µT ambient change moves the fix (medi
 <ul>
 <li><code>src/partlib.js</code>, <code>src/partmodels.js</code>: the parts library (footprints, sizes) and its 3D models, written by
   <code>tools/prep_parts.py</code>; edit the table in that script, not these.</li>
+<li><code>src/switchlib.js</code>, <code>src/switchmodels.js</code>: the long-travel push switches (rev A8c), in the same shape as the
+  two files above plus a travel and an actuator group in each model; written by
+  <code>python3 V6pile/switches/src/build_viewer.py &lt;this folder&gt;</code>. Loaded after the parts library, so an entry with
+  the same key replaces the library's.</li>
 <li><code>out/&lt;variant&gt;/v6mech.pretty/</code>, <code>out/&lt;variant&gt;/WT_wig_top_board.kicad_pcb</code>: the library footprints used and
   the wig's top board.</li>
 </ul>
@@ -704,6 +895,13 @@ outline on Edge.Cuts, the parts on that board as outlines on User.Drawings, and 
 User.Comments. They are a one-way export: edits made in KiCad do not come back into the JSON.</p>
 <h2>Not verified</h2>
 <ul>
+<li><strong>The long-travel switches (rev A8c).</strong> The land patterns and outline boxes are the makers' drawings, and
+  <code>V6pile/switches/src/verify.py</code> re-reads every file. Four models are drawn from the drawings, not from
+  maker CAD, with details assumed where the drawing gives none (corner cuts, the shape of the stem's foot):
+  EVQ-PV, EVP-BD, EVP-CD and both KSC SLT. On the Omron B3AL the line between rubber cap and base (3.0 above
+  the board) is assumed. The SKSUAAE010 is the SKSUBBE010 model with a 0.49 shorter stem. Which of the
+  SPEJ's outer terminals is closed at rest is inferred from the sheet's two turnover heights, not stated
+  on it: check with a meter. None of it has been held against a part.</li>
 <li><strong>The KiCad files have not been opened in KiCad.</strong> They are written to the v8 format and read back two
   ways (<code>tools/verify.py</code>'s own reader and the <code>kiutils</code> library): every end point on Edge.Cuts is shared
   by exactly two primitives, the rebuilt loops match the resolved shape (polygon corners within 0.007 mm of
