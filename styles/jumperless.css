@@ -13,6 +13,9 @@
    its own token names at the --jl-* aliases (localize_fonts.py --theme writes that block). Never define an
    alias in terms of a plain token: that is a cycle, and a cycle makes every colour invalid.
    body.app  = dense tool layout: no document decorations, no column width.
+   html.console = the console look for tools (panels with name plates, cut corners, narrow capital labels):
+   the section between "console:begin" and "console:end" at the end of this file. The routing lab, the board
+   outline, the cost explorer and the V6 notebook all take it from here.
    Phones: a control panel (filters, toolbars) keeps at most 40% of the screen and scrolls inside
    itself; a row of chips or buttons scrolls sideways instead of wrapping into a wall. Use .capped on
    the panel and .scroll-x on each row; the converter applies the same to common artifact patterns.
@@ -23,6 +26,10 @@
 @font-face{font-family:Lato;font-weight:700;font-display:swap;src:url(fonts/Lato-700.woff2) format("woff2")}
 @font-face{font-family:Michroma;font-weight:400;font-display:swap;src:url(fonts/Michroma-400.woff2) format("woff2")}
 @font-face{font-family:"Press Start 2P";font-weight:400;font-display:swap;src:url(fonts/PressStart2P-400.woff2) format("woff2")}
+@font-face{font-family:"Archivo Narrow";font-weight:400 700;font-display:swap;src:url(fonts/ArchivoNarrow-var.woff2) format("woff2")}
+@font-face{font-family:"IBM Plex Mono";font-weight:400;font-display:swap;src:url(fonts/IBMPlexMono-400.woff2) format("woff2")}
+@font-face{font-family:"IBM Plex Mono";font-weight:500;font-display:swap;src:url(fonts/IBMPlexMono-500.woff2) format("woff2")}
+@font-face{font-family:"IBM Plex Mono";font-weight:600;font-display:swap;src:url(fonts/IBMPlexMono-600.woff2) format("woff2")}
 
 :root{
   color-scheme:dark;
@@ -36,6 +43,11 @@
   --jl-font-body:Lato,"Helvetica Neue",Arial,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
   --jl-font-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
   --jl-font-pixel:"Press Start 2P","Courier New",monospace;
+  /* the console look's own: its label and number faces, the corner cut off its furniture, and three grounds
+     (a row under the pointer, the thing picked, a problem: the only red) */
+  --jl-font-label:"Archivo Narrow","Arial Narrow","Helvetica Neue",Arial,sans-serif;
+  --jl-font-console:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --jl-cut:8px; --jl-hover:#39393f; --jl-sel:#4d3a47; --jl-problem:#ff4d3d;
   --bg:var(--jl-bg); --surface:var(--jl-surface); --surface-2:var(--jl-surface-2); --fg:var(--jl-fg); --muted:var(--jl-muted); --line:var(--jl-line);
   --accent:var(--jl-accent); --accent-2:var(--jl-accent-2); --accent-3:var(--jl-accent-3);
   --r1:var(--jl-r1);--r2:var(--jl-r2);--r3:var(--jl-r3);--r4:var(--jl-r4);--r5:var(--jl-r5);--r6:var(--jl-r6);
@@ -179,3 +191,114 @@ body.app hr{height:1px;background:var(--line);margin:1rem 0}
 :focus-visible{outline:2px solid var(--accent-2);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 @media print{body::before{position:static}body{padding:0}a{color:inherit}}
+
+/* console:begin
+   The console look, for tools: Jumperless's greys, its rainbow and its pink on panels shaped as a ship's console is,
+   with cut corners, name plates, narrow capital labels and thin lines. A page asks for it with <html class="console">
+   (and no "app" on its body). The pink here is the magenta, which stays clear of the red; red means a problem and
+   nothing else is red.
+   Every rule but the first starts with :where(.console), so it weighs no more than the same rule in a page's own sheet: the
+   document rules above lose to it by coming first, and a page's own rules win by coming after.
+   The text between the two markers stands alone (every value has its fallback): .tools/console_copy.py writes it out
+   for a tool that must also open from disk with no network. Change the look here, not in a copy. */
+.console{
+  color-scheme:dark;
+  --bg:var(--jl-bg,#27272b); --panel:var(--jl-surface,#323238); --panel-2:var(--jl-surface-2,#3d3d44);
+  --line:var(--jl-line,#4b4b54); --ink:var(--jl-fg,#f3f3f5); --dim:var(--jl-muted,#aaaab5);
+  --accent:var(--jl-accent-3,#fc0289); --focus:var(--jl-accent-2,#00fced);
+  --r1:var(--jl-r1,#f03060);--r2:var(--jl-r2,#f12fbf);--r3:var(--jl-r3,#c728f8);--r4:var(--jl-r4,#7647f2);
+  --r5:var(--jl-r5,#5174ed);--r6:var(--jl-r6,#50beeb);--r7:var(--jl-r7,#68f4d7);--r8:var(--jl-r8,#70f899);
+  --r9:var(--jl-r9,#7af85c);--r10:var(--jl-r10,#c0f848);--r11:var(--jl-r11,#e8cb40);--r12:var(--jl-r12,#e86828);
+  --rainbow:linear-gradient(90deg,var(--r1),var(--r2),var(--r3),var(--r4),var(--r5),var(--r6),var(--r7),var(--r8),var(--r9),var(--r10),var(--r11),var(--r12));
+  --problem:var(--jl-problem,#ff4d3d); --better:var(--r8); --worse:var(--r11);
+  --hover:var(--jl-hover,#39393f); --sel:var(--jl-sel,#4d3a47); --btn:var(--panel-2);
+  --label:var(--jl-font-label,"Archivo Narrow","Arial Narrow","Helvetica Neue",Arial,sans-serif);
+  --display:var(--jl-font-display,Michroma,"Eurostile Extended","Avenir Next","Helvetica Neue",Arial,sans-serif);
+  --mono:var(--jl-font-console,"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,Consolas,monospace);
+  --cut:var(--jl-cut,8px);
+  font-size:13px;
+}
+:where(.console) *,:where(.console) *::before,:where(.console) *::after{box-sizing:border-box}
+:where(.console) [hidden]{display:none!important}
+:where(.console) body{margin:0;padding:0;background:var(--bg);color:var(--ink);font:13px/1.35 var(--mono);
+  font-variant-numeric:tabular-nums;scrollbar-color:var(--line) transparent;scrollbar-width:thin}
+:where(.console) body::before{content:"";position:fixed;inset:0 0 auto;height:3px;background:var(--rainbow);z-index:10}
+
+/* words: the page's name, a heading inside a panel (a small plate on a rule, in the colour its panel or its
+   turn gives it as --c), and the plain tags at a tool's size */
+:where(.console) h1{font-family:var(--display);font-size:14px;line-height:1.4;font-weight:400;letter-spacing:.02em;margin:0;text-wrap:wrap}
+:where(.console) h2{display:flex;align-items:center;gap:8px;font-family:var(--label);font-size:12px;line-height:1.35;margin:14px 0 5px;
+  padding:0;border:0;color:var(--ink);font-weight:600;text-transform:uppercase;letter-spacing:.09em;text-wrap:wrap}
+:where(.console) h2::before{content:"";flex:none;width:9px;height:9px;background:var(--c,var(--accent));
+  clip-path:polygon(0 0,100% 0,100% 100%,45% 100%,0 55%)}
+:where(.console) h2::after{content:"";flex:1;height:1px;background:var(--line)}
+/* the headings straight inside a panel's body take the rainbow in turn */
+:where(.console) .body>h2:nth-of-type(6n+1){--c:var(--r2)} :where(.console) .body>h2:nth-of-type(6n+2){--c:var(--r3)}
+:where(.console) .body>h2:nth-of-type(6n+3){--c:var(--r7)} :where(.console) .body>h2:nth-of-type(6n+4){--c:var(--r8)}
+:where(.console) .body>h2:nth-of-type(6n+5){--c:var(--r10)} :where(.console) .body>h2:nth-of-type(6n+6){--c:var(--r11)}
+:where(.console) h3{font-family:var(--label);font-size:12px;line-height:1.35;font-weight:600;letter-spacing:.06em;margin:10px 0 4px;color:var(--ink)}
+:where(.console) :is(p,ul,ol,dl,table,pre,blockquote,figure){margin:0 0 .6em}
+:where(.console) li{margin:.25em 0}
+:where(.console) a{color:var(--accent)}
+:where(.console) a:hover{color:var(--ink)}
+:where(.console) :is(small,.muted,.hint){color:var(--dim)}
+:where(.console) .eyebrow{margin:0;line-height:1.4;font-family:var(--label);font-weight:600;font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--dim)}
+:where(.console) .eyebrow a{color:inherit;text-decoration:none}
+:where(.console) .eyebrow a:hover{color:var(--accent)}
+:where(.console) hr{height:1px;background:var(--line);margin:10px 0;border:0;border-radius:0}
+:where(.console) :is(code,kbd,pre){font-family:var(--mono);font-size:inherit}
+:where(.console) :is(code,kbd){background:var(--panel-2);padding:0 .3em;border-radius:0}
+:where(.console) pre{background:var(--bg);border:1px solid var(--line);border-radius:0;padding:6px;line-height:1.3;overflow:auto}
+:where(.console) pre code{background:none;padding:0}
+:where(.console) table{border-collapse:collapse;width:100%;font-size:inherit}
+:where(.console) :is(th,td){padding:2px 4px;text-align:left;vertical-align:baseline;border:0}
+:where(.console) th{font-family:var(--label);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--dim);
+  background:none;border-bottom:1px solid var(--line)}
+
+/* things to press and fill in. A button is a plate with one corner cut; under the pointer it lights, pressed it
+   turns over, and one that is on wears the pink */
+:where(.console) :is(button,input,select,textarea){font:inherit;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:0;padding:3px 7px}
+:where(.console) button{cursor:pointer;font-family:var(--label);font-weight:600;text-transform:uppercase;letter-spacing:.07em;font-size:12px;
+  padding:3px 12px 3px 9px;border:0;background:var(--btn);color:var(--ink);
+  clip-path:polygon(0 0,100% 0,100% calc(100% - var(--cut)),calc(100% - var(--cut)) 100%,0 100%)}
+:where(.console) button:hover{background:var(--line)}
+:where(.console) button:active{background:var(--ink);color:var(--bg)}
+:where(.console) button:is(.on,[aria-pressed="true"],[aria-selected="true"]){background:var(--accent);color:var(--bg)}
+:where(.console) button:disabled{opacity:.45;cursor:default}
+:where(.console) button.quiet{padding:2px 7px;clip-path:none;background:none;color:var(--dim);font-size:11px}
+:where(.console) button.quiet:hover{background:none;color:var(--ink)}
+:where(.console) button.quiet:is(.on,[aria-pressed="true"],[aria-selected="true"]){background:none;color:var(--ink);box-shadow:inset 0 -2px 0 var(--accent)}
+:where(.console) :is(input,select,textarea):hover{border-color:var(--dim)}
+:where(.console) input:is([type="checkbox"],[type="radio"]){width:14px;height:14px;padding:0;accent-color:var(--accent)}
+:where(.console) input[type="range"]{padding:0;border:0;background:none;accent-color:var(--accent)}
+:where(.console) :focus-visible{outline:2px solid var(--focus);outline-offset:1px}
+:where(.console) button:focus-visible{outline:0;box-shadow:inset 0 0 0 2px var(--focus)}   /* a cut corner would clip an outline */
+/* a row of tabs: the one shown wears the pink */
+:where(.console) .tabs{display:inline-flex;gap:2px}
+:where(.console) .tabs button{padding:3px 14px 3px 10px;color:var(--dim)}
+:where(.console) .tabs button:hover{color:var(--ink)}
+:where(.console) .tabs button[aria-selected="true"]{color:var(--bg)}
+@media (prefers-reduced-motion:no-preference){
+  :where(.console) :is(button,input,select,.plate){transition:background-color .12s,color .12s,border-color .12s,opacity .12s}
+}
+
+/* a panel: a bar with its name plate (its number on its colour --c, its name beside it, the far corner cut), a
+   note, a mark that folds it, and its body under the bar */
+:where(.console) .panel{position:relative;display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--panel)}
+:where(.console) .panel>.body{flex:1 1 0;min-height:0;overflow:auto;padding:10px;scrollbar-color:var(--line) transparent;scrollbar-width:thin}
+:where(.console) .panel.shut>.body{display:none}
+:where(.console) :is(.bar,.pbar){flex:none;display:flex;align-items:center;gap:8px;min-height:26px;padding-right:6px;background:var(--bg);
+  border-bottom:1px solid var(--line);box-shadow:inset 0 -2px 0 -1px var(--c,var(--line))}
+:where(.console) .plate{flex:none;display:inline-flex;align-items:center;gap:7px;align-self:stretch;padding:0 16px 0 0;
+  user-select:none;-webkit-user-select:none;font-family:var(--label);font-weight:600;font-size:12px;text-transform:uppercase;
+  letter-spacing:.12em;color:var(--ink);background:var(--panel-2);clip-path:polygon(0 0,100% 0,calc(100% - 11px) 100%,0 100%)}
+:where(.console) .plate b{align-self:stretch;display:inline-flex;align-items:center;padding:0 7px 0 8px;font-family:var(--display);
+  font-weight:400;font-size:10px;letter-spacing:0;color:var(--bg);background:var(--c,var(--accent))}
+:where(.console) .bar-note{flex:1;min-width:0;color:var(--dim);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+:where(.console) .fold{flex:none;width:22px;height:18px;padding:0;clip-path:none;background:none;color:var(--dim);font-family:var(--mono);font-size:14px;line-height:1}
+:where(.console) .fold::before{content:"\2212"}
+:where(.console) .panel.shut .fold::before{content:"+"}
+:where(.console) .fold:hover{background:none;color:var(--ink)}
+@media print{:where(.console) body::before{position:static}}
+/* console:end */
