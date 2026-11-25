@@ -19,8 +19,34 @@ Start a new page from `styles/template.html`. Give it a `<title>` and, if the ti
 `styles/jumperless.css` follows shop.jumperless.org (charcoal, hot pink, cyan, Michroma headings, Press Start 2P labels) and docs.jumperless.org (the rainbow). Dark only; `data-theme="light"` on `<html>` gives the light look. Tokens: `--bg --surface --surface-2 --fg --muted --line --accent --accent-2 --accent-3 --r1…--r10 --rainbow --font-display --font-body --font-mono --font-pixel`. Logo: `styles/jumperless-wordmark.png` (the pixel wordmark), `styles/jump-logo.svg` (the round mark). The ten `--r` colours are the wordmark's letters in order.
 
 - Document pages: `<main class="page">` (reading column) or `class="page wide"`.
-- Tool pages (dense UI with their own layout): `<body class="app">` turns off the document decorations.
+- Tool pages (dense UI with their own layout): `<body class="app">` turns off the document decorations. A tool in the console look uses `<html class="console">` instead: see the next section.
 - Style guide: links and single highlights are pink (the J); a row of siblings cycles the rainbow (`.cycle`); backgrounds are layered greys, never black; on phones a control panel is capped at 40% of the screen and scrolls inside itself (`.capped`) and rows of chips or buttons scroll sideways (`.scroll-x`). The converter applies the phone rules to the usual `header`, `.filters`, `.frow`, `.seg`, `.chips`, `.tabs` and `.toc` patterns.
+
+## The console look, and where to change it
+
+Tools (the routing lab, the board outline, the cost explorer, the V6 notebook) wear one look: panels with name plates, cut corners, narrow capital labels, the rainbow and the magenta. It lives in one place, the section of `styles/jumperless.css` between `console:begin` and `console:end`, and a page asks for it with `<html class="console">` (and no `app` on its body).
+
+- **To change every tool at once**, edit `styles/jumperless.css`. Colours, fonts, the corner cut and the three grounds are the `--jl-*` values at the top (`--jl-surface`, `--jl-font-label`, `--jl-font-console`, `--jl-cut`, `--jl-hover`, `--jl-sel`, `--jl-problem`, and the palette); the shapes (plate, button, panel bar, heading mark, table head, tab row) are in the console section. Document pages follow the `--jl-*` colours too.
+- **Every console rule starts with `:where(.console)`**, so it weighs no more than the same rule in a page's own sheet: the document rules above it lose by coming first, a page's own rules win by coming after. Keep new rules that way.
+- **A tool keeps only its own layout** in its page. A tool that must also open from disk carries a copy of the section in `<style id="console-copy">` (or, the routing lab, in `console.css`). Never edit a copy: `python3 .tools/console_copy.py <file> [...]` writes it again from the sheet.
+
+| Tool | Source | How it gets here |
+|---|---|---|
+| Routing lab | `~/Documents/GitHub/Jimulator/Routing` (`web/console.css` is the copy) | `lab.py export`, then `.tools/routing_lab_dress.py` (takes the copy out, links the sheet) |
+| Cost explorer | `~/Desktop/V6pile/notes/v6_cost_explorer.html` (copy inline) | `.tools/console_dress.py <source> V6/cost-explorer.html "<short title>" "<description>"` |
+| Board outline | `~/Documents/GitHub/JumperlessV6/v6mech` | its own `tools/to_slopswap.py`. It still carries its own copy of the look (its colours follow the sheet, its fonts and cut do not yet) |
+| V6 notebook | `V6/notebook.html`, written here | nothing: it links the sheet |
+
+After a change to the look, run `console_copy.py` on the two copies if the tools should also follow from disk, then `python3 build.py` and look at one page of each tool.
+
+## The V6 notebook
+
+`V6/notebook.html` shows the V6 tools as tabs of one page. Each tool is its own page in a frame, so it still opens alone at its own address and a newer copy of a tool drops in with nothing to redo.
+
+- **Tabs** are the `TABS` list in the page; the frames behind them are `FRAMES`. To add a tool, add a line to each: its address and the names it keeps its state under in the browser's storage (`keys`).
+- **A notebook page** is a whole design: a copy of what every tool keeps under its `keys`, taken when the page is put away and written back when it is opened. The page open now is simply what the tools hold; nothing in a tool was changed for this. Pages live in this browser (`v6nb.v1`); Export and Import carry them as a file.
+- **Inside the notebook** a tool gets `class="embedded"` on its `<html>` and drops its stripe, its crumb and its own name (the console section and each tool's sheet say how). The board outline does not know that class yet, so the notebook hides its header's crumb, name and two tabs from outside (`FRAMES.outline.css`).
+- **The Routing tab shows a saved run**, one per copper (`COPPER`): it switches between runs made ahead of time and does not route.
 
 ## Dark Reader
 
