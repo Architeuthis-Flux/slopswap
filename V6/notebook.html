@@ -23,10 +23,19 @@ body { display: flex; flex-direction: column; padding-top: 3px; overflow: hidden
 #frames iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: var(--bg); }
 #frames iframe[hidden] { display: none; }
 @media (max-width: 700px) {
+  /* a phone: the bar is three short lines. The tabs; the page; then which copper (on the Routing tab), what just
+     happened, and where this page is. A line too long for the screen scrolls sideways instead of wrapping. */
   .top { padding: 5px 8px; gap: 5px 8px; }
-  .top h1 { display: none; }                        /* the crumb says where this is; the room goes to the tabs */
-  .tabs { max-width: 100%; overflow-x: auto; scrollbar-width: none; }
-  .tabs button { flex: none; }
+  .top h1, .top .spacer { display: none; }
+  .tabs { order: 1; flex: 1 0 100%; }
+  #pages, #ask { order: 2; flex: 1 0 100%; }
+  #copper-box { order: 3; }
+  #said { order: 4; flex: 1 1 0; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .top > .eyebrow { order: 5; }
+  #copper-box:not([hidden]) ~ #said { order: 6; flex: 1 0 100%; }      /* with the copper on that line, what happened gets one of its own */
+  .tabs, .top .group { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; max-width: 100%; }
+  .tabs::-webkit-scrollbar, .top .group::-webkit-scrollbar { display: none; }
+  .tabs button, .top .group > * { flex: none; }
 }
 </style>
 </head>

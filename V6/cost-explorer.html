@@ -1,93 +1,103 @@
+<!doctype html>
+<html lang="en" class="console">
+<head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Jumperless V6 Cost Explorer</title>
+<meta name="short-title" content="Cost explorer">
+<meta name="description" content="Unit cost, landed cost and margin for the Jumperless V6 main board and wig from the staged schematic BOM. Choose the display and its window, row isolation, bus splits, the shunt amplifier, the expansion port, the magnetometers and the cost cuts; the whole schematic BOM and the bar display survey are below the numbers.">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="../styles/jumperless.css">
 <style>
-/* Layout: a control rail on the left, a results column on the right; both stack on phones. */
+/* The cost explorer's own layout: the options in one panel, what they cost in the other, each scrolling on its own;
+   on a narrow screen they stack and the page scrolls. The look (greys, rainbow, pink, plates, cut corners, buttons,
+   tables) is the console's: the block above when this file is opened from disk, the site's stylesheet on slopswap. */
 :root {
-  --bg: #f3f1ec; --panel: #ffffff; --ink: #1f2328; --muted: #5d6670; --line: #d9d4ca;
-  --copper: #b2602a; --copper-soft: #f1dccb; --good: #2f7d4f; --warn: #b7791f; --bad: #b3362b;
-  --bar1: #b2602a; --bar2: #d59a6c; --bar3: #6b7f99; --bar4: #9fb0c4; --bar5: #c9c2b4; --bar6: #7a8a66;
-  --sans: var(--font-body, Lato, "Helvetica Neue", Arial, sans-serif); --mono: var(--font-mono, ui-monospace, Menlo, monospace);
+  /* the names the script uses, pointed at the look's: the parts of a whole walk the rainbow, and only a problem is red */
+  --muted: var(--dim); --copper: var(--accent); --good: var(--better); --warn: var(--worse); --bad: var(--problem);
+  --bar1: var(--r2); --bar2: var(--r4); --bar3: var(--r6); --bar4: var(--r7); --bar5: var(--r9); --bar6: var(--r11);
 }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-  --bg: #15181c; --panel: #1e2328; --ink: #e8e4dc; --muted: #9aa3ad; --line: #343b43;
-  --copper: #d9834a; --copper-soft: #3a2a1f; --good: #5fbf85; --warn: #e0a640; --bad: #e0675a;
-  --bar1: #d9834a; --bar2: #a86a44; --bar3: #7f93ad; --bar4: #55657a; --bar5: #4a5058; --bar6: #8aa07a; color-scheme: dark } }
-:root[data-theme="dark"] {
-  --bg: #15181c; --panel: #1e2328; --ink: #e8e4dc; --muted: #9aa3ad; --line: #343b43;
-  --copper: #d9834a; --copper-soft: #3a2a1f; --good: #5fbf85; --warn: #e0a640; --bad: #e0675a;
-  --bar1: #d9834a; --bar2: #a86a44; --bar3: #7f93ad; --bar4: #55657a; --bar5: #4a5058; --bar6: #8aa07a; color-scheme: dark }
-* { box-sizing: border-box }
-body { background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 14px; line-height: 1.45;
-  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 20px 40px }
-h1 { font-size: 22px; font-weight: 600; margin: 0 0 4px; text-wrap: balance }
-h2 { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px }
-h3 { font-size: 14px; font-weight: 600; margin: 0 0 6px }
-p { margin: 0 0 8px; max-width: 70ch }
-.sub { color: var(--muted); margin-bottom: 18px }
-.wrap { display: grid; grid-template-columns: minmax(280px, 380px) minmax(0, 1fr); gap: 20px; max-width: 1200px; margin: 0 auto }
-@media (max-width: 820px) { .wrap { grid-template-columns: 1fr } }
-.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 14px 16px; min-width: 0 }
-.rail { display: flex; flex-direction: column; gap: 14px }
-.group { border-top: 1px solid var(--line); padding-top: 10px; margin-top: 4px }
-.group:first-of-type { border-top: 0; padding-top: 0; margin-top: 0 }
-.row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 4px 0; flex-wrap: wrap }
-.row label { flex: 1 1 160px; min-width: 0 }
-.row small { display: block; color: var(--muted); font-size: 12px }
-select, input[type=number] { font: inherit; font-family: var(--mono); font-size: 13px; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 4px 6px; max-width: 100% }
-input[type=number] { width: 86px; text-align: right }
-select { max-width: 190px }
-input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--copper) }
-.seg { display: flex; gap: 4px; flex-wrap: wrap }
-.seg button { font: inherit; font-size: 13px; padding: 4px 10px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 4px; cursor: pointer }
-.seg button[aria-pressed="true"] { background: var(--copper); border-color: var(--copper); color: #fff }
-.seg button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--copper); outline-offset: 1px }
-.est { font-size: 11px; color: var(--copper); border: 1px solid var(--copper); border-radius: 3px; padding: 0 4px; margin-left: 4px; vertical-align: middle }
-.results { display: flex; flex-direction: column; gap: 14px }
-.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px }
-.tile { background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px }
-.tile .v { font-family: var(--mono); font-size: 22px; font-weight: 500; font-variant-numeric: tabular-nums }
-.tile .k { font-size: 12px; color: var(--muted) }
-.tile .d { font-size: 12px; font-family: var(--mono); color: var(--muted) }
-.stack { display: flex; height: 26px; border-radius: 4px; overflow: hidden; border: 1px solid var(--line) }
-.stack div { height: 100%; min-width: 0 }
-.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; margin-top: 8px }
-.legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; margin-right: 5px; border-radius: 2px; background: var(--c); vertical-align: -1px }
-table { border-collapse: collapse; width: 100%; font-size: 13px }
-th, td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--line); vertical-align: top }
-td.n, th.n { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap }
-tr.total td { font-weight: 600; border-top: 2px solid var(--line) }
-.tablewrap { overflow-x: auto }
-.margins td.good { color: var(--good) } .margins td.warn { color: var(--warn) } .margins td.bad { color: var(--bad) }
-.meter { height: 14px; background: var(--bg); border: 1px solid var(--line); border-radius: 4px; position: relative; overflow: hidden }
-.meter .fill { position: absolute; inset: 0 auto 0 0; background: var(--copper) }
-.meter .mark { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--bad) }
-.note { font-size: 12px; color: var(--muted) }
-.hint { font-size: 12px; color: var(--muted); margin-top: 6px }
-.chips { display: flex; flex-wrap: wrap; gap: 6px }
-.chip { font-size: 12px; border: 1px solid var(--line); border-radius: 12px; padding: 2px 9px; background: var(--bg) }
-.chip b { font-family: var(--mono); font-weight: 500 }
-a { color: var(--copper) }
-/* slopswap: the site theme is linked for its fonts and the rainbow stripe; undo its document styling inside this app */
-h1 { font-family: var(--font-display, var(--sans)); margin-top: .75rem }
-h2 { border-left: 0; padding-left: 0; font-family: var(--sans); text-wrap: initial }
-th { text-transform: none; letter-spacing: 0; background: none; font-size: 13px; color: inherit }
-p, ul, table { margin-bottom: 8px }
-hr { height: 1px; background: var(--line); margin: 1rem 0 }
-.eyebrow { font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); margin: 0 0 .5rem } .eyebrow a { color: inherit; text-decoration: none }
-@media (prefers-reduced-motion: no-preference) { .stack div, .meter .fill { transition: width .25s ease } }
+html, body { height: 100%; }
+body { display: flex; flex-direction: column; padding-top: 3px; }
+header.top { flex: none; display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 12px; padding: 8px 12px 7px; border-bottom: 1px solid var(--line); }
+header.top .sub { flex: 1 0 100%; margin: 2px 0 0; color: var(--dim); max-width: 120ch; }
+html.embedded header.top h1 { display: none; }       /* inside the V6 notebook its tab already says which tool this is */
+main { flex: 1 1 0; min-height: 0; display: flex; }
+#panel-options { flex: 0 0 400px; --c: var(--r2); border-right: 1px solid var(--line); }
+#panel-costs { flex: 1 1 0; --c: var(--r10); }
+.panel > .body { padding: 2px 12px 24px; }
+p { max-width: 110ch; }
+
+/* an option: what it is on the left with a line about it under, the thing to set on the right */
+.row { display: flex; align-items: center; justify-content: space-between; gap: 4px 10px; padding: 3px 0; flex-wrap: wrap; }
+.row label { flex: 1 1 160px; min-width: 0; }
+.row small { display: block; color: var(--dim); font-size: 11px; line-height: 1.35; }
+input[type=number] { width: 86px; text-align: right; }
+select { max-width: 200px; }
+.seg { display: flex; gap: 3px; flex-wrap: wrap; }
+.seg button { padding: 3px 11px 3px 8px; }
+/* "est": a number that is an assumption. Not the pink (that is what is on) and not red (that is a problem) */
+.est { font-family: var(--label); font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--worse);
+  border: 1px solid currentColor; padding: 0 4px; margin-left: 5px; vertical-align: 1px; }
+
+/* the headline numbers: plates, each the next colour */
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 6px; margin: 8px 0 2px; }
+.tile { background: var(--panel-2); padding: 7px 10px 8px 11px; border-left: 3px solid var(--c, var(--line));
+  clip-path: polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, 0 100%); }
+.tile:nth-child(5n+1) { --c: var(--r2); } .tile:nth-child(5n+2) { --c: var(--r3); } .tile:nth-child(5n+3) { --c: var(--r7); }
+.tile:nth-child(5n+4) { --c: var(--r8); } .tile:nth-child(5n+5) { --c: var(--r10); }
+.tile .k { font-family: var(--label); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .09em; color: var(--dim); }
+.tile .v { font-size: 22px; font-weight: 500; line-height: 1.25; }
+.tile .d { font-size: 11px; color: var(--dim); }
+.stack { display: flex; height: 22px; border: 1px solid var(--line); margin-top: 4px; }
+.stack div { height: 100%; min-width: 0; }
+.legend { display: flex; flex-wrap: wrap; gap: 3px 14px; font-size: 12px; margin: 6px 0; }
+.legend span::before { content: ""; display: inline-block; width: 9px; height: 9px; margin-right: 5px; background: var(--c);
+  clip-path: polygon(0 0, 100% 0, 100% 60%, 60% 100%, 0 100%); }
+
+.tablewrap { overflow-x: auto; margin-bottom: 4px; }
+.body td, .body th { padding: 3px 10px 3px 4px; vertical-align: top; }
+.body td { border-bottom: 1px solid var(--line); }
+td.n, th.n { text-align: right; white-space: nowrap; }
+tr.total td { font-weight: 600; border-top: 1px solid var(--dim); }
+#bomtable th { cursor: pointer; position: sticky; top: 0; background: var(--panel); }
+.margins td.good { color: var(--better); } .margins td.warn { color: var(--worse); } .margins td.bad { color: var(--problem); }
+/* how full the board is; the mark is where a dense board gets crowded: a limit, drawn in the ink colour */
+.meter { height: 12px; background: var(--bg); border: 1px solid var(--line); position: relative; overflow: hidden; margin: 4px 0; }
+.meter .fill { position: absolute; inset: 0 auto 0 0; background: var(--accent); }
+.meter .mark { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--ink); }
+.note, .hint { font-size: 12px; color: var(--dim); }
+.hint { margin-top: 5px; }
+.chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.chip { font-size: 12px; border: 1px solid var(--line); padding: 1px 8px; background: var(--bg); }
+.chip b { font-weight: 500; color: var(--ink); }
+@media (prefers-reduced-motion: no-preference) { .stack div, .meter .fill { transition: width .25s ease; } }
+
+/* a narrow screen: one column. The options keep at most 40% of the screen and scroll inside themselves, a row of
+   choices scrolls sideways, and the costs run as long as they are */
+@media (max-width: 900px) {
+  html, body { height: auto; }
+  main { flex-direction: column; }
+  #panel-options, #panel-costs { flex: none; border-right: 0; }
+  .panel > .body { flex: none; overflow: visible; }
+  #panel-options > .body { max-height: 40vh; max-height: 40svh; overflow-y: auto; overscroll-behavior: contain; }
+  .seg { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; max-width: 100%; }
+  .seg button { flex: none; }
+}
 </style>
-
-<p class="eyebrow"><a href="../">slopswap</a> / V6</p>
-<h1>Jumperless V6 Cost Explorer</h1>
-<p class="sub">Parts from the staged schematic BOM of 2026-10-29 (1000 boards; <code>docs/V6_BOM.md</code>), the rest scaled from the V5 Elecrow quotes. Choose the open options; everything marked <span class="est">est</span> is an assumption you can edit.</p>
-
-<div class="wrap">
-<div class="rail">
-  <div class="panel">
+</head>
+<body>
+<header class="top">
+  <p class="eyebrow" id="crumb"><a href="../">slopswap</a> / <a href="./">V6</a></p>
+  <h1>Jumperless V6 Cost Explorer</h1>
+  <p class="sub">Parts from the staged schematic BOM of 2026-10-29 (1000 boards; <code>docs/V6_BOM.md</code>), the rest scaled from the V5 Elecrow quotes. Choose the open options; everything marked <span class="est">est</span> is an assumption you can edit.</p>
+</header>
+<main>
+<section class="panel" id="panel-options" aria-label="Options">
+  <header class="bar"><span class="plate"><b>01</b> Options</span><span class="bar-note">what the unit is built from: every choice is kept in this browser</span></header>
+  <div class="body">
     <h2>Build</h2>
-    <div class="row"><label>Your selections are kept in this browser<small>defaults = the 2026-10-31 baseline: TFT + touch, ROW-ISO fitted, buses unsplit (0R links), floated TP181 sense on the housekeeping mux, M.2 port with one isolated port chip, 18 × MMC5603NJ, 80 clips</small></label><button type="button" id="reset" class="chip">Reset to baseline</button></div>
+    <div class="row"><label>Your selections are kept in this browser<small>defaults = the 2026-10-31 baseline: TFT + touch, ROW-ISO fitted, buses unsplit (0R links), floated TP181 sense on the housekeeping mux, M.2 port with one isolated port chip, 18 × MMC5603NJ, 80 clips</small></label><button type="button" id="reset">Reset to baseline</button></div>
     <div class="row"><label>Volume<small>parts −5 % at 3k; tooling amortised over the run</small></label>
       <div class="seg" id="vol"><button aria-pressed="true" data-v="1000">1k</button><button data-v="3000">3k</button><button data-v="5000">5k</button></div></div>
     <div class="row"><label>Shell and probe housing</label>
@@ -96,20 +106,26 @@ hr { height: 1px; background: var(--line); margin: 1rem 0 }
       <div class="seg" id="labour"><button aria-pressed="true" data-v="block">Outsourced</button><button data-v="hand">Hand</button></div></div>
     <div class="row"><label>Sell price (USD)</label><select id="price"><option>339</option><option>299</option><option>279</option><option>249</option><option>220</option></select></div>
     <div class="row"><label>Tariff on landed cost<span class="est">est</span></label><input type="number" id="tariff" value="25" min="0" max="100" step="1"> %</div>
-  </div>
-
-  <div class="panel">
     <h2>Display</h2>
-    <div class="row"><label>Panel</label>
-      <div class="seg" id="disp"><button data-v="amoled">1.47″ AMOLED</button><button aria-pressed="true" data-v="tft">1.47″ TFT</button><button data-v="none">None</button></div></div>
+    <div class="row"><label>Panel<small>the bar panels are from the survey of 2026-11-24: table and links on the right</small></label>
+      <div class="seg" id="disp"><button data-v="amoled">1.47″ AMOLED</button><button aria-pressed="true" data-v="tft">1.47″ TFT</button><button data-v="bar22">2.2″ bar</button><button data-v="bar279">2.79″ bar</button><button data-v="bar165">1.65″ bar</button><button data-v="bar225">2.25″ bar</button><button data-v="none">None</button></div></div>
     <div class="row"><label>AMOLED GLO147 + OK-118 socket<small>sample price in the BOM</small></label><input type="number" id="p_amoled" value="8.49" step="0.1"> $</div>
     <div class="row"><label>TFT QHS147TP module, no touch<span class="est">est</span><small>your budget was $1–3; 172×320 ST7789P3</small></label><input type="number" id="p_tft" value="2.60" step="0.1"> $</div>
-    <div class="row"><label><input type="checkbox" id="ctp" checked> Capacitive touch (CST816D)<span class="est">est</span><small>adder on the module; nav stick can then go</small></label><input type="number" id="p_ctp" value="1.00" step="0.1"> $</div>
-    <div class="row"><label><input type="checkbox" id="glass"> Custom chamfered cover glass<span class="est">est</span><small>per piece + one-off tooling</small></label><input type="number" id="p_glass" value="0.60" step="0.1"> $</div>
-    <div class="row"><label>Cover-glass tooling (one-off)<span class="est">est</span></label><input type="number" id="t_glass" value="400" step="50"> $</div>
-  </div>
-
-  <div class="panel">
+    <div class="row"><label>Bar panel<span class="est">est</span><small id="bar_txt">filled in when a bar panel is chosen; none of the four has a 1k quote yet</small></label><input type="number" id="p_bar" value="2.39" step="0.05"> $</div>
+    <div class="row"><label><input type="checkbox" id="ctp" checked> Capacitive touch (CST816D)<span class="est">est</span><small>adder on the 1.47″ TFT module; nav stick can then go</small></label><input type="number" id="p_ctp" value="1.00" step="0.1"> $</div>
+    <div class="row"><label>Window and cover<small>how the display meets the top board</small></label>
+      <select id="win">
+        <option value="open" selected>Module up through the top board (as drawn; dead border shows)</option>
+        <option value="crop">Under the top board, board cut to the active area, no glass ($0)</option>
+        <option value="glass">+ glass let into the cut, bedded in adhesive ($0.95)</option>
+        <option value="oca">+ glass laminated to the panel with OCA, floats with it ($1.25)</option>
+        <option value="pmma">+ laser-cut hard-coated PMMA / PC lens instead of glass ($0.30)</option>
+        <option value="resin">+ clear resin cast into the cut ($0.60)</option>
+        <option value="vglass">Chamfered cover glass from the module maker (the earlier entry, $0.60)</option>
+      </select></div>
+    <div class="row"><label>Cover, per unit<span class="est">est</span><small id="win_txt"></small></label><input type="number" id="p_win" value="0.00" step="0.05"> $</div>
+    <div class="row"><label>Cover tooling (one-off)<span class="est">est</span><small>CNC jig and first articles for glass; none for the others</small></label><input type="number" id="t_win" value="0" step="50"> $</div>
+    <div class="row"><label><input type="checkbox" id="rock"> Display on two switches: the display is two buttons<span class="est">est</span><small>2 × metal dome or tact under its ends, the FPC as the flexure; needs the OCA-laminated pane or no pane. Can stand in for the two cantilevered keys</small></label><input type="number" id="p_rock" value="0.10" step="0.01"> $</div>
     <h2>ChonkBus and sensing</h2>
     <div class="row"><label>Row isolation<small>30 × ET7460H + 8 × 74HC595 + 38 × 100n; bridges otherwise</small></label>
       <div class="seg" id="iso"><button aria-pressed="true" data-v="fit">Fitted</button><button data-v="bridge">0R bridges</button></div></div>
@@ -132,27 +148,18 @@ hr { height: 1px; background: var(--line); margin: 1rem 0 }
     <div class="row"><label>Where the slow analog signals go<small>the pin budget has every CH32 ADC_IN spoken for</small></label>
       <div class="seg" id="adcroute"><button aria-pressed="true" data-v="mux">8:1 housekeeping mux on one 12-bit pin</button><button data-v="direct">One CH32 pin each</button><button data-v="rp">RP2350 ADC pins</button></div></div>
     <div class="row"><span class="note" id="adc_txt"></span></div>
-  </div>
-
-  <div class="panel">
     <h2>Expansion port</h2>
     <div class="row"><label>Connector</label>
       <select id="port"><option value="pads">Edge pads (B33, $0)</option><option value="m2" selected>M.2 Key M socket, 67 pads (Lotes APCI0079 $0.23, XKB $0.40)</option><option value="m2g">M.2 Key G socket, 67 pads (custom key: no SSD fits; Lotes $0.96)</option><option value="mpcie">mini PCIe socket, 52 pads (SOFNG $0.32)</option><option value="sodimm">DDR4 SO-DIMM socket, 260 pads (Lotes ADDR0205 $0.56)</option><option value="pcie1">PCIe x1 slot, 36 pads, vertical (UMAX $0.37)</option></select></div>
     <div class="row"><label>Connector price<small>LCSC ladder nearest 1k, 2026-10-29</small></label><input type="number" id="p_port" value="0.23" step="0.05"> $</div>
     <div class="row"><label>Port crossbar chips (CH446Q, 16 routable pins each)<small>B38 sheet draws one: S1 on the lane layer</small></label><select id="portchips"><option>0</option><option selected>1</option><option>2</option></select></div>
     <div class="row"><label><input type="checkbox" id="portiso" checked> Per-pin isolation on the port<small>8 × ET7460H + 2 × 74HC595 + 16 × BAT54S per chip ≈ $1.45</small></label></div>
-  </div>
-
-  <div class="panel">
     <h2>Wig: magnetometers and spring clips</h2>
     <div class="row"><label>Magnetometer array<small>MEMSIC MMC5603NJ (AMR, 0x30) instead of 9 × TMAG5273; one 74LVC138 SCL-decoder per 8</small></label>
       <select id="nmag"><option>9</option><option selected>18</option><option>32</option></select></div>
     <div class="row"><label>MMC5603NJ price<small>LCSC C404328, $0.15 @1k on 2026-10-18</small></label><input type="number" id="p_mag" value="0.15" step="0.01"> $</div>
     <div class="row"><label>Spring clips per unit<small>Fulimei Spring Clip6, phosphor bronze</small></label><input type="number" id="nclip" value="80" step="1" min="0"></div>
     <div class="row"><label>Spring clip price<small>$0.0599 each — Fulimei proforma invoice 2026-06-17 (10k at the 100k-run price); tooling $2,686 paid, amortised in Mechanics</small></label><input type="number" id="p_clip" value="0.0599" step="0.001"> $</div>
-  </div>
-
-  <div class="panel">
     <h2>Cost cuts (toggle to apply)</h2>
     <div class="row"><label><input type="checkbox" id="c_l272"> L272D → TCA0372 (2 ×)<small>−$1.08, pinout check</small></label></div>
     <div class="row"><label><input type="checkbox" id="c_u4" checked> Drop U4 (INA219 on R57)<small>−$0.47; the bus shunt covers it</small></label></div>
@@ -163,10 +170,10 @@ hr { height: 1px; background: var(--line); margin: 1rem 0 }
     <div class="row"><label><input type="checkbox" id="c_cable" checked> Generic cable instead of pink<small>−$2.08</small></label></div>
     <div class="row"><label><input type="checkbox" id="c_hasl"> HASL where no exposed pads<small>−$0.40<span class="est">est</span></small></label></div>
   </div>
-</div>
-
-<div class="results">
-  <div class="panel">
+</section>
+<section class="panel" id="panel-costs" aria-label="Costs">
+  <header class="bar"><span class="plate"><b>02</b> Costs</span><span class="bar-note">what those choices cost, and the parts behind the numbers</span></header>
+  <div class="body">
     <div class="tiles">
       <div class="tile"><div class="k">Parts, both boards</div><div class="v" id="t_parts">—</div><div class="d" id="t_parts_d"></div></div>
       <div class="tile"><div class="k">Ex-works unit cost</div><div class="v" id="t_exw">—</div><div class="d" id="t_exw_d"></div></div>
@@ -174,36 +181,25 @@ hr { height: 1px; background: var(--line); margin: 1rem 0 }
       <div class="tile"><div class="k">Margin, sold direct</div><div class="v" id="t_mdir">—</div><div class="d" id="t_mdir_d"></div></div>
       <div class="tile"><div class="k">Margin via Crowd Supply</div><div class="v" id="t_mcs">—</div><div class="d">12 % + 2.9 % + $5</div></div>
     </div>
-  </div>
-
-  <div class="panel">
     <h2>Where the unit cost goes</h2>
     <div class="stack" id="stack"></div>
     <div class="legend" id="legend"></div>
     <div class="tablewrap"><table id="cost"><thead><tr><th>Item</th><th class="n">USD / unit</th><th>Basis</th></tr></thead><tbody></tbody></table></div>
-  </div>
-
-  <div class="panel">
     <h2>Parts by block (main board + wig)</h2>
     <div class="tablewrap"><table id="blocks"><thead><tr><th>Block</th><th class="n">USD</th><th>What moves it</th></tr></thead><tbody></tbody></table></div>
     <p class="hint">Baseline lines from <code>docs/V6_BOM.md</code> at 1000 boards; unpriced small parts (27 main, 8 wig) are added as a $2.00 estimate. The CH32H417 ($3.30) and the LEDs ($0.0188 each) are the two largest single assumptions in the schematic BOM itself.</p>
-  </div>
-
-  <div class="panel">
     <h2>Will it fit on one main board?</h2>
     <p>Courtyard area of the fitted main-board parts against the V5 outline (170.5 × 82.6 mm, 4 layers), counting both sides. Dense boards with WLCSP/0.35 mm QFN get crowded past about 45 % of the two-sided area; a sandwich (second PCB) is the alternative.</p>
     <div class="meter"><div class="fill" id="area_fill" style="width:0%"></div><div class="mark" style="left:45%"></div></div>
     <div class="row"><span class="note" id="area_txt"></span></div>
     <div class="chips" id="area_chips"></div>
     <p class="hint">Measured by <code>v6gen/area.py</code> from the footprint courtyards (<code>docs/V6_area.json</code>). The wig carries the 480 LEDs, the breadboard pattern and the magnetometers (7,440 mm² of courtyard on its own 83 × 54 mm face) and is not in this bar.</p>
-  </div>
-
-  <div class="panel">
+    <h2>Display options: bar panels in this footprint</h2>
+    <p class="hint">Survey of 2026-11-24 (<code>notes/README_v6BarDisplay.md</code>). Prices are list or quoted prices on that day. "Frames" is whole-screen RGB565 redraws a second: the wire's ceiling at the clock given, and what to expect on 50 MHz SPI, scaled by pixel count from the 33–40 the Testolomew bench gets on its 240 × 240 ST7789 at that clock. Every panel scans at about 60 Hz, so anything above 60 is headroom, not picture.</p>
+    <div class="tablewrap"><table id="disptable"><thead><tr><th>Display</th><th>Pixels</th><th>Controller, bus on the stock FPC</th><th>Module / active area, mm</th><th>Price</th><th class="n">Frames, wire ceiling</th><th class="n">Expect</th><th>Links</th></tr></thead><tbody></tbody></table></div>
+    <p class="hint">Interface ceilings from the datasheets: NV3006B (2.2″) SPI write clock 15 ns = 66 MHz, QSPI 33 ns = 30 MHz × 4 bits, 8-bit 8080 66 ns; pixel formats 12, 16 and 18 bit. NV3007 (2.79″, 1.65″) SPI 10 ns = 100 MHz, QSPI 19 ns = 52 MHz × 4 bits; 16 and 18 bit only. ST7789P3 (2.25″) SPI 16 ns = 62 MHz. The RP2350's hardware SPI stops at 75 MHz; the stock 8- to 13-pin FPCs bring out plain 4-wire SPI only, so 2-lane, QSPI and 8080 need a custom FPC from the module maker.</p>
     <h2>Margin by price</h2>
     <div class="tablewrap"><table class="margins" id="mtable"><thead><tr><th>Price</th><th class="n">Direct</th><th class="n">Crowd Supply</th><th class="n">Ex-works ceiling for 45 % via CS</th></tr></thead><tbody></tbody></table></div>
-  </div>
-
-  <div class="panel">
     <h2>Every part on the schematic (the BOM the baseline is built from)</h2>
     <p class="hint">Straight from <code>docs/V6_BOM.csv</code> (staged MainBoard, prices at 1000 boards). Fitted rows are what the schematic builds today; "option" rows are drawn but not fitted (dnp) and the panels above add or remove them as deltas. Blank price = unpriced. Click a column to sort; LCSC codes link to the product page.</p>
     <div class="row">
@@ -214,16 +210,12 @@ hr { height: 1px; background: var(--line); margin: 1rem 0 }
     </div>
     <div class="row"><span class="note" id="bom_sum"></span></div>
     <div class="tablewrap" style="max-height:70vh;overflow:auto"><table id="bomtable"><thead><tr><th data-k="b">Block</th><th data-k="o">Option</th><th data-k="d">Board</th><th class="n" data-k="q">Qty</th><th data-k="v">Value</th><th data-k="m">MPN</th><th data-k="l">LCSC</th><th class="n" data-k="u">Unit $</th><th class="n" data-k="x">Ext $</th><th data-k="s">Basis</th><th data-k="p">Footprint</th><th data-k="r">Refs</th></tr></thead><tbody></tbody></table></div>
-  </div>
-
-  <div class="panel">
     <h2>Datasheets for every part named on this page</h2>
     <div class="tablewrap"><table id="dstable"><thead><tr><th>Part</th><th>Where it is used</th><th>Datasheet</th><th>Buy / price</th></tr></thead><tbody></tbody></table></div>
     <p class="hint">Vendor PDFs where one exists; the LCSC product page otherwise (it carries the manufacturer drawing). Display modules are sample parts without public datasheets.</p>
   </div>
-</div>
-</div>
-
+</section>
+</main>
 <script>
 (function () {
   // ---- baseline from docs/V6_BOM.md (1000 boards, parts only) -------------------------------------------
@@ -233,7 +225,7 @@ hr { height: 1px; background: var(--line); margin: 1rem 0 }
     wig:  { B26: 0.09, B27: 9.30, B28: 0.00, mags: 0, clips: 0 },
     unpriced: 2.00,
   };
-  const WHAT = { B21: 'CH32H417 core (CH32 $3.30 est.)', B22: 'USB', B23: 'RP2350 link, PSRAM $1.42', B24: 'display + socket (sample price)',
+  const WHAT = { B21: 'CH32H417 core (CH32 $3.30 est.)', B22: 'USB', B23: 'RP2350 link, PSRAM $1.42', B24: 'display as selected, with its window / cover option and the switches under it',
     B25: 'controls: nav stick $2.34, encoder $1.30', B27: 'LED drive (main) / 480 LEDs (wig)', B28: 'wig interface', B29: 'ChonkBus: 97 × ET7460H $11.64, 25 × 74HC595 $1.52, 74HC238 ×2, 8 × 0R segment links, shunt amplifier as selected, gates, bus dividers, housekeeping mux; + segment options as selected',
     B30: 'lane layer: 5 × CH446Q $4.50', B32: 'power: TPS65131 $2.17, 60 × BAT54S $1.04', B33: 'expansion port: socket + port CH446Q + per-pin isolation as selected', B34: 'handover: 74HC238 ×2, TCA9534', B35: 'ADC taps',
     V5: 'your V5 parts: 12 × CH446Q $10.80, 2 × L272D $2.28, MCP4728, RP2350B, 2 × INA219', B26: 'magnetometer board passives', mags: 'MMC5603NJ array + 74LVC138 decoders + 2.2 µF (was 9 × TMAG5273 $4.43)', clips: 'Fulimei Spring Clip6, $0.0599 each (PI 2026-06-17)', extra: 'AMOLED socket' };
@@ -249,6 +241,24 @@ hr { height: 1px; background: var(--line); margin: 1rem 0 }
   const SENSE = { ina219: { price: 0.47, extra: 0, pins: 0 }, negina: { price: 0.16, extra: 0.09, pins: 1 }, ina296: { price: 1.69, extra: 0.09, pins: 1 },
     tsc: { price: 1.33, extra: 0.05, pins: 1 }, max: { price: 2.18, extra: 0.07, pins: 1 }, amc: { price: 2.27, extra: 0.10, pins: 1 },
     hall: { price: 0.72, extra: 0.04, pins: 1 }, diff: { price: 2.44, extra: 0.20, pins: 1 }, both: { price: 0.47, extra: 0.03, pins: 0 } };
+  // bar panels (survey 2026-11-24): the price put into the box when one is chosen, and where it comes from
+  const DISP = {
+    bar22:  { price: 2.39, txt: '2.2″ 116×420 NV3006B: $2.39 for one (AliExpress, EC-Buying), $3.07 at 100 (EastRising ER-TFT022-3); no 1k quote yet' },
+    bar279: { price: 3.20, txt: '2.79″ 142×428 NV3007: $3.20 at 100 (EastRising ER-TFT2.79-2, 12-pin with TE); $3.48 for the 600 nit ER-TFT2.79-1' },
+    bar165: { price: 2.23, txt: '1.65″ 142×428 NV3007: $2.23 at 100 (EastRising ER-TFT1.65-3, rounded corners, 8-pin)' },
+    bar225: { price: 2.37, txt: '2.25″ 76×284 ST7789P3: $2.37 at 100 (EastRising ER-TFT2.25-1); Shineworld quoted $4.09 at 1000 on 2026-09-04' },
+  };
+  // window / cover options: per-unit cost at 1k and one-off tooling. All estimates: listing prices for small custom CNC cover glass run
+  // $1.00–2.50 at a few pieces and about $1.50 at 300 for Gorilla 3; CNC PMMA lenses $0.01–1.00. See notes/README_v6BarDisplay.md.
+  const WIN = {
+    open:   { price: 0.00, tool: 0,   txt: 'nothing added: the whole module comes up through the top board' },
+    crop:   { price: 0.00, tool: 0,   txt: 'a routed cut in the top board only; the panel sits one board thickness down. Ask the fab for a plated cut edge to stop the backlight lighting the FR4' },
+    glass:  { price: 0.95, tool: 300, txt: 'pane $0.70 (CNC-ground, chemically strengthened, as thick as the top board) + adhesive and labour $0.25, bedded from behind with the face down on a flat plate' },
+    oca:    { price: 1.25, tool: 300, txt: 'pane $0.70 + OCA film $0.15 + lamination $0.40; the pane rides on the panel and moves with it' },
+    pmma:   { price: 0.30, tool: 0,   txt: 'laser-cut lens $0.10–0.20 + fitting; sheet thickness varies about ±10 %, so it will not sit as flush as glass, and it scratches' },
+    resin:  { price: 0.60, tool: 0,   txt: 'resin $0.10 + labour $0.50, cast face down on a release film so it comes out flush; soft surface, yellows with UV' },
+    vglass: { price: 0.60, tool: 400, txt: 'the estimate from the Shineworld visit: their chamfered cover glass on the 1.47″ TFT, tooling about $400' },
+  };
   const PLACE_RATE = 0.0127;                             // $/placement, the V5 rate (8.50 for 670)
   const PLACEMENTS = { main: 808, wig: 617 };            // bought pieces + PCB features, ISO fitted
   const MECH = { sls: { shell: 5.67, probe: 6.50, tool: 0 }, mould: { shell: 0.50, probe: 4.80, tool: 10000 } };
@@ -281,7 +291,8 @@ hr { height: 1px; background: var(--line); margin: 1rem 0 }
   $('reset').addEventListener('click', () => { try { localStorage.removeItem(KEY); } catch (e) { /* ignore */ } location.reload(); });
   $('port').addEventListener('change', () => { $('p_port').value = PORT[$('port').value].price.toFixed(2); render(); });
   $('sense').addEventListener('change', () => { $('p_sense').value = SENSE[$('sense').value].price.toFixed(2); render(); });
-  $('disp').addEventListener('click', () => { if (state.disp !== 'tft') { $('ctp').checked = false; $('glass').checked = false; } render(); });
+  $('disp').addEventListener('click', () => { if (state.disp !== 'tft') $('ctp').checked = false; if (DISP[state.disp]) $('p_bar').value = DISP[state.disp].price.toFixed(2); render(); });
+  $('win').addEventListener('change', () => { const w = WIN[$('win').value]; $('p_win').value = w.price.toFixed(2); $('t_win').value = w.tool; render(); });
 
   const num = id => parseFloat($('' + id).value) || 0;
   const money = v => '$' + v.toFixed(2);
@@ -294,7 +305,9 @@ hr { height: 1px; background: var(--line); margin: 1rem 0 }
     // display
     main.B24 = 0.07; main.extra = 0;                      // keep the display block's passives; socket goes with the AMOLED
     if (state.disp === 'amoled') { main.B24 += num('p_amoled'); notes.push('AMOLED at the sample price'); }
-    else if (state.disp === 'tft') { main.B24 += num('p_tft') + ($('ctp').checked ? num('p_ctp') : 0) + ($('glass').checked ? num('p_glass') + num('t_glass') / vol : 0); }
+    else if (state.disp === 'tft') { main.B24 += num('p_tft') + ($('ctp').checked ? num('p_ctp') : 0); }
+    else if (DISP[state.disp]) { main.B24 += num('p_bar'); }
+    if (state.disp !== 'none') main.B24 += num('p_win') + num('t_win') / vol + ($('rock').checked ? num('p_rock') : 0);   // window / cover option and the two switches under the display
     // ChonkBus isolation and bus segments (docs/V6_BOM.md options table, 2026-10-31)
     if (state.iso === 'bridge') main.B29 -= ISO_PARTS;
     const split = $('split').value;
@@ -352,6 +365,8 @@ hr { height: 1px; background: var(--line); margin: 1rem 0 }
   function render() {
     const r = compute();
     persist();
+    $('bar_txt').textContent = DISP[state.disp] ? DISP[state.disp].txt : 'filled in when a bar panel is chosen; none of the four has a 1k quote yet';
+    $('win_txt').textContent = WIN[$('win').value].txt;
     $('t_parts').textContent = money(r.parts);
     $('t_parts_d').textContent = 'main ' + money(r.partsMain) + ' · wig ' + money(r.partsWig) + (r.scale < 1 ? ' · ×' + r.scale : '');
     $('t_exw').textContent = money(r.exw);
@@ -451,6 +466,8 @@ hr { height: 1px; background: var(--line); margin: 1rem 0 }
     ['GLO147-D-M2002', '1.47″ AMOLED (sample)', 'no public datasheet (vendor sample)', '', '$8.00 sample'],
     ['OK-118RF024/2-35 (OCN)', 'AMOLED FPC socket', 'vendor drawing only', '', '$0.49'],
     ['QHS147TP / ST7789P3 / CST816D', '1.47″ TFT module (sample), its controller (link) and touch IC', 'https://files.waveshare.com/wiki/common/ST7789P3.pdf', '', '$2.60 + $1.00 est'],
+    ['NV3006B (New Vision)', '2.2″ 116×420 bar: 120RGB×480 driver, 129,600-byte GRAM; SPI 15 ns, QSPI 33 ns, 8080 66 ns; hardware scroll on both axes, GRAM clear, scanline read-back', 'https://www.buydisplay.com/download/ic/ER-NV3006B.pdf', 'https://www.buydisplay.com/2-2-inch-ips-tft-bar-display-116x420-spi-nv3006b-with-soldering-type-fpc', '$3.07 @100 (module)'],
+    ['NV3007 (New Vision)', '2.79″ and 1.65″ 142×428 bars: 168RGB×428 driver; SPI 10 ns, QSPI 19 ns', 'https://buydisplay.com/download/ic/NV3007.pdf', 'https://www.buydisplay.com/2-79-inch-142x428-resolution-ips-tft-lcd-display-nv3007-4-wire-spi', '$3.20 @100 (module)'],
     ['Lotes APCI0079-P002A', 'M.2 Key M socket, H3.2', L('C841651'), L('C841651'), '$0.233 @1200'],
     ['XKB X1302WVS-67CM-LPV01', 'M.2 Key M socket, H4.2', L('C30167366'), L('C30167366'), '$0.40'],
     ['Lotes APCI0093-P009A', 'M.2 Key G socket (custom key)', L('C841660'), L('C841660'), '$0.96'],
@@ -459,6 +476,21 @@ hr { height: 1px; background: var(--line); margin: 1rem 0 }
     ['UMAX 3183-10110P1T', 'PCIe x1 slot (TH)', L('C404109'), L('C404109'), '$0.37'],
     ['TE 2199230-4', 'M.2 Key M socket (the stock KiCad footprint)', 'https://www.te.com/en/product-2199230-4.html', '', 'not priced'],
   ];
+  // ---- the bar-display survey (2026-11-24). [name, pixels, controller + bus, module / active area mm, price, wire ceiling, expect, links]
+  const BD = 'https://www.buydisplay.com/';
+  const DISPT = [
+    ['2.2″ bar (LTN220TF-PF09 / ER-TFT022-3)', '116 × 420', 'NV3006B; 4-wire SPI, 8-pin (13-pin soldered variant on AliExpress)', '17.6 × 59.1 × 1.6 / 14.96 × 54.18', '$2.39 one (AliExpress); $3.07 @100', '64 @50 MHz, 85 @66 MHz', '39–47', [['EastRising', BD + '2-2-inch-ips-tft-bar-display-116x420-spi-nv3006b-with-soldering-type-fpc'], ['breakout', BD + '2-2-inch-116x420-ips-tft-lcd-display-module-for-stm32-esp32-and-arduino'], ['AliExpress', 'https://www.aliexpress.us/item/3256812438743306.html'], ['NV3006B', BD + 'download/ic/ER-NV3006B.pdf']]],
+    ['2.79″ bar (ER-TFT2.79-2 / -1, Microtech MTF028AA81A)', '142 × 428', 'NV3007; 4-wire SPI, 12-pin with TE + SDO (-2) or 10-pin ZIF (-1)', '24.38 × 69.43 × 2.1 / 21.28 × 64.14', '$3.20 @100 (-2, 400 nit); $3.48 @100 (-1, 600 nit)', '51 @50 MHz, 77 @75 MHz', '31–38', [['ER-TFT2.79-2', BD + '2-79-inch-142x428-resolution-ips-tft-lcd-display-nv3007-4-wire-spi'], ['ER-TFT2.79-1', BD + 'wide-angle-2-79-inch-142x428-color-ips-tft-display-nv3007-controller'], ['breakout', BD + '2-79-inch-142x428-ips-display-with-breakout-board-for-stm32-esp32-and-arduino'], ['NV3007', 'https://buydisplay.com/download/ic/NV3007.pdf']]],
+    ['1.65″ bar (ER-TFT1.65-2 / -3)', '142 × 428', 'NV3007; 4-wire SPI, 13-pin (-2) or 8-pin, rounded corners (-3)', '16.3 × 44.96 × 2.2 / 13.16 × 39.68', '$2.23 @100 (-3)', '51 @50 MHz, 77 @75 MHz', '31–38', [['ER-TFT1.65-2', 'https://buydisplay.com/wide-angle-1-65-inch-142x428-color-ips-tft-display-nv3007-controller'], ['ER-TFT1.65-3', BD + 'bar-type-1-65-inch-142x428-tft-lcd-display-4-wire-spi-nv3007-connector-type-fpc']]],
+    ['2.25″ bar (LTS225KP / ER-TFT2.25-1)', '76 × 284', 'ST7789P3; 4-wire SPI, 8-pin, same pin order as the 2.2″', '17.9 × 62.5 × 2.3 / 14.80 × 55.30', '$2.37 @100 (EastRising); $4.09 @1k (Shineworld quote)', '145 @50 MHz', '60 (panel)', [['EastRising', BD + '2-25-inch-tft-serial-spi-76x284-lcd-display-module-w-st7789p3'], ['breakout', BD + 'spi-tft-2-25-lcd-76x284-display-module-st7789-breakout-board-for-arduino-raspberry-pi']]],
+    ['1.9″ (LTS190KP-PF04 / ER-TFT019-1)', '170 × 320', 'ST7789; SPI or 8-bit 8080', '25.8 × 49.72 × 1.4–2.0 / 22.70 × 42.72', '$2.90 @1k (Shineworld quote); $5.71 @100', '57 @50 MHz', '35–42', [['EastRising', BD + 'full-viewing-angle-spi-1-9-inch-ips-tft-lcd-display-panel-170x320-st7789'], ['Tailor Pixels', 'https://tailorpixels.com/?p=21275']]],
+    ['3.0″ bar (S30TFT268800 / EastRising 2.99″)', '268 × 800', 'ST7701S; RGB dot clock ≈16 MHz on 18 data pins, SPI for setup only', '26.96 × 80.08 × 1.76 / 24.12 × 72.0', '$4.87 @1k (Shineworld quote); $10.52 @100', 'RGB: fixed 60', '60, from your own 419 kB frame buffer', [['EastRising', BD + 'bar-type-2-99-inch-268x800-ips-tft-lcd-display-spi-rgb-interface']]],
+    ['2.86″ bar (ER-TFT2.86-1)', '376 × 960', 'ST7701S; RGB + SPI', 'about 28 × 69 viewing area', '$9.96 @100', 'RGB: fixed 60', '60, 705 kB frame buffer', [['EastRising', BD + 'bar-type-2-86-inch-376x960-ips-tft-lcd-display-spi-rgb-interface']]],
+    ['1.91″ AMOLED strip', '240 × 536', 'RM67162; QSPI or MIPI', '— / 22.40 × 51.42', '$17.85 one (Gesight)', '78 @QSPI 40 MHz', '48–58', [['Gesight', 'https://gesight.com/product/1-91-inch-240x536-amoled-smart-phone-display'], ['Panox', 'https://panoxdisplay.com/amoled/1-91-amoled-display-240x536.html']]],
+    ['3.4″ bar with in-cell touch (TTH034BVT-02CG): too long at 91.8 mm, listed as the QSPI yardstick', '180 × 640', 'AXS15231; QSPI / SPI / MIPI', '27.72 × 91.83 × 2.73 / 23.22 × 82.56', '$11.50–18.50', '87 @QSPI 40 MHz', '53–60', [['Tailor Pixels', 'https://tailorpixels.com/?p=25179']]],
+    ['1.47″ TFT (baseline, for comparison)', '172 × 320', 'ST7789P3; 4-wire SPI', '19.75 × 36.86 / 17.65 × 32.83', '$1.69 @1k without touch (Shineworld quote)', '57 @50 MHz', '35–42', []],
+  ];
+  $('disptable').tBodies[0].innerHTML = DISPT.map(d => `<tr><td><b>${d[0]}</b></td><td>${d[1]}</td><td>${d[2]}</td><td>${d[3]}</td><td>${d[4]}</td><td class="n" style="white-space:normal">${d[5]}</td><td class="n" style="white-space:normal">${d[6]}</td><td>${d[7].map(l => `<a href="${l[1]}" target="_blank" rel="noopener">${l[0]}</a>`).join(' · ') || '—'}</td></tr>`).join('');
   const link = (u, t) => /^https?:/.test(u) ? `<a href="${u}" target="_blank" rel="noopener">${t}</a>` : (u || '—');
   $('dstable').tBodies[0].innerHTML = DS.map(d => `<tr><td><b>${d[0]}</b></td><td>${d[1]}</td><td>${link(d[2], /lcsc\.com\/product/.test(d[2]) ? 'LCSC page (PDF there)' : 'datasheet')}</td><td>${link(d[3], d[4] || 'LCSC')}${d[3] && d[4] ? '' : (d[4] ? ' ' + d[4] : '')}</td></tr>`).join('');
 
@@ -488,13 +520,5 @@ hr { height: 1px; background: var(--line); margin: 1rem 0 }
   render();
 })();
 </script>
-
-<style>
-/* slopswap: rainbow instead of copper. Links, badges and the meter go pink (the J); a row of segment buttons cycles. */
-:root,:root:not([data-theme="light"]),:root[data-theme="dark"]{--bg:var(--jl-bg,#27272b);--panel:var(--jl-surface,#323238);--ink:var(--jl-fg,#f3f3f5);--muted:var(--jl-muted,#aaaab5);--line:var(--jl-line,#4b4b54);--copper:var(--accent,#f03060);--copper-soft:var(--surface-2,#3d3d44);--bar1:var(--r1);--bar2:var(--r3);--bar3:var(--r5);--bar4:var(--r7);--bar5:var(--r9);--bar6:var(--r11)}
-.seg button[aria-pressed="true"]{color:#1f1f21}
-.seg button:nth-child(1)[aria-pressed="true"]{background:var(--r1);border-color:var(--r1)}
-.seg button:nth-child(2)[aria-pressed="true"]{background:var(--r5);border-color:var(--r5)}
-.seg button:nth-child(3)[aria-pressed="true"]{background:var(--r9);border-color:var(--r9)}
-.seg button:nth-child(4)[aria-pressed="true"]{background:var(--r11);border-color:var(--r11)}
-</style>
+</body>
+</html>
