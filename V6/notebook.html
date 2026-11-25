@@ -25,15 +25,16 @@ body { display: flex; flex-direction: column; padding-top: 3px; overflow: hidden
 #frames iframe[hidden] { display: none; }
 @media (max-width: 700px) {
   /* a phone: the bar is three short lines. The tabs; the page; then which copper (on the Routing tab), what just
-     happened, and where this page is. A line too long for the screen scrolls sideways instead of wrapping. */
+     happened, and where this page is, after the linked box. A line too long for the screen scrolls sideways instead of
+     wrapping. */
   .top { padding: 5px 8px; gap: 5px 8px; }
   .top h1, .top .spacer { display: none; }
   .tabs { order: 1; flex: 1 0 100%; }
   #pages, #ask { order: 2; flex: 1 0 100%; }
-  #copper-box { order: 3; }
+  #link-box, #copper-box { order: 3; }
   #said { order: 4; flex: 1 1 0; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .top > .eyebrow { order: 5; }
-  #copper-box:not([hidden]) ~ #said { order: 6; flex: 1 0 100%; }      /* with the copper on that line, what happened gets one of its own */
+  #copper-box:not([hidden]) ~ #said { min-width: 60%; }      /* with the copper on that line, what happened goes to the next, beside the crumb */
   .tabs, .top .group { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; max-width: 100%; }
   .tabs::-webkit-scrollbar, .top .group::-webkit-scrollbar { display: none; }
   .tabs button, .top .group > * { flex: none; }
@@ -49,7 +50,7 @@ body { display: flex; flex-direction: column; padding-top: 3px; overflow: hidden
     <label class="eyebrow" for="copper">copper</label>
     <select id="copper" title="which run of the routing lab is shown. Each was routed ahead of time: the page shows a run, it does not route."></select>
   </span>
-  <label class="group" title="Linked: the cost explorer follows the outline. Its display, the display's window, the expansion port and the number of magnetometers are set from the outline's design whenever that changes. Untick to price something the outline does not have."><input type="checkbox" id="linked" checked> <span class="eyebrow">linked</span></label>
+  <label class="group" id="link-box" title="Linked: the cost explorer follows the outline. Its display, the display's window, the expansion port and the number of magnetometers are set from the outline's design whenever that changes. Untick to price something the outline does not have."><input type="checkbox" id="linked" checked> <span class="eyebrow">linked</span></label>
   <span class="spacer"></span>
   <span class="group" id="pages">
     <label class="eyebrow" for="page">page</label>
