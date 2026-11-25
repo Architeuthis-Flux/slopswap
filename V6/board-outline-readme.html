@@ -19,10 +19,10 @@
 <main class="page wide">
 <p class="eyebrow"><a href="../">slopswap</a> / <a href="./">V6</a></p>
 <h1>V6 board outline and stack</h1>
-<p class="muted">The readme of <code>JumperlessV6/v6mech</code>, rev A9 2026-11-25. Kevin Cappuccio with Claude.</p>
+<p class="muted">The readme of <code>JumperlessV6/v6mech</code>, rev A10 2026-11-25. Kevin Cappuccio with Claude.</p>
 <ul class="get cycle">
   <li><a href="board-outline.html"><b>Open the 3D viewer</b></a></li>
-  <li><a href="board-outline-v6mech.zip" download><b>Download the folder</b> (.zip, 12.6 MB): parameters, source, KiCad and DXF outlines, STEP</a></li>
+  <li><a href="board-outline-v6mech.zip" download><b>Download the folder</b> (.zip, 12.7 MB): parameters, source, KiCad and DXF outlines, STEP</a></li>
 </ul>
 <figure><a href="board-outline-on-sketch.png"><img src="board-outline-on-sketch.png" alt="The outline (pink) laid over the notebook page it was traced from"></a><figcaption>The outline (pink) laid over the notebook page it was traced from: the viewer's sketch underlay, seen from above.</figcaption></figure>
 <figure><a href="board-outline-inputs.png"><img src="board-outline-inputs.png" alt="From the top edge"></a><figcaption>From the top edge: the click wheel under the top board at the corner, a nav switch through it, two button holes. Left, the pickers and the per-board tick boxes of the selected part.</figcaption></figure>
@@ -45,7 +45,8 @@ rev A8 the same day (a display can sit behind a window: under the top board, the
 with chamfered corners, glass let into the cut; and each bar display says what drives it, what it costs and
 where to get it); rev A8b and A8c the same day (a cantilever's tongue belongs to the top board; sixteen
 long-travel push switches, drawn pressed); rev A9 on 2026-11-25 (a Top band control, and the default outline
-made square: 83.82 x 83.82).</p>
+made square: 83.82 x 83.82); rev A10 the same day (view controls in the 3D view itself, board opacity, lighting
+rigs, surfaces, more backdrops and benches).</p>
 <h2>Use it</h2>
 <ol>
 <li>Open <code>V6_outline_viewer.html</code> (double-click; it needs no server and no network).</li>
@@ -396,6 +397,24 @@ JumperlessFootprints; the RKJXM has no footprint yet (B25 says so too).</p>
 </div>
 <p><code>node build.mjs --check</code> exits 1 if two parts clash, a part runs into a board kept whole, or a bare
 breadboard no longer fits beside the unit.</p>
+<h2>Rev A10: view controls in the 3D view, and more ways to draw it</h2>
+<ul>
+<li><strong>A strip of view controls sits in the 3D view</strong>, along the bottom to start with: Explode, Board opacity, Hide
+  shell and Drawn as. Its four small squares dock it along the bottom or top or down the left or right of the view;
+  <strong>–</strong> folds it to a tab and <strong>×</strong> sends everything back to the View section. <strong>+</strong> lists every view control with a
+  tick for whether it is in the strip, and each row of the View section has a <strong>pin</strong> that does the same. A control
+  is in one place or the other, never both. All of it is remembered.</li>
+<li><strong>Board opacity</strong> fades the frame's boards (and what is printed on them) so the parts between them show, without
+  going to X-ray.</li>
+<li><strong>Lighting</strong>: six rigs (Studio, Bench lamp, Overcast, Three lights, Pink and cyan, Dusk). Picking one sets a main
+  light, a second light, a back light and the sky, each of which then has its own colour and level. Light from still
+  turns the main light, and the back light stays opposite it.</li>
+<li><strong>Board surface</strong>: Smooth, Soldermask grain, Glass weave, or Tracks under the mask (made-up routing, there to
+  make a board look like a board; it is not the design's copper). <strong>Shell surface</strong>: Moulded or Printed layers.</li>
+<li><strong>Backdrop</strong> adds Slate, Blueprint, Dusk, Rainbow line and a colour of your own. <strong>Bench</strong> adds a cutting mat
+  (10 mm squares), a wooden bench and brushed steel, each taking the shadow.</li>
+<li>The lighting colours, surfaces and benches apply to the Real drawing. None of this changes a check or an export.</li>
+</ul>
 <h2>Rev A9: a square outline, and a top band that moves</h2>
 <p>Kevin: the overall (simplified) outline should be square, and the strip along the left means the top can come up
 to match, which gives more room.</p>

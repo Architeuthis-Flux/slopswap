@@ -111,8 +111,46 @@ body.resizing { user-select: none; -webkit-user-select: none; }
 #view { position: relative; flex: 1 1 0; min-height: 0; min-width: 0; overflow: hidden; }
 #view[data-bg="clear"] { background: repeating-conic-gradient(#2d2d32 0 25%, #36363c 0 50%) 0 0 / 18px 18px; }
 #view canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+/* the view controls that sit in the 3D view */
+.vstrip { position: absolute; z-index: 3; display: flex; align-items: center; gap: 4px 12px; padding: 5px 6px 5px 10px; background: rgba(50, 50, 56, .9); border: 1px solid var(--line); border-top: 2px solid var(--focus); font-size: 11px; color: var(--ink); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); max-width: calc(100% - 20px); }
+.vstrip[hidden] { display: none; }
+.vstrip[data-dock="bottom"] { left: 10px; bottom: 28px; }
+.vstrip[data-dock="top"] { left: 10px; top: 8px; }
+.vstrip[data-dock="left"], .vstrip[data-dock="right"] { top: 8px; flex-direction: column; align-items: stretch; width: 186px; max-height: calc(100% - 44px); overflow: auto; padding: 7px 8px; }
+.vstrip[data-dock="left"] { left: 10px; } .vstrip[data-dock="right"] { right: 10px; }
+.vstrip.folded { width: auto; padding: 3px 4px; }
+.vs-items { display: flex; flex-wrap: wrap; align-items: center; gap: 5px 14px; min-width: 0; }
+.vstrip[data-dock="left"] .vs-items, .vstrip[data-dock="right"] .vs-items { flex-direction: column; align-items: stretch; gap: 7px; }
+.vcell { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.vcell > label { font-family: var(--label); text-transform: uppercase; letter-spacing: .06em; font-size: 10.5px; color: var(--dim); white-space: nowrap; }
+.vcell input[type="range"] { width: 96px; }
+.vcell select { max-width: 150px; font-size: 11px; padding: 1px 4px; }
+.vcell input[type="color"], .ctl input[type="color"] { width: 30px; height: 20px; padding: 0; border: 1px solid var(--line); background: none; }
+.vcell .seg button { padding: 2px 7px 2px 6px; font-size: 10.5px; }
+.vstrip[data-dock="left"] .vcell, .vstrip[data-dock="right"] .vcell { justify-content: space-between; flex-wrap: wrap; }
+.vs-tools { display: flex; align-items: center; gap: 3px; margin-left: auto; flex: none; }
+.vstrip[data-dock="left"] .vs-tools, .vstrip[data-dock="right"] .vs-tools { margin: 4px 0 0; justify-content: flex-end; }
+.vs-tools .menu > summary { padding: 0 7px; font-size: 13px; line-height: 18px; clip-path: none; }
+.vs-tools .pop { width: 236px; max-height: 300px; overflow: auto; right: 0; left: auto; }
+.vstrip[data-dock="bottom"] .pop { top: auto; bottom: calc(100% + 9px); border-top: 1px solid var(--line); border-bottom: 3px solid var(--accent); }
+.vstrip[data-dock="left"] .pop { left: 0; right: auto; }
+.vp { display: flex; align-items: center; gap: 7px; padding: 2px 0; font-size: 11.5px; cursor: pointer; }
+.vdk, .vfold { width: 18px; height: 18px; padding: 0; clip-path: none; background: var(--btn); border: 1px solid var(--line); position: relative; font-size: 11px; line-height: 1; color: var(--ink); }
+.vfold { width: auto; min-width: 18px; padding: 0 5px; font-family: var(--label); text-transform: uppercase; letter-spacing: .06em; }
+.vdk::after { content: ""; position: absolute; background: var(--dim); }
+.vdk[data-d="bottom"]::after { left: 2px; right: 2px; bottom: 2px; height: 3px; } .vdk[data-d="top"]::after { left: 2px; right: 2px; top: 2px; height: 3px; }
+.vdk[data-d="left"]::after { left: 2px; top: 2px; bottom: 2px; width: 3px; } .vdk[data-d="right"]::after { right: 2px; top: 2px; bottom: 2px; width: 3px; }
+.vdk[aria-pressed="true"] { background: var(--btn); border-color: var(--accent); }
+.vdk[aria-pressed="true"]::after { background: var(--accent); }
+.ctl { display: inline-flex; align-items: center; gap: 5px; }
+button.pin { padding: 0 5px; font-size: 9.5px; line-height: 15px; clip-path: none; background: none; border: 1px solid var(--line); color: var(--dim); flex: none; }
+button.pin:hover { color: var(--ink); border-color: var(--ink); }
+button.pin[aria-pressed="true"] { color: var(--focus); border-color: var(--focus); }
+.row.pinned { opacity: .85; }
+.row.pinned .hint { flex: 1 1 auto; text-align: left; margin: 0; }
+body.tab-mag .vstrip { display: none; }
 #hud { position: absolute; left: 10px; bottom: 8px; right: 10px; color: var(--dim); font-size: 11px; pointer-events: none; text-shadow: 0 0 3px var(--bg), 0 0 3px var(--bg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#view[data-bg="paper"] #hud, #view[data-bg="white"] #hud { color: #3d3d44; text-shadow: none; }
+#view[data-bg="paper"] #hud, #view[data-bg="white"] #hud, #view[data-ground="wood"] #hud, #view[data-ground="steel"] #hud { color: #2b2b30; text-shadow: none; }
 #tip { position: absolute; display: none; pointer-events: none; z-index: 4; max-width: 300px; padding: 5px 9px 6px; background: var(--panel-2); color: var(--ink); font-size: 11.5px; border-left: 3px solid var(--accent);
   clip-path: polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, 0 100%); }
 #fallback { padding: 24px; display: none; color: var(--dim); }
@@ -245,6 +283,7 @@ html.embedded #crumb, html.embedded header.top > h1, html.embedded header.top > 
     <section class="panel viewpanel" id="centre" style="--c: var(--r7)" aria-label="3D view">
       <div class="pbar"><span class="plate"><b>02</b>View</span><span id="viewbar"></span><span class="bar-note"></span><button id="btn-solo" class="quiet" type="button" aria-pressed="false" title="hide or show both panels: the \ key">Panels</button></div>
       <div id="view">
+        <div id="viewstrip" class="vstrip" role="toolbar" aria-label="view controls"></div>
         <div id="hud">drag: orbit &nbsp; scroll: move &nbsp; pinch or ctrl + scroll: zoom &nbsp; right-drag: move &nbsp; drag a part or an outline dot: move it &nbsp; double-click: reset the view</div>
         <div id="magview" hidden>
           <canvas id="magcanvas" tabindex="0" role="application" aria-label="Plan of the unit with the magnetometers. Tab to the sensor list in the panel to move them with the keyboard."></canvas>
@@ -8982,7 +9021,7 @@ window.V6_SKETCH = {"x0": -16, "y0": -34, "x1": 104, "y1": 64, "px_per_mm": 12, 
 
 </script>
 <script>
-window.V6_DEFAULTS = {"meta":{"name":"Jumperless V6 board outline","rev":"A9 2026-11-25","units":"mm","frame_of_reference":"x right, y DOWN (KiCad). x=0 is the wig's left edge, y=0 the wig body's top edge, so breadboard column k sits at x = 2.54*k. z=0 is the top face of the main board (= the wig PCB's top face), z up."},"grid":{"pitch":2.54,"cols":30,"dead_rows_left":2,"coupler":"none","_coupler":"an edge coupler between two units, for the check only: none, wingtat (HEE70LP03BK, boards about 6.4 apart), kiss (custom kiss slot V2, 9.2 between shoulders) or kiss_short (V3, 7.8)","_dead_rows_left":"width of the left strip in 2.54 mm rows: 0, 1, 2 or 3 (0 / 2.54 / 5.08 / 7.62). Unit pitch = (31 + this) * 2.54 and dead rows between two units = this + 1. The outline's strip edge is expected at x = -this * 2.54."},"wig":{"mode":"integrated","_mode":"integrated = breadboard area is part of the main board; removable = separate wig PCB (real WigLEDmag outline) on a right-angle 1.27 mm header pair","width":78.74,"height":54.991,"pcb_t":1.6,"shell":{"w":78.7,"h":54.6,"t":6.75},"_shell":"t: 6.75 is the injection-moulding target and the older print (Body95); the current Wiiig v7 print measures 7.1.","face":{"on":true,"t":0.71,"sits":"on","header_strip":false},"_face":"the wig's top board on the shell: the countersunk holes read from wiigtop.3mf into ref/wig_ref.json, on the breadboard body's outline, with no card edge. t = its thickness (0.71 as modelled). sits: on = it lies on the shell and adds t; inset = the shell is t shorter and the top stays at shell.t. header_strip: true puts back the 3.43 mm strip with the 2 x 35 holes that wiigtop.3mf has along the top; that card edge belongs to the wig's bottom board.","fit_gap":0.1,"pcb_gap":0.2,"connector_side":"top"},"frame":{"_outline":"The frame (top band + left strip), clockwise as seen from above, traced from Kevin's notebook page (IMG a384f12f, rectified on the breadboard's four corners; read to about +-0.5 mm). Per vertex: nothing = sharp; r = round corner; c:[cx,cy] + r = rounded chamfer (a chamfer with both ends blended, cx along the more horizontal edge, cy along the more vertical); c:\"wig\" = the WigLEDmag corner itself, point for point. n is a note.","outline":[{"x":-8.3,"y":-27.129,"c":[8.8,7.7],"r":2,"n":"top-left rounded chamfer. Drawn with the top edge at -23.0; rev A9 raised the whole top edge 4.129 so the simplified outline is square (see band_drawn)"},{"x":44.2,"y":-27.129,"r":1.2,"n":"the top edge steps up here in the drawing: left part beside the display (drawn at -23.0) ..."},{"x":46.8,"y":-28.829,"r":1.2,"n":"... right part 1.7 higher (drawn at -24.7). Give both the same y to take the step out."},{"x":78.74,"y":-28.829,"c":[6.7,5.8],"r":2,"n":"top-right rounded chamfer. Drawn right edge is at 79.0-79.3; set on the grid plane 78.74."},{"x":78.74,"y":0,"c":"wig","n":"the band curves in to meet the breadboard's corner, as drawn"},{"x":0,"y":0,"c":"wig","n":"inside corner: follows the breadboard's own corner chamfer"},{"x":0,"y":54.991,"n":"strip ends level with the breadboard's bottom edge"},{"x":-5.08,"y":54.991,"c":"wig","n":"bottom-left rounded chamfer"},{"x":-5.08,"y":44.29,"r":2,"n":"the drawn bump on the strip's outer edge (-5.6 from y 28 to 43). Shaped here so it sits in the waist of a breadboard standing against this edge, 0.13 clear. ASSUMPTION about what it is for; delete these four vertices for a straight edge."},{"x":-5.58,"y":42.29,"r":2},{"x":-5.58,"y":30,"r":2},{"x":-5.08,"y":28,"r":2},{"x":-5.08,"y":1.583,"r":1,"n":"the top-left block slopes out from here, as drawn. The slope is the corner chamfer of a breadboard standing on the left (2.211 x 1.583 with r 1.0), carried on in a straight line ..."},{"x":-8.3,"y":-0.722,"r":2,"n":"... to the block's left edge, drawn at about -8.3 (3.2 mm past the strip). No flat under the block."}],"band_drawn":24.7,"_band_drawn":"the top band's height in the notebook drawing (breadboard top edge to the highest part of the top edge). The outline above stands 28.829 high instead: 83.82 - 54.991, so the simplified outline (strip plane to right plane, top edge to bottom edge) is 83.82 square, which is also 33 rows high. The Top band control moves the top edge; As drawn puts this back.","fill_notches":0,"_fill_notches":"integrated only: closes notches in the one-piece bottom board narrower than twice this (0 = leave the outline as drawn)","ring_wall":2,"_ring_wall":"wall width of a board whose kind is ring (a hollow spacer); none in the default stack"},"_stack":"Bottom to top. gap is the space under that board; parts live in the gaps. A board is opened only where a part passes through it, so the bottom and top boards stay whole unless something really goes through them. The gaps here make the top flush with the breadboard (6.75).","stack":[{"id":"L0","name":"Main board","t":1.6,"gap":0,"kind":"base"},{"id":"L1","name":"Mid board","t":1.6,"gap":1.775,"kind":"board"},{"id":"L2","name":"Top board","t":1.6,"gap":1.775,"kind":"board"}],"_parts":"display: where the shaded box is in the drawing. encoder: the click wheel without its cap, at the V5 offsets (5.83 mm from the left and top edges) from the new top-left corner; the top board covers it. usbc: the V5 corner position. port: on top of the bottom board, mouth at the top edge.","_open":"Boards are opened for a part automatically where it passes through them (and, for buttons and the like, above it so it can be reached). A part can override that per board with \"open\": { \"L2\": true } to open one, or false to keep one whole. Input part types are in src/catalog.js: encoder_siq02, encoder_siq02_cap, nav_rkjxm, nav_skrh, nav_k1_1210, tact_ts1187, joy_joycon, custom_control (with \"dims\": { w, d, h, stem, top }).","parts":[{"id":"display","type":"display_tft220bar","x":30,"y":-9.9,"rot":90,"mount":{"flush":"top","offset":0}},{"id":"encoder","type":"encoder_siq02","x":-2.47,"y":-21.299,"rot":45,"mount":{"on":"L0","side":"top"}},{"id":"usbc","type":"usbc_16p","x":72.9,"y":-22.989,"rot":315,"mount":{"on":"L0","side":"top"}},{"id":"port","type":"m2_socket","x":56,"y":-19.329,"rot":0,"mount":{"on":"L0","side":"top"}},{"id":"key1","type":"btn_cantilever","x":64.5,"y":-5,"rot":90,"tongue":{"dir":90},"mount":{"on":"L1","side":"top"}},{"id":"key2","type":"btn_cantilever","x":70.5,"y":-5,"rot":90,"tongue":{"dir":90},"mount":{"on":"L1","side":"top"}}],"probe":{"dia":3.6,"len":70,"magnet":{"dia":2,"len":1,"from_tip":1},"dock":{"enabled":true,"x":-2.54,"y_tip":1,"z":null,"clearance":0.2},"_dock":"the probe lies in the space between the bottom and top boards; z = height of its axis, null = centred in that space"},"_mag":"The probe tracker's magnetometers and how the layout is judged (src/magmodel.js). list: one entry per sensor. x, y = where it is; on = the board that carries it: \"wig\" is the board under the breadboard (the wig's PCB when removable, the main board when integrated), otherwise a board id from the stack; side = top or bottom face of that board; kind = mmc (MMC5603, the default) or tmag (TMAG5273). The default is six under the breadboard and six on the frame, on the undersides. magnet.use: bench (the bench probe, 1900 mT*mm^3 as measured), probe (the cylinder drawn in probe.magnet), n42_3x6, clip (16000), or other with strength in mT*mm^3. height = the magnet's centre above the breadboard's top, mm. lean = how far the probe leans, degrees (the error is the rms over upright and four leans). noise_uT, zero_uT, gain_pct = each reading's noise, how well its zero is known, and its gain error (the 2026-11-01 MMC bench: 0.4, 1, 1). ambient: zeroed = the zero takes the ambient field out; fitted = the fit solves for a uniform field too. hold_strength: the fit holds the magnet's strength (Testolomew does). map: error, shift (how far a 10 uT ambient change moves the fix) or used (sensors in range).","mag":{"list":[{"x":26,"y":24,"on":"wig","side":"bottom"},{"x":52,"y":24,"on":"wig","side":"bottom"},{"x":72,"y":14,"on":"wig","side":"bottom"},{"x":14,"y":46,"on":"wig","side":"bottom"},{"x":42,"y":46,"on":"wig","side":"bottom"},{"x":70,"y":44,"on":"wig","side":"bottom"},{"x":10,"y":-6,"on":"L0","side":"bottom"},{"x":32,"y":-6,"on":"L0","side":"bottom"},{"x":54,"y":-6,"on":"L0","side":"bottom"},{"x":76,"y":-6,"on":"L0","side":"bottom"},{"x":-2.54,"y":16,"on":"L0","side":"bottom"},{"x":-2.54,"y":38,"on":"L0","side":"bottom"}],"magnet":{"use":"bench","strength":1900},"height":2,"lean":25,"noise_uT":0.4,"zero_uT":1,"gain_pct":1,"ambient":"zeroed","hold_strength":true,"map":"error"},"room":{"min_gap":0.6},"_room":"a board face under another board counts as component room when the gap is at least this","features":[],"_features":"manual pockets or tabs: { \"op\": \"cut\" | \"add\", \"layers\": [\"L1\"], \"x\": 0, \"y\": 0, \"w\": 10, \"h\": 5, \"r\": 0.5, \"rot\": 0, \"note\": \"\" } with x, y the rectangle centre","show":{"neighbour":false,"header40":false,"header40_row":8,"header40_col":1,"sensors":true,"sensor_layout":"custom","_sensor_layout":"custom = the sensors of mag.list below (the Magnetometers tab edits them). The older fixed choices still read: wigledmag = the test board's 9 TMAG5273 + 8 MMC5603; plan18 / plan32 = an MMC5603 grid, 3 x 6 or 4 x 8, spread evenly over the 76 x 45 hole field","coupler":false,"plugged":true,"_plugged":"the M.2 card, mini PCIe card or SO-DIMM drawn in its socket; false hides it"},"look":{"mask":"black","silk":"white","finish":"enig","shell":"black","face_mask":"black","leds":"off","screen":true},"_look":"how the 3D view paints things; no effect on the geometry. mask / face_mask: black, white, green, purple, blue, red. finish: enig or hasl. shell: black, white, clear. leds: off, rainbow, rails, probe.","area_budget_mm2":9134,"_area_budget_mm2":"courtyard area of the fitted main-board parts, from docs/V6_area.json via the expansion-port doc"};
+window.V6_DEFAULTS = {"meta":{"name":"Jumperless V6 board outline","rev":"A10 2026-11-25","units":"mm","frame_of_reference":"x right, y DOWN (KiCad). x=0 is the wig's left edge, y=0 the wig body's top edge, so breadboard column k sits at x = 2.54*k. z=0 is the top face of the main board (= the wig PCB's top face), z up."},"grid":{"pitch":2.54,"cols":30,"dead_rows_left":2,"coupler":"none","_coupler":"an edge coupler between two units, for the check only: none, wingtat (HEE70LP03BK, boards about 6.4 apart), kiss (custom kiss slot V2, 9.2 between shoulders) or kiss_short (V3, 7.8)","_dead_rows_left":"width of the left strip in 2.54 mm rows: 0, 1, 2 or 3 (0 / 2.54 / 5.08 / 7.62). Unit pitch = (31 + this) * 2.54 and dead rows between two units = this + 1. The outline's strip edge is expected at x = -this * 2.54."},"wig":{"mode":"integrated","_mode":"integrated = breadboard area is part of the main board; removable = separate wig PCB (real WigLEDmag outline) on a right-angle 1.27 mm header pair","width":78.74,"height":54.991,"pcb_t":1.6,"shell":{"w":78.7,"h":54.6,"t":6.75},"_shell":"t: 6.75 is the injection-moulding target and the older print (Body95); the current Wiiig v7 print measures 7.1.","face":{"on":true,"t":0.71,"sits":"on","header_strip":false},"_face":"the wig's top board on the shell: the countersunk holes read from wiigtop.3mf into ref/wig_ref.json, on the breadboard body's outline, with no card edge. t = its thickness (0.71 as modelled). sits: on = it lies on the shell and adds t; inset = the shell is t shorter and the top stays at shell.t. header_strip: true puts back the 3.43 mm strip with the 2 x 35 holes that wiigtop.3mf has along the top; that card edge belongs to the wig's bottom board.","fit_gap":0.1,"pcb_gap":0.2,"connector_side":"top"},"frame":{"_outline":"The frame (top band + left strip), clockwise as seen from above, traced from Kevin's notebook page (IMG a384f12f, rectified on the breadboard's four corners; read to about +-0.5 mm). Per vertex: nothing = sharp; r = round corner; c:[cx,cy] + r = rounded chamfer (a chamfer with both ends blended, cx along the more horizontal edge, cy along the more vertical); c:\"wig\" = the WigLEDmag corner itself, point for point. n is a note.","outline":[{"x":-8.3,"y":-27.129,"c":[8.8,7.7],"r":2,"n":"top-left rounded chamfer. Drawn with the top edge at -23.0; rev A9 raised the whole top edge 4.129 so the simplified outline is square (see band_drawn)"},{"x":44.2,"y":-27.129,"r":1.2,"n":"the top edge steps up here in the drawing: left part beside the display (drawn at -23.0) ..."},{"x":46.8,"y":-28.829,"r":1.2,"n":"... right part 1.7 higher (drawn at -24.7). Give both the same y to take the step out."},{"x":78.74,"y":-28.829,"c":[6.7,5.8],"r":2,"n":"top-right rounded chamfer. Drawn right edge is at 79.0-79.3; set on the grid plane 78.74."},{"x":78.74,"y":0,"c":"wig","n":"the band curves in to meet the breadboard's corner, as drawn"},{"x":0,"y":0,"c":"wig","n":"inside corner: follows the breadboard's own corner chamfer"},{"x":0,"y":54.991,"n":"strip ends level with the breadboard's bottom edge"},{"x":-5.08,"y":54.991,"c":"wig","n":"bottom-left rounded chamfer"},{"x":-5.08,"y":44.29,"r":2,"n":"the drawn bump on the strip's outer edge (-5.6 from y 28 to 43). Shaped here so it sits in the waist of a breadboard standing against this edge, 0.13 clear. ASSUMPTION about what it is for; delete these four vertices for a straight edge."},{"x":-5.58,"y":42.29,"r":2},{"x":-5.58,"y":30,"r":2},{"x":-5.08,"y":28,"r":2},{"x":-5.08,"y":1.583,"r":1,"n":"the top-left block slopes out from here, as drawn. The slope is the corner chamfer of a breadboard standing on the left (2.211 x 1.583 with r 1.0), carried on in a straight line ..."},{"x":-8.3,"y":-0.722,"r":2,"n":"... to the block's left edge, drawn at about -8.3 (3.2 mm past the strip). No flat under the block."}],"band_drawn":24.7,"_band_drawn":"the top band's height in the notebook drawing (breadboard top edge to the highest part of the top edge). The outline above stands 28.829 high instead: 83.82 - 54.991, so the simplified outline (strip plane to right plane, top edge to bottom edge) is 83.82 square, which is also 33 rows high. The Top band control moves the top edge; As drawn puts this back.","fill_notches":0,"_fill_notches":"integrated only: closes notches in the one-piece bottom board narrower than twice this (0 = leave the outline as drawn)","ring_wall":2,"_ring_wall":"wall width of a board whose kind is ring (a hollow spacer); none in the default stack"},"_stack":"Bottom to top. gap is the space under that board; parts live in the gaps. A board is opened only where a part passes through it, so the bottom and top boards stay whole unless something really goes through them. The gaps here make the top flush with the breadboard (6.75).","stack":[{"id":"L0","name":"Main board","t":1.6,"gap":0,"kind":"base"},{"id":"L1","name":"Mid board","t":1.6,"gap":1.775,"kind":"board"},{"id":"L2","name":"Top board","t":1.6,"gap":1.775,"kind":"board"}],"_parts":"display: where the shaded box is in the drawing. encoder: the click wheel without its cap, at the V5 offsets (5.83 mm from the left and top edges) from the new top-left corner; the top board covers it. usbc: the V5 corner position. port: on top of the bottom board, mouth at the top edge.","_open":"Boards are opened for a part automatically where it passes through them (and, for buttons and the like, above it so it can be reached). A part can override that per board with \"open\": { \"L2\": true } to open one, or false to keep one whole. Input part types are in src/catalog.js: encoder_siq02, encoder_siq02_cap, nav_rkjxm, nav_skrh, nav_k1_1210, tact_ts1187, joy_joycon, custom_control (with \"dims\": { w, d, h, stem, top }).","parts":[{"id":"display","type":"display_tft220bar","x":30,"y":-9.9,"rot":90,"mount":{"flush":"top","offset":0}},{"id":"encoder","type":"encoder_siq02","x":-2.47,"y":-21.299,"rot":45,"mount":{"on":"L0","side":"top"}},{"id":"usbc","type":"usbc_16p","x":72.9,"y":-22.989,"rot":315,"mount":{"on":"L0","side":"top"}},{"id":"port","type":"m2_socket","x":56,"y":-19.329,"rot":0,"mount":{"on":"L0","side":"top"}},{"id":"key1","type":"btn_cantilever","x":64.5,"y":-5,"rot":90,"tongue":{"dir":90},"mount":{"on":"L1","side":"top"}},{"id":"key2","type":"btn_cantilever","x":70.5,"y":-5,"rot":90,"tongue":{"dir":90},"mount":{"on":"L1","side":"top"}}],"probe":{"dia":3.6,"len":70,"magnet":{"dia":2,"len":1,"from_tip":1},"dock":{"enabled":true,"x":-2.54,"y_tip":1,"z":null,"clearance":0.2},"_dock":"the probe lies in the space between the bottom and top boards; z = height of its axis, null = centred in that space"},"_mag":"The probe tracker's magnetometers and how the layout is judged (src/magmodel.js). list: one entry per sensor. x, y = where it is; on = the board that carries it: \"wig\" is the board under the breadboard (the wig's PCB when removable, the main board when integrated), otherwise a board id from the stack; side = top or bottom face of that board; kind = mmc (MMC5603, the default) or tmag (TMAG5273). The default is six under the breadboard and six on the frame, on the undersides. magnet.use: bench (the bench probe, 1900 mT*mm^3 as measured), probe (the cylinder drawn in probe.magnet), n42_3x6, clip (16000), or other with strength in mT*mm^3. height = the magnet's centre above the breadboard's top, mm. lean = how far the probe leans, degrees (the error is the rms over upright and four leans). noise_uT, zero_uT, gain_pct = each reading's noise, how well its zero is known, and its gain error (the 2026-11-01 MMC bench: 0.4, 1, 1). ambient: zeroed = the zero takes the ambient field out; fitted = the fit solves for a uniform field too. hold_strength: the fit holds the magnet's strength (Testolomew does). map: error, shift (how far a 10 uT ambient change moves the fix) or used (sensors in range).","mag":{"list":[{"x":26,"y":24,"on":"wig","side":"bottom"},{"x":52,"y":24,"on":"wig","side":"bottom"},{"x":72,"y":14,"on":"wig","side":"bottom"},{"x":14,"y":46,"on":"wig","side":"bottom"},{"x":42,"y":46,"on":"wig","side":"bottom"},{"x":70,"y":44,"on":"wig","side":"bottom"},{"x":10,"y":-6,"on":"L0","side":"bottom"},{"x":32,"y":-6,"on":"L0","side":"bottom"},{"x":54,"y":-6,"on":"L0","side":"bottom"},{"x":76,"y":-6,"on":"L0","side":"bottom"},{"x":-2.54,"y":16,"on":"L0","side":"bottom"},{"x":-2.54,"y":38,"on":"L0","side":"bottom"}],"magnet":{"use":"bench","strength":1900},"height":2,"lean":25,"noise_uT":0.4,"zero_uT":1,"gain_pct":1,"ambient":"zeroed","hold_strength":true,"map":"error"},"room":{"min_gap":0.6},"_room":"a board face under another board counts as component room when the gap is at least this","features":[],"_features":"manual pockets or tabs: { \"op\": \"cut\" | \"add\", \"layers\": [\"L1\"], \"x\": 0, \"y\": 0, \"w\": 10, \"h\": 5, \"r\": 0.5, \"rot\": 0, \"note\": \"\" } with x, y the rectangle centre","show":{"neighbour":false,"header40":false,"header40_row":8,"header40_col":1,"sensors":true,"sensor_layout":"custom","_sensor_layout":"custom = the sensors of mag.list below (the Magnetometers tab edits them). The older fixed choices still read: wigledmag = the test board's 9 TMAG5273 + 8 MMC5603; plan18 / plan32 = an MMC5603 grid, 3 x 6 or 4 x 8, spread evenly over the 76 x 45 hole field","coupler":false,"plugged":true,"_plugged":"the M.2 card, mini PCIe card or SO-DIMM drawn in its socket; false hides it"},"look":{"mask":"black","silk":"white","finish":"enig","shell":"black","face_mask":"black","leds":"off","screen":true},"_look":"how the 3D view paints things; no effect on the geometry. mask / face_mask: black, white, green, purple, blue, red. finish: enig or hasl. shell: black, white, clear. leds: off, rainbow, rails, probe.","area_budget_mm2":9134,"_area_budget_mm2":"courtyard area of the fitted main-board parts, from docs/V6_area.json via the expansion-port doc"};
 window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","datum":{"x0":115.841532,"y0":28.304321,"note":"x0 = wig left edge, y0 = wig body top edge (corner flats)"},"outline":[[69.85,54.991],[76.1812,54.9912],[76.2265,54.9907],[76.3166,54.9827],[76.4057,54.9668],[76.493,54.943],[76.5779,54.9117],[76.6597,54.873],[76.7378,54.8272],[76.7749,54.8013],[77.0118,54.6454],[78.2967,53.7257],[78.3335,53.6998],[78.4029,53.6425],[78.467,53.5793],[78.5253,53.5106],[78.5773,53.4372],[78.6227,53.3594],[78.6611,53.278],[78.6921,53.1935],[78.7156,53.1066],[78.7314,53.0179],[78.7393,52.9283],[78.7398,52.8832],[78.7398,45.2008],[78.7362,45.0538],[78.7255,44.9072],[78.7075,44.7614],[78.6824,44.6165],[78.6503,44.4731],[78.1944,42.6497],[78.1623,42.5063],[78.1372,42.3615],[78.1192,42.2156],[78.1084,42.069],[78.1048,41.9221],[78.1048,13.4507],[78.1084,13.3038],[78.1192,13.1572],[78.1372,13.0114],[78.1623,12.8666],[78.1944,12.7231],[78.6503,10.8997],[78.6824,10.7563],[78.7075,10.6115],[78.7255,10.4656],[78.7362,10.3191],[78.7398,10.1721],[78.74,2.1082],[78.7395,2.0632],[78.7316,1.9735],[78.7158,1.8849],[78.6923,1.798],[78.6613,1.7135],[78.6229,1.632],[78.5775,1.5543],[78.5255,1.4808],[78.4672,1.4122],[78.4031,1.349],[78.3337,1.2917],[78.2968,1.2658],[77.0021,0.339],[76.775,0.1895],[76.7378,0.1637],[76.6598,0.1179],[76.578,0.0792],[76.4931,0.0479],[76.4058,0.0241],[76.3167,0.0082],[76.2273,0.0003],[76.2,0],[71.2353,0],[71.0884,-0.0036],[70.9418,-0.0144],[70.7959,-0.0324],[70.6511,-0.0574],[70.5077,-0.0896],[65.3796,-1.3716],[65.2702,-1.3784],[65.1656,-1.3455],[65.0798,-1.2771],[64.8195,-0.9436],[64.7833,-0.8826],[64.7707,-0.8128],[64.7691,0.5367],[64.7423,0.6367],[64.6691,0.7098],[64.5668,0.7366],[62.43,0.7366],[62.33,0.7098],[62.2568,0.6366],[62.23,0.532],[62.23,-2.8268],[62.212,-2.9427],[62.1595,-3.0476],[62.0776,-3.1316],[61.7474,-3.3274],[61.646,-3.3861],[61.534,-3.4206],[61.4171,-3.429],[39.37,-3.429],[17.3229,-3.429],[17.206,-3.4206],[17.094,-3.3861],[16.9926,-3.3274],[16.6624,-3.1316],[16.5805,-3.0476],[16.528,-2.9427],[16.51,-2.827],[16.51,0.5366],[16.4832,0.6366],[16.41,0.7098],[16.31,0.7366],[14.1709,0.7366],[14.0709,0.7099],[13.9977,0.6367],[13.9709,0.5367],[13.9693,-0.8128],[13.9567,-0.8826],[13.9205,-0.9436],[13.6602,-1.2771],[13.5744,-1.3455],[13.4698,-1.3784],[13.3604,-1.3716],[8.2323,-0.0896],[8.0889,-0.0574],[7.9441,-0.0323],[7.7982,-0.0144],[7.6516,-0.0036],[7.5047,0],[2.5127,0.0003],[2.5127,0.0003],[2.4233,0.0082],[2.3342,0.0241],[2.2469,0.0479],[2.162,0.0792],[2.0802,0.1179],[2.0022,0.1637],[1.965,0.1895],[1.7379,0.339],[0.4432,1.2658],[0.4063,1.2917],[0.3369,1.349],[0.2728,1.4122],[0.2145,1.4808],[0.1625,1.5543],[0.1171,1.632],[0.0787,1.7135],[0.0477,1.798],[0.0242,1.8849],[0.0084,1.9735],[0.0005,2.0632],[0,2.1082],[0.0002,10.1721],[0.0038,10.3191],[0.0145,10.4656],[0.0325,10.6115],[0.0576,10.7563],[0.0897,10.8997],[0.5456,12.7231],[0.5777,12.8666],[0.6028,13.0114],[0.6208,13.1572],[0.6316,13.3038],[0.6352,13.4507],[0.6352,41.9221],[0.6316,42.069],[0.6208,42.2156],[0.6028,42.3615],[0.5777,42.5063],[0.5456,42.6497],[0.0897,44.4731],[0.0576,44.6165],[0.0325,44.7614],[0.0146,44.9072],[0.0038,45.0538],[0.0002,45.2008],[0.0002,52.8832],[0.0007,52.9283],[0.0086,53.0179],[0.0244,53.1066],[0.0479,53.1935],[0.0789,53.278],[0.1173,53.3594],[0.1627,53.4372],[0.2147,53.5106],[0.273,53.5793],[0.3371,53.6425],[0.4065,53.6998],[0.4433,53.7257],[1.7282,54.6454],[1.9651,54.8013],[2.0022,54.8272],[2.0803,54.873],[2.1621,54.9117],[2.247,54.943],[2.3343,54.9668],[2.4234,54.9827],[2.5135,54.9907],[2.5588,54.9912],[8.89,54.9908]],"cols":[2.5405,5.0805,7.6205,10.1605,12.7005,15.2405,17.7805,20.3205,22.8605,25.4005,27.9405,30.4805,33.0205,35.5605,38.1005,40.6405,43.1805,45.7205,48.2605,50.8005,53.3405,55.8805,58.4205,60.9605,63.5005,66.0405,68.5805,71.1205,73.6605,76.2005],"rows":[3.5557,6.0957,13.7157,16.2557,18.7957,21.3357,23.8757,26.4157,28.9557,31.4957,34.0357,36.5757,39.1157,41.6557,49.2757,51.8157],"mmc":[{"ref":"U9","x":71.12,"y":8.636,"side":"F"},{"ref":"U5","x":24.13,"y":8.636,"side":"F"},{"ref":"U8","x":54.61,"y":46.736,"side":"F"},{"ref":"U2","x":7.62,"y":8.636,"side":"F"},{"ref":"U7","x":54.61,"y":8.636,"side":"F"},{"ref":"U6","x":24.13,"y":46.736,"side":"F"},{"ref":"U10","x":71.12,"y":46.736,"side":"F"},{"ref":"U4","x":7.62,"y":46.736,"side":"F"}],"tmag":[{"ref":"M54","x":39.37,"y":4.826,"side":"B"},{"ref":"M55","x":8.89,"y":50.546,"side":"B"},{"ref":"M59","x":69.85,"y":50.546,"side":"B"},{"ref":"M58","x":2.54,"y":27.686,"side":"B"},{"ref":"M56","x":69.85,"y":4.826,"side":"B"},{"ref":"M53","x":76.2,"y":27.686,"side":"B"},{"ref":"M57","x":39.37,"y":50.546,"side":"B"},{"ref":"M51","x":39.37,"y":27.706,"side":"B"},{"ref":"M52","x":8.89,"y":4.826,"side":"B"}],"footprints":[{"name":"PinHeader_2x35_P1.27_wiig_card","ref":"J2","x":17.78,"y":-0.254,"rot":90,"side":"F","pads_local":[[1.27,2.54],[1.27,3.81],[1.27,5.08],[1.27,6.35],[1.27,7.62],[1.27,8.89],[1.27,10.16],[1.27,11.43],[1.27,12.7],[1.27,13.97],[1.27,15.24],[1.27,16.51],[1.27,17.78],[1.27,19.05],[1.27,20.32],[1.27,22.86],[1.27,24.13],[1.27,25.4],[1.27,26.67],[1.27,27.94],[1.27,29.21],[1.27,30.48],[1.27,31.75],[1.27,33.02],[1.27,34.29],[1.27,35.56],[1.27,36.83],[1.27,38.1],[1.27,39.37],[1.27,40.64],[0,2.54],[0,3.81],[0,5.08],[0,6.35],[0,7.62],[0,8.89],[0,10.16],[0,11.43],[0,12.7],[0,13.97],[0,15.24],[0,16.51],[0,17.78],[0,19.05],[0,20.32],[0,22.86],[0,24.13],[0,25.4],[0,26.67],[0,27.94],[0,29.21],[0,30.48],[0,31.75],[0,33.02],[0,34.29],[0,35.56],[0,36.83],[0,38.1],[0,39.37],[0,40.64],[1.27,41.91],[1.27,43.18],[0,1.27],[0,0],[0,21.59],[0,41.91],[0,43.18],[-2.286,21.59],[1.27,21.59],[1.27,0],[1.27,1.27]]},{"name":"Breadboard_6NonHoles","ref":"J11","x":39.37,"y":27.686,"rot":0,"side":"F","pads_local":null},{"name":"SideConnect_sparserrr_Bottom_tighter","ref":"J3","x":39.37,"y":54.991,"rot":0,"side":"F","pads_local":null},{"name":"fulledge_gap","ref":"J13","x":78.105,"y":27.686,"rot":0,"side":"F","pads_local":null},{"name":"fulledge_gap","ref":"J12","x":0.635,"y":27.686,"rot":180,"side":"B","pads_local":null}],"face":{"source":"V6pile/Wig/Wiig/wiigtop.3mf (Fusion export, 2026-08-19)","w":78.74,"h":58.42,"t":0.71,"csk_depth":0.416,"y0":-3.429,"y1":54.991,"outline":[[0.273,1.412],[0.337,1.349],[0.406,1.292],[0.443,1.266],[1.738,0.339],[1.965,0.19],[2.002,0.164],[2.08,0.118],[2.162,0.079],[2.247,0.048],[2.334,0.024],[2.423,0.008],[2.513,0],[2.54,0],[7.505,0],[7.749,-0.01],[7.992,-0.04],[8.232,-0.089],[13.36,-1.371],[13.407,-1.379],[13.454,-1.38],[13.501,-1.373],[13.546,-1.359],[13.588,-1.338],[13.627,-1.31],[13.66,-1.277],[13.92,-0.943],[13.938,-0.921],[13.951,-0.896],[13.961,-0.869],[13.967,-0.841],[13.969,-0.813],[13.971,1.172],[13.974,1.207],[13.983,1.24],[13.998,1.272],[14.018,1.3],[14.042,1.325],[14.071,1.345],[14.102,1.36],[14.136,1.369],[14.171,1.372],[16.31,1.372],[16.345,1.369],[16.378,1.36],[16.41,1.345],[16.439,1.325],[16.463,1.3],[16.483,1.272],[16.498,1.24],[16.507,1.206],[16.51,1.172],[16.51,-2.827],[16.515,-2.885],[16.528,-2.943],[16.55,-2.997],[16.58,-3.047],[16.618,-3.093],[16.662,-3.131],[16.993,-3.327],[17.067,-3.373],[17.149,-3.406],[17.235,-3.425],[17.323,-3.429],[39.37,-3.429],[61.417,-3.429],[61.505,-3.425],[61.591,-3.406],[61.673,-3.373],[61.747,-3.327],[62.078,-3.131],[62.122,-3.093],[62.159,-3.048],[62.19,-2.997],[62.212,-2.943],[62.225,-2.886],[62.23,-2.827],[62.23,1.172],[62.232,1.203],[62.24,1.234],[62.252,1.263],[62.268,1.289],[62.289,1.313],[62.312,1.334],[62.339,1.35],[62.368,1.362],[62.399,1.369],[62.43,1.372],[64.569,1.372],[64.604,1.369],[64.638,1.36],[64.669,1.345],[64.698,1.325],[64.722,1.3],[64.742,1.272],[64.757,1.24],[64.766,1.207],[64.769,1.172],[64.771,-0.813],[64.773,-0.841],[64.779,-0.869],[64.789,-0.896],[64.802,-0.921],[64.82,-0.943],[65.08,-1.277],[65.113,-1.31],[65.152,-1.338],[65.194,-1.359],[65.239,-1.373],[65.286,-1.38],[65.333,-1.379],[65.38,-1.371],[70.508,-0.089],[70.748,-0.04],[70.991,-0.01],[71.235,0],[76.2,0],[76.227,0],[76.317,0.008],[76.406,0.024],[76.493,0.048],[76.578,0.079],[76.66,0.118],[76.738,0.164],[76.775,0.19],[77.002,0.339],[78.297,1.266],[78.334,1.292],[78.403,1.349],[78.467,1.412],[78.525,1.481],[78.578,1.554],[78.623,1.632],[78.661,1.714],[78.692,1.798],[78.716,1.885],[78.732,1.974],[78.739,2.063],[78.74,2.108],[78.74,10.172],[78.73,10.417],[78.7,10.66],[78.65,10.9],[78.194,12.723],[78.145,12.963],[78.115,13.206],[78.105,13.451],[78.105,41.922],[78.115,42.167],[78.145,42.41],[78.194,42.65],[78.65,44.473],[78.7,44.713],[78.73,44.956],[78.74,45.201],[78.74,52.883],[78.739,52.928],[78.731,53.018],[78.716,53.107],[78.692,53.194],[78.661,53.278],[78.623,53.36],[78.577,53.437],[78.525,53.511],[78.467,53.579],[78.403,53.643],[78.333,53.7],[78.297,53.726],[77.012,54.646],[76.775,54.801],[76.738,54.827],[76.66,54.873],[76.578,54.912],[76.493,54.943],[76.406,54.967],[76.317,54.983],[76.226,54.991],[76.181,54.991],[64.751,54.991],[39.37,54.991],[13.989,54.991],[2.559,54.991],[2.514,54.991],[2.423,54.983],[2.334,54.967],[2.247,54.943],[2.162,54.912],[2.08,54.873],[2.002,54.827],[1.965,54.801],[1.728,54.646],[0.443,53.726],[0.407,53.7],[0.337,53.643],[0.273,53.579],[0.215,53.511],[0.163,53.437],[0.117,53.36],[0.079,53.278],[0.048,53.194],[0.024,53.107],[0.009,53.018],[0.001,52.928],[0,52.883],[0,45.201],[0.01,44.956],[0.04,44.713],[0.09,44.473],[0.546,42.65],[0.595,42.41],[0.625,42.167],[0.635,41.922],[0.635,13.451],[0.625,13.206],[0.595,12.963],[0.546,12.723],[0.09,10.9],[0.04,10.66],[0.01,10.417],[0,10.172],[0,2.108],[0.001,2.063],[0.008,1.974],[0.024,1.885],[0.048,1.798],[0.079,1.714],[0.117,1.632],[0.162,1.554],[0.215,1.481]],"holes":[[17.78,-1.524,0.65,0.65],[19.05,-1.524,0.65,0.65],[20.32,-1.524,0.65,0.65],[21.59,-1.524,0.65,0.65],[22.86,-1.524,0.65,0.65],[24.13,-1.524,0.65,0.65],[25.4,-1.524,0.65,0.65],[26.67,-1.524,0.65,0.65],[27.94,-1.524,0.65,0.65],[29.21,-1.524,0.65,0.65],[30.48,-1.524,0.65,0.65],[31.75,-1.524,0.65,0.65],[33.02,-1.524,0.65,0.65],[34.29,-1.524,0.65,0.65],[35.56,-1.524,0.65,0.65],[36.83,-1.524,0.65,0.65],[38.1,-1.524,0.65,0.65],[39.37,-1.524,0.65,0.65],[40.64,-1.524,0.65,0.65],[41.91,-1.524,0.65,0.65],[43.18,-1.524,0.65,0.65],[44.45,-1.524,0.65,0.65],[45.72,-1.524,0.65,0.65],[46.99,-1.524,0.65,0.65],[48.26,-1.524,0.65,0.65],[49.53,-1.524,0.65,0.65],[50.8,-1.524,0.65,0.65],[52.07,-1.524,0.65,0.65],[53.34,-1.524,0.65,0.65],[54.61,-1.524,0.65,0.65],[55.88,-1.524,0.65,0.65],[57.15,-1.524,0.65,0.65],[58.42,-1.524,0.65,0.65],[59.69,-1.524,0.65,0.65],[60.96,-1.524,0.65,0.65],[17.78,-0.254,0.65,0.65],[19.05,-0.254,0.65,0.65],[20.32,-0.254,0.65,0.65],[21.59,-0.254,0.65,0.65],[22.86,-0.254,0.65,0.65],[24.13,-0.254,0.65,0.65],[25.4,-0.254,0.65,0.65],[26.67,-0.254,0.65,0.65],[27.94,-0.254,0.65,0.65],[29.21,-0.254,0.65,0.65],[30.48,-0.254,0.65,0.65],[31.75,-0.254,0.65,0.65],[33.02,-0.254,0.65,0.65],[34.29,-0.254,0.65,0.65],[35.56,-0.254,0.65,0.65],[36.83,-0.254,0.65,0.65],[38.1,-0.254,0.65,0.65],[39.37,-0.254,0.65,0.65],[40.64,-0.254,0.65,0.65],[41.91,-0.254,0.65,0.65],[43.18,-0.254,0.65,0.65],[44.45,-0.254,0.65,0.65],[45.72,-0.254,0.65,0.65],[46.99,-0.254,0.65,0.65],[48.26,-0.254,0.65,0.65],[49.53,-0.254,0.65,0.65],[50.8,-0.254,0.65,0.65],[52.07,-0.254,0.65,0.65],[53.34,-0.254,0.65,0.65],[54.61,-0.254,0.65,0.65],[55.88,-0.254,0.65,0.65],[57.15,-0.254,0.65,0.65],[58.42,-0.254,0.65,0.65],[59.69,-0.254,0.65,0.65],[60.96,-0.254,0.65,0.65],[2.54,3.556,2.032,1.2],[5.08,3.556,2.032,1.2],[7.62,3.556,2.032,1.2],[10.16,3.556,2.032,1.2],[12.7,3.556,2.032,1.2],[15.24,3.556,2.032,1.2],[17.78,3.556,2.032,1.2],[20.32,3.556,2.032,1.2],[22.86,3.556,2.032,1.2],[25.4,3.556,2.032,1.2],[27.94,3.556,2.032,1.2],[30.48,3.556,2.032,1.2],[33.02,3.556,2.032,1.2],[35.56,3.556,2.032,1.2],[38.1,3.556,2.032,1.2],[40.64,3.556,2.032,1.2],[43.18,3.556,2.032,1.2],[45.72,3.556,2.032,1.2],[48.26,3.556,2.032,1.2],[50.8,3.556,2.032,1.2],[53.34,3.556,2.032,1.2],[55.88,3.556,2.032,1.2],[58.42,3.556,2.032,1.2],[60.96,3.556,2.032,1.2],[63.5,3.556,2.032,1.2],[66.04,3.556,2.032,1.2],[68.58,3.556,2.032,1.2],[71.12,3.556,2.032,1.2],[73.66,3.556,2.032,1.2],[76.2,3.556,2.032,1.2],[2.54,6.096,2.032,1.2],[5.08,6.096,2.032,1.2],[7.62,6.096,2.032,1.2],[10.16,6.096,2.032,1.2],[12.7,6.096,2.032,1.2],[15.24,6.096,2.032,1.2],[17.78,6.096,2.032,1.2],[20.32,6.096,2.032,1.2],[22.86,6.096,2.032,1.2],[25.4,6.096,2.032,1.2],[27.94,6.096,2.032,1.2],[30.48,6.096,2.032,1.2],[33.02,6.096,2.032,1.2],[35.56,6.096,2.032,1.2],[38.1,6.096,2.032,1.2],[40.64,6.096,2.032,1.2],[43.18,6.096,2.032,1.2],[45.72,6.096,2.032,1.2],[48.26,6.096,2.032,1.2],[50.8,6.096,2.032,1.2],[53.34,6.096,2.032,1.2],[55.88,6.096,2.032,1.2],[58.42,6.096,2.032,1.2],[60.96,6.096,2.032,1.2],[63.5,6.096,2.032,1.2],[66.04,6.096,2.032,1.2],[68.58,6.096,2.032,1.2],[71.12,6.096,2.032,1.2],[73.66,6.096,2.032,1.2],[76.2,6.096,2.032,1.2],[2.54,8.636,2.032,1.2],[76.2,8.636,2.032,1.2],[2.54,13.716,2.032,1.2],[5.08,13.716,2.032,1.2],[7.62,13.716,2.032,1.2],[10.16,13.716,2.032,1.2],[12.7,13.716,2.032,1.2],[15.24,13.716,2.032,1.2],[17.78,13.716,2.032,1.2],[20.32,13.716,2.032,1.2],[22.86,13.716,2.032,1.2],[25.4,13.716,2.032,1.2],[27.94,13.716,2.032,1.2],[30.48,13.716,2.032,1.2],[33.02,13.716,2.032,1.2],[35.56,13.716,2.032,1.2],[38.1,13.716,2.032,1.2],[40.64,13.716,2.032,1.2],[43.18,13.716,2.032,1.2],[45.72,13.716,2.032,1.2],[48.26,13.716,2.032,1.2],[50.8,13.716,2.032,1.2],[53.34,13.716,2.032,1.2],[55.88,13.716,2.032,1.2],[58.42,13.716,2.032,1.2],[60.96,13.716,2.032,1.2],[63.5,13.716,2.032,1.2],[66.04,13.716,2.032,1.2],[68.58,13.716,2.032,1.2],[71.12,13.716,2.032,1.2],[73.66,13.716,2.032,1.2],[76.2,13.716,2.032,1.2],[2.54,16.256,2.032,1.2],[5.08,16.256,2.032,1.2],[7.62,16.256,2.032,1.2],[10.16,16.256,2.032,1.2],[12.7,16.256,2.032,1.2],[15.24,16.256,2.032,1.2],[17.78,16.256,2.032,1.2],[20.32,16.256,2.032,1.2],[22.86,16.256,2.032,1.2],[25.4,16.256,2.032,1.2],[27.94,16.256,2.032,1.2],[30.48,16.256,2.032,1.2],[33.02,16.256,2.032,1.2],[35.56,16.256,2.032,1.2],[38.1,16.256,2.032,1.2],[40.64,16.256,2.032,1.2],[43.18,16.256,2.032,1.2],[45.72,16.256,2.032,1.2],[48.26,16.256,2.032,1.2],[50.8,16.256,2.032,1.2],[53.34,16.256,2.032,1.2],[55.88,16.256,2.032,1.2],[58.42,16.256,2.032,1.2],[60.96,16.256,2.032,1.2],[63.5,16.256,2.032,1.2],[66.04,16.256,2.032,1.2],[68.58,16.256,2.032,1.2],[71.12,16.256,2.032,1.2],[73.66,16.256,2.032,1.2],[76.2,16.256,2.032,1.2],[2.54,18.796,2.032,1.2],[5.08,18.796,2.032,1.2],[7.62,18.796,2.032,1.2],[10.16,18.796,2.032,1.2],[12.7,18.796,2.032,1.2],[15.24,18.796,2.032,1.2],[17.78,18.796,2.032,1.2],[20.32,18.796,2.032,1.2],[22.86,18.796,2.032,1.2],[25.4,18.796,2.032,1.2],[27.94,18.796,2.032,1.2],[30.48,18.796,2.032,1.2],[33.02,18.796,2.032,1.2],[35.56,18.796,2.032,1.2],[38.1,18.796,2.032,1.2],[40.64,18.796,2.032,1.2],[43.18,18.796,2.032,1.2],[45.72,18.796,2.032,1.2],[48.26,18.796,2.032,1.2],[50.8,18.796,2.032,1.2],[53.34,18.796,2.032,1.2],[55.88,18.796,2.032,1.2],[58.42,18.796,2.032,1.2],[60.96,18.796,2.032,1.2],[63.5,18.796,2.032,1.2],[66.04,18.796,2.032,1.2],[68.58,18.796,2.032,1.2],[71.12,18.796,2.032,1.2],[73.66,18.796,2.032,1.2],[76.2,18.796,2.032,1.2],[2.54,21.336,2.032,1.2],[5.08,21.336,2.032,1.2],[7.62,21.336,2.032,1.2],[10.16,21.336,2.032,1.2],[12.7,21.336,2.032,1.2],[15.24,21.336,2.032,1.2],[17.78,21.336,2.032,1.2],[20.32,21.336,2.032,1.2],[22.86,21.336,2.032,1.2],[25.4,21.336,2.032,1.2],[27.94,21.336,2.032,1.2],[30.48,21.336,2.032,1.2],[33.02,21.336,2.032,1.2],[35.56,21.336,2.032,1.2],[38.1,21.336,2.032,1.2],[40.64,21.336,2.032,1.2],[43.18,21.336,2.032,1.2],[45.72,21.336,2.032,1.2],[48.26,21.336,2.032,1.2],[50.8,21.336,2.032,1.2],[53.34,21.336,2.032,1.2],[55.88,21.336,2.032,1.2],[58.42,21.336,2.032,1.2],[60.96,21.336,2.032,1.2],[63.5,21.336,2.032,1.2],[66.04,21.336,2.032,1.2],[68.58,21.336,2.032,1.2],[71.12,21.336,2.032,1.2],[73.66,21.336,2.032,1.2],[76.2,21.336,2.032,1.2],[2.54,23.876,2.032,1.2],[5.08,23.876,2.032,1.2],[7.62,23.876,2.032,1.2],[10.16,23.876,2.032,1.2],[12.7,23.876,2.032,1.2],[15.24,23.876,2.032,1.2],[17.78,23.876,2.032,1.2],[20.32,23.876,2.032,1.2],[22.86,23.876,2.032,1.2],[25.4,23.876,2.032,1.2],[27.94,23.876,2.032,1.2],[30.48,23.876,2.032,1.2],[33.02,23.876,2.032,1.2],[35.56,23.876,2.032,1.2],[38.1,23.876,2.032,1.2],[40.64,23.876,2.032,1.2],[43.18,23.876,2.032,1.2],[45.72,23.876,2.032,1.2],[48.26,23.876,2.032,1.2],[50.8,23.876,2.032,1.2],[53.34,23.876,2.032,1.2],[55.88,23.876,2.032,1.2],[58.42,23.876,2.032,1.2],[60.96,23.876,2.032,1.2],[63.5,23.876,2.032,1.2],[66.04,23.876,2.032,1.2],[68.58,23.876,2.032,1.2],[71.12,23.876,2.032,1.2],[73.66,23.876,2.032,1.2],[76.2,23.876,2.032,1.2],[2.54,26.416,2.032,1.2],[5.08,26.416,2.032,1.2],[7.62,26.416,2.032,1.2],[10.16,26.416,2.032,1.2],[12.7,26.416,2.032,1.2],[15.24,26.416,2.032,1.2],[17.78,26.416,2.032,1.2],[20.32,26.416,2.032,1.2],[22.86,26.416,2.032,1.2],[25.4,26.416,2.032,1.2],[27.94,26.416,2.032,1.2],[30.48,26.416,2.032,1.2],[33.02,26.416,2.032,1.2],[35.56,26.416,2.032,1.2],[38.1,26.416,2.032,1.2],[40.64,26.416,2.032,1.2],[43.18,26.416,2.032,1.2],[45.72,26.416,2.032,1.2],[48.26,26.416,2.032,1.2],[50.8,26.416,2.032,1.2],[53.34,26.416,2.032,1.2],[55.88,26.416,2.032,1.2],[58.42,26.416,2.032,1.2],[60.96,26.416,2.032,1.2],[63.5,26.416,2.032,1.2],[66.04,26.416,2.032,1.2],[68.58,26.416,2.032,1.2],[71.12,26.416,2.032,1.2],[73.66,26.416,2.032,1.2],[76.2,26.416,2.032,1.2],[2.54,28.986,2.032,1.2],[5.08,28.986,2.032,1.2],[7.62,28.986,2.032,1.2],[10.16,28.986,2.032,1.2],[12.7,28.986,2.032,1.2],[15.24,28.986,2.032,1.2],[17.78,28.986,2.032,1.2],[20.32,28.986,2.032,1.2],[22.86,28.986,2.032,1.2],[25.4,28.986,2.032,1.2],[27.94,28.986,2.032,1.2],[30.48,28.986,2.032,1.2],[33.02,28.986,2.032,1.2],[35.56,28.986,2.032,1.2],[38.1,28.986,2.032,1.2],[40.64,28.986,2.032,1.2],[43.18,28.986,2.032,1.2],[45.72,28.986,2.032,1.2],[48.26,28.986,2.032,1.2],[50.8,28.986,2.032,1.2],[53.34,28.986,2.032,1.2],[55.88,28.986,2.032,1.2],[58.42,28.986,2.032,1.2],[60.96,28.986,2.032,1.2],[63.5,28.986,2.032,1.2],[66.04,28.986,2.032,1.2],[68.58,28.986,2.032,1.2],[71.12,28.986,2.032,1.2],[73.66,28.986,2.032,1.2],[76.2,28.986,2.032,1.2],[2.54,31.526,2.032,1.2],[5.08,31.526,2.032,1.2],[7.62,31.526,2.032,1.2],[10.16,31.526,2.032,1.2],[12.7,31.526,2.032,1.2],[15.24,31.526,2.032,1.2],[17.78,31.526,2.032,1.2],[20.32,31.526,2.032,1.2],[22.86,31.526,2.032,1.2],[25.4,31.526,2.032,1.2],[27.94,31.526,2.032,1.2],[30.48,31.526,2.032,1.2],[33.02,31.526,2.032,1.2],[35.56,31.526,2.032,1.2],[38.1,31.526,2.032,1.2],[40.64,31.526,2.032,1.2],[43.18,31.526,2.032,1.2],[45.72,31.526,2.032,1.2],[48.26,31.526,2.032,1.2],[50.8,31.526,2.032,1.2],[53.34,31.526,2.032,1.2],[55.88,31.526,2.032,1.2],[58.42,31.526,2.032,1.2],[60.96,31.526,2.032,1.2],[63.5,31.526,2.032,1.2],[66.04,31.526,2.032,1.2],[68.58,31.526,2.032,1.2],[71.12,31.526,2.032,1.2],[73.66,31.526,2.032,1.2],[76.2,31.526,2.032,1.2],[2.54,34.066,2.032,1.2],[5.08,34.066,2.032,1.2],[7.62,34.066,2.032,1.2],[10.16,34.066,2.032,1.2],[12.7,34.066,2.032,1.2],[15.24,34.066,2.032,1.2],[17.78,34.066,2.032,1.2],[20.32,34.066,2.032,1.2],[22.86,34.066,2.032,1.2],[25.4,34.066,2.032,1.2],[27.94,34.066,2.032,1.2],[30.48,34.066,2.032,1.2],[33.02,34.066,2.032,1.2],[35.56,34.066,2.032,1.2],[38.1,34.066,2.032,1.2],[40.64,34.066,2.032,1.2],[43.18,34.066,2.032,1.2],[45.72,34.066,2.032,1.2],[48.26,34.066,2.032,1.2],[50.8,34.066,2.032,1.2],[53.34,34.066,2.032,1.2],[55.88,34.066,2.032,1.2],[58.42,34.066,2.032,1.2],[60.96,34.066,2.032,1.2],[63.5,34.066,2.032,1.2],[66.04,34.066,2.032,1.2],[68.58,34.066,2.032,1.2],[71.12,34.066,2.032,1.2],[73.66,34.066,2.032,1.2],[76.2,34.066,2.032,1.2],[2.54,36.606,2.032,1.2],[5.08,36.606,2.032,1.2],[7.62,36.606,2.032,1.2],[10.16,36.606,2.032,1.2],[12.7,36.606,2.032,1.2],[15.24,36.606,2.032,1.2],[17.78,36.606,2.032,1.2],[20.32,36.606,2.032,1.2],[22.86,36.606,2.032,1.2],[25.4,36.606,2.032,1.2],[27.94,36.606,2.032,1.2],[30.48,36.606,2.032,1.2],[33.02,36.606,2.032,1.2],[35.56,36.606,2.032,1.2],[38.1,36.606,2.032,1.2],[40.64,36.606,2.032,1.2],[43.18,36.606,2.032,1.2],[45.72,36.606,2.032,1.2],[48.26,36.606,2.032,1.2],[50.8,36.606,2.032,1.2],[53.34,36.606,2.032,1.2],[55.88,36.606,2.032,1.2],[58.42,36.606,2.032,1.2],[60.96,36.606,2.032,1.2],[63.5,36.606,2.032,1.2],[66.04,36.606,2.032,1.2],[68.58,36.606,2.032,1.2],[71.12,36.606,2.032,1.2],[73.66,36.606,2.032,1.2],[76.2,36.606,2.032,1.2],[2.54,39.146,2.032,1.2],[5.08,39.146,2.032,1.2],[7.62,39.146,2.032,1.2],[10.16,39.146,2.032,1.2],[12.7,39.146,2.032,1.2],[15.24,39.146,2.032,1.2],[17.78,39.146,2.032,1.2],[20.32,39.146,2.032,1.2],[22.86,39.146,2.032,1.2],[25.4,39.146,2.032,1.2],[27.94,39.146,2.032,1.2],[30.48,39.146,2.032,1.2],[33.02,39.146,2.032,1.2],[35.56,39.146,2.032,1.2],[38.1,39.146,2.032,1.2],[40.64,39.146,2.032,1.2],[43.18,39.146,2.032,1.2],[45.72,39.146,2.032,1.2],[48.26,39.146,2.032,1.2],[50.8,39.146,2.032,1.2],[53.34,39.146,2.032,1.2],[55.88,39.146,2.032,1.2],[58.42,39.146,2.032,1.2],[60.96,39.146,2.032,1.2],[63.5,39.146,2.032,1.2],[66.04,39.146,2.032,1.2],[68.58,39.146,2.032,1.2],[71.12,39.146,2.032,1.2],[73.66,39.146,2.032,1.2],[76.2,39.146,2.032,1.2],[2.54,41.686,2.032,1.2],[5.08,41.686,2.032,1.2],[7.62,41.686,2.032,1.2],[10.16,41.686,2.032,1.2],[12.7,41.686,2.032,1.2],[15.24,41.686,2.032,1.2],[17.78,41.686,2.032,1.2],[20.32,41.686,2.032,1.2],[22.86,41.686,2.032,1.2],[25.4,41.686,2.032,1.2],[27.94,41.686,2.032,1.2],[30.48,41.686,2.032,1.2],[33.02,41.686,2.032,1.2],[35.56,41.686,2.032,1.2],[38.1,41.686,2.032,1.2],[40.64,41.686,2.032,1.2],[43.18,41.686,2.032,1.2],[45.72,41.686,2.032,1.2],[48.26,41.686,2.032,1.2],[50.8,41.686,2.032,1.2],[53.34,41.686,2.032,1.2],[55.88,41.686,2.032,1.2],[58.42,41.686,2.032,1.2],[60.96,41.686,2.032,1.2],[63.5,41.686,2.032,1.2],[66.04,41.686,2.032,1.2],[68.58,41.686,2.032,1.2],[71.12,41.686,2.032,1.2],[73.66,41.686,2.032,1.2],[76.2,41.686,2.032,1.2],[2.54,46.736,2.032,1.2],[76.201,46.736,2.032,1.2],[2.54,49.276,2.032,1.2],[5.08,49.276,2.032,1.2],[7.62,49.276,2.032,1.2],[10.16,49.276,2.032,1.2],[12.7,49.276,2.032,1.2],[15.24,49.276,2.032,1.2],[17.78,49.276,2.032,1.2],[20.32,49.276,2.032,1.2],[22.86,49.276,2.032,1.2],[25.4,49.276,2.032,1.2],[27.94,49.276,2.032,1.2],[30.48,49.276,2.032,1.2],[33.02,49.276,2.032,1.2],[35.56,49.276,2.032,1.2],[38.1,49.276,2.032,1.2],[40.64,49.276,2.032,1.2],[43.18,49.276,2.032,1.2],[45.72,49.276,2.032,1.2],[48.26,49.276,2.032,1.2],[50.8,49.276,2.032,1.2],[53.34,49.276,2.032,1.2],[55.88,49.276,2.032,1.2],[58.42,49.276,2.032,1.2],[60.96,49.276,2.032,1.2],[63.5,49.276,2.032,1.2],[66.04,49.276,2.032,1.2],[68.58,49.276,2.032,1.2],[71.12,49.276,2.032,1.2],[73.66,49.276,2.032,1.2],[76.2,49.276,2.032,1.2],[2.54,51.816,2.032,1.2],[5.08,51.816,2.032,1.2],[7.62,51.816,2.032,1.2],[10.16,51.816,2.032,1.2],[12.7,51.816,2.032,1.2],[15.24,51.816,2.032,1.2],[17.78,51.816,2.032,1.2],[20.32,51.816,2.032,1.2],[22.86,51.816,2.032,1.2],[25.4,51.816,2.032,1.2],[27.94,51.816,2.032,1.2],[30.48,51.816,2.032,1.2],[33.02,51.816,2.032,1.2],[35.56,51.816,2.032,1.2],[38.1,51.816,2.032,1.2],[40.64,51.816,2.032,1.2],[43.18,51.816,2.032,1.2],[45.72,51.816,2.032,1.2],[48.26,51.816,2.032,1.2],[50.8,51.816,2.032,1.2],[53.34,51.816,2.032,1.2],[55.88,51.816,2.032,1.2],[58.42,51.816,2.032,1.2],[60.96,51.816,2.032,1.2],[63.5,51.816,2.032,1.2],[66.04,51.816,2.032,1.2],[68.58,51.816,2.032,1.2],[71.12,51.816,2.032,1.2],[73.66,51.816,2.032,1.2],[76.2,51.816,2.032,1.2]]}};
 </script>
 <script>
@@ -10789,7 +10828,17 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
   var SILK = { white: '#f2f2ee', black: '#111113', yellow: '#e8d44d' };
   var FINISH = { enig: ['#d9b441', '#8a6a1a'], hasl: ['#cfd3d8', '#7c8187'] };
   var SHELL = { black: 0x1c1d20, white: 0xe4e2dc, clear: 0xc9d2da };
-  var BG = { console: '#27272b', deep: '#1b1b1e', studio: 'studio', paper: '#dfe3e6', white: '#ffffff', clear: null };
+  var BG = { console: '#27272b', deep: '#1b1b1e', studio: 'tex', slate: 'tex', blueprint: 'tex', dusk: 'tex', rainbow: 'tex', paper: '#dfe3e6', white: '#ffffff', custom: 'custom', clear: null };
+  // Lighting rigs: a main light (shadows, turned by Light from), a second light from the far side, a back light low behind,
+  // and the sky. Picking one copies these into the view settings, where each can then be changed.
+  var RIGS = {
+    studio: { label: 'Studio', keyColor: '#ffffff', keyLevel: 1, fillColor: '#ffffff', fillLevel: 1, rimColor: '#ffffff', rimLevel: 0, skyColor: '#ffffff', ambLevel: 1 },
+    bench: { label: 'Bench lamp', keyColor: '#ffdcae', keyLevel: 1.25, fillColor: '#b9ccff', fillLevel: 0.4, rimColor: '#ffffff', rimLevel: 0, skyColor: '#ffe9cf', ambLevel: 0.5 },
+    soft: { label: 'Overcast', keyColor: '#ffffff', keyLevel: 0.4, fillColor: '#ffffff', fillLevel: 1.4, rimColor: '#ffffff', rimLevel: 0, skyColor: '#f4f7ff', ambLevel: 1.6 },
+    three: { label: 'Three lights', keyColor: '#fff1dc', keyLevel: 1.05, fillColor: '#d9e5ff', fillLevel: 1.1, rimColor: '#ffffff', rimLevel: 1.3, skyColor: '#ffffff', ambLevel: 0.75 },
+    neon: { label: 'Pink and cyan', keyColor: '#fc0289', keyLevel: 0.95, fillColor: '#00fced', fillLevel: 2.2, rimColor: '#7647f2', rimLevel: 1.6, skyColor: '#55557a', ambLevel: 0.45 },
+    dusk: { label: 'Dusk', keyColor: '#ffab66', keyLevel: 1.2, fillColor: '#5b7cff', fillLevel: 1.2, rimColor: '#ff5aa0', rimLevel: 0.8, skyColor: '#9aa6d8', ambLevel: 0.55 }
+  };
   var RAINBOW = ['#f03060', '#f12fbf', '#c728f8', '#7647f2', '#5174ed', '#50beeb', '#68f4d7', '#70f899', '#7af85c', '#c0f848', '#e8cb40', '#e86828'];      // Jumperless's own, from the site theme
   function hex(c) { return typeof c === 'number' ? c : parseInt(String(c).replace('#', ''), 16); }
   function canvas(w, h) { var c = document.createElement('canvas'); c.width = Math.max(2, Math.round(w)); c.height = Math.max(2, Math.round(h)); return c; }
@@ -10823,16 +10872,93 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     var sc = L.key.shadow.camera; sc.left = -140; sc.right = 140; sc.top = 140; sc.bottom = -140; sc.near = 10; sc.far = 600;
     scene.add(L.key); scene.add(L.key.target);
     L.fill = new T.DirectionalLight(0xffffff, 0.3); L.fill.position.set(160, 60, -120); scene.add(L.fill);
+    L.rim = new T.DirectionalLight(0xffffff, 0); scene.add(L.rim); scene.add(L.rim.target);
     R.env = makeEnv(renderer);
     R.ground = new T.Group(); scene.add(R.ground);
   }
 
-  function studioTexture() {
-    if (R.bgTex) return R.bgTex;
-    var c = canvas(16, 512), g = c.getContext('2d'), gr = g.createLinearGradient(0, 0, 0, 512);
-    gr.addColorStop(0, '#4a4b52'); gr.addColorStop(0.55, '#2c2c31'); gr.addColorStop(1, '#17171a');
-    g.fillStyle = gr; g.fillRect(0, 0, 16, 512);
-    R.bgTex = new T.CanvasTexture(c); R.bgTex.encoding = T.sRGBEncoding; return R.bgTex;
+  // a small repeatable random source, so a texture is the same picture every time
+  function rng(seed) { var a = seed >>> 0; return function () { a |= 0; a = a + 0x6D2B79F5 | 0; var t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  var texCache = {};
+  // backdrops that are a picture behind everything (they do not turn with the view)
+  function bgTexture(kind) {
+    if (texCache['bg:' + kind]) return texCache['bg:' + kind];
+    var c = canvas(512, 512), g = c.getContext('2d'), gr, i;
+    if (kind === 'blueprint') {
+      g.fillStyle = '#0f2f5e'; g.fillRect(0, 0, 512, 512);
+      for (i = 0; i <= 512; i += 16) { g.strokeStyle = i % 64 === 0 ? 'rgba(170,205,255,0.30)' : 'rgba(170,205,255,0.11)'; g.lineWidth = 1; g.beginPath(); g.moveTo(i + 0.5, 0); g.lineTo(i + 0.5, 512); g.moveTo(0, i + 0.5); g.lineTo(512, i + 0.5); g.stroke(); }
+    } else if (kind === 'dusk') {
+      gr = g.createLinearGradient(0, 0, 0, 512); gr.addColorStop(0, '#15123a'); gr.addColorStop(0.42, '#4a2466'); gr.addColorStop(0.66, '#c95f55'); gr.addColorStop(0.74, '#f0a35a'); gr.addColorStop(0.8, '#3a2338'); gr.addColorStop(1, '#161019');
+      g.fillStyle = gr; g.fillRect(0, 0, 512, 512);
+    } else if (kind === 'rainbow') {
+      g.fillStyle = '#19191c'; g.fillRect(0, 0, 512, 512);
+      gr = g.createLinearGradient(0, 0, 512, 0); RAINBOW.forEach(function (col, j) { gr.addColorStop(j / (RAINBOW.length - 1), col); });
+      g.fillStyle = gr; g.globalAlpha = 0.55; g.fillRect(0, 300, 512, 6); g.globalAlpha = 1;
+      var fade = g.createLinearGradient(0, 120, 0, 512); fade.addColorStop(0, 'rgba(25,25,28,0)'); fade.addColorStop(0.36, 'rgba(25,25,28,0)'); fade.addColorStop(1, 'rgba(25,25,28,1)');
+      g.fillStyle = gr; g.globalAlpha = 0.16; g.fillRect(0, 150, 512, 362); g.globalAlpha = 1; g.fillStyle = fade; g.fillRect(0, 306, 512, 206);
+    } else if (kind === 'slate') {
+      gr = g.createRadialGradient(256, 230, 20, 256, 256, 380); gr.addColorStop(0, '#454852'); gr.addColorStop(0.6, '#26272c'); gr.addColorStop(1, '#101013');
+      g.fillStyle = gr; g.fillRect(0, 0, 512, 512);
+    } else {                                       // studio: a soft fade, lighter at the top
+      gr = g.createLinearGradient(0, 0, 0, 512); gr.addColorStop(0, '#4a4b52'); gr.addColorStop(0.55, '#2c2c31'); gr.addColorStop(1, '#17171a');
+      g.fillStyle = gr; g.fillRect(0, 0, 512, 512);
+    }
+    var t = new T.CanvasTexture(c); t.encoding = T.sRGBEncoding; return (texCache['bg:' + kind] = t);
+  }
+  function tile(c, mm, total) { var t = tex(c); t.wrapS = t.wrapT = T.RepeatWrapping; t.repeat.set(total / mm, total / mm); return t; }
+  // surfaces to stand the unit on. mat: a cutting mat, 10 mm squares. wood: a bench top. steel: a brushed plate.
+  function groundTexture(kind) {
+    if (texCache['g:' + kind]) return texCache['g:' + kind];
+    var c = canvas(512, 512), g = c.getContext('2d'), r = rng(kind.length * 977 + 5), i, y;
+    if (kind === 'mat') {
+      g.fillStyle = '#1f4a3c'; g.fillRect(0, 0, 512, 512);
+      for (i = 0; i < 1600; i++) { g.fillStyle = 'rgba(' + (r() > 0.5 ? '255,255,255' : '0,0,0') + ',' + (0.02 + r() * 0.03) + ')'; g.fillRect(r() * 512, r() * 512, 1 + r() * 2, 1 + r() * 2); }
+      for (i = 0; i <= 5; i++) { var q = i * 102.4; g.strokeStyle = i === 0 || i === 5 ? 'rgba(235,245,225,0.75)' : 'rgba(235,245,225,0.36)'; g.lineWidth = i === 0 || i === 5 ? 3 : 1.4; g.beginPath(); g.moveTo(q, 0); g.lineTo(q, 512); g.moveTo(0, q); g.lineTo(512, q); g.stroke(); }
+      return (texCache['g:' + kind] = tile(c, 50, 700));
+    }
+    if (kind === 'wood') {
+      g.fillStyle = '#8b6a45'; g.fillRect(0, 0, 512, 512);
+      for (i = 0; i < 520; i++) { y = r() * 512; var a = 2 + r() * 5, ph = r() * 6.3, wl = 140 + r() * 260; g.strokeStyle = 'rgba(' + (r() > 0.35 ? '58,36,16' : '214,176,128') + ',' + (0.05 + r() * 0.13) + ')'; g.lineWidth = 0.6 + r() * 1.8; g.beginPath();
+        var cyc = 1 + Math.floor(wl / 140); for (var x = 0; x <= 512; x += 16) { var yy = y + Math.sin(x / 512 * 6.2832 * cyc + ph) * a; if (x === 0) g.moveTo(x, yy); else g.lineTo(x, yy); } g.stroke(); }
+      [0, 256].forEach(function (s) { g.fillStyle = 'rgba(30,18,8,0.55)'; g.fillRect(0, s, 512, 2); g.fillStyle = 'rgba(255,235,200,0.10)'; g.fillRect(0, s + 2, 512, 1.5); });
+      return (texCache['g:' + kind] = tile(c, 180, 700));
+    }
+    g.fillStyle = '#9da2a8'; g.fillRect(0, 0, 512, 512);                                                    // steel: fine lines one way
+    for (i = 0; i < 2600; i++) { y = r() * 512; g.strokeStyle = 'rgba(' + (r() > 0.5 ? '255,255,255' : '40,44,50') + ',' + (0.03 + r() * 0.09) + ')'; g.lineWidth = 0.5 + r(); g.beginPath(); g.moveTo(0, y); g.lineTo(512, y); g.stroke(); }
+    return (texCache['g:' + kind] = tile(c, 120, 700));
+  }
+  // What a board's face is made of, repeated in millimetres (an extruded board's texture coordinates are its plan in mm).
+  // fine: the slight orange peel of soldermask. weave: the glass cloth showing through. traces: tracks and vias under the mask.
+  function boardTexture(kind, maskHex) {
+    var key = 'b:' + kind + ':' + (kind === 'traces' ? maskHex : ''); if (texCache[key]) return texCache[key];
+    var c = canvas(512, 512), g = c.getContext('2d'), r = rng(kind.length * 131 + 7), i, out = {};
+    if (kind === 'fine') {
+      var im = g.createImageData(512, 512); for (i = 0; i < im.data.length; i += 4) { var v = 110 + r() * 60; im.data[i] = im.data[i + 1] = im.data[i + 2] = v; im.data[i + 3] = 255; } g.putImageData(im, 0, 0);
+      out.bump = tile(c, 9, 1); out.bumpScale = 0.012; out.rough = 0.6;
+    } else if (kind === 'weave') {
+      g.fillStyle = '#808080'; g.fillRect(0, 0, 512, 512);
+      for (i = 0; i < 16; i++) for (var j = 0; j < 16; j++) { var over = (i + j) % 2 === 0; g.fillStyle = over ? '#b4b4b4' : '#5c5c5c'; g.fillRect(i * 32 + 2, j * 32 + 2, 28, 28); g.fillStyle = over ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.25)'; if (over) g.fillRect(i * 32 + 2, j * 32 + 12, 28, 8); else g.fillRect(i * 32 + 12, j * 32 + 2, 8, 28); }
+      out.bump = tile(c, 6.4, 1); out.bumpScale = 0.02; out.rough = 0.66;
+    } else {                                           // traces: 51.2 mm of made-up routing at 10 px a mm, drawn so the tile joins itself
+      var base = new T.Color(maskHex), cu = new T.Color('#c07a3a'), lit = base.clone().lerp(cu, 0.2).lerp(new T.Color('#ffffff'), 0.05), c2 = canvas(512, 512), g2 = c2.getContext('2d');
+      g.fillStyle = '#' + base.getHexString(); g.fillRect(0, 0, 512, 512); g2.fillStyle = '#6a6a6a'; g2.fillRect(0, 0, 512, 512);
+      var draw = function (fn) { for (var ox = -512; ox <= 512; ox += 512) for (var oy = -512; oy <= 512; oy += 512) { [g, g2].forEach(function (cx, n) { cx.save(); cx.translate(ox, oy); cx.strokeStyle = cx.fillStyle = n ? '#b8b8b8' : '#' + lit.getHexString(); fn(cx, n); cx.restore(); }); } };
+      for (i = 0; i < 64; i++) (function () {
+        var x = r() * 512, y = r() * 512, w = [2, 2, 2.5, 3, 4, 6][Math.floor(r() * 6)], pts = [[x, y]], dir = Math.floor(r() * 8), n = 2 + Math.floor(r() * 4), k;
+        for (k = 0; k < n; k++) { var len = 20 + r() * 130, a = dir * Math.PI / 4; x += Math.cos(a) * len; y += Math.sin(a) * len; pts.push([x, y]); dir = (dir + (r() > 0.5 ? 1 : 7)) % 8; }
+        draw(function (cx) { cx.lineWidth = w; cx.lineJoin = 'round'; cx.lineCap = 'round'; cx.beginPath(); pts.forEach(function (q, m) { if (m) cx.lineTo(q[0], q[1]); else cx.moveTo(q[0], q[1]); }); cx.stroke();
+          [pts[0], pts[pts.length - 1]].forEach(function (q) { cx.beginPath(); cx.arc(q[0], q[1], 3.2, 0, 6.3); cx.fill(); }); });
+      })();
+      for (i = 0; i < 5; i++) (function () { var x = r() * 512, y = r() * 512, w = 30 + r() * 70, h = 30 + r() * 60; draw(function (cx) { cx.globalAlpha = 0.85; cx.fillRect(x, y, w, h); cx.globalAlpha = 1; }); })();
+      out.map = tile(c, 51.2, 1); out.bump = tile(c2, 51.2, 1); out.bump.encoding = T.LinearEncoding; out.bumpScale = 0.02; out.rough = 0.52;
+    }
+    if (out.bump) out.bump.encoding = T.LinearEncoding;
+    return (texCache[key] = out);
+  }
+  function shellTexture() {                         // a printed shell: 0.24 mm layers up the walls
+    if (texCache.shell) return texCache.shell;
+    var c = canvas(8, 64), g = c.getContext('2d'), gr = g.createLinearGradient(0, 0, 0, 64); gr.addColorStop(0, '#404040'); gr.addColorStop(0.5, '#c8c8c8'); gr.addColorStop(1, '#404040'); g.fillStyle = gr; g.fillRect(0, 0, 8, 64);
+    var t = tex(c); t.encoding = T.LinearEncoding; t.wrapS = t.wrapT = T.RepeatWrapping; t.repeat.set(0.1, 1 / 0.24); return (texCache.shell = t);
   }
 
   // S: { mode, bg, ground, shadows, exposure, light, sun } ; box: { x0, x1, y0, y1, zb } the unit's extent in plan and its underside
@@ -10842,18 +10968,29 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     r.toneMappingExposure = real ? (S.exposure || 1) : 1;
     sc.environment = real ? R.env : null;
     var k = S.light != null ? S.light : 1;
-    L.hemi.intensity = (real ? 0.55 : 1.0) * k; L.key.intensity = (real ? 1.9 : 1.0) * k; L.fill.intensity = (real ? 0.45 : 0.45) * k;
+    // the rig colours the lights only in the Real drawing; the flat ones stay white so a layer's colour is its colour
+    var num = function (v, d) { return v != null && !isNaN(+v) ? +v : d; }, col = function (light, c) { light.color.set(real && c ? c : '#ffffff').convertSRGBToLinear(); };
+    col(L.key, S.keyColor); col(L.fill, S.fillColor); col(L.rim, S.rimColor); col(L.hemi, S.skyColor);
+    L.hemi.intensity = (real ? 0.55 * num(S.ambLevel, 1) : 1.0) * k; L.key.intensity = (real ? 1.9 * num(S.keyLevel, 1) : 1.0) * k; L.fill.intensity = 0.45 * (real ? num(S.fillLevel, 1) : 1) * k;
+    L.rim.intensity = real ? 1.1 * num(S.rimLevel, 0) * k : 0;
     var az = ((S.sun != null ? S.sun : 215) * Math.PI) / 180, cx = (box.x0 + box.x1) / 2, cy = (box.y0 + box.y1) / 2;
     L.key.position.set(cx + Math.sin(az) * 120, 190, cy + Math.cos(az) * 120); L.key.target.position.set(cx, 0, cy); L.key.target.updateMatrixWorld();
     L.key.castShadow = real && S.shadows !== false;
+    L.rim.position.set(cx - Math.sin(az) * 150, 55, cy - Math.cos(az) * 150); L.rim.target.position.set(cx, 0, cy); L.rim.target.updateMatrixWorld();
     var bg = BG[S.bg] !== undefined ? BG[S.bg] : BG.console;
     if (S.mode === 'lines' && S.bg !== 'clear' && S.bg !== 'paper' && S.bg !== 'white') bg = BG.deep;
     if (bg === null) { sc.background = null; r.setClearColor(0x000000, 0); }
-    else if (bg === 'studio') { sc.background = studioTexture(); }
+    else if (bg === 'tex') { sc.background = bgTexture(S.bg); }
+    else if (bg === 'custom') { sc.background = new T.Color(S.bgColor || '#27272b').convertSRGBToLinear(); }
     else { sc.background = new T.Color(bg); }
     // the bench: a shadow catcher, or a 0.1 inch grid that lines up with the breadboard's holes
     var G = R.ground; while (G.children.length) { var c = G.children.pop(); if (c.geometry) c.geometry.dispose(); }
     var z = box.zb - (S.ground === 'grid' ? 0.02 : 0.02), light = S.bg === 'paper' || S.bg === 'white';
+    if ((S.ground === 'mat' || S.ground === 'wood' || S.ground === 'steel') && S.mode !== 'lines') {
+      // a real surface under the unit: 700 mm square, its picture repeated, taking the shadow itself
+      var gt = groundTexture(S.ground), gm = new T.Mesh(new T.PlaneGeometry(700, 700), new T.MeshStandardMaterial({ map: gt, roughness: S.ground === 'steel' ? 0.38 : S.ground === 'wood' ? 0.62 : 0.92, metalness: S.ground === 'steel' ? 0.75 : 0, envMapIntensity: S.ground === 'steel' ? 0.6 : 0.25 }));
+      gm.rotation.x = -Math.PI / 2; gm.position.set(cx, z, cy); gm.receiveShadow = true; G.add(gm);
+    }
     if (S.ground === 'shadow' && real && S.shadows !== false) {
       var pl = new T.Mesh(new T.PlaneGeometry(900, 900), new T.ShadowMaterial({ opacity: light ? 0.22 : 0.42 })); pl.rotation.x = -Math.PI / 2; pl.position.set(cx, z, cy); pl.receiveShadow = true; G.add(pl);
     } else if (S.ground === 'grid') {
@@ -10875,9 +11012,10 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
   // a board: [faces, cut edge]. real = soldermask gloss over the faces and bare FR4 on the edge; otherwise the layer's flat colour
   function board(mode, layerColor, look) {
     if (mode !== 'real') return plain(hex(layerColor), { rough: 0.75 });
-    var mk = MASK[look.mask] || MASK.black, key = 'b:' + mk + ':' + (look.plated ? look.finish || 'enig' : '');
+    var mk = MASK[look.mask] || MASK.black, tx = look.texture && look.texture !== 'smooth' ? look.texture : '', key = 'b:' + mk + ':' + (look.plated ? look.finish || 'enig' : '') + ':' + tx;
     return std(key, function () {
       var face = new T.MeshPhysicalMaterial({ color: hex(mk), roughness: 0.5, metalness: 0.0, clearcoat: 0.2, clearcoatRoughness: 0.4, envMapIntensity: 0.35 });
+      if (tx) { var bt = boardTexture(tx, mk); if (bt.map) { face.map = bt.map; face.color.set(0xffffff); } face.bumpMap = bt.bump; face.bumpScale = bt.bumpScale; face.roughness = bt.rough; }
       // the cut edge: bare FR4. On the face board (plated: true) it is mostly hole wall, so it is drawn as plating instead.
       var edge = look.plated ? new T.MeshStandardMaterial({ color: hex((FINISH[look.finish] || FINISH.enig)[1]), roughness: 0.5, metalness: 0.7, envMapIntensity: 0.5 }) : new T.MeshStandardMaterial({ color: look.mask === 'white' ? 0xa89f7c : 0x5f5738, roughness: 0.9, metalness: 0 });
       return [face, edge];
@@ -10886,7 +11024,12 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
   function shell(mode, look) {
     var k = look.shell || 'black';
     if (mode !== 'real') return plain(0x26282c, { rough: 0.9 });
-    return std('s:' + k, function () { return k === 'clear' ? new T.MeshPhysicalMaterial({ color: SHELL.clear, roughness: 0.25, metalness: 0, transparent: true, opacity: 0.42, depthWrite: false, clearcoat: 0.4 }) : new T.MeshStandardMaterial({ color: SHELL[k] || SHELL.black, roughness: 0.62, metalness: 0.02 }); });
+    var printed = look.shellTex === 'printed';
+    return std('s:' + k + (printed ? ':p' : ''), function () {
+      var m = k === 'clear' ? new T.MeshPhysicalMaterial({ color: SHELL.clear, roughness: 0.25, metalness: 0, transparent: true, opacity: 0.42, depthWrite: false, clearcoat: 0.4 }) : new T.MeshStandardMaterial({ color: SHELL[k] || SHELL.black, roughness: 0.62, metalness: 0.02 });
+      if (printed) { m.bumpMap = shellTexture(); m.bumpScale = 0.03; m.roughness = k === 'clear' ? 0.4 : 0.72; }
+      return m;
+    });
   }
   function part(mode, color, o) {
     o = o || {};
@@ -11000,10 +11143,20 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
 
   // ---------- after the scene is built: dress it for the chosen way of looking ----------
   var xray = {}, hidden = null, lineMats = {};
+  // the frame's boards drawn part see-through (Board opacity): a copy of each material, kept per opacity
+  var fadeCache = {};
+  function faded(m, op) {
+    if (Array.isArray(m)) return m.map(function (x) { return faded(x, op); });
+    var key = m.uuid + ':' + op;
+    if (!fadeCache[key]) { var c = m.clone(); c.transparent = true; c.opacity = (m.opacity != null ? m.opacity : 1) * op; c.depthWrite = op > 0.85; fadeCache[key] = c; }
+    return fadeCache[key];
+  }
   function finish(groups, S) {
     var mode = S.mode;
     if (!hidden) hidden = new T.MeshBasicMaterial({ visible: false });
+    var bo = S.boardOpacity != null ? Math.max(0.05, Math.min(1, Math.round(S.boardOpacity * 20) / 20)) : 1, fadeBoards = bo < 0.999 && (mode === 'real' || mode === 'tech');
     groups.forEach(function (grp) { grp.traverse(function (o) {
+      if (fadeBoards && o.isMesh && o.userData.isBoard) o.material = faded(o.material, bo);
       if (o.isLineSegments && o.userData.edge) { o.visible = mode !== 'real' || S.edges === true; if (mode === 'lines') { var lc = o.userData.lineColor || 0xf3f3f5; o.material = lineMats[lc] || (lineMats[lc] = new T.LineBasicMaterial({ color: lc })); } return; }
       if (!o.isMesh) return;
       if (o.userData.decal) { o.visible = mode === 'real'; return; }
@@ -11037,7 +11190,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
   }
 
   root.V6Render = { setup: setup, apply: apply, plain: plain, board: board, shell: shell, part: part, faceDecal: faceDecal, padsDecal: padsDecal, shellDecal: shellDecal, boardDecal: boardDecal, screenMesh: screenMesh, finish: finish, linear: linear, refreshMaterials: refreshMaterials, png: png,
-    MASK: MASK, SILK: SILK, FINISH: FINISH, RAINBOW: RAINBOW, BG: BG, clearCache: function () { R.cache = {}; } };
+    MASK: MASK, SILK: SILK, FINISH: FINISH, RAINBOW: RAINBOW, BG: BG, RIGS: RIGS, clearCache: function () { R.cache = {}; } };
 })(typeof self !== 'undefined' ? self : this);
 
 </script>
@@ -11383,7 +11536,10 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
   var P = boot.params;
   var R = null;
   var ui = { browse: { q: '', group: 'all', mine: false }, sel: null, vsel: null, editOutline: false, sketch: false, sketchOpacity: 0.6, explode: 0, clipAxis: 'off', clipPos: 0.5, envelopes: false, planes: true, hidden: {}, hideShell: false,
-    render: { mode: 'real', bg: 'console', ground: 'shadow', shadows: true, exposure: 1, light: 1, sun: 215, fov: 30, rotate: false, edges: false, decals: true, wheel: 'pan' },
+    render: { mode: 'real', bg: 'console', bgColor: '#27272b', ground: 'shadow', shadows: true, exposure: 1, light: 1, sun: 215, fov: 30, rotate: false, edges: false, decals: true, wheel: 'pan',
+      boardOpacity: 1, texture: 'smooth', shellTex: 'smooth', rig: 'studio', keyColor: '#ffffff', keyLevel: 1, fillColor: '#ffffff', fillLevel: 1, rimColor: '#ffffff', rimLevel: 0, skyColor: '#ffffff', ambLevel: 1 },
+    // the view controls that sit in the 3D view itself: where the strip is docked (bottom, top, left, right, off) and what is in it
+    viewbar: { dock: 'bottom', items: ['explode', 'opacity', 'shell', 'mode'], fold: false },
     layout: { dock: { 'panel-design': 'left', 'panel-checks': 'right' }, w: { left: 348, right: 338 }, h: 300, ratio: { left: 0.55, right: 0.5, bottom: 0.5 }, solo: false, text: 'm' }, fold: { 'Look': true, 'Probe dock': true, 'Saved designs': true, 'Readings': true }, panels: {},
     tab: 'outline', mag: { sel: null, parts: true, ref: null } };       // tab: which of the two the page shows, 'outline' or 'mag' (the Magnetometers tab, src/magtab.js)
   if (boot.ui) Object.keys(ui).forEach(function (k) { var v = boot.ui[k]; if (v === undefined) return; if (ui[k] && typeof ui[k] === 'object') { for (var j in v) ui[k][j] = v[j]; } else ui[k] = v; });
@@ -11456,6 +11612,8 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     return true;
   }
   var lastMode = null;
+  // the design's look plus the view's surface choices, for the materials
+  function lookNow(extra) { var o = {}, k; for (k in P.look) o[k] = P.look[k]; o.texture = ui.render.texture; o.shellTex = ui.render.shellTex; for (k in (extra || {})) o[k] = extra[k]; return o; }
   function applyRender() {
     if (!renderer || !R) return;
     var pl = R.planes, wide = P.show.neighbour ? pl.pitch : 0;
@@ -11463,6 +11621,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     if (camera.fov !== ui.render.fov) { camera.fov = ui.render.fov || 30; camera.updateProjectionMatrix(); }
     if (lastMode !== ui.render.mode) { lastMode = ui.render.mode; Rn.refreshMaterials(scene); }
     view.setAttribute('data-bg', ui.render.bg);
+    view.setAttribute('data-ground', ui.render.mode === 'lines' ? '' : ui.render.ground);
   }
   function resize() {
     if (!renderer) return;
@@ -11554,7 +11713,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     var mode = ui.render.mode, real = mode === 'real';
     if (p.type === 'bb_shell') {
       if (!ui.hideShell) {
-        bodies(Rn.shell(mode, P.look));
+        bodies(Rn.shell(mode, lookNow()));
         if (!R.wig.face) { if (real) grp.add(Rn.shellDecal(R.wig, P.look, p.z1 + 0.012)); else grp.add(holesMesh(0, 0, p.z1 + 0.02, 0xa67c2e)); }
         grp.traverse(function (o) { o.userData.lineColor = 0x8c8c98; });
       }
@@ -11568,14 +11727,14 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
             var fm = extrude([{ outer: b0.pts, holes: holes }], b0.z0, b0.z1, null, false); fm.geometry.userData.keep = true; geoCache[key] = fm.geometry;
           }
           var mk = Rn.MASK[P.look.face_mask] || Rn.MASK.black;
-          var face = new T.Mesh(geoCache[key], real ? Rn.board(mode, mk, { mask: P.look.face_mask, plated: true, finish: P.look.finish }) : mat(0xc9a43a, { metal: 0.6, rough: 0.4 }));
+          var face = new T.Mesh(geoCache[key], real ? Rn.board(mode, mk, lookNow({ mask: P.look.face_mask, plated: true })) : mat(0xc9a43a, { metal: 0.6, rough: 0.4 }));
           face.userData.lineColor = 0xd9b441; grp.add(face);
           if (real) grp.add(Rn.faceDecal(fc, P.look, b0.z1 + 0.012));
           var ol = new T.LineSegments(new T.EdgesGeometry(new T.ExtrudeGeometry(new T.Shape(b0.pts.map(function (q) { return new T.Vector2(q[0], -q[1]); })), { depth: 0.001, bevelEnabled: false }).rotateX(-Math.PI / 2).translate(0, b0.z1, 0), 30), lineMat); ol.userData.edge = true; face.add(ol); face.userData.hasEdges = true;
         } else { bodies(mat(0xc9a43a, { metal: 0.6, rough: 0.4 })); grp.add(holesMesh(0, 0, p.z1 + 0.02, 0x1a1a1a)); }
       }
     } else if (p.type === 'wig_pcb') {
-      bodies(real ? Rn.board(mode, '#15201a', P.look) : mat(0x15201a, { rough: 0.6 }));
+      bodies(real ? Rn.board(mode, '#15201a', lookNow()) : mat(0x15201a, { rough: 0.6 }));
       if (real && R.wig.card_holes && R.wig.card_holes.length) grp.add(Rn.padsDecal(R.wig.card_holes, P.look, p.z1 + 0.012));
       grp.traverse(function (o) { o.userData.lineColor = 0x70f899; });
     } else if (p.type === 'probe') {
@@ -11636,9 +11795,10 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     R.layers.forEach(function (L, i) {
       if (ui.hidden[L.id] || !L.shape.length) return;
       var lc = Exp.LAYER_COLORS[i % Exp.LAYER_COLORS.length];
-      var m = extrude(L.shape, L.z0, L.z1, Rn.board(ui.render.mode, lc, P.look));
+      var m = extrude(L.shape, L.z0, L.z1, Rn.board(ui.render.mode, lc, lookNow()));
       m.position.y = i * ui.explode; m.userData.layerId = L.id; m.userData.lineColor = parseInt(lc.slice(1), 16); m.children.forEach(function (ch) { ch.userData.lineColor = m.userData.lineColor; });
       if (ui.render.mode === 'real' && ui.render.decals !== false && !(drag && drag.moved)) { var dc = Rn.boardDecal(L, R.parts, { x0: R.planes.x0 - 2, x1: R.planes.x1 + 2, y0: R.planes.yt - 2, y1: R.planes.yb + 2 }, P.look); if (dc) m.add(dc); }
+      m.traverse(function (x) { if (x.isMesh) x.userData.isBoard = true; });      // Board opacity fades these
       unit.add(m);
     });
     R.parts.forEach(function (p) {
@@ -11883,9 +12043,81 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     return st.set === false ? 'kept whole (your choice)' : 'whole';
   }
 
+  // ---------- view controls: one list. Each is shown in the panel's View section, or pinned into the strip in the 3D view ----------
+  var VIEW_ID = { explode: 'c-ex', opacity: 'c-bop', shell: 'c-hs', bg: 'c-bg', ground: 'c-ground', light: 'c-light', sun: 'c-sun', exposure: 'c-exp', shadows: 'c-shadow', decals: 'c-decals', edges: 'c-edges', fov: 'c-fov', wheel: 'c-wheel', rotate: 'c-rot', clip: 'c-clip', clipPos: 'c-clipp', env: 'c-env' };
+  function rset(k, v, sceneToo, redraw) { ui.render[k] = v; applyRender(); if (sceneToo) buildScene(); saveView(); if (redraw) renderControls(); }
+  function viewItems() {
+    var rs = ui.render, real = rs.mode === 'real';
+    function sel(k, opts, o) { o = o || {}; return function (id) { var x = el('select', { id: id, onchange: function (e) { var v = e.target.value; if (o.set) o.set(v); else rset(k, isNaN(+v) || v === '' ? v : +v, o.scene, o.redraw); } }, opts.map(function (q) { return el('option', { value: q[0], text: q[1] }); })); x.value = String(o.get ? o.get() : rs[k]); return x; }; }
+    function range(k, min, max, step, o) { o = o || {}; return function (id) { return el('input', { type: 'range', id: id, min: min, max: max, step: step, value: o.get ? o.get() : (rs[k] != null ? rs[k] : o.def), oninput: function (e) { var v = parseFloat(e.target.value); if (o.set) o.set(v); else rset(k, v, o.scene); } }); }; }
+    function chk(k, o) { o = o || {}; return function (id) { var x = el('input', { type: 'checkbox', id: id, onchange: function (e) { if (o.set) o.set(e.target.checked); else rset(k, e.target.checked, o.scene); } }); x.checked = !!(o.get ? o.get() : rs[k]); return x; }; }
+    function colour(k) { return function (id) { return el('input', { type: 'color', id: id, value: rs[k] || '#ffffff', oninput: function (e) { rset(k, e.target.value); } }); }; }
+    var items = [
+      { k: 'mode', label: 'Drawn as', make: function () { return el('span', { class: 'seg', role: 'group' }, [['real', 'Real'], ['tech', 'Flat'], ['xray', 'X-ray'], ['lines', 'Lines']].map(function (o) { return el('button', { type: 'button', 'aria-pressed': String(rs.mode === o[0]), text: o[1], onclick: function () { rset('mode', o[0], true, true); } }); })); } },
+      { k: 'explode', label: 'Explode', make: range(null, 0, 14, 0.5, { get: function () { return ui.explode; }, set: function (v) { ui.explode = v; buildScene(); saveView(); } }) },
+      { k: 'opacity', label: 'Board opacity', make: range('boardOpacity', 0.1, 1, 0.05, { def: 1, scene: true }) },
+      { k: 'shell', label: 'Hide the breadboard shell', short: 'Hide shell', check: true, make: chk(null, { get: function () { return ui.hideShell; }, set: function (v) { ui.hideShell = v; buildScene(); saveView(); } }) },
+      { k: 'bg', label: 'Backdrop', make: sel('bg', [['console', 'Console grey'], ['deep', 'Dark'], ['studio', 'Studio fade'], ['slate', 'Slate, lit in the middle'], ['blueprint', 'Blueprint'], ['dusk', 'Dusk'], ['rainbow', 'Rainbow line'], ['paper', 'Paper'], ['white', 'White'], ['custom', 'A colour of your own'], ['clear', 'None (clear PNG)']], { redraw: true }) },
+      { k: 'bgColor', label: 'Backdrop colour', short: 'Colour', when: function () { return rs.bg === 'custom'; }, make: colour('bgColor') },
+      { k: 'ground', label: 'Bench', make: sel('ground', [['shadow', 'Shadow only'], ['grid', '0.1 inch grid'], ['mat', 'Cutting mat'], ['wood', 'Wooden bench'], ['steel', 'Brushed steel'], ['none', 'Nothing']]) },
+      { k: 'rig', label: 'Lighting', real: true, make: sel('rig', Object.keys(Rn.RIGS).map(function (r) { return [r, Rn.RIGS[r].label]; }), { set: function (v) { var g = Rn.RIGS[v]; rs.rig = v; for (var j in g) if (j !== 'label') rs[j] = g[j]; applyRender(); saveView(); renderControls(); } }) },
+      { k: 'light', label: 'Light level', make: range('light', 0.3, 2, 0.05) },
+      { k: 'sun', label: 'Light from', real: true, make: range('sun', 0, 360, 5) },
+      { k: 'keyColor', label: 'Main light colour', short: 'Main light', real: true, make: colour('keyColor') },
+      { k: 'fillLevel', label: 'Second light', real: true, make: range('fillLevel', 0, 3, 0.05, { def: 1 }) },
+      { k: 'fillColor', label: 'Second light colour', short: '2nd colour', real: true, make: colour('fillColor') },
+      { k: 'rimLevel', label: 'Back light', real: true, make: range('rimLevel', 0, 3, 0.05, { def: 0 }) },
+      { k: 'rimColor', label: 'Back light colour', short: 'Back colour', real: true, make: colour('rimColor') },
+      { k: 'ambLevel', label: 'Sky light', real: true, make: range('ambLevel', 0, 2.5, 0.05, { def: 1 }) },
+      { k: 'skyColor', label: 'Sky colour', real: true, make: colour('skyColor') },
+      { k: 'texture', label: 'Board surface', real: true, make: sel('texture', [['smooth', 'Smooth'], ['fine', 'Soldermask grain'], ['weave', 'Glass weave'], ['traces', 'Tracks under the mask']], { scene: true }) },
+      { k: 'shellTex', label: 'Shell surface', real: true, make: sel('shellTex', [['smooth', 'Moulded'], ['printed', 'Printed layers']], { scene: true }) },
+      { k: 'shadows', label: 'Shadows', check: true, real: true, make: chk('shadows') },
+      { k: 'exposure', label: 'Exposure', real: true, make: range('exposure', 0.4, 2, 0.05) },
+      { k: 'decals', label: 'Part outlines printed on the boards', short: 'Outlines', check: true, real: true, make: chk('decals', { scene: true }) },
+      { k: 'edges', label: 'Draw edges', short: 'Edges', check: true, real: true, make: chk('edges', { scene: true }) },
+      { k: 'fov', label: 'Lens', make: sel('fov', [[12, 'Flat (12 deg)'], [30, 'Normal (30 deg)'], [50, 'Wide (50 deg)']]) },
+      { k: 'wheel', label: 'Scrolling', make: sel('wheel', [['pan', 'Moves the view (pinch zooms)'], ['zoom', 'Zooms (mouse wheel)']]) },
+      { k: 'rotate', label: 'Turn slowly', short: 'Turn', check: true, make: chk('rotate') },
+      { k: 'clip', label: 'Section cut', make: sel(null, [['off', 'off'], ['x', 'across (x)'], ['y', 'down the board (y)'], ['z', 'by height (z)']], { get: function () { return ui.clipAxis; }, set: function (v) { ui.clipAxis = v; applyClip(); saveView(); } }) },
+      { k: 'clipPos', label: 'Cut position', short: 'Cut at', make: range(null, 0, 1, 0.005, { get: function () { return ui.clipPos; }, set: function (v) { ui.clipPos = v; applyClip(); } }) },
+      { k: 'env', label: 'Show pocket envelopes', short: 'Pockets', check: true, make: chk(null, { get: function () { return ui.envelopes; }, set: function (v) { ui.envelopes = v; buildScene(); saveView(); } }) }
+    ];
+    return items.filter(function (it) { return !(it.real && !real) && !(it.when && !it.when()); });
+  }
+  function inView(k) { return ui.viewbar.dock !== 'off' && ui.viewbar.items.indexOf(k) >= 0; }
+  function togglePin(k, keepMenu) {
+    var vb = ui.viewbar, i = vb.items.indexOf(k);
+    if (vb.dock === 'off') { vb.dock = 'bottom'; if (i < 0) vb.items.push(k); }
+    else if (i >= 0) vb.items.splice(i, 1); else vb.items.push(k);
+    saveView(); renderControls();
+    if (keepMenu) { var m = document.querySelector('#viewstrip .vs-add'); if (m) m.open = true; }
+  }
+  function renderViewbar() {
+    var box = $('viewstrip'); if (!box) return;
+    var vb = ui.viewbar, all = viewItems(), byK = {};
+    all.forEach(function (it) { byK[it.k] = it; });
+    box.innerHTML = ''; box.setAttribute('data-dock', vb.dock); box.classList.toggle('folded', !!vb.fold);
+    box.hidden = vb.dock === 'off' || ui.tab === 'mag';
+    if (box.hidden) return;
+    var cells = el('div', { class: 'vs-items' });
+    if (!vb.fold) vb.items.forEach(function (k) {
+      var it = byK[k]; if (!it) return;
+      cells.appendChild(el('div', { class: 'vcell' + (it.check ? ' chk' : ''), 'data-k': k }, [el('label', { for: 'v-' + k, text: it.short || it.label }), it.make('v-' + k)]));
+    });
+    var menu = el('details', { class: 'menu vs-add' }, [el('summary', { text: '+', title: 'choose what is in the view', 'aria-label': 'choose which view controls are in the 3D view' }),
+      el('div', { class: 'pop' }, [el('div', { class: 'hint', text: 'In the 3D view:' })].concat(all.map(function (it) { var cb = el('input', { type: 'checkbox', id: 'vp-' + it.k, onchange: function () { togglePin(it.k, true); } }); cb.checked = vb.items.indexOf(it.k) >= 0; return el('label', { class: 'vp', for: 'vp-' + it.k }, [cb, el('span', { text: it.label })]); })))]);
+    var docks = ['bottom', 'top', 'left', 'right'].map(function (d) { return el('button', { type: 'button', class: 'vdk', 'data-d': d, 'aria-pressed': String(vb.dock === d), title: 'dock at the ' + d + ' of the view', 'aria-label': 'dock the view controls at the ' + d + ' of the view', onclick: function () { vb.dock = d; saveView(); renderControls(); } }); });
+    var fold = el('button', { type: 'button', class: 'vfold', id: 'vs-fold', text: vb.fold ? 'View' : '–', title: vb.fold ? 'show the view controls' : 'fold the view controls away', 'aria-label': vb.fold ? 'show the view controls' : 'fold the view controls away', onclick: function () { vb.fold = !vb.fold; saveView(); renderViewbar(); } });
+    var off = el('button', { type: 'button', class: 'vfold', id: 'vs-off', text: '×', title: 'put them all back in the View section', 'aria-label': 'put the view controls back in the View section', onclick: function () { vb.dock = 'off'; saveView(); renderControls(); } });
+    box.appendChild(cells);
+    box.appendChild(el('div', { class: 'vs-tools' }, vb.fold ? [fold] : [menu].concat(docks, [fold, off])));
+  }
+
   function renderControls() {
     var root = $('controls'), c = root, keepScroll = root.scrollTop, nsec = 0;
     root.innerHTML = '';
+    renderViewbar();
     function sect(title) {
       var shut = !!ui.fold[title], body = el('div', { class: 'secbody' });
       var h = el('h2', {}, [el('button', { type: 'button', class: 'sech', 'aria-expanded': String(!shut), text: title, onclick: function () { ui.fold[title] = !ui.fold[title]; saveView(); renderControls(); } })]);
@@ -12128,34 +12360,15 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     }
 
     c = sect('View');
-    var rs = ui.render;
-    c.appendChild(viewRow('Drawn as', el('span', { class: 'seg', role: 'group' }, [['real', 'Real'], ['tech', 'Flat'], ['xray', 'X-ray'], ['lines', 'Lines']].map(function (o) { return el('button', { type: 'button', 'aria-pressed': String(rs.mode === o[0]), text: o[1], onclick: function () { vset('mode', o[0], true); renderControls(); } }); }))));
-    function vsel(id, k, opts, scene) { var x = el('select', { id: id, onchange: function (e) { var v = e.target.value; vset(k, isNaN(+v) || v === '' ? v : +v, scene); } }, opts.map(function (o) { return el('option', { value: o[0], text: o[1] }); })); x.value = String(rs[k]); return x; }
-    function vrange(id, k, min, max, step) { return el('input', { type: 'range', id: id, min: min, max: max, step: step, value: rs[k], oninput: function (e) { vset(k, parseFloat(e.target.value)); } }); }
-    function vchk(id, label, k, scene) { var x = el('input', { type: 'checkbox', id: id, onchange: function (e) { vset(k, e.target.checked, scene); } }); x.checked = !!rs[k]; return el('div', { class: 'row' }, [el('label', { for: id, text: label }), x]); }
-    c.appendChild(viewRow('Backdrop', vsel('c-bg', 'bg', [['console', 'Console grey'], ['deep', 'Dark'], ['studio', 'Studio fade'], ['paper', 'Paper'], ['white', 'White'], ['clear', 'None (clear PNG)']]), 'c-bg'));
-    c.appendChild(viewRow('Bench', vsel('c-ground', 'ground', [['shadow', 'Shadow only'], ['grid', '0.1 inch grid'], ['none', 'Nothing']]), 'c-ground'));
-    c.appendChild(viewRow('Scrolling', vsel('c-wheel', 'wheel', [['pan', 'Moves the view (pinch zooms)'], ['zoom', 'Zooms (mouse wheel)']]), 'c-wheel'));
-    c.appendChild(viewRow('Lens', vsel('c-fov', 'fov', [[12, 'Flat (12 deg)'], [30, 'Normal (30 deg)'], [50, 'Wide (50 deg)']]), 'c-fov'));
-    if (rs.mode === 'real') {
-      c.appendChild(vchk('c-shadow', 'Shadows', 'shadows'));
-      c.appendChild(viewRow('Exposure', vrange('c-exp', 'exposure', 0.4, 2, 0.05), 'c-exp'));
-      c.appendChild(viewRow('Light from', vrange('c-sun', 'sun', 0, 360, 5), 'c-sun'));
-      c.appendChild(vchk('c-decals', 'Part outlines printed on the boards', 'decals', true));
-      c.appendChild(vchk('c-edges', 'Draw edges', 'edges', true));
-    }
-    c.appendChild(viewRow('Light level', vrange('c-light', 'light', 0.3, 2, 0.05), 'c-light'));
-    c.appendChild(vchk('c-rot', 'Turn slowly', 'rotate'));
+    var vdock = el('select', { id: 'c-vdock', onchange: function (e) { ui.viewbar.dock = e.target.value; saveView(); renderControls(); } }, [['bottom', 'along the bottom'], ['top', 'along the top'], ['left', 'down the left'], ['right', 'down the right'], ['off', 'nowhere: all of them here']].map(function (o) { return el('option', { value: o[0], text: o[1] }); })); vdock.value = ui.viewbar.dock;
+    c.appendChild(row('Controls in the 3D view', vdock, '', 'c-vdock'));
+    viewItems().forEach(function (it) {
+      var id = VIEW_ID[it.k] || 'c-' + it.k, there = inView(it.k);
+      var pin = el('button', { type: 'button', class: 'pin', 'data-k': it.k, 'aria-pressed': String(there), text: there ? 'in view' : 'pin', title: there ? 'bring it back here' : 'put it in the 3D view', 'aria-label': there ? 'bring ' + it.label + ' back to this list' : 'put ' + it.label + ' in the 3D view', onclick: function () { togglePin(it.k); } });
+      if (there) c.appendChild(el('div', { class: 'row pinned' }, [el('span', { class: 'hint', text: it.label }), pin]));
+      else c.appendChild(el('div', { class: 'row' }, [el('label', { for: id, text: it.label }), el('span', { class: 'ctl' }, [it.make(id), pin])]));
+    });
     c.appendChild(el('div', { class: 'row' }, [el('span', { class: 'hint', text: 'Save the picture as a PNG:' }), el('span', {}, [el('button', { type: 'button', text: 'As shown', onclick: function () { savePng(1); } }), ' ', el('button', { type: 'button', text: '2x', onclick: function () { savePng(2); } })])]));
-    var ex = el('input', { type: 'range', min: 0, max: 14, step: 0.5, value: ui.explode, id: 'c-ex', oninput: function (e) { ui.explode = parseFloat(e.target.value); buildScene(); saveView(); } });
-    c.appendChild(row('Explode', ex, '', 'c-ex'));
-    var cs = el('select', { id: 'c-clip', onchange: function (e) { ui.clipAxis = e.target.value; applyClip(); } }, [['off', 'off'], ['x', 'across (x)'], ['y', 'down the board (y)'], ['z', 'by height (z)']].map(function (o) { return el('option', { value: o[0], text: o[1] }); })); cs.value = ui.clipAxis;
-    c.appendChild(row('Section cut', cs, '', 'c-clip'));
-    c.appendChild(row('Cut position', el('input', { type: 'range', min: 0, max: 1, step: 0.005, value: ui.clipPos, id: 'c-clipp', oninput: function (e) { ui.clipPos = parseFloat(e.target.value); applyClip(); } }), '', 'c-clipp'));
-    var hs = el('input', { type: 'checkbox', id: 'c-hs', onchange: function (e) { ui.hideShell = e.target.checked; buildScene(); } }); hs.checked = ui.hideShell;
-    c.appendChild(el('div', { class: 'row' }, [el('label', { for: 'c-hs', text: 'Hide the breadboard shell' }), hs]));
-    var en = el('input', { type: 'checkbox', id: 'c-env', onchange: function (e) { ui.envelopes = e.target.checked; buildScene(); } }); en.checked = ui.envelopes;
-    c.appendChild(el('div', { class: 'row' }, [el('label', { for: 'c-env', text: 'Show pocket envelopes' }), en]));
     c.appendChild(check('c-sens', 'Show the magnetometers', P.show.sensors, function (v) { P.show.sensors = v; }));
     c.appendChild(el('div', { class: 'row' }, [el('span', { class: 'hint', text: R.wig.sensors.list.length + ' of them. Where they sit and how well that places the probe:' }), el('button', { type: 'button', text: 'Magnetometers tab', onclick: function () { setTab('mag'); } })]));
     c = sect('Look');
