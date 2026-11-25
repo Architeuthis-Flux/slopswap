@@ -2,7 +2,7 @@
 // What two devices and the account must come to, case by case. No network, nothing installed.
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
-const { merge, sig } = createRequire(import.meta.url)('../../../V6/notebook-sync.js');
+const { merge, sig, same } = createRequire(import.meta.url)('../../../V6/notebook-sync.js');
 
 const page = (t, text, s) => ({ t, ...(s === undefined ? {} : { s }), copper: 'v5', keys: { 'v6ce.v4': text } });
 const names = (o) => Object.keys(o).sort();
@@ -62,8 +62,33 @@ assert.deepEqual(names(m.remote.pages), ['A']); assert.equal(m.push, true);
 m = run({ pages: { A: page(1, 'a', 1) } }, { pages: { A: page(1, 'a'), C: page(3, 'c') }, gone: {} });
 assert.deepEqual(names(m.pages), ['A', 'C']); assert.deepEqual(m.took, ['C']); assert.equal(m.push, false);
 
-// the outline tool's own time stamp is not a change; its design is
-const st = (t, w) => ({ t: 1, copper: 'v5', keys: { 'v6mech.state': JSON.stringify({ params: { w }, cam: [1], t }) } });
-assert.equal(sig(st(111, 3)), sig(st(222, 3))); assert.notEqual(sig(st(111, 3)), sig(st(111, 4)));
+// looking is not changing: the outline's time stamp, its camera and panels, and which example the routing lab has
+// open are no part of a page's design; the design is
+const st = (v, w, cam, s) => ({ t: v, ...(s === undefined ? {} : { s }), copper: 'v5',
+  keys: { 'v6mech.state': JSON.stringify({ params: { w }, ui: { dock: cam }, cam: [cam], t: cam * 7 }), 'lab.ui.v1:/V6/x.html': '{"selected":' + cam + '}' } });
+assert.equal(sig(st(1, 3, 1)), sig(st(1, 3, 2))); assert.notEqual(sig(st(1, 3, 1)), sig(st(1, 4, 1)));
+
+// so a device that only looked (the same version, another camera) sends nothing and keeps its own view
+m = run({ pages: { A: st(5, 3, 2, 5) } }, { pages: { A: st(5, 3, 1) }, gone: {} });
+assert.equal(m.push, false); assert.deepEqual(m.took, []); assert.equal(JSON.parse(m.pages.A.keys['v6mech.state']).cam[0], 2);
+
+// and a page that really changed takes its view along
+m = run({ pages: { A: st(9, 4, 2, 5) } }, { pages: { A: st(5, 3, 1) }, gone: {} });
+assert.equal(m.push, true); assert.equal(JSON.parse(m.remote.pages.A.keys['v6mech.state']).cam[0], 2);
+
+// a tool never opened on a page is no opinion: a new device that has only seen the outline does not get a copy of
+// a page whose outline is the same, and it takes the account's page, which knows the cost explorer too
+const two = (t, outline, cost, s) => ({ t, ...(s === undefined ? {} : { s }), copper: 'v5', keys: { 'v6mech.state': JSON.stringify({ params: outline }), 'v6ce.v4': cost } });
+m = run({ pages: { 'Page 1': two(50, { w: 1 }, null) } }, { pages: { 'Page 1': two(7, { w: 1 }, 'priced') }, gone: {} });
+assert.deepEqual(m.kept, []); assert.equal(m.pages['Page 1'].keys['v6ce.v4'], 'priced'); assert.equal(m.push, false);
+assert.deepEqual(m.took, ['Page 1']);                       // so the open tools are given what came down, and cannot send the page back without it
+assert.equal(m.pages['Page 1'].s, 7);
+// each knows a tool the other does not: the two are put together, and that goes up as a new version
+const lab = (t, outline, ui, s) => ({ t, ...(s === undefined ? {} : { s }), copper: 'v5', keys: { 'v6mech.state': outline, 'v6ce.v4': ui } });
+m = run({ pages: { A: lab(50, null, 'priced') } }, { pages: { A: lab(7, JSON.stringify({ params: { w: 2 } }), null) }, gone: {} });
+assert.deepEqual([m.kept, m.took], [[], ['A']]); assert.equal(m.push, true);
+assert.deepEqual(m.remote.pages.A.keys, { 'v6ce.v4': 'priced', 'v6mech.state': JSON.stringify({ params: { w: 2 } }) });
+assert.deepEqual(m.pages.A.keys, m.remote.pages.A.keys);
+assert.equal(same(two(1, { w: 1 }, null), two(2, { w: 1 }, 'priced')), true); assert.equal(same(two(1, { w: 1 }, 'a'), two(2, { w: 1 }, 'b')), false);
 
 console.log('notebook merge: ok');

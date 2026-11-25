@@ -13,18 +13,30 @@
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
 
-  // What a page holds, as one text, for telling whether it changed. The outline tool stamps its state with the
-  // time of every save: that stamp is not a change.
-  function sig(page) {
+  // What a page's design is, tool by tool, for telling whether it changed. Looking is not changing: where the 3D
+  // view stands, how the panels are laid out, which example is open in the routing lab and the time the outline
+  // stamps on every save travel with a page but are no part of this. (Otherwise a device that only opens the
+  // notebook would send a "new" version, and the other devices would reload for it.)
+  function design(page) {
     const keys = {};
     for (const k of Object.keys((page && page.keys) || {}).sort()) {
       let v = page.keys[k];
+      if (k.indexOf('lab.ui.') === 0) continue;
       if (k === 'v6mech.state' && typeof v === 'string') {
-        try { const o = JSON.parse(v); delete o.t; v = JSON.stringify(o); } catch (e) { /* not JSON: compared as it is */ }
+        try { v = JSON.stringify(JSON.parse(v).params); } catch (e) { /* not JSON: compared as it is */ }
       }
       keys[k] = v == null ? null : v;
     }
-    return JSON.stringify([(page && page.copper) || null, keys]);
+    return keys;
+  }
+  function sig(page) { return JSON.stringify([(page && page.copper) || null, design(page)]); }
+  // Two versions of a page say the same thing: the same copper, and for every tool the same design, or one of the
+  // two has never opened that tool on this page (which is no opinion, not a different one).
+  function same(a, b) {
+    if (((a && a.copper) || null) !== ((b && b.copper) || null)) return false;
+    const x = design(a), y = design(b);
+    for (const k of new Set(Object.keys(x).concat(Object.keys(y)))) if (x[k] != null && y[k] != null && x[k] !== y[k]) return false;
+    return true;
   }
 
   // The account's form of a notebook, in one fixed order, so that two of them can be compared as text.
@@ -49,43 +61,58 @@
   // `remote` (each with s = t); whether `remote` differs from what the account has and must be sent; the names
   // taken from the account; [name, copy name] for each page both had changed (the account's keeps the name, this
   // device's is kept as the copy); and the names dropped here because they were deleted elsewhere.
+  // A page that is the same version on both sides is left alone on both: this device keeps its own view of it and
+  // the account is not sent one, so that looking at a page never makes a device write.
   function merge(local, remote, stamp, now) {
     const lp = (local && local.pages) || {}, lg = (local && local.gone) || {};
     const rp = (remote && remote.pages) || {}, gone = Object.assign({}, remote && remote.gone);
-    const pages = {}, took = [], kept = [], dropped = [];
-    const agreed = (p) => Object.assign({}, p, { s: p.t });
+    const pages = {}, account = {}, took = [], kept = [], dropped = [];
+    const agreed = (p, t) => Object.assign({}, p, { t: t === undefined ? p.t : t, s: t === undefined ? p.t : t });
     const free = (base) => { let n = base, i = 2; while (pages[n] || lp[n] || rp[n]) n = base + ' ' + i++; return n; };
 
     for (const name of new Set(Object.keys(lp).concat(Object.keys(rp)))) {
       const l = lp[name], r = rp[name];
       if (l && r) {
         const here = l.t !== l.s, there = r.t !== l.s;
-        if (!there) pages[name] = agreed(l);                          // unchanged there: ours stands (and goes up if it changed)
-        else if (!here || sig(l) === sig(r)) {                        // changed there only, or both to the same thing
-          pages[name] = agreed(r);
-          if (sig(l) !== sig(r)) took.push(name);
-        } else {                                                      // both changed: the account's keeps the name, ours is kept beside it
+        if (!here && !there) { pages[name] = agreed(l); account[name] = r; }             // the same version: each keeps its own view of it
+        else if (here && !there) { pages[name] = agreed(l); account[name] = l; }         // changed here only: ours goes up
+        else if (!here) { pages[name] = agreed(r); account[name] = r; took.push(name); } // changed there only: theirs comes down
+        else if (same(l, r)) {
+          // Both, to the same thing. Where one has a tool's state and the other has never opened that tool on this
+          // page, the two are put together: what this device lacked comes down, and what the account lacked goes up
+          // as a new version. Where both have it, this device keeps its own view.
+          const keys = Object.assign({}, l.keys);
+          let fromThere = false, fromHere = false;
+          for (const k of new Set(Object.keys(l.keys || {}).concat(Object.keys(r.keys || {})))) {
+            const a = (l.keys || {})[k], b = (r.keys || {})[k];
+            if (a == null && b != null) { keys[k] = b; fromThere = true; } else if (a != null && b == null) fromHere = true;
+          }
+          const both = Object.assign({}, l, { keys: keys });
+          if (fromHere) { pages[name] = agreed(both); account[name] = both; }
+          else { pages[name] = agreed(both, r.t); account[name] = r; }
+          if (fromThere) took.push(name);
+        } else {                                                                         // both changed: the account's keeps the name, ours is kept beside it
           const as = free(name + ' (this device ' + stamp + ')');
-          pages[name] = agreed(r); pages[as] = agreed(l);
+          pages[name] = agreed(r); account[name] = r; pages[as] = agreed(l); account[as] = l;
           took.push(name); kept.push([name, as]);
         }
       } else if (l) {
         // Not in the account. Deleted elsewhere and untouched here: it goes. New here, changed here since, or
         // simply missing there: it stays and goes up.
         if (gone[name] && l.s != null && l.t === l.s) dropped.push(name);
-        else pages[name] = agreed(l);
+        else { pages[name] = agreed(l); account[name] = l; }
       } else {
         // Not on this device. Deleted here while the account still has the version that was deleted: it goes
         // there too. Otherwise it is new, or was changed there after the delete: it comes down.
         const d = lg[name];
         if (d && d.s === r.t) gone[name] = { t: now };
-        else { pages[name] = agreed(r); took.push(name); }
+        else { pages[name] = agreed(r); account[name] = r; took.push(name); }
       }
     }
-    for (const name of Object.keys(pages)) delete gone[name];        // a name in use is not a deleted one
-    const next = canon({ pages: pages, gone: gone });
+    for (const name of Object.keys(account)) delete gone[name];      // a name in use is not a deleted one
+    const next = canon({ pages: account, gone: gone });
     return { pages: pages, remote: next, push: JSON.stringify(next) !== JSON.stringify(canon(remote)), took: took, kept: kept, dropped: dropped };
   }
 
-  return { sig: sig, canon: canon, merge: merge };
+  return { sig: sig, same: same, canon: canon, merge: merge };
 });
