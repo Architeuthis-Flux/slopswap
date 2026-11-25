@@ -1,0 +1,12 @@
+{
+	"name": "slopswap-notebook",
+	"main": "src/index.js",
+	"compatibility_date": "2026-09-29",
+	// Reachable only on the page's own hostname: no workers.dev address, no preview addresses.
+	"workers_dev": false,
+	"preview_urls": false,
+	"routes": [{ "pattern": "slopswap.org/api/notebook", "zone_name": "slopswap.org" }],
+	"observability": { "enabled": true },
+	// The database was made once with `wrangler d1 create slopswap-notebook` (2026-11-25); this is its id.
+	"d1_databases": [{ "binding": "DB", "database_name": "slopswap-notebook", "database_id": "e65a5500-25d4-49e4-9aa4-68c6a0076cd7" }]
+}

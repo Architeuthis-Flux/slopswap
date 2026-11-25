@@ -55,6 +55,7 @@ body { display: flex; flex-direction: column; padding-top: 3px; overflow: hidden
   <span class="group" id="pages">
     <label class="eyebrow" for="page">page</label>
     <select id="page" title="a notebook page is a whole design: what every tool was set to when you left it. Picking another page puts this one away as it is and opens that one in every tab."></select>
+    <button type="button" id="nb-sync" class="quiet"></button>
     <button type="button" id="pg-copy" title="a second page that starts as a copy of this one">Copy as</button>
     <button type="button" id="pg-blank" title="a new page with every tool at its built-in design">Blank</button>
     <button type="button" id="pg-rename" class="quiet">Rename</button>
@@ -62,6 +63,7 @@ body { display: flex; flex-direction: column; padding-top: 3px; overflow: hidden
     <button type="button" id="nb-export" class="quiet" title="every page of the notebook as one file, to keep or to open in another browser">Export</button>
     <button type="button" id="nb-import" class="quiet" title="add the pages of an exported notebook file to this one">Import</button>
     <input type="file" id="nb-file" accept=".json,application/json" hidden>
+    <button type="button" id="nb-sync-off" class="quiet" hidden title="forget the key on this device. Its pages stay here and the account keeps its own.">Stop sync</button>
   </span>
   <span class="group" id="ask" hidden>
     <label class="eyebrow" for="ask-name" id="ask-what"></label>
@@ -72,11 +74,13 @@ body { display: flex; flex-direction: column; padding-top: 3px; overflow: hidden
   <span id="said" role="status"></span>
 </header>
 <main id="frames"></main>
+<script src="notebook-sync.js"></script>
 <script>
 (() => {
   'use strict';
   const $ = (id) => document.getElementById(id);
-  const NB = 'v6nb.v1';
+  const NB = 'v6nb.v1', KEY = 'v6nb.key', API = '../api/notebook';
+  const S = self.NotebookSync;                       // how this device's pages and the account's become one set
 
   // The tools. Each keeps its working state in this browser under names of its own (keys); a notebook page is a
   // copy of those values, taken when the page is put away and written back when it is opened. Nothing in a tool
@@ -107,10 +111,12 @@ body { display: flex; flex-direction: column; padding-top: 3px; overflow: hidden
   const put = (k, v) => { try { if (!store) return false; if (v == null) store.removeItem(k); else store.setItem(k, v); return true; } catch (e) { return false; } };
   const say = (words) => { $('said').textContent = words; };
 
-  // nb: { pages: { name: { t, keys: { key: value or null }, copper } }, current, tab, copper }
+  // nb: { pages: { name: { t, s, keys: { key: value or null }, copper } }, gone: { name: { s } }, current, tab, copper, linked }
+  // t and s are for the account (V6/notebook-sync.js says how): t names the page's version, s the version the account
+  // had when this device last agreed with it. gone holds the pages deleted here that the account still has.
   // The page named by current is the one the tools hold now: its truth is the tools' own keys, and its entry here
   // is brought up to date when it is put away. Every other page's truth is its entry.
-  let nb = { pages: {}, current: null, tab: 'outline', copper: COPPER[0].id, linked: true };
+  let nb = { pages: {}, gone: {}, current: null, tab: 'outline', copper: COPPER[0].id, linked: true };
   const keep = () => put(NB, JSON.stringify(nb));
   const snapshot = () => ({ t: Date.now(), copper: nb.copper, keys: Object.fromEntries(KEYS.map((k) => [k, get(k)])) });
   const names = () => Object.keys(nb.pages);
@@ -119,7 +125,12 @@ body { display: flex; flex-direction: column; padding-top: 3px; overflow: hidden
     t: Number(p && p.t) || 0,
     copper: COPPER.some((c) => c.id === (p && p.copper)) ? p.copper : COPPER[0].id,
     keys: Object.fromEntries(KEYS.map((k) => { const v = p && p.keys && p.keys[k]; return [k, typeof v === 'string' ? v : null]; })),
+    ...(p && typeof p.s === 'number' ? { s: p.s } : {}),
   });
+  // a page from a file or from the account: the same, and whatever it says of having been synced is not this device's
+  // ponytail: only the tools this copy of the page knows are kept, so a device running an older copy of the page would
+  // drop a newer tool's state from a page it changes. Keep unknown keys too if tools are ever added while devices lag.
+  const strange = (p) => { const c = clean(p); delete c.s; return c; };
   const cleanName = (s) => String(s == null ? '' : s).replace(/\s+/g, ' ').trim().slice(0, 60);
 
   function load() {
@@ -131,6 +142,7 @@ body { display: flex; flex-direction: column; padding-top: 3px; overflow: hidden
         if (TABS.some((t) => t.id === o.tab)) nb.tab = o.tab;
         if (COPPER.some((c) => c.id === o.copper)) nb.copper = o.copper;
         nb.linked = o.linked !== false;
+        for (const [name, g] of Object.entries(o.gone && typeof o.gone === 'object' ? o.gone : {})) { const n = cleanName(name); if (n && g && typeof g.s === 'number') nb.gone[n] = { s: g.s }; }
       }
     } catch (e) { /* a notebook that does not read starts over; the tools' own state is untouched */ }
     if (!nb.current) {                       // the first visit, or a notebook that lost its place: what the tools hold is a page
@@ -189,7 +201,7 @@ body { display: flex; flex-direction: column; padding-top: 3px; overflow: hidden
     } catch (e) { /* the cost explorer is not ready: its next load asks again */ }
     return did;
   }
-  function sync() {
+  function followNow() {
     if (!nb.linked || !live.cost) return;
     const did = follow();
     if (did === null) { if (nb.tab === 'cost') say('The cost explorer is not following the outline yet: open the Outline tab once, so this browser has its design.'); return; }
@@ -205,7 +217,7 @@ body { display: flex; flex-direction: column; padding-top: 3px; overflow: hidden
   function dress(name) {                             // a tool inside the notebook drops what the notebook's bar already says (its own sheet knows .embedded)
     try { live[name].contentDocument.documentElement.classList.add('embedded'); } catch (e) { /* a frame that cannot be reached is shown as it is */ }
     inner();
-    if (name === 'cost') sync();
+    if (name === 'cost') followNow();
   }
   function inner() {                                 // Outline and Magnetometers are two tabs of the one outline tool
     const tab = TABS.find((t) => t.id === nb.tab), f = live[tab.frame];
@@ -227,14 +239,21 @@ body { display: flex; flex-direction: column; padding-top: 3px; overflow: hidden
     }
     for (const [name, f] of Object.entries(live)) f.hidden = name !== tab.frame;
     inner();
-    if (tab.frame === 'cost') { flush(); sync(); }      // the outline may have changed a moment ago and not written it yet
+    if (tab.frame === 'cost') { flush(); followNow(); }      // the outline may have changed a moment ago and not written it yet
     try { live[tab.frame].contentWindow.dispatchEvent(new Event('resize')); } catch (e) { /* not loaded yet */ }   // a view sized while hidden measures again
     history.replaceState(null, '', '#' + tab.id);
     keep();
   }
 
   // ---- the pages
-  function putAway() { flush(); nb.pages[nb.current] = snapshot(); }
+  function putAway() {                               // the open page's entry, brought up to what the tools hold
+    flush();
+    const was = nb.pages[nb.current], now = snapshot();
+    if (was && S.sig(was) === S.sig(now)) now.t = was.t;      // nothing changed: it is still the same version
+    if (was && was.s != null) now.s = was.s;
+    nb.pages[nb.current] = now;
+  }
+  const forget = (name) => { const p = nb.pages[name]; if (p && p.s != null) nb.gone[name] = { s: p.s }; delete nb.pages[name]; };   // the account is told at the next sync
   function open(name, words) {                       // name is a page already in nb.pages, and not the one held now
     const page = nb.pages[name];
     drop();                                          // the tools go first, so that none writes its old state over the new
@@ -251,16 +270,17 @@ body { display: flex; flex-direction: column; padding-top: 3px; overflow: hidden
     $('copper').value = nb.copper;
     $('pg-delete').disabled = names().length < 2;
   }
-  let asking = null;                                 // what the name field is for: { ok(name) }
-  function ask(what, button, value, ok) {
-    asking = { ok };
+  let asking = null;                                 // what the field is for: { ok(text), secret }
+  function ask(what, button, value, ok, secret) {
+    asking = { ok, secret: !!secret };
+    $('ask-name').type = secret ? 'password' : 'text'; $('ask-name').maxLength = secret ? 200 : 60;
     $('ask-what').textContent = what; $('ask-ok').textContent = button; $('ask-name').value = value;
     $('pages').hidden = true; $('ask').hidden = false; $('ask-name').focus(); $('ask-name').select();
   }
-  function askDone() { asking = null; $('ask').hidden = true; $('pages').hidden = false; }
+  function askDone() { asking = null; $('ask-name').value = ''; $('ask').hidden = true; $('pages').hidden = false; }
   function answer() {
-    const name = cleanName($('ask-name').value);
-    if (!name) return say('A page needs a name.');
+    const name = asking.secret ? $('ask-name').value.trim() : cleanName($('ask-name').value);
+    if (!name) return say(asking.secret ? 'Paste the key first.' : 'A page needs a name.');
     if (asking.ok(name) !== false) askDone();
   }
   const fresh = (name) => { if (nb.pages[name]) { say('There is already a page named "' + name + '".'); return false; } return true; };
@@ -280,10 +300,96 @@ body { display: flex; flex-direction: column; padding-top: 3px; overflow: hidden
     for (const [raw, p] of Object.entries(o.pages)) {
       const base = cleanName(raw); if (!base) continue;
       const name = nb.pages[base] ? suggest(base + ' (imported)') : base;
-      nb.pages[name] = clean(p); added.push(name);
+      nb.pages[name] = strange(p); added.push(name);
     }
-    keep(); list();
+    keep(); list(); later(800);
     say(added.length ? 'Added ' + added.length + (added.length === 1 ? ' page: ' : ' pages: ') + added.join(', ') + '. This page is unchanged.' : 'That notebook has no pages.');
+  }
+
+  // ---- the account: the same pages on every device. This device's pages and the account's are merged whenever
+  // something changed here, when the page is come back to, and on the Sync button. The key is kept in this browser
+  // only (v6nb.key): it is no part of a page or of an export, and it is sent only to this site's own /api/notebook.
+  let syncing = false, owed = false, timer = null;
+  const stamp = () => new Date().toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+  const later = (ms) => { if (!get(KEY)) return; clearTimeout(timer); timer = setTimeout(() => syncNow(false), ms); };
+  const call = async (method, body) => {
+    const r = await fetch(API, { method, cache: 'no-store', body: body ? JSON.stringify(body) : undefined,
+      headers: { authorization: 'Bearer ' + get(KEY), ...(body ? { 'content-type': 'application/json' } : {}) } });
+    let o = null; try { o = await r.json(); } catch (e) { /* not JSON: not this site's service */ }
+    return { status: r.status, body: o || {} };
+  };
+  // what the account sent, read the way a file is: only what a notebook holds
+  const theirs = (o) => {
+    if (!o || typeof o !== 'object') return null;
+    const pages = {}, gone = {};
+    for (const [raw, pg] of Object.entries(o.pages && typeof o.pages === 'object' ? o.pages : {})) { const n = cleanName(raw); if (n) pages[n] = strange(pg); }
+    for (const [raw, g] of Object.entries(o.gone && typeof o.gone === 'object' ? o.gone : {})) { const n = cleanName(raw); if (n && g) gone[n] = { t: Number(g.t) || 0 }; }
+    return { pages, gone };
+  };
+  function mark(last) {                              // the Sync button says whether this device syncs
+    const on = !!get(KEY);
+    $('nb-sync').textContent = on ? 'Sync on' : 'Sync';
+    $('nb-sync').title = on ? 'This device keeps the same pages as your account. Press to sync now.' + (last ? ' Last: ' + last + '.' : '')
+      : 'Keep the same pages on every device: paste the notebook key once, and this device and your account share them.';
+    $('nb-sync-off').hidden = !on;
+  }
+  function busy(on) {                                // while a sync is out, the pages are not rearranged under it
+    for (const id of ['page', 'pg-copy', 'pg-blank', 'pg-rename', 'pg-delete', 'nb-import']) $(id).disabled = on;
+    if (!on) $('pg-delete').disabled = names().length < 2;
+  }
+  // The merge is in, and the account has it: this device takes it. The tools hold the open page, so that one needs care.
+  function settle(m, before, asked, sent) {
+    const was = nb.current, said = [];
+    nb.pages = m.pages; nb.gone = {};
+    let reload = null;
+    const copy = m.kept.find((k) => k[0] === was);
+    if (copy) nb.current = copy[1];                  // both changed the open page: the tools hold this device's, now under the copy's name
+    else if (m.took.includes(was) || m.dropped.includes(was)) {
+      flush();
+      if (S.sig(snapshot()) !== before) {            // changed here in the moment the answer was on its way: kept the same way
+        const as = suggest(was + ' (this device ' + stamp() + ')');
+        nb.pages[as] = snapshot(); nb.current = as; m.kept.push([was, as]); owed = true;
+      } else if (m.took.includes(was)) reload = was;
+      else if (names().length) reload = names()[0];
+      else { nb.pages[was] = snapshot(); owed = true; }          // every page was deleted elsewhere: what is open stays, as a new page
+    }
+    const q = (n) => '"' + n + '"';
+    const others = m.took.filter((n) => !m.kept.some((k) => k[0] === n));
+    if (others.length) said.push('took ' + others.map(q).join(', ') + ' from your account');
+    for (const [n, as] of m.kept) said.push('both had changed ' + q(n) + ': the account\'s keeps the name and this device\'s is kept as ' + q(as));
+    if (m.dropped.length) said.push('removed ' + m.dropped.map(q).join(', ') + ', deleted on another device');
+    keep(); list(); mark(stamp());
+    const words = said.length ? 'Synced: ' + said.join('; ') + '.' : asked ? 'Synced: ' + names().length + (names().length === 1 ? ' page' : ' pages') + (sent ? ', this device\'s changes sent.' : ', nothing to change.') : null;
+    if (reload) open(reload, words || 'Synced: opened ' + q(reload) + ' as your account has it.');
+    else if (words) say(words);
+  }
+  async function syncNow(asked) {
+    if (!get(KEY)) return;
+    if (syncing) { owed = true; return; }
+    syncing = true; owed = false; clearTimeout(timer); busy(true);
+    try {
+      let there = await call('GET');
+      for (let round = 0; ; round++) {
+        if (there.status === 401) { put(KEY, null); mark(); return say('The account refused the key, so sync is off on this device. Press Sync to paste it again.'); }
+        if (there.status === 503) return say('Sync: no key is set on the server yet.');
+        if (there.status !== 200 && there.status !== 409) throw new Error('the server answered ' + there.status);
+        putAway();
+        const before = S.sig(nb.pages[nb.current]);
+        const m = S.merge({ pages: nb.pages, gone: nb.gone }, theirs(there.body.notebook), stamp(), Date.now());
+        if (m.push) {
+          const sent = await call('PUT', { base: there.body.rev, notebook: m.remote });
+          if (sent.status === 409 && round < 4) { there = sent; continue; }      // another device wrote in between: merged again with what it wrote
+          if (sent.status === 413) return say('Sync: the notebook is too big for the account. Export it, then delete pages you no longer need.');
+          if (sent.status !== 200) throw new Error('the server answered ' + sent.status);
+        }
+        return settle(m, before, asked, m.push);
+      }
+    } catch (e) {
+      say('Sync did not get through (' + ((e && e.message) || e) + '). It tries again at the next change.');
+    } finally {
+      syncing = false; busy(false);
+      if (owed) later(1000);
+    }
   }
 
   // ---- wiring
@@ -297,18 +403,18 @@ body { display: flex; flex-direction: column; padding-top: 3px; overflow: hidden
   $('copper').addEventListener('change', () => {
     nb.copper = $('copper').value;
     if (live.routing) live.routing.src = FRAMES.routing.src();
-    keep(); say('Routing shows ' + $('copper').selectedOptions[0].textContent + '. This page remembers it.');
+    keep(); later(800); say('Routing shows ' + $('copper').selectedOptions[0].textContent + '. This page remembers it.');
   });
   $('page').addEventListener('change', () => {
     const to = $('page').value, from = nb.current;
     if (!nb.pages[to] || to === from) return;
     putAway();
-    open(to, 'Put "' + from + '" away as it was and opened "' + to + '".');
+    open(to, 'Put "' + from + '" away as it was and opened "' + to + '".'); later(800);
   });
   $('pg-copy').addEventListener('click', () => ask('copy this page as', 'Copy', suggest(nb.current + ' copy'), (name) => {
     if (!fresh(name)) return false;
     const from = nb.current;
-    putAway(); nb.pages[name] = snapshot(); nb.current = name; keep(); list();     // the tools already hold it: nothing reloads
+    putAway(); nb.pages[name] = snapshot(); nb.current = name; keep(); list(); later(800);     // the tools already hold it: nothing reloads
     say('"' + name + '" is a copy of "' + from + '" and is the page open now. "' + from + '" stays as it was.');
   }));
   $('pg-blank').addEventListener('click', () => ask('new blank page', 'Make', suggest('Page ' + (names().length + 1)), (name) => {
@@ -316,14 +422,15 @@ body { display: flex; flex-direction: column; padding-top: 3px; overflow: hidden
     const from = nb.current;
     putAway();
     nb.pages[name] = clean({ t: Date.now(), copper: COPPER[0].id });
-    open(name, 'Put "' + from + '" away and opened "' + name + '", with every tool at its built-in design.');
+    open(name, 'Put "' + from + '" away and opened "' + name + '", with every tool at its built-in design.'); later(800);
   }));
   $('pg-rename').addEventListener('click', () => ask('rename this page', 'Rename', nb.current, (name) => {
     if (name === nb.current) return;
     if (!fresh(name)) return false;
-    const from = nb.current, pages = {};
-    for (const [n, p] of Object.entries(nb.pages)) pages[n === from ? name : n] = p;     // it keeps its place in the list
-    nb.pages = pages; nb.current = name; keep(); list();
+    const from = nb.current, pages = {}, old = nb.pages[from];
+    if (old.s != null) nb.gone[from] = { s: old.s };                                    // to the account the old name is deleted and the new one is new
+    for (const [n, p] of Object.entries(nb.pages)) pages[n === from ? name : n] = n === from ? strange(p) : p;     // it keeps its place in the list
+    nb.pages = pages; nb.current = name; keep(); list(); later(800);
     say('"' + from + '" is now "' + name + '".');
   }));
   $('pg-delete').addEventListener('click', () => {
@@ -331,8 +438,8 @@ body { display: flex; flex-direction: column; padding-top: 3px; overflow: hidden
     const gone = nb.current;
     ask('type the name to delete it', 'Delete', '', (name) => {
       if (name !== gone) { say('That is not this page\'s name ("' + gone + '"). Nothing was deleted.'); return false; }
-      delete nb.pages[gone];
-      open(names()[0], 'Deleted "' + gone + '" and opened "' + names()[0] + '".');
+      forget(gone);
+      open(names()[0], 'Deleted "' + gone + '" and opened "' + names()[0] + '".'); later(800);
     });
     say('Deleting "' + gone + '" cannot be undone. Export first to keep a copy.');
   });
@@ -350,14 +457,31 @@ body { display: flex; flex-direction: column; padding-top: 3px; overflow: hidden
   $('linked').addEventListener('change', () => {
     nb.linked = $('linked').checked; keep();
     say(nb.linked ? 'Linked: the cost explorer takes its display, window, port and magnetometer count from the outline.' : 'Not linked: the cost explorer keeps what you set in it, whatever the outline has.');
-    if (nb.linked) { flush(); sync(); }
+    if (nb.linked) { flush(); followNow(); }
   });
-  window.addEventListener('storage', (e) => { if (e.key === 'v6mech.state') sync(); });   // the outline, in its frame, has written a change
+  window.addEventListener('storage', (e) => {             // a tool, in its frame, has written a change
+    if (e.key === 'v6mech.state') followNow();
+    // a sync is due a few seconds after the last real change. The outline writes again whenever it is told it is being
+    // left (a sync tells it so), with only its time stamp new: that is not a change, and must not ask for another sync.
+    if (KEYS.includes(e.key) && S.sig({ keys: { [e.key]: e.newValue } }) !== S.sig({ keys: { [e.key]: e.oldValue } })) later(4000);
+  });
+  $('nb-sync').addEventListener('click', () => {
+    if (get(KEY)) return syncNow(true);
+    ask('paste the notebook key', 'Use', '', (key) => {
+      if (key.length < 24) { say('That is too short to be the key: it is 24 characters or more.'); return false; }
+      if (!put(KEY, key)) { say('This browser will not keep the key, so it cannot sync.'); return false; }
+      mark(); say('Asking your account...'); syncNow(true);
+    }, true);
+    say('The key is kept in this browser only and is sent only to this site.');
+  });
+  $('nb-sync-off').addEventListener('click', () => { put(KEY, null); clearTimeout(timer); mark(); say('Sync is off on this device. Its pages stay here, and the account keeps its own.'); });
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') later(300); else syncNow(false); });
   window.addEventListener('pagehide', () => { putAway(); keep(); });
   window.addEventListener('hashchange', () => { const want = location.hash.slice(1); if (want !== nb.tab && TABS.some((t) => t.id === want)) show(want); });
 
   list();
   show(nb.tab);
+  mark();
   if (/[?&]check\b/.test(location.search)) {          // the link's reading of a design, tried on four made-up ones
     const t = (params, want) => JSON.stringify(facts(params)) === JSON.stringify(want);
     const ok = t({ parts: [{ type: 'display_tft220bar', window: {} }, { type: 'm2_socket' }], show: { sensor_layout: 'custom' }, mag: { list: [1, 2, 3] } }, { disp: 'bar22', win: 'glass', port: 'm2', nmag: 3 })
@@ -366,6 +490,7 @@ body { display: flex; flex-direction: column; padding-top: 3px; overflow: hidden
       && t({}, { disp: 'none', win: undefined, port: 'pads', nmag: undefined });
     return say('Link check: ' + (ok ? 'ok' : 'FAILED'));
   }
+  syncNow(false);
   say(store ? 'Page "' + nb.current + '". ' + (names().length === 1 ? 'Copy it to keep this design and try another.' : names().length + ' pages in this notebook.')
     : 'This browser will not keep anything for this page (a private window does this): the tabs work, the pages will not last.');
 })();
