@@ -219,7 +219,6 @@ body.app hr{height:1px;background:var(--line);margin:1rem 0}
   font-size:13px;
 }
 :where(.console) *,:where(.console) *::before,:where(.console) *::after{box-sizing:border-box}
-:where(.console) [hidden]{display:none!important}
 :where(.console) body{margin:0;padding:0;background:var(--bg);color:var(--ink);font:13px/1.35 var(--mono);
   font-variant-numeric:tabular-nums;scrollbar-color:var(--line) transparent;scrollbar-width:thin}
 :where(.console) body::before{content:"";position:fixed;inset:0 0 auto;height:3px;background:var(--rainbow);z-index:10}

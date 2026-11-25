@@ -11,6 +11,7 @@
 /* The notebook is a bar over one tool at a time. Each tool is its own page in a frame, so it also opens alone at
    its own address and a newer copy of it drops in with nothing to redo here. The look is the site's console. */
 html, body { height: 100%; }
+[hidden] { display: none !important; }
 body { display: flex; flex-direction: column; padding-top: 3px; overflow: hidden; }
 .top { flex: none; display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; padding: 6px 10px; background: var(--bg);
   border-bottom: 1px solid var(--line); }
@@ -48,6 +49,7 @@ body { display: flex; flex-direction: column; padding-top: 3px; overflow: hidden
     <label class="eyebrow" for="copper">copper</label>
     <select id="copper" title="which run of the routing lab is shown. Each was routed ahead of time: the page shows a run, it does not route."></select>
   </span>
+  <label class="group" title="Linked: the cost explorer follows the outline. Its display, the display's window, the expansion port and the number of magnetometers are set from the outline's design whenever that changes. Untick to price something the outline does not have."><input type="checkbox" id="linked" checked> <span class="eyebrow">linked</span></label>
   <span class="spacer"></span>
   <span class="group" id="pages">
     <label class="eyebrow" for="page">page</label>
@@ -84,10 +86,7 @@ body { display: flex; flex-direction: column; padding-top: 3px; overflow: hidden
   ];
   const pathOf = (src) => new URL(src, location.href).pathname;
   const FRAMES = {
-    outline: { title: 'Board outline', src: () => 'board-outline.html', keys: ['v6mech.state'],
-      // ponytail: this reaches into the outline tool's header from outside (its crumb, name and own two tabs are
-      // the notebook's here). When the tool's source learns html.embedded, delete this line.
-      css: '#crumb, header.top > h1, header.top > .tabs { display: none !important; } body::before { display: none !important; }' },
+    outline: { title: 'Board outline', src: () => 'board-outline.html', keys: ['v6mech.state'] },
     routing: { title: 'Routing lab', src: () => (COPPER.find((c) => c.id === nb.copper) || COPPER[0]).src,
       keys: COPPER.map((c) => 'lab.ui.v1:' + pathOf(c.src)) },
     cost: { title: 'Cost explorer', src: () => 'cost-explorer.html', keys: ['v6ce.v4'] },
@@ -110,7 +109,7 @@ body { display: flex; flex-direction: column; padding-top: 3px; overflow: hidden
   // nb: { pages: { name: { t, keys: { key: value or null }, copper } }, current, tab, copper }
   // The page named by current is the one the tools hold now: its truth is the tools' own keys, and its entry here
   // is brought up to date when it is put away. Every other page's truth is its entry.
-  let nb = { pages: {}, current: null, tab: 'outline', copper: COPPER[0].id };
+  let nb = { pages: {}, current: null, tab: 'outline', copper: COPPER[0].id, linked: true };
   const keep = () => put(NB, JSON.stringify(nb));
   const snapshot = () => ({ t: Date.now(), copper: nb.copper, keys: Object.fromEntries(KEYS.map((k) => [k, get(k)])) });
   const names = () => Object.keys(nb.pages);
@@ -130,6 +129,7 @@ body { display: flex; flex-direction: column; padding-top: 3px; overflow: hidden
         if (nb.pages[o.current]) nb.current = o.current;
         if (TABS.some((t) => t.id === o.tab)) nb.tab = o.tab;
         if (COPPER.some((c) => c.id === o.copper)) nb.copper = o.copper;
+        nb.linked = o.linked !== false;
       }
     } catch (e) { /* a notebook that does not read starts over; the tools' own state is untouched */ }
     if (!nb.current) {                       // the first visit, or a notebook that lost its place: what the tools hold is a page
@@ -140,20 +140,71 @@ body { display: flex; flex-direction: column; padding-top: 3px; overflow: hidden
     if (TABS.some((t) => t.id === want)) nb.tab = want;
   }
 
+  // ---- the link: the outline is the design, and the cost explorer prices it. What the two share goes one way, from
+  // the outline's stored design into the cost explorer's own controls, so that its own handlers fill in the prices.
+  // The names on the left are the outline's (src/catalog.js there), those on the right the cost explorer's.
+  const LINK = {
+    display: { display_amoled147: 'amoled', display_tft147: 'tft', display_tft220bar: 'bar22', display_ips279bar: 'bar279',
+      display_ips165bar: 'bar165', display_tft225bar: 'bar225' },
+    port: { m2_socket: 'm2', minipcie: 'mpcie', sodimm_ddr4: 'sodimm', pcie_x1_ra: 'pcie1', sfp_cage: null },
+    covers: ['glass', 'oca', 'pmma', 'resin', 'vglass'],   // the cost explorer's kinds of pane; the outline only knows glass or none
+  };
+  // What a design says about the four shared things. undefined = nothing the cost explorer can price: left alone.
+  function facts(params) {
+    const parts = Array.isArray(params && params.parts) ? params.parts : [];
+    const disp = parts.find((u) => /^display_/.test(u.type || ''));
+    const port = parts.find((u) => Object.prototype.hasOwnProperty.call(LINK.port, u.type));
+    const layout = params && params.show && params.show.sensor_layout, list = params && params.mag && params.mag.list;
+    return {
+      disp: disp ? LINK.display[disp.type] : 'none',
+      win: !disp ? undefined : !disp.window ? 'open' : (disp.window.glass != null ? +disp.window.glass : 1) ? 'glass' : 'crop',
+      port: port ? LINK.port[port.type] || undefined : 'pads',
+      nmag: layout === 'plan18' ? 18 : layout === 'plan32' ? 32 : layout === 'custom' && Array.isArray(list) ? list.length : undefined,
+    };
+  }
+  // Set the cost explorer to what the outline says. Returns what it changed, in words; null when the outline has
+  // not kept a design in this browser yet.
+  function follow() {
+    let params; try { params = JSON.parse(get('v6mech.state')).params; } catch (e) { params = null; }
+    if (!params) return null;
+    const want = facts(params), did = [];
+    try {
+      const d = live.cost.contentDocument;
+      const set = (id, v, name) => {
+        const el = d.getElementById(id);
+        if (!el || String(el.value) === String(v)) return;
+        el.value = v;
+        if (String(el.value) !== String(v)) return;          // a choice the cost explorer does not have
+        for (const t of ['input', 'change']) el.dispatchEvent(new Event(t, { bubbles: true }));
+        did.push(name + ' ' + (el.selectedOptions ? el.selectedOptions[0].textContent.split(/[(:,]/)[0].trim() : v));
+      };
+      if (want.disp !== undefined) {
+        const b = d.querySelector('#disp button[data-v="' + want.disp + '"]');
+        if (b && b.getAttribute('aria-pressed') !== 'true') { b.click(); did.push('display ' + b.textContent.trim()); }
+      }
+      if (want.win !== undefined && !(want.win === 'glass' && LINK.covers.includes(d.getElementById('win').value))) set('win', want.win, 'window:');
+      if (want.port !== undefined && !(want.port === 'm2' && d.getElementById('port').value === 'm2g')) set('port', want.port, 'port:');
+      if (want.nmag !== undefined) set('nmag', want.nmag, 'magnetometers');
+    } catch (e) { /* the cost explorer is not ready: its next load asks again */ }
+    return did;
+  }
+  function sync() {
+    if (!nb.linked || !live.cost) return;
+    const did = follow();
+    if (did === null) { if (nb.tab === 'cost') say('The cost explorer is not following the outline yet: open the Outline tab once, so this browser has its design.'); return; }
+    if (did.length) say('Cost follows the outline: ' + did.join(', ') + '.');
+  }
+
   // ---- the frames
   const live = {};                                   // frame name -> its iframe, once its tab has been opened
   function flush() {                                 // the outline writes its state a moment after a change, and at once when told it is being left
     for (const f of Object.values(live)) { try { f.contentWindow.dispatchEvent(new Event('pagehide')); } catch (e) { /* not loaded yet */ } }
   }
   function drop() { for (const k of Object.keys(live)) { live[k].remove(); delete live[k]; } }
-  function dress(name) {                             // a tool inside the notebook drops what the notebook's bar already says
-    const f = live[name], spec = FRAMES[name];
-    try {
-      const doc = f.contentDocument;
-      doc.documentElement.classList.add('embedded');
-      if (spec.css) { const s = doc.createElement('style'); s.textContent = spec.css; doc.head.appendChild(s); }
-    } catch (e) { /* a frame that cannot be reached is shown as it is */ }
+  function dress(name) {                             // a tool inside the notebook drops what the notebook's bar already says (its own sheet knows .embedded)
+    try { live[name].contentDocument.documentElement.classList.add('embedded'); } catch (e) { /* a frame that cannot be reached is shown as it is */ }
     inner();
+    if (name === 'cost') sync();
   }
   function inner() {                                 // Outline and Magnetometers are two tabs of the one outline tool
     const tab = TABS.find((t) => t.id === nb.tab), f = live[tab.frame];
@@ -175,6 +226,7 @@ body { display: flex; flex-direction: column; padding-top: 3px; overflow: hidden
     }
     for (const [name, f] of Object.entries(live)) f.hidden = name !== tab.frame;
     inner();
+    if (tab.frame === 'cost') { flush(); sync(); }      // the outline may have changed a moment ago and not written it yet
     try { live[tab.frame].contentWindow.dispatchEvent(new Event('resize')); } catch (e) { /* not loaded yet */ }   // a view sized while hidden measures again
     history.replaceState(null, '', '#' + tab.id);
     keep();
@@ -293,11 +345,26 @@ body { display: flex; flex-direction: column; padding-top: 3px; overflow: hidden
     if (file.size > 20e6) { $('nb-file').value = ''; return say('That file is too big to be a notebook.'); }
     file.text().then(importText).finally(() => { $('nb-file').value = ''; });
   });
+  $('linked').checked = nb.linked;
+  $('linked').addEventListener('change', () => {
+    nb.linked = $('linked').checked; keep();
+    say(nb.linked ? 'Linked: the cost explorer takes its display, window, port and magnetometer count from the outline.' : 'Not linked: the cost explorer keeps what you set in it, whatever the outline has.');
+    if (nb.linked) { flush(); sync(); }
+  });
+  window.addEventListener('storage', (e) => { if (e.key === 'v6mech.state') sync(); });   // the outline, in its frame, has written a change
   window.addEventListener('pagehide', () => { putAway(); keep(); });
   window.addEventListener('hashchange', () => { const want = location.hash.slice(1); if (want !== nb.tab && TABS.some((t) => t.id === want)) show(want); });
 
   list();
   show(nb.tab);
+  if (/[?&]check\b/.test(location.search)) {          // the link's reading of a design, tried on four made-up ones
+    const t = (params, want) => JSON.stringify(facts(params)) === JSON.stringify(want);
+    const ok = t({ parts: [{ type: 'display_tft220bar', window: {} }, { type: 'm2_socket' }], show: { sensor_layout: 'custom' }, mag: { list: [1, 2, 3] } }, { disp: 'bar22', win: 'glass', port: 'm2', nmag: 3 })
+      && t({ parts: [{ type: 'display_tft147', window: { glass: 0 } }], show: { sensor_layout: 'plan32' } }, { disp: 'tft', win: 'crop', port: 'pads', nmag: 32 })
+      && t({ parts: [{ type: 'display_tft300' }, { type: 'sfp_cage' }], show: { sensor_layout: 'wigledmag' } }, { disp: undefined, win: 'open', port: undefined, nmag: undefined })
+      && t({}, { disp: 'none', win: undefined, port: 'pads', nmag: undefined });
+    return say('Link check: ' + (ok ? 'ok' : 'FAILED'));
+  }
   say(store ? 'Page "' + nb.current + '". ' + (names().length === 1 ? 'Copy it to keep this design and try another.' : names().length + ' pages in this notebook.')
     : 'This browser will not keep anything for this page (a private window does this): the tabs work, the pages will not last.');
 })();

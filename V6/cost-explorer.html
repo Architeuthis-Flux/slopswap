@@ -156,7 +156,7 @@ tr.total td { font-weight: 600; border-top: 1px solid var(--dim); }
     <div class="row"><label><input type="checkbox" id="portiso" checked> Per-pin isolation on the port<small>8 × ET7460H + 2 × 74HC595 + 16 × BAT54S per chip ≈ $1.45</small></label></div>
     <h2>Wig: magnetometers and spring clips</h2>
     <div class="row"><label>Magnetometer array<small>MEMSIC MMC5603NJ (AMR, 0x30) instead of 9 × TMAG5273; one 74LVC138 SCL-decoder per 8</small></label>
-      <select id="nmag"><option>9</option><option selected>18</option><option>32</option></select></div>
+      <input type="number" id="nmag" value="18" min="0" max="64" step="1"></div>
     <div class="row"><label>MMC5603NJ price<small>LCSC C404328, $0.15 @1k on 2026-10-18</small></label><input type="number" id="p_mag" value="0.15" step="0.01"> $</div>
     <div class="row"><label>Spring clips per unit<small>Fulimei Spring Clip6, phosphor bronze</small></label><input type="number" id="nclip" value="80" step="1" min="0"></div>
     <div class="row"><label>Spring clip price<small>$0.0599 each — Fulimei proforma invoice 2026-06-17 (10k at the 100k-run price); tooling $2,686 paid, amortised in Mechanics</small></label><input type="number" id="p_clip" value="0.0599" step="0.001"> $</div>

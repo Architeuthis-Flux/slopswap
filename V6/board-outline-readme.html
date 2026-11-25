@@ -22,7 +22,7 @@
 <p class="muted">The readme of <code>JumperlessV6/v6mech</code>, rev A9 2026-11-25. Kevin Cappuccio with Claude.</p>
 <ul class="get cycle">
   <li><a href="board-outline.html"><b>Open the 3D viewer</b></a></li>
-  <li><a href="board-outline-v6mech.zip" download><b>Download the folder</b> (.zip, 12.7 MB): parameters, source, KiCad and DXF outlines, STEP</a></li>
+  <li><a href="board-outline-v6mech.zip" download><b>Download the folder</b> (.zip, 12.6 MB): parameters, source, KiCad and DXF outlines, STEP</a></li>
 </ul>
 <figure><a href="board-outline-on-sketch.png"><img src="board-outline-on-sketch.png" alt="The outline (pink) laid over the notebook page it was traced from"></a><figcaption>The outline (pink) laid over the notebook page it was traced from: the viewer's sketch underlay, seen from above.</figcaption></figure>
 <figure><a href="board-outline-inputs.png"><img src="board-outline-inputs.png" alt="From the top edge"></a><figcaption>From the top edge: the click wheel under the top board at the corner, a nav switch through it, two button holes. Left, the pickers and the per-board tick boxes of the selected part.</figcaption></figure>
@@ -1002,6 +1002,21 @@ User.Comments. They are a one-way export: edits made in KiCad do not come back i
 <li>The wig outline's bottom edge is closed with a straight line; on the real board that edge belongs to
   the side-connect footprint.</li>
 <li>The header-to-socket mated distance (8.59 mm row to row) comes from the KiCad models, not a mated pair.</li>
+</ul>
+<h2>The look</h2>
+<p>The page wears the same console look as the routing lab and the cost explorer (2026-11-25), and that look is kept in
+one place: the console section of slopswap's <code>styles/jumperless.css</code>.</p>
+<ul>
+<li><code>src/viewer.html</code> carries a copy of it in <code>&lt;style id="console-copy"&gt;</code>, so the single file still opens from disk.
+  Do not edit that block: change the look in slopswap and run its <code>.tools/console_copy.py src/viewer.html</code>, then
+  <code>node build.mjs</code>.</li>
+<li>The <code>&lt;style&gt;</code> under it holds only what is this tool's own (the docks, the view, the rows, the checks). A plate,
+  a button, a heading mark or a table head is not restyled here.</li>
+<li><code>tools/to_slopswap.py</code> takes the copy out and links the site's stylesheet, so a change there reaches the
+  published page with no rebuild.</li>
+<li>Inside the V6 notebook (<code>V6/notebook.html</code> on slopswap) the page gets <code>class="embedded"</code> on its <code>&lt;html&gt;</code> and
+  hides its crumb, its name and its two tabs: the notebook's bar has them.</li>
+<li>The folder as it was before this is <code>../_v6mech-before-console-look-2026-11-25</code>.</li>
 </ul>
 <hr>
 <p class="muted">Jumperless V6 is a work in progress. Part models in the viewer and the zip: KiCad library (CC-BY-SA 4.0 with the library exception), SparkFun (CC-BY 4.0), Adafruit (MIT); the parts library's footprints and models are EasyEDA's, by LCSC number, unchecked; <code>models/SOURCES.md</code> in the zip says which is which.</p>

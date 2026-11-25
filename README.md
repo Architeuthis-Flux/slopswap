@@ -27,6 +27,7 @@ Start a new page from `styles/template.html`. Give it a `<title>` and, if the ti
 Tools (the routing lab, the board outline, the cost explorer, the V6 notebook) wear one look: panels with name plates, cut corners, narrow capital labels, the rainbow and the magenta. It lives in one place, the section of `styles/jumperless.css` between `console:begin` and `console:end`, and a page asks for it with `<html class="console">` (and no `app` on its body).
 
 - **To change every tool at once**, edit `styles/jumperless.css`. Colours, fonts, the corner cut and the three grounds are the `--jl-*` values at the top (`--jl-surface`, `--jl-font-label`, `--jl-font-console`, `--jl-cut`, `--jl-hover`, `--jl-sel`, `--jl-problem`, and the palette); the shapes (plate, button, panel bar, heading mark, table head, tab row) are in the console section. Document pages follow the `--jl-*` colours too.
+- **The section does not hide `[hidden]` elements for a page**: a page that sets `display` on things it also hides says `[hidden] { display: none !important; }` itself (the lab and the notebook do; the outline shows a hidden dock on a phone on purpose).
 - **Every console rule starts with `:where(.console)`**, so it weighs no more than the same rule in a page's own sheet: the document rules above it lose by coming first, a page's own rules win by coming after. Keep new rules that way.
 - **A tool keeps only its own layout** in its page. A tool that must also open from disk carries a copy of the section in `<style id="console-copy">` (or, the routing lab, in `console.css`). Never edit a copy: `python3 .tools/console_copy.py <file> [...]` writes it again from the sheet.
 
@@ -34,10 +35,10 @@ Tools (the routing lab, the board outline, the cost explorer, the V6 notebook) w
 |---|---|---|
 | Routing lab | the Jimulator repo, `Routing/` (`web/console.css` is the copy) | `lab.py export`, then `.tools/routing_lab_dress.py` (takes the copy out, links the sheet) |
 | Cost explorer | the V6 pile, `notes/v6_cost_explorer.html` (copy inline) | `.tools/console_dress.py <source> V6/cost-explorer.html "<short title>" "<description>"` |
-| Board outline | the JumperlessV6 folder, `v6mech/` | its own `tools/to_slopswap.py`. It still carries its own copy of the look (its colours follow the sheet, its fonts and cut do not yet) |
+| Board outline | the JumperlessV6 folder, `v6mech/` (copy inline in `src/viewer.html`) | `node build.mjs`, then its own `tools/to_slopswap.py` (takes the copy out, links the sheet) |
 | V6 notebook | `V6/notebook.html`, written here | nothing: it links the sheet |
 
-After a change to the look, run `console_copy.py` on the two copies if the tools should also follow from disk, then `python3 build.py` and look at one page of each tool.
+After a change to the look, run `console_copy.py` on the three copies if the tools should also follow from disk, then `python3 build.py` and look at one page of each tool.
 
 ## The V6 notebook
 
@@ -45,7 +46,8 @@ After a change to the look, run `console_copy.py` on the two copies if the tools
 
 - **Tabs** are the `TABS` list in the page; the frames behind them are `FRAMES`. To add a tool, add a line to each: its address and the names it keeps its state under in the browser's storage (`keys`).
 - **A notebook page** is a whole design: a copy of what every tool keeps under its `keys`, taken when the page is put away and written back when it is opened. The page open now is simply what the tools hold; nothing in a tool was changed for this. Pages live in this browser (`v6nb.v1`); Export and Import carry them as a file.
-- **Inside the notebook** a tool gets `class="embedded"` on its `<html>` and drops its stripe, its crumb and its own name (the console section and each tool's sheet say how). The board outline does not know that class yet, so the notebook hides its header's crumb, name and two tabs from outside (`FRAMES.outline.css`).
+- **Inside the notebook** a tool gets `class="embedded"` on its `<html>` and drops its stripe, its crumb and its own name (the console section and each tool's sheet say how).
+- **Linked** (the box in the bar, on by default): the outline is the design and the cost explorer prices it. The display, its window (none, cut, glass), the expansion port and the number of magnetometers go one way, from the outline's kept design into the cost explorer's own controls, whenever the outline changes or the Cost tab opens. `LINK` and `facts()` in the page hold the two tools' names for the same things; add a display or a socket there when a tool gains one. What the cost explorer has no price for (the 1.9 and 2.99 inch displays, SFP cages, the test board's mixed sensors) is left as it was. Open the page with `?check` to try the reading on four made-up designs. Unticked, the cost explorer keeps what is set in it.
 - **The Routing tab shows a saved run**, one per copper (`COPPER`): it switches between runs made ahead of time and does not route.
 
 ## Dark Reader
