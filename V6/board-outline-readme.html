@@ -19,7 +19,7 @@
 <main class="page wide">
 <p class="eyebrow"><a href="../">slopswap</a> / <a href="./">V6</a></p>
 <h1>V6 board outline and stack</h1>
-<p class="muted">The readme of <code>JumperlessV6/v6mech</code>, rev A8c 2026-11-24. Kevin Cappuccio with Claude.</p>
+<p class="muted">The readme of <code>JumperlessV6/v6mech</code>, rev A9 2026-11-25. Kevin Cappuccio with Claude.</p>
 <ul class="get cycle">
   <li><a href="board-outline.html"><b>Open the 3D viewer</b></a></li>
   <li><a href="board-outline-v6mech.zip" download><b>Download the folder</b> (.zip, 12.7 MB): parameters, source, KiCad and DXF outlines, STEP</a></li>
@@ -43,7 +43,9 @@ inventory, a parts browser, cantilevered buttons, hiding what is plugged into a 
 with the outline as lines and arcs and the parts as footprints);
 rev A8 the same day (a display can sit behind a window: under the top board, the board cut to the active area
 with chamfered corners, glass let into the cut; and each bar display says what drives it, what it costs and
-where to get it).</p>
+where to get it); rev A8b and A8c the same day (a cantilever's tongue belongs to the top board; sixteen
+long-travel push switches, drawn pressed); rev A9 on 2026-11-25 (a Top band control, and the default outline
+made square: 83.82 x 83.82).</p>
 <h2>Use it</h2>
 <ol>
 <li>Open <code>V6_outline_viewer.html</code> (double-click; it needs no server and no network).</li>
@@ -394,6 +396,33 @@ JumperlessFootprints; the RKJXM has no footprint yet (B25 says so too).</p>
 </div>
 <p><code>node build.mjs --check</code> exits 1 if two parts clash, a part runs into a board kept whole, or a bare
 breadboard no longer fits beside the unit.</p>
+<h2>Rev A9: a square outline, and a top band that moves</h2>
+<p>Kevin: the overall (simplified) outline should be square, and the strip along the left means the top can come up
+to match, which gives more room.</p>
+<ul>
+<li><strong>Top band</strong> (0.1 inch grid section, under Left strip) is how far the frame stands above the breadboard's top
+  edge. Type a height, or press <strong>Make it square</strong> (as high as the unit pitch is wide), <strong>Square to the widest
+  point</strong> (as high as the outline is wide where the top-left block sticks out) or <strong>As drawn</strong> (24.7, the
+  notebook page). The whole top edge moves as one, so the 1.7 mm step in it stays; the parts in the upper half of
+  the band move with it (the click wheel, the USB-C and the port by default), the rest stay where they are.
+  Undo takes it back.</li>
+<li>The line under it gives the simplified outline (left strip plane to right plane, top edge to bottom edge), how
+  far it is from square, and its height in rows. <code>checks.txt</code> has the same on the line under GRID, and
+  <code>resolved.json</code> under <code>checks.grid.overall</code>.</li>
+<li><strong>The default design is now square: 83.82 x 83.82</strong>, top band 28.83 (it was 24.7, so 79.69 high). The top edge
+  is at y = -27.13 left of the step and -28.83 right of it; the click wheel, USB-C and M.2 socket went up 4.13
+  with it; the display and the two keys did not move. Where the sections below say 23.0 and 24.7, that is the
+  drawing, and <code>frame.band_drawn</code> keeps it.</li>
+<li><strong>Square on the unit pitch is also 33 rows high.</strong> A unit stood above another then keeps its hole rows on the
+  0.1 inch grid, the same way units side by side do. At 24.7 the height was 31.37 rows. With a 7.62 strip the
+  square is 86.36 (34 rows, top band 31.37).</li>
+<li>What it buys: 359 mm² more on each of the three boards (main 6955, mid 2038, top 1509 mm² integrated), and
+  component room used drops from 82 % to 72 %. There are about 9 mm of top board free above the display now.</li>
+<li>A design saved in the browser keeps its own outline: open it and press Make it square.</li>
+<li>Not looked at: the tongues could be about 4 mm longer in the taller band (softer keys), and nothing has been
+  moved to use the new room. The widest point is still 87.04 because of the top-left block, so the outline with
+  the block is 3.2 mm wider than it is high.</li>
+</ul>
 <h2>Rev A8c: the long-travel push switches, and buttons drawn pressed</h2>
 <p>Sixteen push switches with a real travel (0.7 to 1.7 mm, a spring and a click, not a dome under a film) are in
 the parts list under Buttons. They are the candidates for the keys, from the '93 Grand Cherokee head unit's
