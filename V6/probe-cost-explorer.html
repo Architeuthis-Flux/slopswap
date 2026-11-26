@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="en" class="console">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jumperless V6 Probe Cost Explorer</title>
+<meta name="short-title" content="Probe cost explorer">
+<meta name="description" content="The Jumperless V6 active probe priced part by part: a coil the magnetometers read, infrared both ways for the acknowledgement, ten ways to store its energy from a supercap to a lithium-ion capacitor to a LiPo, three WCH controllers and the dock. Shows what a charge lasts, how long the dock takes, how far the coil reaches and block-level circuits that follow the choices.">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="../styles/jumperless.css">
+<style>
+/* The probe cost explorer's own layout, the same as the V6 cost explorer's: the options in one panel, what they cost
+   and do in the other, each scrolling on its own; on a narrow screen they stack and the page scrolls. */
+html, body { height: 100%; }
+body { display: flex; flex-direction: column; padding-top: 3px; }
+header.top { flex: none; display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 12px; padding: 8px 12px 7px; border-bottom: 1px solid var(--line); }
+header.top .sub { flex: 1 0 100%; margin: 2px 0 0; color: var(--dim); max-width: 120ch; }
+html.embedded header.top h1 { display: none; }
+main { flex: 1 1 0; min-height: 0; display: flex; }
+#panel-options { flex: 0 0 400px; --c: var(--r3); border-right: 1px solid var(--line); }
+#panel-costs { flex: 1 1 0; --c: var(--r8); }
+.panel > .body { padding: 2px 12px 24px; }
+p { max-width: 110ch; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 4px 10px; padding: 3px 0; flex-wrap: wrap; }
+.row label { flex: 1 1 160px; min-width: 0; }
+.row small { display: block; color: var(--dim); font-size: 11px; line-height: 1.35; }
+input[type=number] { width: 78px; text-align: right; }
+select { max-width: 230px; }
+.seg { display: flex; gap: 3px; flex-wrap: wrap; }
+.seg button { padding: 3px 11px 3px 8px; }
+.est { font-family: var(--label); font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--worse);
+  border: 1px solid currentColor; padding: 0 4px; margin-left: 5px; vertical-align: 1px; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 6px; margin: 8px 0 2px; }
+.tile { background: var(--panel-2); padding: 7px 10px 8px 11px; border-left: 3px solid var(--c, var(--line));
+  clip-path: polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, 0 100%); }
+.tile:nth-child(7n+1) { --c: var(--r2); } .tile:nth-child(7n+2) { --c: var(--r3); } .tile:nth-child(7n+3) { --c: var(--r5); }
+.tile:nth-child(7n+4) { --c: var(--r7); } .tile:nth-child(7n+5) { --c: var(--r8); } .tile:nth-child(7n+6) { --c: var(--r10); } .tile:nth-child(7n+7) { --c: var(--r11); }
+.tile .k { font-family: var(--label); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .09em; color: var(--dim); }
+.tile .v { font-size: 22px; font-weight: 500; line-height: 1.25; }
+.tile .d { font-size: 11px; color: var(--dim); }
+.tile.bad .v { color: var(--problem); }
+.tablewrap { overflow-x: auto; margin-bottom: 4px; }
+.body td, .body th { padding: 3px 10px 3px 4px; vertical-align: top; }
+.body td { border-bottom: 1px solid var(--line); }
+td.n, th.n { text-align: right; white-space: nowrap; }
+tr.total td { font-weight: 600; border-top: 1px solid var(--dim); }
+td input[type=number] { width: 66px; padding: 1px 4px; }
+#stores tbody tr { cursor: pointer; }
+#stores td:nth-child(2) { white-space: nowrap; }
+#stores tbody tr:hover { background: var(--hover); }
+#stores tbody tr.on { background: var(--sel); }
+td.bad, .bad { color: var(--problem); } td.warn { color: var(--worse); } td.good { color: var(--better); }
+.note, .hint { font-size: 12px; color: var(--dim); }
+.hint { margin-top: 5px; }
+.chips { display: flex; flex-wrap: wrap; gap: 4px; margin: 4px 0; }
+.chip { font-size: 12px; border: 1px solid var(--line); padding: 1px 8px; background: var(--bg); }
+.chip b { font-weight: 500; color: var(--ink); }
+.chip.bad { border-color: var(--problem); }
+/* a proposed circuit: plates joined by labelled wires, one signal path a row */
+.ckt { display: block; max-width: none; margin: 4px 0 2px; }
+.ckt .bx { fill: var(--panel-2); stroke: var(--line); stroke-width: 1; }
+.ckt .bx.hot { stroke: var(--accent); }
+.ckt .wi { stroke: var(--dim); stroke-width: 1.2; fill: none; }
+.ckt text { font-family: var(--mono); font-size: 10.5px; fill: var(--ink); }
+.ckt .bs, .ckt .wl { fill: var(--dim); font-size: 9.5px; }
+h3 { margin-top: 12px; }
+@media (max-width: 900px) {
+  html, body { height: auto; }
+  main { flex-direction: column; }
+  #panel-options, #panel-costs { flex: none; border-right: 0; }
+  .panel > .body { flex: none; overflow: visible; }
+  #panel-options > .body { max-height: 40vh; max-height: 40svh; overflow-y: auto; overscroll-behavior: contain; }
+  .seg { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; max-width: 100%; }
+  .seg button { flex: none; }
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <p class="eyebrow" id="crumb"><a href="../">slopswap</a> / <a href="./">V6</a></p>
+  <h1>Jumperless V6 Probe Cost Explorer</h1>
+  <p class="sub">The active probe: a magnet for position, a coil the magnetometers read, infrared both ways for the acknowledgement, something to store energy, a small WCH controller and a dock that charges and flashes it. Prices looked up on 2026-11-25 at about 1000 pieces; everything marked <span class="est">est</span> is an assumption, and every price in the tables can be typed over. Reach and energy are estimates: nothing here has been built.</p>
+</header>
+<main>
+<section class="panel" id="panel-options" aria-label="Options">
+  <header class="bar"><span class="plate"><b>01</b> Options</span><span class="bar-note">what the probe is built from: every choice is kept in this browser</span></header>
+  <div class="body">
+    <h2>Build</h2>
+    <div class="row"><label>Your selections are kept in this browser<small>defaults: coil and IR, 3 × 45 mm rod on a bridge IC, 30 F lithium-ion capacitor, CH32V006</small></label><button type="button" id="reset">Reset</button></div>
+    <h2>Link</h2>
+    <div class="row"><label>How a click reaches the board<small>the board only answers over IR, so the coil alone is one-way</small></label>
+      <div class="seg" id="link"><button data-v="coil">Coil</button><button data-v="ir">IR</button><button aria-pressed="true" data-v="both">Coil + IR</button></div></div>
+    <div class="row"><label>Sends per click, on average<span class="est">est</span><small>1 = always heard first time; no acknowledgement means send again</small></label><input type="number" id="retry" value="1.2" min="1" max="5" step="0.1"></div>
+    <h2>Coil to the magnetometers</h2>
+    <div class="row"><label>Coil<small id="coil_txt"></small></label>
+      <div class="seg" id="coil"><button data-v="key3d">Keyfob 3D</button><button data-v="rod230">2×30 rod</button><button aria-pressed="true" data-v="rod345">3×45 rod</button><button data-v="rod460">4×60 rod</button></div></div>
+    <div class="row"><label>Driver<small>four controller pins lose about 80 Ω<span class="est">est</span> in series; a bridge IC about 1 Ω</small></label>
+      <div class="seg" id="drv"><button data-v="gpio">4 pins</button><button aria-pressed="true" data-v="bridge">Bridge IC</button></div></div>
+    <div class="row"><label>Power drawn while sending<small>a rod is wound to suit this; the keyfob coil takes what its 84 Ω allows</small></label><input type="number" id="p_coil_mw" value="66" min="5" max="400" step="1"> mW</div>
+    <div class="row"><label>Coil message<span class="est">est</span><small>about 32 chips at 250 a second, with the sequence number</small></label><input type="number" id="t_coil" value="130" min="16" max="1000" step="1"> ms</div>
+    <h2>Infrared, both ways</h2>
+    <div class="row"><label>Receiver in the probe<small>powered from a pin and only on while it waits for the answer</small></label>
+      <div class="seg" id="irrx"><button aria-pressed="true" data-v="module">Module</button><button data-v="diode">Photodiode</button></div></div>
+    <div class="row"><label>LED current in the probe<small>50 % carrier; over 20 mA wants a transistor</small></label><input type="number" id="ir_ma" value="20" min="2" max="200" step="1"> mA</div>
+    <div class="row"><label>Bit rate<small>57.6 kHz carrier for 9600, 38.4 kHz for 4800 and below (Vishay TSDP note)</small></label><select id="ir_bps"><option>2400</option><option>4800</option><option>9600</option></select></div>
+    <div class="row"><label>Bits in a message, each way</label><input type="number" id="ir_bits" value="32" min="8" max="256" step="1"></div>
+    <div class="row"><label>Wait for the answer<span class="est">est</span></label><input type="number" id="t_listen" value="30" min="5" max="500" step="1"> ms</div>
+    <div class="row"><label>Receivers on the board</label><input type="number" id="n_rx_b" value="2" min="1" max="6" step="1"></div>
+    <div class="row"><label>IR LEDs on the board</label><input type="number" id="n_led_b" value="3" min="1" max="8" step="1"></div>
+    <h2>Energy storage</h2>
+    <div class="row"><label>Store<small>or click a row in the table on the right</small></label><select id="store"></select></div>
+    <div class="row"><label>Dock charge current<small>capped by what the part allows</small></label><input type="number" id="i_dock" value="100" min="5" max="1000" step="5"> mA</div>
+    <div class="row"><label>Standby current, whole probe<span class="est">est</span><small>controller asleep, receiver off; the store's own leakage is added</small></label><input type="number" id="i_stby" value="10" min="0.1" max="500" step="0.1"> µA</div>
+    <div class="row"><label>Clicks in a day of use<span class="est">est</span></label><input type="number" id="clicks_day" value="500" min="1" max="100000" step="10"></div>
+    <h2>Controller</h2>
+    <div class="row"><label>Part<small id="mcu_txt"></small></label>
+      <div class="seg" id="mcu"><button data-v="v003">CH32V003</button><button aria-pressed="true" data-v="v006">CH32V006</button><button data-v="x035">CH32X035</button></div></div>
+    <h2>The rest</h2>
+    <div class="row"><label>Buttons</label><input type="number" id="n_btn" value="2" min="0" max="6" step="1"></div>
+    <div class="row"><label><input type="checkbox" id="sled" checked> Status LED<small>shows the click was acknowledged</small></label></div>
+    <div class="row"><label>Housing</label>
+      <div class="seg" id="hous"><button data-v="sls">SLS</button><button aria-pressed="true" data-v="mould">Moulded</button></div></div>
+  </div>
+</section>
+<section class="panel" id="panel-costs" aria-label="Costs">
+  <header class="bar"><span class="plate"><b>02</b> Costs</span><span class="bar-note">what those choices cost, how long a charge lasts, and the circuits behind them</span></header>
+  <div class="body">
+    <div class="tiles" id="tiles"></div>
+    <div class="chips" id="chips"></div>
+    <h2>Probe parts</h2>
+    <div class="tablewrap"><table id="parts"><thead><tr><th>Part</th><th class="n">Qty</th><th class="n">USD each</th><th class="n">USD</th><th>Basis</th></tr></thead><tbody></tbody></table></div>
+    <h2>What the board gains</h2>
+    <div class="tablewrap"><table id="board"><thead><tr><th>Part</th><th class="n">Qty</th><th class="n">USD each</th><th class="n">USD</th><th>Basis</th></tr></thead><tbody></tbody></table></div>
+    <h2>Energy stores compared</h2>
+    <p class="hint">Every store under the link, controller and use set on the left. Click a row to choose it. Usable energy is between the store's full voltage and what the controller or the part itself can go down to.</p>
+    <div class="tablewrap"><table id="stores"><thead><tr><th>Store</th><th>Size, mm</th><th class="n">Usable J</th><th class="n">Clicks</th><th class="n">Days of use</th><th class="n">Asleep</th><th class="n">Dock, full</th><th class="n">USD with its parts</th><th>Can, shipping</th></tr></thead><tbody></tbody></table></div>
+    <h2>One click</h2>
+    <div class="tablewrap"><table id="click"><thead><tr><th>Step</th><th class="n">Time</th><th class="n">Energy</th><th>How</th></tr></thead><tbody></tbody></table></div>
+    <h2>Proposed circuits</h2>
+    <p class="hint">Block level, with the values that matter. They follow the options: change the store or the driver and the paths change.</p>
+    <h3>Power and charging</h3><div class="tablewrap" id="c_power"></div><p class="hint" id="c_power_txt"></p>
+    <h3>Coil drive</h3><div class="tablewrap" id="c_coil"></div><p class="hint" id="c_coil_txt"></p>
+    <h3>Infrared in the probe</h3><div class="tablewrap" id="c_ir"></div><p class="hint" id="c_ir_txt"></p>
+    <h3>Dock contacts and buttons</h3><div class="tablewrap" id="c_dock"></div><p class="hint">The WCH parts flash and debug over one wire, so the third contact carries firmware, the pairing handshake and the magnet calibration. The magnet stays the position source, so a flat probe still points.</p>
+    <h3>On the main board</h3><div class="tablewrap" id="c_board"></div><p class="hint">The coil link adds nothing: the tracker's MMC5603s read it at 1 kHz. Two receivers on opposite sides of the frame so a hand cannot cover both.</p>
+    <h2>Controllers</h2>
+    <div class="tablewrap"><table><thead><tr><th>Part</th><th class="n">USD</th><th>Supply</th><th>Analog</th><th>Fits</th></tr></thead><tbody>
+      <tr><td>CH32V003F4U6, QFN20 3 × 3</td><td class="n">0.139</td><td>2.7–5.5 V</td><td>10-bit ADC</td><td>Cheapest. Its 2.7 V floor leaves nothing usable in a 2.7 V supercap, and it has no op-amp for a bare photodiode.</td></tr>
+      <tr><td>CH32V006F8U6, QFN20 3 × 3</td><td class="n">0.154</td><td>2–5 V</td><td>12-bit ADC at 3 Msps, op-amp / PGA / comparator, touch keys</td><td>Runs straight off a supercap, a lithium-ion capacitor or a LiPo with no regulator. The op-amp takes the photodiode or a measuring input.</td></tr>
+      <tr><td>CH32X035G8U6, QFN28 4 × 4</td><td class="n">0.293</td><td>to 5 V<span class="est">est</span></td><td>12-bit ADC, 2 op-amps, 3 comparators, touch keys</td><td>Only if the probe grows a second analog channel. Twice the price, a bigger package.</td></tr>
+    </tbody></table></div>
+    <p class="hint">All three have the one-wire debug port and a unique chip ID. A 2.4 GHz part (CH572, $0.22) is the fallback if the coil and IR do not reach far enough; it is not priced here.</p>
+    <h2>How the numbers are made</h2>
+    <ul class="note">
+      <li><b>Coil strength.</b> Moment = figure of merit × √(power in the coil). Figures of merit, A·m² per √W: keyfob 3D coil 0.0080 (from its 84 Ω and 72 mV per A/m), 2 × 30 rod 0.042, 3 × 45 rod 0.101, 4 × 60 rod 0.25 (a rod model that read a Coilcraft part a factor of two low). K in the tracker's mT·mm³ is 100 000 × the moment; the bench magnet is 1900.</li>
+      <li><b>Coil reach.</b> Distance from the coil to the nearest MMC5603 where a 32-sample code still stands 5 times over the 0.4 µT noise, across the dipole's weak and strong directions. Combining all the sensors adds about a quarter.</li>
+      <li><b>Usable energy.</b> Capacitors: ½·C·(V_full² − V_low²). Cells: capacity × nominal voltage × 0.9; × 0.8 again through a boost converter.</li>
+      <li><b>Days of use.</b> Usable energy ÷ (clicks a day × energy a click + a day of standby). <b>Asleep</b> is standby alone.</li>
+      <li><b>Dock time.</b> Capacitors: through a resistor from 4.7 V, so the current tapers; the figure is R·C·ln of the two headrooms. LiPo: 1.3 × capacity ÷ current, at no more than 1C. NiMH: 14 hours at a tenth of its capacity through a resistor.</li>
+      <li><b>Body width.</b> The widest part across the probe plus a 1 mm wall each side. The dock strip is 7.62 mm wide and the probe drawn in the outline tool is 3.6 mm.</li>
+    </ul>
+    <h2>Sources</h2>
+    <ul class="note">
+      <li>Controllers: LCSC <a href="https://www.lcsc.com/product-detail/C5299908.html">CH32V003F4U6</a> ($0.139 at 5000), <a href="https://www.lcsc.com/product-detail/C42431288.html">CH32V006F8U6</a> ($0.154 at 500), <a href="https://www.lcsc.com/product-detail/C7437027.html">CH32X035G8U6</a> ($0.293 at 490).</li>
+      <li>IR receiver: Everlight <a href="https://www.lcsc.com/product-detail/C91447.html">IRM-H638T/TR2</a>, 5 × 4 mm, 38 kHz, 1.2 mA, 2.7–5.5 V, from $0.155 (LCSC C390031). Bit rates and carriers: <a href="https://www.vishay.com/docs/82666/tsdpreceiver.pdf">Vishay TSDP note</a>.</li>
+      <li>Supercap: CDA <a href="https://www.digikey.com.mx/en/products/detail/cda-zhifengwei-technology/CXHP2R7335R-TW/21848950">CXHP2R7335R-TW</a>, 3.3 F 2.7 V, 8 × 20 mm, $0.48 at 1000 (DigiKey).</li>
+      <li>Lithium-ion capacitors: Tecate <a href="https://www.digikey.com.br/en/products/detail/tecate-group/TPLC-3R8-30MR8X25/12417600">TPLC-3R8/30MR8X25</a>, 30 F, 8 × 25 mm, $1.50 at 1000; Vinatech <a href="https://www.farnell.com/datasheets/3816249.pdf">VEL08203R8306G</a>, 30 F, 8 × 20 mm, 3.8–2.5 V, 11 mAh, 1 µA leakage, 0.1 A rated and 0.6 A pulse charge, $3.20 at 120 (Farnell).</li>
+      <li>LiPo 40 mAh: 3.5 × 8 × 20 mm with protection, <a href="https://tinycircuits.com/products/lithium-ion-polymer-battery-3-7v-40mah">$3.49 for one</a>; the cylinder is the 75130 size. NiMH AAAA 300 mAh, 8.3 × 39.3 mm: about $2 each in threes (Rapid).</li>
+      <li>Coil and sensor figures: Premo 3DC11F-0720J, Coilcraft 4513TC-725 and the MMC5603NJ datasheet, worked through in the V6 project notes on the probe (2026-11-25).</li>
+    </ul>
+  </div>
+</section>
+</main>
+<script>
+(function () {
+  // ---- parts and prices. est = an assumption, shown with the mark; every price can be typed over in the tables ----
+  const P = {
+    v003: { p: 0.139, n: 'CH32V003F4U6', b: 'LCSC, 5000' }, v006: { p: 0.154, n: 'CH32V006F8U6', b: 'LCSC, 500' }, x035: { p: 0.293, n: 'CH32X035G8U6', b: 'LCSC, 490' },
+    key3d: { p: 0.45, est: 1, n: 'Keyfob 3D coil, 7.2 mH', b: 'the ZSUCORE 3D1212B class; no quote' },
+    rod230: { p: 0.30, est: 1, n: 'Rod coil, 2 × 30 mm, wound to order', b: 'ferrite rod + winding; no quote' },
+    rod345: { p: 0.35, est: 1, n: 'Rod coil, 3 × 45 mm, wound to order', b: 'ferrite rod + winding; no quote' },
+    rod460: { p: 0.50, est: 1, n: 'Rod coil, 4 × 60 mm, wound to order', b: 'ferrite rod + winding; no quote' },
+    bridge: { p: 0.10, est: 1, n: 'H-bridge IC, DRV8837 class, 2 × 2 mm', b: 'jellybean motor driver' },
+    irled: { p: 0.03, est: 1, n: 'IR LED, 940 nm, 0603', b: '' }, npn: { p: 0.02, est: 1, n: 'NPN + resistors for the LED', b: '' },
+    irmod: { p: 0.155, n: 'IR receiver module, Everlight IRM-H638T class', b: 'LCSC C390031; 5 × 4 mm' },
+    irpd: { p: 0.05, est: 1, n: 'IR photodiode, 0805, + filter parts', b: 'into the controller\'s op-amp' },
+    edlc1: { p: 0.20, est: 1, n: 'Supercap 1 F 2.7 V', b: 'no quote' }, edlc3: { p: 0.48, n: 'Supercap 3.3 F 2.7 V, CDA CXHP2R7335R', b: 'DigiKey, 1000' },
+    edlc10: { p: 0.60, est: 1, n: 'Supercap 10 F 2.7 V', b: 'no quote' },
+    lic10: { p: 1.00, est: 1, n: 'Lithium-ion capacitor 10 F 3.8 V', b: 'Tecate TPLC 8 × 14 class; no quote' },
+    lic30: { p: 1.50, n: 'Lithium-ion capacitor 30 F 3.8 V, Tecate TPLC', b: 'DigiKey, 1000; Vinatech 8 × 20 is $3.20 at 120' },
+    lipo40: { p: 0.60, est: 1, n: 'LiPo pouch 40 mAh, protected', b: '$3.49 for one; volume price a guess' },
+    lipo40c: { p: 0.70, est: 1, n: 'LiPo cylinder 40 mAh, 75130', b: 'no quote' }, lipo100: { p: 0.80, est: 1, n: 'LiPo pouch 100 mAh, protected', b: 'no quote' },
+    nimh: { p: 0.80, est: 1, n: 'NiMH AAAA 300 mAh', b: 'about $2 each in threes; volume a guess' }, alk: { p: 0.40, est: 1, n: 'Alkaline AAAA', b: 'user-replaceable' },
+    ldo: { p: 0.04, est: 1, n: 'LDO, SOT-23, with its capacitors', b: 'ME6211 class' }, chg: { p: 0.06, est: 1, n: 'LiPo charger, TP4054 class, with its parts', b: '' },
+    boost: { p: 0.13, est: 1, n: 'Boost converter to 3.0 V + inductor', b: 'ME2108 class' }, trick: { p: 0.01, est: 1, n: 'Trickle resistor + diode', b: '' },
+    btn: { p: 0.04, est: 1, n: 'Push switch', b: 'a part from the switch library costs more' }, sled: { p: 0.02, est: 1, n: 'Status LED + resistor', b: '' },
+    tip: { p: 0.10, est: 1, n: 'Needle tip + magnet', b: '' }, pass: { p: 0.08, est: 1, n: 'Passives, TVS, pads', b: '' }, pcb: { p: 0.10, est: 1, n: 'Probe PCB, 0.8 mm', b: 'about 5 × 90 mm, panelised' },
+    hous_sls: { p: 1.50, est: 1, n: 'Housing, SLS', b: '' }, hous_mould: { p: 0.40, est: 1, n: 'Housing, moulded, two halves', b: 'tooling not included' },
+    asm: { p: 0.60, est: 1, n: 'Assembly and test', b: 'placement, coil and store by hand' },
+    pogo: { p: 0.07, est: 1, n: 'Dock contact, sprung', b: '' }, dockpwr: { p: 0.05, est: 1, n: 'Dock charge limit: resistor, PTC, switch', b: '' },
+  };
+  // energy stores. F: capacitor (vmax down to vmin). mAh: cell. leak in µA. w: widest dimension across the probe, mm
+  const STORE = {
+    edlc1:   { size: 'Ø6.3 × 12', w: 6.3, F: 1, vmax: 2.7, vmin: 0.5, leak: 3, sup: ['ldo'], can: 'aluminium; not a battery', chg: 'LDO 2.7 V' },
+    edlc3:   { size: 'Ø8 × 20', w: 8, F: 3.3, vmax: 2.7, vmin: 0.5, leak: 6, sup: ['ldo'], can: 'aluminium; not a battery', chg: 'LDO 2.7 V' },
+    edlc10:  { size: 'Ø10 × 20', w: 10, F: 10, vmax: 2.7, vmin: 0.5, leak: 15, sup: ['ldo'], can: 'aluminium; not a battery', chg: 'LDO 2.7 V' },
+    lic10:   { size: 'Ø8 × 14', w: 8, F: 10, vmax: 3.8, vmin: 2.5, leak: 1, imax: 0.2, sup: ['ldo'], can: 'aluminium; capacitor rules, to confirm', chg: 'LDO 3.8 V' },
+    lic30:   { size: 'Ø8 × 20–25', w: 8, F: 30, vmax: 3.8, vmin: 2.5, leak: 1, imax: 0.5, sup: ['ldo'], can: 'aluminium; capacitor rules, to confirm', chg: 'LDO 3.8 V' },
+    lipo40:  { size: '3.5 × 8 × 20', w: 8, mAh: 40, vnom: 3.7, vmax: 4.2, vmin: 3.0, leak: 1.1, sup: ['chg'], can: 'pouch; lithium battery rules', chg: 'TP4054 class' },
+    lipo40c: { size: 'Ø7.5 × 13', w: 7.5, mAh: 40, vnom: 3.7, vmax: 4.2, vmin: 3.0, leak: 1.1, sup: ['chg'], can: 'steel can; lithium battery rules', chg: 'TP4054 class' },
+    lipo100: { size: '4 × 12 × 30', w: 12, mAh: 100, vnom: 3.7, vmax: 4.2, vmin: 3.0, leak: 2.8, sup: ['chg'], can: 'pouch; lithium battery rules', chg: 'TP4054 class' },
+    nimh:    { size: 'Ø8.3 × 39', w: 8.3, mAh: 300, vnom: 1.2, vmax: 1.4, vmin: 1.0, leak: 40, boost: 1, sup: ['boost', 'trick'], can: 'steel can, by the tracker; no lithium', chg: 'resistor, C/10' },
+    alk:     { size: 'Ø8.3 × 42', w: 8.3, mAh: 550, vnom: 1.5, vmax: 1.6, vmin: 0.9, leak: 0.5, boost: 1, sup: ['boost'], can: 'steel can, by the tracker; primary', chg: 'none' },
+  };
+  const MCU = { v003: { vmin: 2.7, vmax: 5.5, run: 3, txt: '2.7–5.5 V, 10-bit ADC, no op-amp' }, v006: { vmin: 2.0, vmax: 5.0, run: 3, txt: '2–5 V, 12-bit ADC, op-amp and comparator' }, x035: { vmin: 2.0, vmax: 5.0, run: 4, txt: '12-bit ADC, 2 op-amps, 3 comparators' } };
+  const COIL = { key3d: { fom: 0.00796, R: 84, w: 12, sat: 1000, txt: '12 mm square; fixed 84 Ω an axis; K 150–280' }, rod230: { fom: 0.042, w: 3, sat: 80, txt: '3 mm wound; saturates near 80 mW' },
+    rod345: { fom: 0.101, w: 4, sat: 200, txt: '4 mm wound; about 13 × the keyfob coil at the same power' }, rod460: { fom: 0.25, w: 6, sat: 350, txt: '6 mm wound; needs a 70 mm body' } };
+  const DRV = { gpio: 80, bridge: 1 };
+  const IRRX = { module: { pid: 'irmod', mA: 1.2, w: 5 }, diode: { pid: 'irpd', mA: 0.3, w: 2 } };
+
+  const $ = id => document.getElementById(id);
+  const state = { link: 'both', coil: 'rod345', drv: 'bridge', irrx: 'module', mcu: 'v006', hous: 'mould', prices: {} };
+  $('store').innerHTML = Object.keys(STORE).map(k => `<option value="${k}"${k === 'lic30' ? ' selected' : ''}>${P[k].n.split(',')[0]} (${STORE[k].size})</option>`).join('');
+  const num = id => parseFloat($(id).value) || 0;
+  const price = id => (id in state.prices ? state.prices[id] : P[id].p);
+  const money = v => '$' + v.toFixed(2);
+  const sig = (v, d) => (v >= 100 ? v.toFixed(0) : v >= 10 ? v.toFixed(d > 0 ? 1 : 0) : v.toFixed(d === undefined ? 2 : d + 1));
+  const dur = s => s == null ? 'not rechargeable' : s < 90 ? s.toFixed(0) + ' s' : s < 5400 ? (s / 60).toFixed(0) + ' min' : s < 172800 ? (s / 3600).toFixed(1) + ' h' : (s / 86400).toFixed(0) + ' days';
+  const mj = j => j >= 1 ? sig(j) + ' J' : sig(j * 1000) + ' mJ';
+  const count = v => v >= 1e6 ? (v / 1e6).toFixed(1) + ' M' : v >= 1e4 ? (v / 1e3).toFixed(0) + ' k' : v >= 1e3 ? (v / 1e3).toFixed(1) + ' k' : v.toFixed(0);
+
+  // ---- the model: one store id in, everything about the probe with that store out ----
+  function model(sid) {
+    const S = STORE[sid], M = MCU[state.mcu], C = COIL[state.coil], Rd = DRV[state.drv];
+    const useCoil = state.link !== 'ir', useIR = state.link !== 'coil';
+    const boost = !!S.boost;
+    const vlow = boost ? S.vmin : Math.max(S.vmin, M.vmin);
+    let E = S.F ? 0.5 * S.F * (S.vmax * S.vmax - vlow * vlow) : S.mAh * 3.6 * S.vnom * 0.9;
+    if (boost) E *= 0.8;
+    E = Math.max(0, E);
+    const V = boost ? 3.0 : S.F ? (S.vmax + Math.min(vlow, S.vmax)) / 2 : S.vnom;        // what the loads see, on average
+    // coil
+    let Rcoil = 0, Icoil = 0, Psup = 0, Pcoil = 0, K = 0, sat = false;
+    if (useCoil) {
+      Rcoil = C.R ? C.R : Math.max(1, V * V / (num('p_coil_mw') / 1000) - Rd);
+      Icoil = V / (Rcoil + Rd); Psup = V * Icoil; Pcoil = Icoil * Icoil * Rcoil;
+      if (Pcoil > C.sat / 1000) { Pcoil = C.sat / 1000; sat = true; }
+      K = 1e5 * C.fom * Math.sqrt(Pcoil);
+    }
+    const Bmin = 5 * 0.4 / Math.sqrt(32) * 1e-3;                                        // mT
+    const reach = K ? [Math.cbrt(K / Bmin), Math.cbrt(2 * K / Bmin)] : null;            // mm, weak and strong direction
+    // one send
+    const tc = useCoil ? num('t_coil') / 1000 : 0, tir = useIR ? num('ir_bits') / +$('ir_bps').value : 0, tl = useIR ? num('t_listen') / 1000 : 0;
+    const rx = IRRX[state.irrx];
+    const steps = [];
+    if (useCoil) steps.push(['Coil message', tc, Psup * tc, `${(Psup * 1000).toFixed(0)} mW from the store, ${(Icoil * 1000).toFixed(0)} mA through ${Rcoil.toFixed(0)} Ω + ${Rd} Ω of driver`]);
+    if (useIR) steps.push(['IR message', tir, V * num('ir_ma') / 1000 * 0.5 * tir, `${num('ir_bits')} bits at ${$('ir_bps').value} bps, ${num('ir_ma')} mA at half duty`]);
+    if (useIR) steps.push(['Wait for the answer', tl, V * rx.mA / 1000 * tl, `receiver on, ${rx.mA} mA`]);
+    const tawake = tc + tir + tl + 0.02;
+    steps.push(['Controller awake', tawake, V * M.run / 1000 * tawake, `${M.run} mA`]);
+    const Esend = steps.reduce((a, s) => a + s[2], 0), Eclick = Esend * num('retry');
+    const Pst = (num('i_stby') + S.leak) * 1e-6 * V / (boost ? 0.8 : 1);
+    const clicks = Eclick ? E / Eclick : 0;
+    const days = E / (num('clicks_day') * Eclick + 86400 * Pst);
+    const asleep = E / Pst;                                                              // s
+    // dock
+    const Id = num('i_dock') / 1000;
+    let tchg = null, Ichg = 0;
+    let Rchg = 0;                                                                        // caps: 4.7 V behind a resistor, stopped at vmax by the regulator
+    if (S.F) { Ichg = Math.min(Id, S.imax || Id); const v0 = Math.min(vlow, S.vmax - 0.05); Rchg = (4.7 - v0) / Ichg; tchg = Rchg * S.F * Math.log((4.7 - v0) / (4.7 - S.vmax)); }
+    else if (sid.startsWith('lipo')) { Ichg = Math.min(Id, S.mAh / 1000); tchg = 1.3 * S.mAh / 1000 / Ichg * 3600; }
+    else if (sid === 'nimh') { Ichg = S.mAh / 10000; tchg = 14 * 3600; }
+    const topup = tchg == null ? null : 100 * Eclick / ((S.F ? V : S.vnom) * Ichg) * (S.F || sid === 'nimh' ? 1.4 : 1.1);
+    const sup = S.sup.slice();
+    const cost = price(sid) + sup.reduce((a, k) => a + price(k), 0);
+    const dead = !boost && (vlow >= S.vmax || S.vmax > M.vmax + 1e-9);
+    return { sid, S, M, C, Rd, useCoil, useIR, boost, vlow, E, V, Rcoil, Icoil, Psup, Pcoil, K, sat, reach, steps, Esend, Eclick, Pst, clicks, days, asleep, tchg, Ichg, Rchg, topup, sup, cost, dead, rx };
+  }
+
+  // ---- a proposed circuit: rows of plates joined by labelled wires ----
+  function chain(rows) {
+    let y = 4, W = 0, out = '';
+    for (const row of rows) {
+      let x = 2;
+      for (const it of row) {
+        if (it.b !== undefined) {
+          const w = Math.max(62, 16 + 6.5 * Math.max(it.b.length, (it.s || '').length));
+          out += `<path class="bx${it.hot ? ' hot' : ''}" d="M${x} ${y}h${w - 7}l7 7v${31}h${-w}z"/><text x="${x + 7}" y="${y + 15}">${it.b}</text>` + (it.s ? `<text class="bs" x="${x + 7}" y="${y + 29}">${it.s}</text>` : '');
+          x += w;
+        } else {
+          const w = Math.max(30, 14 + 5.8 * (it.l || '').length);
+          out += `<line class="wi" x1="${x}" y1="${y + 19}" x2="${x + w}" y2="${y + 19}"/>` + (it.l ? `<text class="wl" x="${x + w / 2}" y="${y + 14}" text-anchor="middle">${it.l}</text>` : '');
+          x += w;
+        }
+      }
+      W = Math.max(W, x); y += 48;
+    }
+    return `<svg class="ckt" viewBox="0 0 ${W + 2} ${y - 6}" width="${W + 2}" height="${y - 6}" role="img" aria-label="circuit, block level">${out}</svg>`;
+  }
+  const B = (b, s, hot) => ({ b, s, hot }), L = l => ({ l });
+
+  function circuits(r) {
+    const S = r.S, id = r.sid, mcu = P[state.mcu].n.replace(/F4U6|F8U6|G8U6/, '');
+    // power
+    let rows, txt;
+    if (S.F) {
+      const lic = id.startsWith('lic');
+      rows = [[B('Dock pad', '5 V'), L(`${Math.round(r.Rchg)} Ω`), B(`LDO ${S.vmax} V`, 'sets the full voltage'), L('Schottky'), B(P[id].n.split(',')[0], `${S.F} F, ${S.size} mm`, 1), L('VDD'), B(mcu, `runs down to ${r.vlow} V`)]];
+      txt = lic ? `The series resistor sets the charge current (${(r.Ichg * 1000).toFixed(0)} mA at the start, less as it fills) and the regulator stops it at 3.8 V. A lithium-ion capacitor must not go below 2.5 V: the controller's voltage detector puts everything to sleep at 2.6 V, and the 1 µA leakage then takes months to matter.`
+        : `The regulator stops the charge at 2.7 V, the cap's limit. The rail then falls as the cap empties, so the coil gets weaker towards the end of a charge. ${r.M.vmin > 2.5 ? 'This controller stops at ' + r.M.vmin + ' V, so almost none of the cap is usable: pick the CH32V006.' : ''}`;
+    } else if (id.startsWith('lipo')) {
+      rows = [[B('Dock pad', '5 V'), L('1 Ω'), B('Charger', `TP4054 class, ${(r.Ichg * 1000).toFixed(0)} mA`), L(''), B(P[id].n.split(',')[0], `${S.mAh} mAh, ${S.size} mm`, 1), L('VDD 3.0–4.2 V'), B(mcu, 'no regulator')]];
+      txt = 'The charge current is one resistor on the charger. The cell carries its own protection board. The coil and the LED run from the cell directly.';
+    } else if (id === 'nimh') {
+      rows = [[B('Dock pad', '5 V'), L('120 Ω + diode'), B('NiMH AAAA', '300 mAh, 1.2 V', 1), L(''), B('Boost', 'to 3.0 V'), L('VDD'), B(mcu, '')]];
+      txt = 'No charger IC: a tenth of the capacity through a resistor for as long as it sits in the dock. The boost converter\'s own current is part of the standby figure, and a steel can this close to the tracking magnet needs a bench check.';
+    } else {
+      rows = [[B('Alkaline AAAA', '1.5 V, replaceable', 1), L(''), B('Boost', 'to 3.0 V'), L('VDD'), B(mcu, '')], [B('Dock pad', '5 V'), L('not used for power')]];
+      txt = 'Nothing to charge; the dock is for firmware and calibration only. A steel can this close to the tracking magnet needs a bench check.';
+    }
+    $('c_power').innerHTML = chain(rows); $('c_power_txt').textContent = txt;
+    // coil
+    if (r.useCoil) {
+      const coil = B(P[state.coil].n.split(',')[0], `${r.Rcoil.toFixed(0)} Ω, ±${(r.Icoil * 1000).toFixed(0)} mA`, 1);
+      rows = state.drv === 'bridge' ? [[B(mcu, 'two pins: A, B'), L('IN1, IN2'), B('H-bridge IC', 'sleeps at nA'), L('OUT1, OUT2'), coil]]
+        : [[B(mcu, 'pins A1 + A2 tied'), L(''), coil, L(''), B(mcu, 'pins B1 + B2 tied')]];
+      $('c_coil').innerHTML = chain(rows);
+      $('c_coil_txt').textContent = `A high / B low is one polarity, the reverse the other, both low is off. ${C_note(r)} K ≈ ${r.K.toFixed(0)} mT·mm³` + (r.sat ? ', held there by the core saturating' : '') + '. Slow the edges with a capacitor across the coil so the wiring next to it sees no fast step.';
+    } else { $('c_coil').innerHTML = ''; $('c_coil_txt').textContent = 'No coil in this build: clicks go by IR only, and only in sight of a receiver.'; }
+    // IR
+    if (r.useIR) {
+      const big = num('ir_ma') > 20;
+      rows = [[B(mcu, 'timer pin, carrier'), L(big ? 'NPN' : ''), B('IR LED 940 nm', `${num('ir_ma')} mA`, 1), L(`${Math.max(1, Math.round((r.V - 1.3) / (num('ir_ma') / 1000)))} Ω`), B(big ? 'VDD' : 'GND', '')],
+        state.irrx === 'module' ? [B(mcu, 'pin as its supply'), L('VS, 100 nF'), B('Receiver module', '38 or 57.6 kHz', 1), L('OUT'), B(mcu, 'capture / UART RX')]
+          : [B('Photodiode', 'reverse biased', 1), L('100 kΩ'), B(mcu + ' op-amp', 'gain, then ADC'), L(''), B('Firmware', 'carrier lock-in')]];
+      $('c_ir').innerHTML = chain(rows);
+      $('c_ir_txt').textContent = state.irrx === 'module' ? 'The module does the filtering and gain; it draws 1.2 mA, so a pin powers it only for the answer window. It is 5 × 4 mm and has to look out of the body.'
+        : 'Cheaper and smaller, and the same diode can read the breadboard LEDs, but the demodulator becomes firmware and needs the CH32V006 or CH32X035 op-amp.';
+    } else { $('c_ir').innerHTML = ''; $('c_ir_txt').textContent = 'No IR in this build, so the board cannot answer: the probe never learns whether a click arrived.'; }
+    // dock
+    $('c_dock').innerHTML = chain([[B('Dock pad', 'SWIO'), L('1 kΩ, TVS'), B(mcu, 'one-wire debug + UART')], [B(mcu, 'pins, pulled up'), L(''), B(`${num('n_btn')} × push switch`, 'wake from standby'), L(''), B('GND', 'dock pad 3')]]);
+    // board
+    rows = [];
+    if (r.useIR) { rows.push([B(`${num('n_rx_b')} × receiver module`, 'outputs tied'), L('OUT'), B('CH32H417', 'UART RX / capture')]); rows.push([B('CH32H417', 'timer pin'), L('NPN'), B(`${num('n_led_b')} × IR LED`, '50 mA each'), L('68 Ω each'), B('5 V', '')]); }
+    rows.push([B('5 V', ''), L('switch, PTC'), B('3 dock contacts', '5 V, SWIO, GND'), L('SWIO'), B('CH32H417', 'one pin')]);
+    if (r.useCoil) rows.push([B('MMC5603 array', 'already there'), L('1 kHz, I²C'), B('CH32H417', 'matched filter')]);
+    $('c_board').innerHTML = chain(rows);
+  }
+  const C_note = r => r.C.R ? `The keyfob coil is 84 Ω whatever is asked, so it takes ${(r.Psup * 1000).toFixed(0)} mW.` : `Wound to ${r.Rcoil.toFixed(0)} Ω for this supply.`;
+
+  // ---- the page ----
+  function partRows(r) {
+    const rows = [], add = (id, qty, note) => { if (qty > 0) rows.push([id, qty, note]); };
+    add(state.mcu, 1, MCU[state.mcu].txt);
+    if (r.useCoil) { add(state.coil, 1, `K ≈ ${r.K.toFixed(0)} at ${(r.Pcoil * 1000).toFixed(0)} mW in the coil`); if (state.drv === 'bridge') add('bridge', 1, ''); }
+    if (r.useIR) { add('irled', 1, ''); if (num('ir_ma') > 20) add('npn', 1, ''); add(r.rx.pid, 1, ''); }
+    add(r.sid, 1, `${r.S.size} mm, ${sig(r.E, 0)} J usable`);
+    r.sup.forEach(k => add(k, 1, r.S.chg));
+    add('btn', num('n_btn'), ''); if ($('sled').checked) add('sled', 1, '');
+    add('tip', 1, ''); add('pass', 1, ''); add('pcb', 1, ''); add('hous_' + state.hous, 1, ''); add('asm', 1, '');
+    return rows;
+  }
+  function boardRows(r) {
+    const rows = [];
+    if (r.useIR) { rows.push(['irmod', num('n_rx_b'), 'two sides of the frame']); rows.push(['irled', num('n_led_b'), 'the answer']); rows.push(['npn', 1, '']); }
+    rows.push(['pogo', 3, '5 V, SWIO, GND']); rows.push(['dockpwr', 1, '']);
+    return rows;
+  }
+  const table = (id, rows, totalLabel, tail) => {
+    let sum = 0;
+    $(id).tBodies[0].innerHTML = rows.map(([pid, qty, note]) => { const u = price(pid); sum += u * qty;
+      return `<tr><td>${P[pid].n}${P[pid].est && !(pid in state.prices) ? '<span class="est">est</span>' : ''}</td><td class="n">${qty}</td><td class="n"><input type="number" data-p="${pid}" value="${u}" step="0.01" min="0" aria-label="price of ${P[pid].n}"></td><td class="n">${money(u * qty)}</td><td>${[note, P[pid].b].filter(Boolean).join('; ')}</td></tr>`; }).join('')
+      + (tail || '') + `<tr class="total"><td>${totalLabel}</td><td></td><td></td><td class="n">${money(sum)}</td><td></td></tr>`;
+    return sum;
+  };
+
+  function render() {
+    const sid = $('store').value, r = model(sid);
+    persist();
+    $('coil_txt').textContent = COIL[state.coil].txt; $('mcu_txt').textContent = MCU[state.mcu].txt;
+    const probe = table('parts', partRows(r), 'Probe, built');
+    const board = table('board', boardRows(r), 'Added to the main board', r.useCoil ? '<tr><td>Coil link: the magnetometer array</td><td class="n">0</td><td class="n"></td><td class="n">$0.00</td><td>read at 1 kHz while a click is expected; about 7.5 mA a sensor then</td></tr>' : '');
+    const width = Math.max(r.S.w, r.useCoil ? r.C.w : 0, r.useIR ? r.rx.w : 0, 4) + 2;
+    const tile = (k, v, d, bad) => `<div class="tile${bad ? ' bad' : ''}"><div class="k">${k}</div><div class="v">${v}</div><div class="d">${d}</div></div>`;
+    $('tiles').innerHTML = tile('Probe, built', money(probe), 'parts, PCB, housing, assembly')
+      + tile('Main board gains', money(board), r.useIR ? 'IR parts and dock contacts' : 'dock contacts only')
+      + tile('A charge lasts', r.dead ? 'nothing' : dur(r.days * 86400), `at ${num('clicks_day')} clicks a day; ${count(r.clicks)} clicks in all`, r.dead || r.days < 1)
+      + tile('Full charge in the dock', dur(r.tchg), r.tchg == null ? 'swap the cell' : `${(r.Ichg * 1000).toFixed(0)} mA; 100 clicks back in ${dur(r.topup)}`)
+      + tile('Coil reach', r.reach ? `${(r.reach[0] / 10).toFixed(0)}–${(r.reach[1] / 10).toFixed(0)} cm` : 'none', r.reach ? `K ≈ ${r.K.toFixed(0)}; the bench magnet is 1900` : 'IR only: line of sight')
+      + tile('Body width', width.toFixed(0) + ' mm', width > 7.62 ? 'wider than the 7.62 mm dock strip' : 'inside the 7.62 mm dock strip', false)
+      + tile('One click', mj(r.Eclick), `${(r.steps[r.steps.length - 1][1] * 1000).toFixed(0)} ms awake, × ${num('retry')} sends`);
+    const chips = [];
+    if (r.dead) chips.push(['bad', `<b>${P[state.mcu].n}</b> cannot run from this store: it needs ${r.M.vmin} V and the store is full at ${r.S.vmax} V`]);
+    if (!r.useIR) chips.push(['bad', 'no IR: <b>no acknowledgement</b>, so no resend']);
+    if (!r.useCoil) chips.push(['', 'IR only: a click needs a <b>line of sight</b> or a reflection']);
+    if (r.sat) chips.push(['bad', `the core <b>saturates</b> at ${r.C.sat} mW: more power buys nothing`]);
+    if (state.drv === 'gpio' && r.useCoil) chips.push(['', `the pins waste <b>${(100 * (1 - r.Pcoil / r.Psup)).toFixed(0)} %</b> of the coil power`]);
+    if (state.irrx === 'diode' && state.mcu === 'v003' && r.useIR) chips.push(['bad', 'a bare photodiode needs an <b>op-amp</b>: CH32V006 or CH32X035']);
+    if (/steel/.test(r.S.can)) chips.push(['', 'a <b>steel can</b> sits in the tracker\'s field: bench-check it']);
+    if (width > 7.62) chips.push(['', `<b>${width.toFixed(0)} mm</b> body: the dock becomes a cradle, not a slot in the strip`]);
+    if (sid.startsWith('lic')) chips.push(['', 'keep it above <b>2.5 V</b>: sleep at 2.6 V']);
+    $('chips').innerHTML = chips.map(c => `<span class="chip ${c[0]}">${c[1]}</span>`).join('');
+    // stores compared
+    $('stores').tBodies[0].innerHTML = Object.keys(STORE).map(k => { const m = model(k);
+      const dcls = m.dead ? 'bad' : m.days < 1 ? 'warn' : 'good';
+      return `<tr data-s="${k}" class="${k === sid ? 'on' : ''}"><td>${P[k].n.split(',')[0]}${P[k].est && !(k in state.prices) ? '<span class="est">est</span>' : ''}</td><td>${m.S.size}</td><td class="n">${sig(m.E, 0)}</td><td class="n">${m.dead ? '0' : count(m.clicks)}</td>`
+        + `<td class="n ${dcls}">${m.dead ? 'will not run' : dur(m.days * 86400)}</td><td class="n">${m.dead ? '' : dur(m.asleep)}</td><td class="n">${dur(m.tchg)}</td><td class="n">${money(m.cost)}</td><td>${m.S.can}</td></tr>`; }).join('');
+    // one click
+    $('click').tBodies[0].innerHTML = r.steps.map(s => `<tr><td>${s[0]}</td><td class="n">${(s[1] * 1000).toFixed(0)} ms</td><td class="n">${mj(s[2])}</td><td>${s[3]}</td></tr>`).join('')
+      + `<tr class="total"><td>One send</td><td></td><td class="n">${mj(r.Esend)}</td><td>× ${num('retry')} sends a click = ${mj(r.Eclick)}</td></tr>`
+      + `<tr><td>Asleep</td><td class="n">a day</td><td class="n">${mj(r.Pst * 86400)}</td><td>${num('i_stby')} µA + ${r.S.leak} µA of the store's own leakage, at ${r.V.toFixed(1)} V</td></tr>`;
+    circuits(r);
+  }
+
+  // ---- controls, and remembering them ----
+  document.querySelectorAll('.seg').forEach(seg => seg.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    seg.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+    state[seg.id] = b.dataset.v; render();
+  }));
+  document.querySelectorAll('#panel-options input, #panel-options select').forEach(el => el.addEventListener('input', render));
+  $('panel-costs').addEventListener('change', e => { const pid = e.target.dataset && e.target.dataset.p; if (!pid) return;
+    const v = parseFloat(e.target.value); if (isNaN(v) || v === P[pid].p) delete state.prices[pid]; else state.prices[pid] = v; render(); });
+  $('stores').addEventListener('click', e => { const tr = e.target.closest('tr[data-s]'); if (tr) { $('store').value = tr.dataset.s; render(); } });
+  const KEY = 'v6pe.v1';
+  const snapshot = () => { const o = { state: JSON.parse(JSON.stringify(state)), v: {} };
+    document.querySelectorAll('#panel-options input, #panel-options select').forEach(el => { if (el.id) o.v[el.id] = el.type === 'checkbox' ? el.checked : el.value; }); return o; };
+  const restore = () => { try { const o = JSON.parse(localStorage.getItem(KEY) || 'null'); if (!o) return;
+    Object.assign(state, o.state || {}); if (!state.prices) state.prices = {};
+    document.querySelectorAll('.seg').forEach(seg => seg.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === String(state[seg.id]) ? 'true' : 'false')));
+    for (const [id, val] of Object.entries(o.v || {})) { const el = $(id); if (!el) continue; if (el.type === 'checkbox') el.checked = !!val; else el.value = val; }
+  } catch (e) { /* private mode, blocked storage: run with the defaults */ } };
+  const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(snapshot())); } catch (e) { /* ignore */ } };
+  $('reset').addEventListener('click', () => { try { localStorage.removeItem(KEY); } catch (e) { /* ignore */ } location.reload(); });
+  restore(); render();
+  window.v6pe = { model, state };       // for a check from the console
+})();
+</script>
+</body>
+</html>

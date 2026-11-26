@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Jumperless V6 Cost Explorer</title>
 <meta name="short-title" content="Cost explorer">
-<meta name="description" content="Unit cost, landed cost and margin for the Jumperless V6 main board and wig from the staged schematic BOM. Choose the display and its window, row isolation, bus splits, the shunt amplifier, the expansion port, the magnetometers and the cost cuts; the whole schematic BOM and the bar display survey are below the numbers.">
+<meta name="description" content="Unit cost, landed cost and margin for the Jumperless V6 main board and wig from the staged schematic BOM. Choose the display and its window, row isolation, bus splits, the shunt amplifier, the expansion port, the magnetometers, the probe link and the cost cuts; the whole schematic BOM and the bar display survey are below the numbers.">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="../styles/jumperless.css">
 <style>
@@ -160,6 +160,12 @@ tr.total td { font-weight: 600; border-top: 1px solid var(--dim); }
     <div class="row"><label>MMC5603NJ price<small>LCSC C404328, $0.15 @1k on 2026-10-18</small></label><input type="number" id="p_mag" value="0.15" step="0.01"> $</div>
     <div class="row"><label>Spring clips per unit<small>Fulimei Spring Clip6, phosphor bronze</small></label><input type="number" id="nclip" value="80" step="1" min="0"></div>
     <div class="row"><label>Spring clip price<small>$0.0599 each — Fulimei proforma invoice 2026-06-17 (10k at the 100k-run price); tooling $2,686 paid, amortised in Mechanics</small></label><input type="number" id="p_clip" value="0.0599" step="0.001"> $</div>
+    <h2>Probe</h2>
+    <div class="row"><label>How the probe talks to the board<small>worked out in the probe cost explorer (<code>notes/v6_probe_cost_explorer.html</code>); the probe's housing stays in Mechanics</small></label>
+      <div class="seg" id="plink"><button aria-pressed="true" data-v="stick">Magnet only</button><button data-v="coil">Coil</button><button data-v="coilir">Coil + IR</button></div></div>
+    <div class="row"><label>Probe electronics<span class="est">est</span><small>the probe explorer's default less housing and assembly: CH32V006, 3 × 45 mm rod coil and bridge, IR LED and receiver, 30 F lithium-ion capacitor, switches, PCB</small></label><input type="number" id="p_probe" value="2.71" step="0.05"> $</div>
+    <div class="row"><label>Dock contacts and charge limit<span class="est">est</span><small>3 sprung contacts, resistor, PTC, switch</small></label><input type="number" id="p_pdock" value="0.26" step="0.01"> $</div>
+    <div class="row"><label>IR on the board<span class="est">est</span><small>2 × receiver module at $0.155, 3 × IR LED, driver; counted with Coil + IR only</small></label><input type="number" id="p_pir" value="0.42" step="0.01"> $</div>
     <h2>Cost cuts (toggle to apply)</h2>
     <div class="row"><label><input type="checkbox" id="c_l272"> L272D → TCA0372 (2 ×)<small>−$1.08, pinout check</small></label></div>
     <div class="row"><label><input type="checkbox" id="c_u4" checked> Drop U4 (INA219 on R57)<small>−$0.47; the bus shunt covers it</small></label></div>
@@ -228,7 +234,7 @@ tr.total td { font-weight: 600; border-top: 1px solid var(--dim); }
   const WHAT = { B21: 'CH32H417 core (CH32 $3.30 est.)', B22: 'USB', B23: 'RP2350 link, PSRAM $1.42', B24: 'display as selected, with its window / cover option and the switches under it',
     B25: 'controls: nav stick $2.34, encoder $1.30', B27: 'LED drive (main) / 480 LEDs (wig)', B28: 'wig interface', B29: 'ChonkBus: 97 × ET7460H $11.64, 25 × 74HC595 $1.52, 74HC238 ×2, 8 × 0R segment links, shunt amplifier as selected, gates, bus dividers, housekeeping mux; + segment options as selected',
     B30: 'lane layer: 5 × CH446Q $4.50', B32: 'power: TPS65131 $2.17, 60 × BAT54S $1.04', B33: 'expansion port: socket + port CH446Q + per-pin isolation as selected', B34: 'handover: 74HC238 ×2, TCA9534', B35: 'ADC taps',
-    V5: 'your V5 parts: 12 × CH446Q $10.80, 2 × L272D $2.28, MCP4728, RP2350B, 2 × INA219', B26: 'magnetometer board passives', mags: 'MMC5603NJ array + 74LVC138 decoders + 2.2 µF (was 9 × TMAG5273 $4.43)', clips: 'Fulimei Spring Clip6, $0.0599 each (PI 2026-06-17)', extra: 'AMOLED socket' };
+    V5: 'your V5 parts: 12 × CH446Q $10.80, 2 × L272D $2.28, MCP4728, RP2350B, 2 × INA219', B26: 'magnetometer board passives', mags: 'MMC5603NJ array + 74LVC138 decoders + 2.2 µF (was 9 × TMAG5273 $4.43)', clips: 'Fulimei Spring Clip6, $0.0599 each (PI 2026-06-17)', extra: 'AMOLED socket', probe: 'active probe: its electronics, the dock contacts and, with IR, the board\'s receivers and LEDs (probe cost explorer)' };
   const ISO_PARTS = 4.47, ISO_PLACEMENTS = 16;          // bom.py REPLACES['ROW-BRIDGE']
   const AREA = { main_components_mm2: 9134, iso_mm2: 511, board_mm2: 170.5 * 82.6, sides: 2,
     chips: { 'CH446Q ×17': 3053, '74HC595 ×25': 1059, 'BAT54S ×60': 787, 'ET7460H ×97': 356, 'CH32H417': 177, 'encoder': 159, 'L272D ×2': 154, 'LM324 ×2': 136, 'RP2350B': 121 } };
@@ -265,7 +271,7 @@ tr.total td { font-weight: 600; border-top: 1px solid var(--dim); }
   const CLIP_TOOL = 2686, PCBS = 9.00, BOX = 1.00, TEST = 0.50, CABLE_PINK = 2.88, CABLE_GENERIC = 0.80, FREIGHT = 1.00;
 
   const $ = id => document.getElementById(id);
-  const state = { vol: 1000, shell: 'sls', labour: 'block', disp: 'tft', iso: 'fit', adcroute: 'mux' };
+  const state = { vol: 1000, shell: 'sls', labour: 'block', disp: 'tft', iso: 'fit', adcroute: 'mux', plink: 'stick' };
   document.querySelectorAll('.seg').forEach(seg => seg.addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
     seg.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
@@ -336,6 +342,9 @@ tr.total td { font-weight: 600; border-top: 1px solid var(--dim); }
     wig.mags = nmag * num('p_mag') + Math.ceil(nmag / 8) * 0.11 + nmag * 0.012;   // sensor + 74LVC138 per 8 + 2.2 µF each
     wig.clips = nclip * num('p_clip');
     if ($('c_psram').checked) main.B23 -= 1.42;
+    // probe link (the probe cost explorer, 2026-11-25): a bare magnet adds nothing; an active probe adds its electronics and the dock
+    // contacts; IR adds the board's receivers and LEDs. The coil is read by the magnetometers already counted.
+    if (state.plink !== 'stick') main.probe = num('p_probe') + num('p_pdock') + (state.plink === 'coilir' ? num('p_pir') : 0);
     const sum = o => Object.values(o).reduce((a, b) => a + b, 0);
     const partsMain = (sum(main) + 1.6) * scale, partsWig = (sum(wig) + 0.4) * scale;
     const parts = partsMain + partsWig;
