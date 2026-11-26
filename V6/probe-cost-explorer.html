@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Jumperless V6 Probe Cost Explorer</title>
 <meta name="short-title" content="Probe cost explorer">
-<meta name="description" content="The Jumperless V6 active probe priced part by part: a coil the magnetometers read, or the tracking magnet itself moved on a spring; infrared both ways for the acknowledgement; nineteen ways to store its energy, from a supercap to slim lithium cells to AAA and AA cells with a recharge circuit in the dock; seven controllers and how low each runs. Shows what a charge lasts, how long the dock takes, how far the link reaches and block-level circuits that follow the choices.">
+<meta name="description" content="The Jumperless V6 active probe priced part by part: a coil the magnetometers read, or the tracking magnet itself slid, tilted or flipped by a small coil; infrared both ways for the acknowledgement; nineteen ways to store its energy, from a supercap to slim lithium cells to AAA and AA cells with a recharge circuit in the dock; seven controllers and how low each runs. Shows what a charge lasts, how long the dock takes, how far the link reaches and block-level circuits that follow the choices.">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="../styles/jumperless.css">
 <style>
@@ -93,13 +93,16 @@ h3 { margin-top: 12px; }
     <div class="row"><label>Sends per click, on average<span class="est">est</span><small>1 = always heard first time; no acknowledgement means send again</small></label><input type="number" id="retry" value="1.2" min="1" max="5" step="0.1"></div>
     <h2>Coil to the magnetometers</h2>
     <div class="row"><label>Coil<small id="coil_txt"></small></label>
-      <div class="seg" id="coil"><button data-v="key3d">Keyfob 3D</button><button data-v="rod230">2×30 rod</button><button aria-pressed="true" data-v="rod345">3×45 rod</button><button data-v="rod460">4×60 rod</button><button data-v="mag">Moving magnet</button></div></div>
+      <div class="seg" id="coil"><button data-v="key3d">Keyfob 3D</button><button data-v="rod230">2×30 rod</button><button aria-pressed="true" data-v="rod345">3×45 rod</button><button data-v="rod460">4×60 rod</button><button data-v="mag">The magnet</button></div></div>
     <div class="row"><label>Driver<small>four controller pins lose about 80 Ω<span class="est">est</span> in series; a bridge IC about 1 Ω</small></label>
       <div class="seg" id="drv"><button data-v="gpio">4 pins</button><button aria-pressed="true" data-v="bridge">Bridge IC</button></div></div>
     <div class="row"><label>Power drawn while sending<small>a rod is wound to suit this; the keyfob coil takes what its 84 Ω allows</small></label><input type="number" id="p_coil_mw" value="66" min="5" max="400" step="1"> mW</div>
     <div class="row"><label>Coil message<span class="est">est</span><small>about 32 chips at 250 a second, with the sequence number</small></label><input type="number" id="t_coil" value="130" min="16" max="1000" step="1"> ms</div>
-    <div class="row"><label>Moving magnet: its strength<small>K of the tracking magnet when it is the transmitter: 1900 is the bench magnet, 363 a 2 × 1 mm disc</small></label><input type="number" id="k_mag" value="1900" min="50" max="20000" step="10"></div>
-    <div class="row"><label>Moving magnet: stroke each way<span class="est">est</span><small>at its resonance; its drive is taken as 30 mW<span class="est">est</span>, whatever the power above says</small></label><input type="number" id="d_mag" value="0.5" min="0.05" max="3" step="0.05"> mm</div>
+    <div class="row"><label>The magnet as transmitter: how it moves<small>slid along the shaft, rocked about an axis across it, or turned end for end</small></label>
+      <div class="seg" id="magmode"><button data-v="slide">Slide</button><button aria-pressed="true" data-v="tilt">Tilt</button><button data-v="flip">Flip</button></div></div>
+    <div class="row"><label>Its strength, K<small>3470 is a 4 mm sphere, 1900 the bench magnet, 363 a 2 × 1 mm disc</small></label><input type="number" id="k_mag" value="3470" min="50" max="20000" step="10"></div>
+    <div class="row"><label>Tilt each way<span class="est">est</span><small>at its resonance; the drive is taken as 15 mW<span class="est">est</span>, 10 mW<span class="est">est</span> for flips, whatever the power above says</small></label><input type="number" id="a_mag" value="45" min="2" max="90" step="1"> °</div>
+    <div class="row"><label>Slide each way<span class="est">est</span><small>at its resonance; drive taken as 30 mW<span class="est">est</span></small></label><input type="number" id="d_mag" value="0.5" min="0.05" max="3" step="0.05"> mm</div>
     <h2>Infrared, both ways</h2>
     <div class="row"><label>Receiver in the probe<small>powered from a pin and only on while it waits for the answer</small></label>
       <div class="seg" id="irrx"><button aria-pressed="true" data-v="module">Module</button><button data-v="diode">Photodiode</button></div></div>
@@ -170,7 +173,7 @@ h3 { margin-top: 12px; }
     <ul class="note">
       <li><b>Coil strength.</b> Moment = figure of merit × √(power in the coil). Figures of merit, A·m² per √W: keyfob 3D coil 0.0080 (from its 84 Ω and 72 mV per A/m), 2 × 30 rod 0.042, 3 × 45 rod 0.101, 4 × 60 rod 0.25 (a rod model that read a Coilcraft part a factor of two low). K in the tracker's mT·mm³ is 100 000 × the moment; the bench magnet is 1900.</li>
       <li><b>Coil reach.</b> Distance from the coil to the nearest MMC5603 where a 32-sample code still stands 5 times over the 0.4 µT noise, across the dipole's weak and strong directions. Combining all the sensors adds about a quarter.</li>
-      <li><b>Moving magnet.</b> Moving the tracking magnet by a stroke d changes its field at a sensor a distance r away by up to 3 × d ÷ r of what it was, so the signal falls as 1 ÷ r⁴ where a coil's falls as 1 ÷ r³. Reach is where that change still stands 5 times over the noise across 32 samples; to the side of the stroke it is smaller, down to a third. The 30 mW drive, the stroke and the symbol rate are assumptions.</li>
+      <li><b>The magnet as transmitter.</b> Sliding it by a stroke d changes its field at a sensor a distance r away by up to 3 × d ÷ r of what it was: a signal that falls as 1 ÷ r⁴ and is gone within a few centimetres. Turning it changes the moment itself, so the signal falls as 1 ÷ r³ like a coil's: rocking it ±θ swings 2 × J1(θ) of the moment, and flipping it end for end swings all of it. A resonant slide or tilt is a sine, counted at 1 ÷ √2 of a square code of the same height. Reach is where the signal still stands 5 times over the noise across 32 samples, as for a coil. The drive powers (30, 15 and 10 mW), the angle and the stroke are assumptions.</li>
       <li><b>Usable energy.</b> Capacitors: ½·C·(V_full² − V_low²). Cells: capacity × nominal voltage × 0.9; × 0.8 again through a boost converter, or × 3.3 ÷ the cell voltage through a regulator when the cell's full voltage is over the controller's limit. A capacitor is charged no higher than the controller allows.</li>
       <li><b>Days of use.</b> Usable energy ÷ (clicks a day × energy a click + a day of standby). <b>Asleep</b> is standby alone.</li>
       <li><b>Dock time.</b> Capacitors: through a resistor from 4.7 V, so the current tapers; the figure is R·C·ln of the two headrooms. LiPo: 1.3 × capacity ÷ current, at no more than 1C or the cell's own limit. Lithium titanate: 1.2 × capacity ÷ current. NiMH: 1.4 × capacity ÷ current, at no more than a tenth of the capacity, on a timer.</li>
@@ -192,6 +195,7 @@ h3 { margin-top: 12px; }
       <li>NiMH charging: <a href="https://batteryuniversity.com/article/charging-nickel-metal-hydride">Battery University</a> (a timer below 0.3C, trickle near 0.05C) and Panasonic's <a href="https://ii.tudelft.nl/~wouter/helipage/docs/convbatt/nimhchar.pdf">charge methods</a> (0.1C for 16 hours on a timer).</li>
       <li>Slim lithium cells: Panasonic <a href="https://industrial.panasonic.com/cdbs/www-data/pdf/ACL4000/ACL4000COL7.pdf">pin-type Li-ion</a> (3.65 × 20 mm 16 mAh, 4.7 × 20 mm 23 and 29 mAh, 4.7 × 25 mm 32 mAh; 3.8 V, 4.35 V full, stainless case), listed at <a href="https://octopart.com/cg-320b/m3-panasonic-118693096">$23.46</a> and <a href="https://www.electronicsdatasheets.com/parts/panasonic/CG-425A/E2">$21.09</a>. Soft-pack cylinders: <a href="https://www.alibaba.com/product-detail/High-Quality-Rechargeable-Pen-Battery-60400_1600951976763.html">60400</a>, 6 × 40 mm 90 mAh, $0.73 at 3000; LiPol's <a href="https://www.lipobattery.us/cylindrical-li-polymer-battery/">cylinder list</a> (5.8 × 52 mm 100 mAh, 7 × 39 mm 90 mAh, 7.5 × 37 mm 120 mAh, 7.8 × 55 mm 200 mAh). Lithium titanate: Nichicon <a href="https://www.futureelectronics.com/resources/featured-products/nichicon-slb-series-lto-battery">SLB series</a>, <a href="https://www.newark.com/nichicon/slb03070lr35/small-li-ion-rechargeable-batt/dp/49AH8979">$2.59 at 1000</a> for the 3 × 7 mm one.</li>
       <li>More controllers: WCH <a href="https://www.lcsc.com/product-detail/C22467836.html">CH32L103F8U6</a> (LCSC, from $0.289) and the <a href="https://atta.szlcsc.com/upload/public/pdf/source/20260518/3BF89982BA316BABACD03A0820898262.pdf">CH32V205 datasheet</a>; the ADC floors are in the <a href="https://atta.szlcsc.com/upload/public/pdf/source/20251203/C221D2170A0096F61AB2138A8B98E324.pdf">CH32V006</a> and <a href="https://atta.szlcsc.com/upload/public/pdf/source/20250604/6020776B8F495285DE4C301E93A94A44.pdf">CH32X035</a> datasheets. Puya <a href="https://www.lcsc.com/product-detail/C7434410.html">PY32F071</a> (LCSC). TI <a href="https://www.ti.com/product/MSPM0G3507">MSPM0G3507</a>. Nordic <a href="https://www.lcsc.com/product-detail/C45022042.html">nRF54L05</a> (LCSC) and <a href="https://www.newark.com/nordic-semiconductor/nrf54l15-qfaa-r/wireless-soc-arm-cortex-m33-128mhz/dp/59AM2793">nRF54L15</a> (Newark). ST <a href="https://www.newark.com/stmicroelectronics/stm32g431kbu6/mcu-32bit-170mhz-ufqfpn-32/dp/17AH9354">STM32G431</a>. GigaDevice <a href="https://www.gigadevice.com/product/mcu/entry-level-mcus/gd32c2x1-series/gd32c231">GD32C231</a> and <a href="https://www.mouser.com/pdfDocs/GD32G553xxDatasheetRev101.pdf">GD32G553</a>.</li>
+      <li>Magnets moved to make a signal: a rotating magnet against a coil of the same volume and power, <a href="https://scholarsmine.mst.edu/ele_comeng_facwork/4172">Khilkevich and others, 2020</a>; magnets on torsional resonators held by a magnetic restoring torque, <a href="https://arxiv.org/abs/2012.14548">Thanalakshme and others, 2020</a>; pendulum arrays, <a href="https://doi.org/10.1038/s41598-019-49341-4">Prasad and others, 2019</a>.</li>
       <li>Coil and sensor figures: Premo 3DC11F-0720J, Coilcraft 4513TC-725 and the MMC5603NJ datasheet, worked through in the V6 project notes on the probe (2026-11-25).</li>
     </ul>
   </div>
@@ -208,7 +212,7 @@ h3 { margin-top: 12px; }
     rod230: { p: 0.30, est: 1, n: 'Rod coil, 2 × 30 mm, wound to order', b: 'ferrite rod + winding; no quote' },
     rod345: { p: 0.35, est: 1, n: 'Rod coil, 3 × 45 mm, wound to order', b: 'ferrite rod + winding; no quote' },
     rod460: { p: 0.50, est: 1, n: 'Rod coil, 4 × 60 mm, wound to order', b: 'ferrite rod + winding; no quote' },
-    mag: { p: 0.25, est: 1, n: 'Coil on the tracking magnet, with spring and guide', b: 'wound to order; no quote' },
+    mag: { p: 0.25, est: 1, n: 'Drive coil at the tracking magnet, with its mount', b: 'wound to order; no quote' },
     bridge: { p: 0.10, est: 1, n: 'H-bridge IC, DRV8837 class, 2 × 2 mm', b: 'jellybean motor driver' },
     irled: { p: 0.03, est: 1, n: 'IR LED, 940 nm, 0603', b: '' }, npn: { p: 0.02, est: 1, n: 'NPN + resistors for the LED', b: '' },
     irmod: { p: 0.155, n: 'IR receiver module, Everlight IRM-H638T class', b: 'LCSC C390031; 5 × 4 mm' },
@@ -274,12 +278,21 @@ h3 { margin-top: 12px; }
   };
   const COIL = { key3d: { fom: 0.00796, R: 84, w: 12, sat: 1000, txt: '12 mm square; fixed 84 Ω an axis; K 150–280' }, rod230: { fom: 0.042, w: 3, sat: 80, txt: '3 mm wound; saturates near 80 mW' },
     rod345: { fom: 0.101, w: 4, sat: 200, txt: '4 mm wound; about 13 × the keyfob coil at the same power' }, rod460: { fom: 0.25, w: 6, sat: 350, txt: '6 mm wound; needs a 70 mm body' },
-    mag: { move: 1, w: 5, sat: 1e6, txt: 'the tracking magnet on a spring inside a small coil; its signal falls with the fourth power of distance' } };
+    mag: { move: 1, w: 5, sat: 1e6, txt: 'the tracking magnet itself, moved by a small coil beside it: slid, tilted or flipped' } };
+  const MAGP = { slide: 30, tilt: 15, flip: 10 };                                         // mW assumed for each way of moving the magnet
+  const J0 = x => 1 - x * x / 4 + x ** 4 / 64 - x ** 6 / 2304, J1 = x => x / 2 - x ** 3 / 16 + x ** 5 / 384 - x ** 7 / 18432;
+  // what a coil keyed + and - would need to match it. A tilt or a slide at resonance is a sine, worth 1/sqrt(2) of a square code
+  const magK = () => { const k = num('k_mag'), a = num('a_mag') * Math.PI / 180;
+    return state.magmode === 'flip' ? k : state.magmode === 'tilt' ? 2 * J1(a) * k / Math.SQRT2 : 3 * k * num('d_mag') / 30 / Math.SQRT2; };
+  const MAGTXT = {
+    slide: 'The magnet rides on a spring along the shaft and is driven at its resonance. At a sensor the signal is the magnet\'s own field × 3 × stroke ÷ distance, so it is strong on the board and gone a hand\'s width above it. With a slug on the magnet this is the haptic tick. Stroke, power and symbol rate are guesses until one is on the bench.',
+    tilt: 'The magnet sits on a soft mount, or on a pivot with a keeper behind it, and a coil beside it rocks it about an axis across the shaft at its resonance. The part of its moment that swings is 2 × J1(angle) of the whole, about half at ±30° and three quarters at ±45°, and it falls off with distance exactly as a coil\'s field does. The steady field the tracker uses drops by only a few percent and still points along the shaft. Two coils at right angles make it circle, and the sense of the circle is a bit that does not depend on how the probe is rolled. Angle, power and the quality of the resonance are guesses until one is on the bench.',
+    flip: 'The magnet turns end for end on a pivot, a keeper holding it at either pole, and a coil pulse of about 20 ms throws it over. The whole moment is the signal, a square code, and a flipped magnet stays flipped for nothing, so a held button can be a state. The tracker has to accept the dipole pointing either way. Flip time, power and the bearing are guesses until one is on the bench.' };
   const DRV = { gpio: 80, bridge: 1 };
   const IRRX = { module: { pid: 'irmod', mA: 1.2, w: 5 }, diode: { pid: 'irpd', mA: 0.3, w: 2 } };
 
   const $ = id => document.getElementById(id);
-  const state = { link: 'both', coil: 'rod345', drv: 'bridge', irrx: 'module', mcu: 'v006', hous: 'mould', hap: 'none', prices: {} };
+  const state = { link: 'both', coil: 'rod345', drv: 'bridge', irrx: 'module', mcu: 'v006', hous: 'mould', hap: 'none', magmode: 'tilt', prices: {} };
   $('store').innerHTML = Object.keys(STORE).map(k => `<option value="${k}"${k === 'lic30' ? ' selected' : ''}>${P[k].n.split(',')[0]} (${STORE[k].size})</option>`).join('');
   const num = id => parseFloat($(id).value) || 0;
   const price = id => (id in state.prices ? state.prices[id] : P[id].p);
@@ -308,13 +321,14 @@ h3 { margin-top: 12px; }
     // coil
     let Rcoil = 0, Icoil = 0, Psup = 0, Pcoil = 0, K = 0, sat = false;
     if (useCoil) {
-      Rcoil = C.R ? C.R : Math.max(1, V * V / ((C.move ? 30 : num('p_coil_mw')) / 1000) - Rd);
+      Rcoil = C.R ? C.R : Math.max(1, V * V / ((C.move ? MAGP[state.magmode] : num('p_coil_mw')) / 1000) - Rd);
       Icoil = V / (Rcoil + Rd); Psup = V * Icoil; Pcoil = Icoil * Icoil * Rcoil;
       if (Pcoil > C.sat / 1000) { Pcoil = C.sat / 1000; sat = true; }
-      K = C.move ? 3 * num('k_mag') * num('d_mag') / 30 : 1e5 * C.fom * Math.sqrt(Pcoil);   // moving magnet: what a coil would need to match it 30 mm away
+      K = C.move ? magK() : 1e5 * C.fom * Math.sqrt(Pcoil);                              // a slid magnet: what a coil would need to match it 30 mm away
     }
     const Bmin = 5 * 0.4 / Math.sqrt(32) * 1e-3;                                        // mT
-    const reach = !K ? null : C.move ? [Math.pow(3 * num('d_mag') * num('k_mag') / Bmin, 0.25), Math.pow(6 * num('d_mag') * num('k_mag') / Bmin, 0.25)] : [Math.cbrt(K / Bmin), Math.cbrt(2 * K / Bmin)];            // mm, weak and strong direction
+    const slid = C.move && state.magmode === 'slide', kd = 3 * num('d_mag') * num('k_mag') / Math.SQRT2;
+    const reach = !K ? null : slid ? [Math.pow(kd / Bmin, 0.25), Math.pow(2 * kd / Bmin, 0.25)] : [Math.cbrt(K / Bmin), Math.cbrt(2 * K / Bmin)];            // mm, weak and strong direction
     // one send
     const tc = useCoil ? num('t_coil') / 1000 : 0, tir = useIR ? num('ir_bits') / +$('ir_bps').value : 0, tl = useIR ? num('t_listen') / 1000 : 0;
     const rx = IRRX[state.irrx];
@@ -410,7 +424,7 @@ h3 { margin-top: 12px; }
       rows = state.drv === 'bridge' ? [[B(mcu, 'two pins: A, B'), L('IN1, IN2'), B('H-bridge IC', 'sleeps at nA'), L('OUT1, OUT2'), coil]]
         : [[B(mcu, 'pins A1 + A2 tied'), L(''), coil, L(''), B(mcu, 'pins B1 + B2 tied')]];
       $('c_coil').innerHTML = chain(rows);
-      $('c_coil_txt').textContent = r.C.move ? 'The tracking magnet rides on a spring inside this coil and is driven at its resonance in short shaped bursts: the bridge starts it, then brakes it, so each burst is a clean symbol. At a sensor the signal is the magnet\'s own field × 3 × stroke ÷ distance, so it is strong on the board and gone a hand\'s width above it. With the bridge off, the same coil reads taps and pressure, and with a slug on the magnet it is the haptic tick. Stroke, power and symbol rate are guesses until one is on the bench.' : `A high / B low is one polarity, the reverse the other, both low is off. ${C_note(r)} K ≈ ${r.K.toFixed(0)} mT·mm³` + (r.sat ? ', held there by the core saturating' : '') + '. Slow the edges with a capacitor across the coil so the wiring next to it sees no fast step.';
+      $('c_coil_txt').textContent = r.C.move ? MAGTXT[state.magmode] : `A high / B low is one polarity, the reverse the other, both low is off. ${C_note(r)} K ≈ ${r.K.toFixed(0)} mT·mm³` + (r.sat ? ', held there by the core saturating' : '') + '. Slow the edges with a capacitor across the coil so the wiring next to it sees no fast step.';
     } else { $('c_coil').innerHTML = ''; $('c_coil_txt').textContent = 'No coil in this build: clicks go by IR only, and only in sight of a receiver.'; }
     // IR
     if (r.useIR) {
@@ -438,7 +452,7 @@ h3 { margin-top: 12px; }
   function partRows(r) {
     const rows = [], add = (id, qty, note) => { if (qty > 0) rows.push([id, qty, note]); };
     add(state.mcu, 1, MCU[state.mcu].txt);
-    if (r.useCoil) { add(state.coil, 1, r.C.move ? `the magnet moves ±${num('d_mag')} mm; ${(r.Psup * 1000).toFixed(0)} mW assumed` : `K ≈ ${r.K.toFixed(0)} at ${(r.Pcoil * 1000).toFixed(0)} mW in the coil`); if (state.drv === 'bridge') add('bridge', 1, ''); }
+    if (r.useCoil) { add(state.coil, 1, r.C.move ? `${{ slide: 'the magnet slides ±' + num('d_mag') + ' mm', tilt: 'the magnet tilts ±' + num('a_mag') + '°', flip: 'the magnet flips end for end' }[state.magmode]}; ${(r.Psup * 1000).toFixed(0)} mW assumed` : `K ≈ ${r.K.toFixed(0)} at ${(r.Pcoil * 1000).toFixed(0)} mW in the coil`); if (state.drv === 'bridge') add('bridge', 1, ''); }
     if (r.useIR) { add('irled', 1, ''); if (num('ir_ma') > 20) add('npn', 1, ''); add(r.rx.pid, 1, ''); }
     add(r.sid, 1, `${r.S.size} mm, ${sig(r.E, 0)} J usable`);
     r.sup.forEach(([k, n]) => add(k, 1, n));
@@ -473,7 +487,7 @@ h3 { margin-top: 12px; }
       + tile('Main board gains', money(board), r.useIR ? 'IR parts and dock contacts' : 'dock contacts only')
       + tile('A charge lasts', r.dead ? 'nothing' : dur(r.days * 86400), `at ${num('clicks_day')} clicks a day; ${count(r.clicks)} clicks in all`, r.dead || r.days < 1)
       + tile('Full charge in the dock', r.tchg != null ? dur(r.tchg) : 'none', r.tchg != null ? `${(r.Ichg * 1000).toFixed(0)} mA; 100 clicks back in ${dur(r.topup)}` : r.S.chem === 'nimh' ? 'no charge circuit: the cell goes in a charger' : r.rechg ? 'an alkaline is left alone: swap it' : 'swap the cell')
-      + tile('Coil reach', r.reach ? `${(r.reach[0] / 10).toFixed(r.reach[0] < 100 ? 1 : 0)}–${(r.reach[1] / 10).toFixed(r.reach[0] < 100 ? 1 : 0)} cm` : 'none', r.reach ? (r.C.move ? `like a coil of K ≈ ${r.K.toFixed(0)} at 30 mm, and less further out` : `K ≈ ${r.K.toFixed(0)}; the bench magnet is 1900`) : 'IR only: line of sight')
+      + tile('Coil reach', r.reach ? `${(r.reach[0] / 10).toFixed(r.reach[0] < 100 ? 1 : 0)}–${(r.reach[1] / 10).toFixed(r.reach[0] < 100 ? 1 : 0)} cm` : 'none', r.reach ? (r.C.move ? (state.magmode === 'slide' ? `like a coil of K ≈ ${r.K.toFixed(0)} at 30 mm, and less further out` : `the magnet is the carrier: like a coil of K ≈ ${r.K.toFixed(0)}`) : `K ≈ ${r.K.toFixed(0)}; the bench magnet is 1900`) : 'IR only: line of sight')
       + tile('Body width', width.toFixed(0) + ' mm', width > 7.62 ? 'wider than the 7.62 mm dock strip' : 'inside the 7.62 mm dock strip', false)
       + tile('One click', mj(r.Eclick), `${(r.steps[r.steps.length - 1][1] * 1000).toFixed(0)} ms awake, × ${num('retry')} sends${r.hap ? ', + a tick' : ''}`);
     const chips = [];
@@ -483,8 +497,11 @@ h3 { margin-top: 12px; }
     if (r.needAdc && r.M.vadc > r.M.vmin && !r.boost) chips.push(['', `this part's ADC stops at <b>${r.M.vadc} V</b>: with a photodiode receiver the store is used down to there, not ${r.M.vmin} V`]);
     if (!r.useIR) chips.push(['bad', 'no IR: <b>no acknowledgement</b>, so no resend']);
     if (!r.useCoil) chips.push(['', 'IR only: a click needs a <b>line of sight</b> or a reflection']);
-    if (r.useCoil && r.C.move && num('t_coil') < 200) chips.push(['', 'a magnet on a spring keys at tens of symbols a second: <b>allow about 250 ms</b> for a message']);
-    if (r.useCoil && r.C.move) chips.push(['', 'the board has to sample well above the magnet\'s resonance, and the tip estimate wobbles by the stroke while it sends']);
+    if (r.useCoil && r.C.move) { const mm = state.magmode, a = num('a_mag') * Math.PI / 180;
+      if (mm !== 'tilt' && num('t_coil') < 200) chips.push(['', mm === 'flip' ? 'a flip takes about 20 ms: <b>allow about 260 ms</b> for a 13-flip code' : 'a magnet on a spring keys at tens of symbols a second: <b>allow about 250 ms</b> for a message']);
+      if (mm === 'slide') chips.push(['', 'sliding the magnet cannot reach far: its signal falls with the <b>fourth power</b> of distance']);
+      if (mm === 'tilt') chips.push(['', `the tracker's steady field drops by <b>${(100 * (1 - J0(a))).toFixed(0)} %</b> while it sends, and the board has to sample well above the resonance`]);
+      if (mm === 'flip') chips.push(['', 'a flip turns the tracker\'s dipole over: the fit has to take <b>either sign</b>']); }
     if (r.sat) chips.push(['bad', `the core <b>saturates</b> at ${r.C.sat} mW: more power buys nothing`]);
     if (state.drv === 'gpio' && r.useCoil) chips.push(['', `the pins waste <b>${(100 * (1 - r.Pcoil / r.Psup)).toFixed(0)} %</b> of the coil power`]);
     if (state.irrx === 'diode' && !r.M.opa && r.useIR) chips.push(['bad', 'a bare photodiode needs an <b>op-amp</b>, and this controller has none']);
