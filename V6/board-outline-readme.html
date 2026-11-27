@@ -19,7 +19,7 @@
 <main class="page wide">
 <p class="eyebrow"><a href="../">slopswap</a> / <a href="./">V6</a></p>
 <h1>V6 board outline and stack</h1>
-<p class="muted">The readme of <code>JumperlessV6/v6mech</code>, rev A10 2026-11-25. Kevin Cappuccio with Claude.</p>
+<p class="muted">The readme of <code>JumperlessV6/v6mech</code>, rev A10b 2026-11-27. Kevin Cappuccio with Claude.</p>
 <ul class="get cycle">
   <li><a href="board-outline.html"><b>Open the 3D viewer</b></a></li>
   <li><a href="board-outline-v6mech.zip" download><b>Download the folder</b> (.zip, 12.7 MB): parameters, source, KiCad and DXF outlines, STEP</a></li>
@@ -397,6 +397,17 @@ JumperlessFootprints; the RKJXM has no footprint yet (B25 says so too).</p>
 </div>
 <p><code>node build.mjs --check</code> exits 1 if two parts clash, a part runs into a board kept whole, or a bare
 breadboard no longer fits beside the unit.</p>
+<h2>Rev A10b: no island at the breadboard's corner</h2>
+<p>Where the frame runs along the breadboard, the spaces the breadboard's own outline leaves (its corner chamfers and
+the 0.635 mm waist) are filled, so a board's edge follows the breadboard. Each of those spaces is one long piece down
+a whole side, and it was filled whole. A strip that stops short of the breadboard's bottom corner (vertex 7 raised, or
+given a chamfer) therefore still had the corner's fill, past its own end: a 1.5 mm² island in the mid and top boards
+once the breadboard's clearance was cut, and a tail when the strip stopped higher up.</p>
+<p>Now only the stretch the drawn frame actually touches is filled, on each side of the breadboard. The default design's
+boards are the same to the last point. <code>node tools/islandcheck.mjs</code> tries five outlines in both wig variants and fails
+on any piece lying wholly inside the breadboard's rectangle or any fill past the strip's end.</p>
+<p>The other separate pieces the checks report for the mid board (29.5 and 0.3 mm² by the M.2 socket and the USB-C in the
+default design) are real: the parts' openings cut them off. They are not touched by this.</p>
 <h2>Rev A10: view controls in the 3D view, and more ways to draw it</h2>
 <ul>
 <li><strong>A strip of view controls sits in the 3D view</strong>, along the bottom to start with: Explode, Board opacity, Hide
