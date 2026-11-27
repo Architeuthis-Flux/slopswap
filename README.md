@@ -118,6 +118,17 @@ A link to a page here, pasted into a chat, unfolds with the lenticular shirt's p
 - **`theme-color`** is written with `media="not all"`: Discord reads the colour for its stripe, and browsers skip the tag and keep their own toolbar colour.
 - **To see the cards before pushing:** `SLOPSWAP_AT=http://127.0.0.1:8788 python3 build.py && node .workers/unfurl/dev.mjs`, then open the tester it prints and try the front page. Run plain `python3 build.py` afterwards; `_site/` is not committed either way.
 
+## A page's own preview, made on the page
+
+Any page can have its own card in place of the site's. `build.py` puts `styles/social.js` on every page; it shows a **Social preview** button only in a browser that holds the publishing token (the one the lenticular shirt viewer keeps), or when the address ends in `#social`. Chrome only: it is Chrome that encodes the frames.
+
+- **What it photographs:** a canvas as it moves (turn on the 3D viewer's rotation, then record), a few of the page's own pictures as a slideshow, or a dropped picture or video. Drag the picture in the frame, set its size, the ground and the loop's length, then **Make it**.
+- **What it publishes**, in one commit through GitHub's API, beside the page: `<page>-og.png` (the still), `<page>-og.webp` (the loop), `<page>-og.mp4` (the loop as a video) and `<page>-og.json` (how it was made; give it an `"alt"` to say what the picture shows). `build.py` uses those ahead of the site's card (`own_card`). A page that names an `og:image` in its own tags still keeps that one.
+- **The lenticular shirt viewer** hands the maker a driver (the script at the end of `lenticular-shirt/index.html`): the sweep's reach, the still's angle, shirt flat or curved, and the same view with nothing printed, so the print is cut out and the ground is see-through. There, and on the front page, the maker can also publish **the site's card** itself. `.tools/social_card.py` then follows what was published (`styles/social-card.json`), for a render with nobody at the browser.
+- **A page of its own kind** can do the same: set `window.socialPreview = { name, canvas(), settings, frame(t, values), still(values), bare(on), begin(values), end() }` and the maker walks it through the loop.
+- The token is kept in that browser, for this hostname; any page here can read it, and some folders are edited by other people. Give it write access to this repository and nothing else.
+- Tests for the parts with no page in them: `node .tools/social.test.mjs`.
+
 ## The link preview tester
 
 `misc/link-preview.html`: paste a link, and each platform's card is drawn from the page's tags the way that platform reads them, with what each would turn down and who reads which tag. `?url=` in its address runs it, so a preview can be linked.

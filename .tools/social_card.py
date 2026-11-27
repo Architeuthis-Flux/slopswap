@@ -53,9 +53,26 @@ TEXT_FILL = 0.62                   # how much of the card's width the wordmark s
 TEXT_RAISE = 0.13                  # how far above the card's middle the wordmark's middle sits, as a part of the height
 
 
-def angles() -> list:
+SETTINGS = ROOT / "styles" / "social-card.json"     # written when the site's card is published from the viewer (styles/social.js)
+
+
+def settings() -> dict:
+    """How the card is made: reach, still angle, flat or curved, the loop's seconds, and the framing. From the card
+    last published from the viewer, where there is one; otherwise this file's own numbers and its own framing."""
+    st = {"reach": HALF, "still": STILL_AT, "flat": True, "seconds": FRAMES * FRAME_MS / 1000, "framing": None}
+    try:
+        made = json.loads(SETTINGS.read_text())
+    except (OSError, ValueError):
+        return st
+    st.update({k: v for k, v in (made.get("settings") or {}).items() if k in ("reach", "still", "flat")})
+    if made.get("from") == "driver":
+        st["seconds"], st["framing"] = made.get("seconds", st["seconds"]), made.get("framing")
+    return st
+
+
+def angles(reach: float = HALF, frames: int = FRAMES) -> list:
     """The loop: starts at +HALF (beside the still), eases to -HALF and back, as the viewer's Sweep button does."""
-    return [round(HALF * math.cos(2 * math.pi * k / FRAMES) * 2) / 2 for k in range(FRAMES)]
+    return [round(reach * math.cos(2 * math.pi * k / frames) * 2) / 2 for k in range(frames)]
 
 
 def check() -> list:
@@ -78,8 +95,8 @@ def check() -> list:
         n = getattr(im, "n_frames", 1)
         if im.size != SWEEP_SIZE or im.format != "WEBP":
             bad.append(f"the sweep is {im.format} {im.size}, not WEBP {SWEEP_SIZE}")
-        if not 40 <= n <= 60:
-            bad.append(f"the sweep has {n} frames, not 40 to 60")
+        if not 12 <= n <= 110:
+            bad.append(f"the sweep has {n} frames, not 12 to 110")
         total = 0
         for i in range(n):
             im.seek(i)
@@ -87,8 +104,8 @@ def check() -> list:
             total += im.info.get("duration", 0)
             if i in (0, n // 2) and clear(im) != (0, 255):
                 bad.append(f"frame {i} of the sweep is not clear where nothing is printed")
-        if not 3500 <= total <= 4500:
-            bad.append(f"the sweep lasts {total} ms, not 3.5 to 4.5 s")
+        if not 1000 <= total <= 8500:
+            bad.append(f"the sweep lasts {total} ms, not 1 to 8.5 s")
     probe = json.loads(subprocess.run(
         ["ffprobe", "-v", "error", "-show_streams", "-of", "json", str(VIDEO)], capture_output=True, text=True, check=True).stdout)
     kinds = [s["codec_type"] for s in probe["streams"]]
@@ -117,8 +134,9 @@ def browser(p):
 class Viewer:
     """The lenticular shirt viewer, open in a headless Chrome on a local copy of the site. It does all the drawing."""
 
-    def __init__(self, blank: bool = False):
+    def __init__(self, blank: bool = False, flat: bool = True):
         self.blank = blank          # True: every published art file is answered with an empty picture, so the shirt is bare
+        self.flat = flat            # True: no chest curve
 
     def __enter__(self):
         from playwright.sync_api import sync_playwright
@@ -152,9 +170,9 @@ class Viewer:
         page.wait_for_load_state("networkidle")           # art.json and the published images beside the page
         # The shirt flat (no chest curve), the frames counted, and the loupe's mark left out: it is the one thing the
         # viewer strokes in this white on the shirt canvas, and the view is aimed with it, so it cannot be moved away.
-        page.evaluate("""() => { const L = window.__lent; L.S.curve = 0; window.__drawn = 0; L.hooks.push(() => { window.__drawn++; });
+        page.evaluate("""(flat) => { const L = window.__lent; if (flat) L.S.curve = 0; window.__drawn = 0; L.hooks.push(() => { window.__drawn++; });
             const ctx = document.getElementById('shirt').getContext('2d'), stroke = ctx.stroke;
-            ctx.stroke = function () { if (this.strokeStyle !== 'rgba(255, 255, 255, 0.9)') return stroke.apply(this, arguments); }; }""")
+            ctx.stroke = function () { if (this.strokeStyle !== 'rgba(255, 255, 255, 0.9)') return stroke.apply(this, arguments); }; }""", self.flat)
         last = None                                        # the art is in once two looks a moment apart are the same
         for _ in range(40):
             now = self._png(STILL_AT)
@@ -227,9 +245,16 @@ def palette(im: Image.Image, colours: int) -> Image.Image:
     return q
 
 
-def compose(canvas: Image.Image, box: tuple) -> Image.Image:
+def compose(canvas: Image.Image, box: tuple, framing: dict | None = None) -> Image.Image:
     """The card: the part of the canvas in which the wordmark `box` spans TEXT_FILL of the width and sits TEXT_RAISE
-    above the middle. See-through stays see-through."""
+    above the middle; or, with a `framing` published from the viewer (size, 1 filling the height, and a shift in card
+    pixels), exactly what the preview maker framed. See-through stays see-through."""
+    if framing:
+        k = framing["zoom"] * H / canvas.height
+        canvas = canvas.resize((round(canvas.width * k), round(canvas.height * k)), Image.LANCZOS)
+        card = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+        card.paste(canvas, (round((W - canvas.width) / 2 + framing["x"]), round((H - canvas.height) / 2 + framing["y"])))
+        return card
     s = TEXT_FILL * W / (box[2] - box[0])                  # 1, or next to it: the view was closed in to make it so
     if abs(s - 1) > 0.01:
         canvas = canvas.resize((round(canvas.width * s), round(canvas.height * s)), Image.LANCZOS)
@@ -243,9 +268,10 @@ def compose(canvas: Image.Image, box: tuple) -> Image.Image:
 
 
 def make() -> None:
-    loop = angles()
-    wanted = sorted(set(loop + [STILL_AT]))
-    with Viewer() as viewer:
+    st = settings()
+    loop = angles(st["reach"], max(12, round(st["seconds"] * 1000 / FRAME_MS)))
+    wanted = sorted(set(loop + [st["still"]]))
+    with Viewer(flat=st["flat"]) as viewer:
         whole = viewer.shot(0)
         box, view = wordmark(whole), viewer.view()
         mm = lambda px, mid: mid + (px - whole.width / 2) * view["mm"]          # a canvas pixel as mm on the shirt
@@ -255,12 +281,12 @@ def make() -> None:
         viewer.aim(*aim)
         box = wordmark(viewer.shot(0))
         shots = {a: viewer.shot(a) for a in wanted}
-    with Viewer(blank=True) as viewer:                     # the same views of the same shirt with nothing printed on it
+    with Viewer(blank=True, flat=st["flat"]) as viewer:    # the same views of the same shirt with nothing printed on it
         viewer.aim(*aim)
         bare = {a: viewer.shot(a) for a in wanted}
-    cards = {a: compose(cut_out(shots[a], bare[a]), box) for a in wanted}
+    cards = {a: compose(cut_out(shots[a], bare[a]), box, st["framing"]) for a in wanted}
 
-    still = cards[STILL_AT]
+    still = cards[st["still"]]
     still.save(STILL, "PNG", optimize=True)
     for colours in (256, 128, 64):                         # too heavy in full colour: a palette, as small as it has to be
         if STILL.stat().st_size <= STILL_MOST:

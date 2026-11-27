@@ -14,6 +14,7 @@ import os
 import re
 import shutil
 import subprocess
+import tempfile
 from pathlib import Path
 from urllib.parse import quote
 
@@ -228,7 +229,7 @@ def asset(rel: str) -> str:
     return f"{SITE}/{rel}?v={hashlib.sha256((ROOT / rel).read_bytes()).hexdigest()[:10]}"
 
 
-def discord_embed(title: str, about: str, url: str, home: bool) -> str:
+def discord_embed(title: str, about: str, url: str, home: bool, picture: str = "", alt: str = "") -> str:
     """The page's preview as Discord lays it out from its own parts (a "component embed"): the page's name as a link,
     what it is, the sweep moving, and buttons. JSON for a script tag in the head; every "<" is written as \\u003c so
     no title can end the tag, and the description is cut to keep the whole under Discord's limit."""
@@ -242,7 +243,7 @@ def discord_embed(title: str, about: str, url: str, home: bool) -> str:
         said = " ".join(words) + ("…" if words and len(words) < len(about.split()) else "")
         box = {"type": 17, "accent_color": int(ACCENT[1:], 16), "components": [
             {"type": 10, "content": head + ("\n" + plain(said) if said else "")},
-            {"type": 12, "items": [{"media": {"url": asset(CARD["sweep"])}, "description": CARD["alt"]}]},
+            {"type": 12, "items": [{"media": {"url": asset(picture or CARD["sweep"])}, "description": alt or CARD["alt"]}]},
             {"type": 1, "components": buttons}]}
         text = json.dumps({"component": box}, ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c")
         if len(text.encode()) <= DISCORD_BYTES or not words:
@@ -250,7 +251,29 @@ def discord_embed(title: str, about: str, url: str, home: bool) -> str:
         words = words[:max(0, len(words) - max(1, len(words) // 8))]
 
 
-def social_tags(s: str, url: str, home: bool) -> str:
+def own_card(folder: Path, stem: str) -> dict | None:
+    """The preview made for one page, on the page (styles/social.js publishes <page>-og.png, -og.webp, -og.mp4 and
+    -og.json beside it): the file names, the still's size and its alt text; None for a page that has none."""
+    still = next((folder / f"{stem}-og{ext}" for ext in (".png", ".jpg", ".webp") if (folder / f"{stem}-og{ext}").exists()), None)
+    if not still:
+        return None
+    b = still.read_bytes()[:32]
+    w, h = (int.from_bytes(b[16:20], "big"), int.from_bytes(b[20:24], "big")) if b[1:4] == b"PNG" else (CARD["w"], CARD["h"])
+    name = lambda ext: f"{stem}-og{ext}" if (folder / f"{stem}-og{ext}").exists() else None
+    try:
+        alt = json.loads((folder / f"{stem}-og.json").read_text()).get("alt")
+    except (OSError, ValueError):
+        alt = None
+    return {"image": still.name, "sweep": name(".webp") if still.suffix != ".webp" else None, "video": name(".mp4"), "w": w, "h": h, "alt": alt}
+
+
+def with_maker(s: str, up: str) -> str:
+    """The page with the preview maker's script in its head (styles/social.js: it shows itself only to a browser that
+    holds the publishing token), once."""
+    return s if re.search(r"<script[^>]+styles/social\.js", s) else into_head(s, f'<script defer src="{up}styles/social.js"></script>')
+
+
+def social_tags(s: str, url: str, home: bool, own: dict | None = None) -> str:
     """The tags that make a link to this page unfold with the site's card, or "" for a page that names a picture of
     its own. Three lanes: a still every platform can show (og:image), the sweep as a video that Messages plays by
     itself (og:video), and Discord's own layout with the sweep moving in it. A page keeps the title, description and
@@ -264,36 +287,44 @@ def social_tags(s: str, url: str, home: bool) -> str:
     m = re.search(r"<title>(.*?)</title>", top, re.S | re.I)
     title = said("og:title") or (html.unescape(m.group(1).strip()) if m else SITE_NAME)
     about = said("og:description") or said("description")
+    card = own or CARD                                    # the page's own preview, made on the page, or the site's
+    kind = {".png": "image/png", ".jpg": "image/jpeg", ".webp": "image/webp"}[Path(card["image"]).suffix]
     esc = lambda t: html.escape(t, quote=True)
     tag = lambda key, value, attr="property": f'<meta {attr}="{key}" content="{esc(str(value))}">'
     out = []
     for key, value in (("og:type", "website"), ("og:site_name", SITE_NAME), ("og:title", title), ("og:description", about), ("og:url", url)):
         if value and not has(key):
             out.append(tag(key, value))
-    out += [tag("og:image", asset(CARD["image"])), tag("og:image:type", "image/png"), tag("og:image:width", CARD["w"]),
-            tag("og:image:height", CARD["h"]), tag("og:image:alt", CARD["alt"]),
-            tag("og:video", asset(CARD["video"])), tag("og:video:secure_url", asset(CARD["video"])), tag("og:video:type", "video/mp4"),
-            tag("og:video:width", CARD["w"]), tag("og:video:height", CARD["h"])]
+    out += [tag("og:image", asset(card["image"])), tag("og:image:type", kind), tag("og:image:width", card["w"]),
+            tag("og:image:height", card["h"]), tag("og:image:alt", card["alt"] or title)]
+    if card["video"]:
+        out += [tag("og:video", asset(card["video"])), tag("og:video:secure_url", asset(card["video"])), tag("og:video:type", "video/mp4"),
+                tag("og:video:width", card["w"]), tag("og:video:height", card["h"])]
     if not has("twitter:card"):
         out.append(tag("twitter:card", "summary_large_image", "name"))
     if not has("theme-color"):      # Discord takes its stripe from this; media="not all" keeps browsers from tinting their toolbar with it
         out.append(f'<meta name="theme-color" content="{ACCENT}" media="not all">')
     if DISCORD_EMBED:
-        out.append(f'<script id="discord:component-embed" type="application/json">{discord_embed(title, about, url, home)}</script>')
+        out.append(f'<script id="discord:component-embed" type="application/json">{discord_embed(title, about, url, home, card["sweep"] or card["image"], card["alt"] or title)}</script>')
     return "\n".join(out)
 
 
 def add_social(folder: Path, at: str) -> int:
-    """Give the built pages of a folder the site's card (see social_tags). `at` is the folder's place on the site:
-    "" for the front page, "misc/" for a project. Returns how many pages took it."""
+    """Give the built pages of a folder their social card (see social_tags) and the preview maker's script. `at` is
+    the folder's place on the site: "" for the front page, "misc/" for a project. A page's own preview, if one was
+    made for it, goes ahead of the site's card. Returns how many pages took a card."""
     n = 0
     for p in folder.glob("*.html"):
         s = p.read_text(errors="replace")
         home = not at and p.name == "index.html"
-        tags = social_tags(s, f"{SITE}/{at}" + ("" if p.name == "index.html" else quote(p.name)), home)
-        if tags:
-            p.write_text(into_head(s, tags))
-            n += 1
+        own = own_card(folder, p.stem) if at else None
+        if own:
+            own = {**own, **{k: at + own[k] for k in ("image", "sweep", "video") if own[k]}}
+        tags = social_tags(s, f"{SITE}/{at}" + ("" if p.name == "index.html" else quote(p.name)), home, own)
+        s2 = with_maker(into_head(s, tags) if tags else s, "../" if at else "")
+        if s2 != s:
+            p.write_text(s2)
+        n += bool(tags)
     return n
 
 
@@ -371,6 +402,25 @@ def check() -> None:
     assert gallery["type"] == 12 and len(gallery["items"]) == 1 and "/styles/social-sweep.webp?v=" in gallery["items"][0]["media"]["url"]
     assert [sorted(b) for b in row["components"]] == [["label", "style", "type", "url"]] * 2 and all(b["style"] == 5 for b in row["components"])
     assert len(json.loads(discord_embed("slopswap", "About.", SITE + "/", True))["component"]["components"][2]["components"]) == 1
+    # a preview made on the page (<page>-og.png and its companions, see styles/social.js) goes ahead of the site's card
+    with tempfile.TemporaryDirectory() as d:
+        d = Path(d)
+        assert own_card(d, "board") is None
+        (d / "board-og.png").write_bytes(b"\x89PNG\r\n\x1a\n\0\0\0\rIHDR" + (1200).to_bytes(4, "big") + (630).to_bytes(4, "big") + b"\x08\x06\0\0\0")
+        assert own_card(d, "board") == {"image": "board-og.png", "sweep": None, "video": None, "w": 1200, "h": 630, "alt": None}
+        (d / "board-og.webp").write_bytes(b"x"); (d / "board-og.mp4").write_bytes(b"x"); (d / "board-og.json").write_text('{"alt": "The board, turning."}')
+        assert own_card(d, "board") == {"image": "board-og.png", "sweep": "board-og.webp", "video": "board-og.mp4", "w": 1200, "h": 630, "alt": "The board, turning."}
+    mine = {"image": "styles/social-sweep.webp", "sweep": None, "video": None, "w": 960, "h": 504, "alt": None}      # a file that is there, standing in
+    t = social_tags(bare, url, False, mine)
+    for want in ('property="og:image" content="' + SITE + '/styles/social-sweep.webp?v=', 'property="og:image:type" content="image/webp"',
+                 'property="og:image:width" content="960"', 'property="og:image:alt" content="A &amp; B"'):
+        assert want in t, want
+    assert "og:video" not in t and "social-card.png" not in t and t.count("social-sweep.webp?v=") == 2      # the still is also what Discord's layout shows
+    assert social_tags(bare.replace("<title>", '<meta property="og:image" content="x"><title>'), url, False, mine) == ""
+    # every page carries the maker's script, once
+    once = with_maker(bare, "../")
+    assert '<script defer src="../styles/social.js"></script>' in once and with_maker(once, "../") == once
+    assert "<script defer" in with_maker(bare.replace("<title>", "<!-- see styles/social.js --><title>"), "../")      # a mention is not the script
 
 
 def main() -> None:

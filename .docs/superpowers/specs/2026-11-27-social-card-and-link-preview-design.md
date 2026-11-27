@@ -64,3 +64,20 @@ A slopswap link pasted into a chat should show something worth clicking: the len
 ## Left to the builder
 
 Exact composition of the card inside 1200×630 (how much shirt shows at the sides), frame count and encoder settings, the mock cards' styling.
+
+## Part 3: a preview made from the page itself (2026-11-27, 10:06; approved 10:16, Chrome)
+
+**Asked for.** An option on any of these pages to make a new social preview (the V6 3D viewer, the stickers), with animations; and on the lenticular shirt viewer, a way to set the preview sweep's parameters.
+
+**Approaches considered.**
+1. *A shared maker in the browser, publishing as the viewer already does (picked).* `styles/social.js` on every page, shown only where the publishing token is kept. It photographs a canvas, a few of the page's pictures or a dropped file, frames it, and commits `<page>-og.png`, `-og.webp`, `-og.mp4` beside the page through the GitHub API. Chrome encodes the frames; the script only joins them.
+2. *A script per page run on the Mac.* Nothing in the browser, but every page needs its own recipe and nothing can be framed by eye.
+3. *Render in CI from a settings file.* No token in the browser, but a slow loop (push, wait, look) and a second pipeline to keep alive.
+
+**Decided.**
+- A page may hand the maker a driver, `window.socialPreview` (its settings, how to show the loop at position t, optionally the same view with nothing printed). The lenticular viewer has one: reach, still angle, flat or curved; its bare view makes the cut-out see-through, as the script's does.
+- With no driver the maker records the canvas as it moves (the 3D viewer turning) or runs the chosen pictures as a slideshow.
+- `build.py` uses a page's own `-og` files ahead of the site's card. On the front page and the lenticular viewer the maker can also publish the site's card itself.
+- `.tools/social_card.py` stays as the headless way and reads the settings the maker published for the site's card (`styles/social-card.json`).
+
+**Not in it.** Safari (cannot encode WebP frames). Pictures from other sites (the browser will not let a page read them back).

@@ -3663,5 +3663,46 @@ var SITE_ART={"repo": "Architeuthis-Flux/slopswap", "branch": "main", "dir": "le
 })();
 
 </script>
+<script>
+/* The social preview's driver. It lets the preview maker (styles/social.js, which shows itself only in a browser that
+   holds the publishing token) walk this viewer through the sweep with its own settings, and photograph the shirt with
+   nothing printed on it, so that the print can be cut out and the ground left see-through. The viewer's own drawing
+   is not changed: for the bare view the art it holds is swapped for cloth (the colour of the art's top-left corner,
+   which is unprinted) and then put back, to the bit. */
+(function () {
+  var L = window.__lent, cv = document.getElementById('shirt'), slider = document.getElementById('angle');
+  if (!L || !cv || !slider) return;
+  var drawn = 0, quiet = false, was = null, kept = null, ctx = cv.getContext('2d'), stroke = ctx.stroke;
+  L.hooks.push(function () { drawn++; });
+  ctx.stroke = function () { if (!(quiet && this.strokeStyle === 'rgba(255, 255, 255, 0.9)')) return stroke.apply(this, arguments); };   // the loupe's mark stays out of a preview
+  function show(a) {
+    return new Promise(function (ok) {
+      var n = drawn; slider.value = Math.round(a * 2) / 2; slider.dispatchEvent(new Event('input', { bubbles: true }));
+      (function wait() { if (drawn > n) ok(); else requestAnimationFrame(wait); })();
+    });
+  }
+  window.socialPreview = {
+    name: 'The sweep', site: true, mirror: true, framing: { zoom: 1.77, x: 25, y: 49 },
+    canvas: function () { return cv; },
+    settings: [{ key: 'reach', label: 'Reach each way', unit: 'degrees', min: 5, max: 70, step: 1, value: 35 },
+      { key: 'still', label: 'Still at', unit: 'degrees right', min: -70, max: 70, step: 1, value: 30 },
+      { key: 'flat', label: 'Shirt flat', type: 'check', value: true }],
+    begin: function (v) { quiet = true; was = { curve: L.S.curve, angle: L.S.angle }; if (v.flat) L.S.curve = 0; return show(v.still); },
+    frame: function (t, v) { return show(v.reach * Math.cos(2 * Math.PI * t)); },
+    still: function (v) { return show(v.still); },
+    bare: function (on) {
+      var A = L.art(), k, x, y, i;
+      if (on && !kept) {
+        kept = {};
+        for (k in A) { x = A[k]; if (!(x && x.BYTES_PER_ELEMENT && x.length > 1000)) continue; kept[k] = x; y = new x.constructor(x.length);
+          if (x instanceof Uint16Array) for (i = 0; i < y.length; i += 3) { y[i] = x[0]; y[i + 1] = x[1]; y[i + 2] = x[2]; }
+          A[k] = y; }
+      } else if (!on && kept) { for (k in kept) A[k] = kept[k]; kept = null; }
+      return Promise.resolve();
+    },
+    end: function () { this.bare(false); quiet = false; if (was) { L.S.curve = was.curve; return show(was.angle); } }
+  };
+})();
+</script>
 </body>
 </html>
