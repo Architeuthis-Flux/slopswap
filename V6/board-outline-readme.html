@@ -19,7 +19,7 @@
 <main class="page wide">
 <p class="eyebrow"><a href="../">slopswap</a> / <a href="./">V6</a></p>
 <h1>V6 board outline and stack</h1>
-<p class="muted">The readme of <code>JumperlessV6/v6mech</code>, rev A10b 2026-11-27. Kevin Cappuccio with Claude.</p>
+<p class="muted">The readme of <code>JumperlessV6/v6mech</code>, rev A10c 2026-11-27. Kevin Cappuccio with Claude.</p>
 <ul class="get cycle">
   <li><a href="board-outline.html"><b>Open the 3D viewer</b></a></li>
   <li><a href="board-outline-v6mech.zip" download><b>Download the folder</b> (.zip, 12.7 MB): parameters, source, KiCad and DXF outlines, STEP</a></li>
@@ -209,6 +209,10 @@ Each vertex can carry a corner:</p>
 <td><code>"c": "wig"</code></td>
 <td>the WigLEDmag corner itself (2.51 × 2.11), copied point for point from its Edge.Cuts</td>
 </tr>
+<tr>
+<td><code>"c": "meet"</code></td>
+<td>for a vertex on a corner of the breadboard where the frame stops: the vertex stays sharp, and the frame's edge meets the breadboard's chamfer square, at the middle of its flat (rev A10c)</td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -397,6 +401,28 @@ JumperlessFootprints; the RKJXM has no footprint yet (B25 says so too).</p>
 </div>
 <p><code>node build.mjs --check</code> exits 1 if two parts clash, a part runs into a board kept whole, or a bare
 breadboard no longer fits beside the unit.</p>
+<h2>Rev A10c: the strip's end meets the breadboard's chamfer square</h2>
+<p>At the breadboard's bottom-left corner the strip stops and the breadboard's own corner chamfer begins. Until now the
+space that chamfer leaves was either filled flat to the corner or left open, by whatever the fill rule made of it.
+Now a vertex on that corner can be set to <strong>meets the breadboard's chamfer square</strong> (<code>"c": "meet"</code>), and it is the
+default for vertex 7:</p>
+<ul>
+<li>The strip's bottom edge runs along the breadboard's bottom line to x = 0.51, turns, and runs 0.99 mm straight into
+  the chamfer at right angles, arriving at the middle of the chamfer's 1.58 mm flat, (1.086, 54.186).</li>
+<li>The half of the chamfer beyond that line is left open. Nothing is filled past it, in any board.</li>
+<li>The mid and top boards, which stand 0.1 mm clear of the breadboard, end on the same line.</li>
+<li>In the one-board (integrated) main board the joint is an inside corner of the board's edge. A router leaves its own
+  radius there, so the last few tenths of that 0.99 mm edge will be a fillet when it is made.</li>
+</ul>
+<p>The chamfer's flat is found in the WigLEDmag's own outline (the longest slanting edge at that corner), so the joint
+follows the reference board, not the analytic copy of it. The option works on any of the breadboard's four corners;
+choosing it in the page puts the vertex on the nearest one. A vertex set to it that is not on a corner does nothing and
+says so in the notes. <code>checks.txt</code> has a JOINT line with the point.</p>
+<p>A saved design takes the joint only if its strip-end vertex is still as drawn (on the corner, sharp). A design whose
+end was reshaped by hand keeps its shape: set the vertex on the breadboard's corner to this kind and take out the
+vertices that were added to shape it.</p>
+<p><code>node tools/islandcheck.mjs</code> now also probes four points just either side of the line, 0.45 and 0.75 mm off the
+chamfer, on every board in both wig variants. <code>node tools/migratecheck.mjs</code> covers what a saved design keeps.</p>
 <h2>Rev A10b: no island at the breadboard's corner</h2>
 <p>Where the frame runs along the breadboard, the spaces the breadboard's own outline leaves (its corner chamfers and
 the 0.635 mm waist) are filled, so a board's edge follows the breadboard. Each of those spaces is one long piece down
@@ -889,6 +915,10 @@ percentile / worst hole, and how far a 10 µT ambient change moves the fix (medi
 <tr>
 <td><code>tools/magcheck.mjs</code></td>
 <td>prints the arrangements' numbers for <code>v6_outline.json</code> and checks the model against reference values</td>
+</tr>
+<tr>
+<td><code>tools/migratecheck.mjs</code></td>
+<td>what a saved design keeps and what it takes from a newer revision (the strip's end, rev A10c)</td>
 </tr>
 <tr>
 <td><code>src/catalog.js</code></td>
