@@ -273,6 +273,12 @@ def with_maker(s: str, up: str) -> str:
     return s if re.search(r"<script[^>]+styles/social\.js", s) else into_head(s, f'<script defer src="{up}styles/social.js"></script>')
 
 
+def with_seen(s: str, up: str) -> str:
+    """The page with the visit counter's script in its head (styles/seen.js: what it reports, and what it never does,
+    is at the top of that file), once."""
+    return s if re.search(r"<script[^>]+styles/seen\.js", s) else into_head(s, f'<script defer src="{up}styles/seen.js"></script>')
+
+
 def social_tags(s: str, url: str, home: bool, own: dict | None = None) -> str:
     """The tags that make a link to this page unfold with the site's card, or "" for a page that names a picture of
     its own. Three lanes: a still every platform can show (og:image), the sweep as a video that Messages plays by
@@ -421,6 +427,9 @@ def check() -> None:
     once = with_maker(bare, "../")
     assert '<script defer src="../styles/social.js"></script>' in once and with_maker(once, "../") == once
     assert "<script defer" in with_maker(bare.replace("<title>", "<!-- see styles/social.js --><title>"), "../")      # a mention is not the script
+    # and the visit counter's, every page of every folder
+    counted = with_seen(bare, "../")
+    assert '<script defer src="../styles/seen.js"></script>' in counted and with_seen(counted, "../") == counted and "social.js" not in counted
 
 
 def main() -> None:
@@ -452,6 +461,10 @@ def main() -> None:
     (OUT / "index.html").write_text(landing([project(d) for d in listed]))
     add_icons(OUT, "")
     carded += add_social(OUT, "")
+    for p in OUT.rglob("*.html"):            # every page of every folder is counted, Del Mar's too
+        if len(p.relative_to(OUT).parts) <= 2:
+            s = p.read_text(errors="replace")
+            p.write_text(with_seen(s, "../" * (len(p.relative_to(OUT).parts) - 1)))
     bust(OUT, version())
     locked = lock_dark_reader(OUT)
     print(f"built {len(projects)} project folders into {OUT.relative_to(ROOT)}/ "

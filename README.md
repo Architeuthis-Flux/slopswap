@@ -129,6 +129,10 @@ Any page can have its own card in place of the site's. `build.py` puts `styles/s
 - The token is kept in that browser, for this hostname; any page here can read it, and some folders are edited by other people. Give it write access to this repository and nothing else.
 - Tests for the parts with no page in them: `node .tools/social.test.mjs`.
 
+## Visits
+
+`styles/seen.js` is on every page (`build.py`, `with_seen`) and reports one line per page view to a small Worker, `slopswap.org/api/seen`; `misc/visitors.html` shows the sums to whoever holds the key: people and pages per day, time per page, which controls were used, and where visitors came from. What is kept and what never is (no address, no cookie, nothing typed), the key, and the two commands that deploy it are in `.workers/seen/README.md`. Tests: `node .workers/seen/test/seen.test.mjs`. The front page's footer says visits are counted.
+
 ## The link preview tester
 
 `misc/link-preview.html`: paste a link, and each platform's card is drawn from the page's tags the way that platform reads them, with what each would turn down and who reads which tag. `?url=` in its address runs it, so a preview can be linked.

@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en" class="console">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Visitors</title>
+<meta name="short-title" content="Visitors">
+<meta name="description" content="Who has been looking at slopswap: people and visits per day, time per page, what was used on each tool, and where visitors came from. Needs the owner's key.">
+<link rel="stylesheet" href="../styles/jumperless.css">
+<style>
+/* The visitors page: the sums the site's visit counter keeps (.workers/seen), shown to whoever holds its key. The
+   look is the site's console; this is the page's own layout. Labels and page names come from visitors' browsers, so
+   every one of them goes in as text, never as markup. */
+[hidden] { display: none !important; }
+body { padding-top: 3px; }
+.top { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; padding: 8px 12px; border-bottom: 1px solid var(--line); }
+.top form { display: flex; flex: 1 1 24rem; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin: 0; }
+.top label { display: inline-flex; align-items: center; gap: 6px; color: var(--dim); }
+#key { flex: 1 1 12rem; min-width: 0; }
+#said { flex: 1 0 100%; margin: 0; min-height: 1.35em; color: var(--dim); } #said.bad { color: var(--problem); }
+.sum { display: flex; flex-wrap: wrap; gap: 10px 28px; padding: 12px; }
+.sum div { display: grid; } .sum b { font-family: var(--display); font-size: 22px; font-weight: 400; } .sum span { color: var(--dim); font-family: var(--label); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; }
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(24rem, 1fr)); gap: 10px; padding: 0 10px 10px; align-items: start; }
+.panel > .body { flex: none; overflow: auto; max-height: 32rem; }
+td, th { white-space: nowrap; } td.name { white-space: normal; overflow-wrap: anywhere; } td.n, th.n { text-align: right; }
+td.bar { width: 40%; } td.bar i { display: block; height: 9px; min-width: 1px; background: var(--c, var(--accent)); }
+td small { display: block; }
+</style>
+</head>
+<body>
+<header class="top">
+  <p class="eyebrow"><a href="../">slopswap</a> / <a href="./">misc</a></p>
+  <h1>Visitors</h1>
+  <form id="ask">
+    <input id="key" type="password" autocomplete="off" placeholder="the visitors key" aria-label="The visitors key">
+    <label>over <select id="days"><option value="1">today</option><option value="7">7 days</option><option value="30" selected>30 days</option><option value="90">90 days</option><option value="365">a year</option></select></label>
+    <button>Show</button>
+    <button type="button" class="quiet" id="forget" hidden title="Take the key out of this browser. It will be counted as a visitor again.">Forget the key</button>
+  </form>
+  <p id="said" role="status">Paste the key once; it is kept in this browser, which then stops being counted as a visitor.</p>
+</header>
+<div class="sum" id="sum" hidden></div>
+<main class="cols" id="cols" hidden>
+  <section class="panel" style="--c:var(--r2)"><div class="bar"><span class="plate"><b>01</b>Days</span><span class="bar-note">people, and the pages they opened</span></div><div class="body"><table id="t-days"></table></div></section>
+  <section class="panel" style="--c:var(--r7)"><div class="bar"><span class="plate"><b>02</b>Pages</span><span class="bar-note">by time spent</span></div><div class="body"><table id="t-pages"></table></div></section>
+  <section class="panel" style="--c:var(--r10)"><div class="bar"><span class="plate"><b>03</b>What was used</span><span class="bar-note">controls, by name</span></div><div class="body"><table id="t-used"></table></div></section>
+  <section class="panel" style="--c:var(--r5)"><div class="bar"><span class="plate"><b>04</b>Where from</span><span class="bar-note">sites and countries</span></div><div class="body"><table id="t-refs"></table><table id="t-lands"></table></div></section>
+</main>
+<script>
+(function () {
+  'use strict';
+  const KEY = 'slopswap-visitors.key', $ = (id) => document.getElementById(id);
+  const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
+  const kept = () => { try { return localStorage.getItem(KEY) || ''; } catch (e) { return ''; } };
+  const say = (t, bad) => { $('said').textContent = t; $('said').className = bad ? 'bad' : ''; };
+  const time = (s) => (s >= 3600 ? (s / 3600).toFixed(1) + ' h' : s >= 90 ? Math.round(s / 60) + ' min' : s + ' s');
+
+  // a table from rows: heads (a trailing ":n" makes a column numeric), and for each row its cells; a cell { bar } draws a bar
+  function table(id, heads, rows) {
+    const t = $(id); t.textContent = '';
+    const head = el('tr'); heads.forEach((h) => head.append(el('th', h.endsWith(':n') ? 'n' : '', h.replace(/:n$/, ''))));
+    t.appendChild(el('thead')).append(head);
+    const body = t.appendChild(el('tbody'));
+    rows.forEach(function (cells) {
+      const tr = el('tr');
+      cells.forEach(function (c, i) {
+        if (c && typeof c === 'object') { const td = el('td', 'bar'), bar = el('i'); bar.style.width = Math.round(100 * c.bar) + '%'; td.append(bar); tr.append(td); }
+        else tr.append(el('td', typeof c === 'number' ? 'n' : i === 0 ? 'name' : '', String(c)));
+      });
+      body.append(tr);
+    });
+    if (!rows.length) body.appendChild(el('tr')).append(el('td', 'name', 'Nothing yet.'));
+  }
+  function draw(r) {
+    const sum = $('sum'); sum.textContent = '';
+    [[r.total.people, 'people (per day, added up)'], [r.total.visits, 'pages opened'], [time(r.total.secs), 'looked at, in all'], [r.total.visits ? Math.round(100 * r.total.phones / r.total.visits) + '%' : '0%', 'on a phone']]
+      .forEach(function (x) { const d = el('div'); d.append(el('b', '', String(x[0])), el('span', '', x[1])); sum.append(d); });
+    const most = Math.max(1, ...r.days.map((d) => d.people)), long = Math.max(1, ...r.pages.map((p) => p.secs));
+    table('t-days', ['Day', 'People:n', 'Pages:n', 'Time:n', ''], r.days.slice().reverse().map((d) => [d.day, d.people, d.visits, time(d.secs), { bar: d.people / most }]));
+    table('t-pages', ['Page', 'People:n', 'Opened:n', 'Typical:n', 'In all:n', 'Read to:n', ''], r.pages.map((p) => [p.page, p.people, p.visits, time(p.typical), time(p.secs), p.read + '%', { bar: p.secs / long }]));
+    table('t-used', ['Control', 'On', 'Times:n', 'People:n'], r.used.map((u) => [u.label, u.page, u.times, u.people]));
+    table('t-refs', ['Came from', 'Pages:n'], r.refs.map((x) => [x.ref, x.visits]));
+    table('t-lands', ['Country', 'People:n'], r.countries.map((x) => [x.country, x.people]));
+    $('sum').hidden = $('cols').hidden = false;
+  }
+  async function show(typed) {
+    const key = typed || kept();
+    if (!key) return;
+    say('Asking…');
+    let res, body = null;
+    try { res = await fetch('/api/seen?days=' + $('days').value, { cache: 'no-store', headers: { Authorization: 'Bearer ' + key } }); body = await res.json(); } catch (e) { body = null; }
+    if (!body || typeof body !== 'object') return say('The visit counter is not answering. It has to be deployed once: cd .workers/seen, then the two commands in its README.', true);
+    if (body.error) return say(res.status === 401 ? 'That is not the key.' : 'The counter says: ' + body.error + '.', true);
+    try { localStorage.setItem(KEY, key); } catch (e) { /* shown for this visit only */ }
+    $('key').value = ''; $('key').hidden = true; $('forget').hidden = false;
+    draw(body);
+    say(body.total.visits ? 'Counted since the Worker was deployed. A person is somebody on one day: the same friend on two days counts twice.' : 'Nothing counted yet in this span.');
+  }
+  $('ask').addEventListener('submit', function (e) { e.preventDefault(); show($('key').value.trim()); });
+  $('days').addEventListener('change', () => show(''));
+  $('forget').addEventListener('click', function () { try { localStorage.removeItem(KEY); } catch (e) { /* nothing kept */ } $('key').hidden = false; this.hidden = true; $('sum').hidden = $('cols').hidden = true; say('The key is out of this browser.'); });
+  if (kept()) { $('key').hidden = true; $('forget').hidden = false; show(''); }
+})();
+</script>
+</body>
+</html>

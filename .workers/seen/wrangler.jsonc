@@ -1,0 +1,14 @@
+{
+	"name": "slopswap-seen",
+	"main": "src/index.js",
+	"compatibility_date": "2026-09-29",
+	// Reachable only on the site's own hostname: no workers.dev address, no preview addresses.
+	"workers_dev": false,
+	"preview_urls": false,
+	"routes": [{ "pattern": "slopswap.org/api/seen*", "zone_name": "slopswap.org" }],
+	"observability": { "enabled": true },
+	// The notebook's database, with a table of its own (the Worker makes it on its first request): one thing fewer to create.
+	"d1_databases": [{ "binding": "DB", "database_name": "slopswap-notebook", "database_id": "e65a5500-25d4-49e4-9aa4-68c6a0076cd7" }],
+	// Cloudflare's own limiter, per visitor address: a page view reports a few times at most. Needs wrangler 4.36 or newer.
+	"ratelimits": [{ "name": "LIMIT", "namespace_id": "2712", "simple": { "limit": 60, "period": 60 } }]
+}

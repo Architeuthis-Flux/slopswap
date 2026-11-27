@@ -81,3 +81,13 @@ Exact composition of the card inside 1200×630 (how much shirt shows at the side
 - `.tools/social_card.py` stays as the headless way and reads the settings the maker published for the site's card (`styles/social-card.json`).
 
 **Not in it.** Safari (cannot encode WebP frames). Pictures from other sites (the browser will not let a page read them back).
+
+## Part 4: visits (2026-11-27, 11:31; approved 12:03)
+
+**Asked for.** Some analytics: the site goes to friends; how many people see it, and what they spent time doing.
+
+**Approaches considered.** Cloudflare's own Web Analytics (one switch, counts only, nothing on what was used). A counter of the site's own on the Worker and database already there (picked): both answers, nothing sent to a third party. A hosted service (a third party's script on every page, against the site's own rules for loading in China).
+
+**Decided.** `styles/seen.js` on every page reports page, seconds really looked at, scroll, referrer, window width and the names of the controls used; `.workers/seen` keeps it in D1; `misc/visitors.html` shows the sums behind a key. No address, cookie or browser storage; people are told apart per day by a salted one-way hash. A line in the front page's footer says so.
+
+**Claude's calls.** The table lives in the notebook's database rather than a second one (nothing to create; the Worker makes its table). Every folder is counted, Del Mar's too. Browsers that ask not to be tracked, machines, and the owner's own browser are not counted.
