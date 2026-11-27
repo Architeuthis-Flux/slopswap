@@ -224,7 +224,7 @@ footer{padding:0 0 40px;color:var(--muted);font-size:13px;max-width:80ch}
 
   <section class="block">
     <h2>KiCad schematic and board for this combination</h2>
-    <p class="muted small" style="max-width:80ch">Both files are built for the switches above. Save them as <span class="num">nixie_hv.kicad_sch</span> and <span class="num">nixie_hv.kicad_pcb</span> in a project folder from <a href="nixie_hv_kicad.zip">nixie_hv_kicad.zip</a>, which holds the libraries, the design rules and these generators as scripts. The board is the by-function arrangement at the width limit set beside the preview: every footprint placed on its side with its nets assigned and the outline drawn, ready to route. It has no tracks, vias or copper pours. A stacked build is one file with two outlines, each drawn from its parts side.</p>
+    <p class="muted small" style="max-width:80ch">Both files are built for the switches above. Save them as <span class="num">nixie_hv.kicad_sch</span> and <span class="num">nixie_hv.kicad_pcb</span> in a project folder from <a href="nixie_hv_kicad.zip">nixie_hv_kicad.zip</a>, which holds the libraries, the transformer's 3D model, the design rules and these generators as scripts. The board is the by-function arrangement at the width limit set beside the preview: every footprint placed on its side with its nets assigned and the outline drawn, ready to route. It has no tracks, vias or copper pours. A stacked build is one file with two outlines, each drawn from its parts side.</p>
     <div class="panel">
       <div class="genrow">
         <button type="button" class="primary" id="kbuild">Build the schematic</button>
@@ -1307,7 +1307,7 @@ function modelInfo(p){
   const f=p.f, k=p.fpn;
   if(f.nofp) return ["none yet",k.includes("USB4140")?"No footprint in the project yet. GCT's drawing has the land pattern.":"No footprint in the project. TI's product page offers CAD files for it."];
   if(k.includes("StackPin")) return ["none","A plated hole for a header pin, in the project's own footprint library. The same pin goes through both boards."];
-  if(k.includes("TTRN")) return ["NixieHV.3dshapes/TTRN-060S.step","Cut out of Omnixie's STEP model of the NCH8200HV, where the part is labelled TTRN-060S. It is not in the zip linked above, so KiCad shows no body for T1 until you add one."];
+  if(k.includes("TTRN")) return ["NixieHV.3dshapes/TTRN-060S.step","Cut out of Omnixie's STEP model of the NCH8200HV, where the part is labelled TTRN-060S. It is in the zip linked above."];
   if(!f.model) return ["none needed","Copper only."];
   const name=f.model.replace(/^\$\{[A-Z0-9_]+\}\//,"").replace(/\.(wrl|step|stp)$/i,"");
   let src=f.ok3d===false?"Referenced by the footprint, but not found in KiCad's 3D library.":"KiCad's 3D model library.";
