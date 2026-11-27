@@ -107,6 +107,9 @@ textarea{font:400 12px/1.4 var(--mono);padding:8px;border:1px solid var(--line);
 .kv dt{color:var(--muted)}
 .kv dd{margin:0;font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right}
 #boardwrap{overflow-x:auto}
+#v3wrap{position:relative;height:300px;background:var(--bg);border:1px solid var(--line);overflow:hidden}
+#v3wrap canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
+#v3msg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:12px;text-align:center;pointer-events:none}
 #board{display:block;width:100%;height:auto;min-width:420px}
 .legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--muted)}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
@@ -195,6 +198,21 @@ footer{padding:0 0 40px;color:var(--muted);font-size:13px;max-width:80ch}
         <p class="small muted" id="boardnote"></p>
       </div>
 
+      <div class="panel" id="p3d">
+        <h3>The same board in 3D</h3>
+        <div class="genrow" id="v3bar" role="toolbar" aria-label="3D view controls">
+          <button type="button" class="mini" data-view="iso">Angled</button>
+          <button type="button" class="mini" data-view="top">Top</button>
+          <button type="button" class="mini" data-view="under">Underside</button>
+          <button type="button" class="mini" data-view="side">Long side</button>
+          <button type="button" class="mini" data-view="end">USB end</button>
+        </div>
+        <label class="field" for="v3open" id="v3openrow"><span>Open the stack: <span id="v3openv" class="num">closed</span></span>
+          <input type="range" id="v3open" min="0" max="180" step="1" value="0"></label>
+        <div id="v3wrap"><div id="v3msg" class="small muted">The 3D view loads when it comes on screen.</div></div>
+        <p class="small muted">Drag to turn it, pinch or Ctrl + scroll to zoom, right-drag to slide. The bodies and pads are KiCad's own 3D models, placed by the same layout as the drawing above. The transformer's colours are painted by hand, pads with nothing fitted stay bare, and a part with no model in KiCad's library (the DSBGA boost) is a plain block. Lighting and materials come from the Jumperless V6 outline viewer.</p>
+      </div>
+
       <div class="panel">
         <h3>Biggest cuts from here</h3>
         <div class="rows" id="cuts"></div>
@@ -224,7 +242,7 @@ footer{padding:0 0 40px;color:var(--muted);font-size:13px;max-width:80ch}
 
   <section class="block">
     <h2>KiCad schematic and board for this combination</h2>
-    <p class="muted small" style="max-width:80ch">Both files are built for the switches above. Save them as <span class="num">nixie_hv.kicad_sch</span> and <span class="num">nixie_hv.kicad_pcb</span> in a project folder from <a href="nixie_hv_kicad.zip?v=ab8d9686">nixie_hv_kicad.zip</a>, which holds the libraries, the transformer's 3D model, the design rules and these generators as scripts. The board is the by-function arrangement at the width limit set beside the preview: every footprint placed on its side with its nets assigned and the outline drawn, ready to route. It has no tracks, vias or copper pours. A stacked build is one file with two outlines, each drawn from its parts side.</p>
+    <p class="muted small" style="max-width:80ch">Both files are built for the switches above. Save them as <span class="num">nixie_hv.kicad_sch</span> and <span class="num">nixie_hv.kicad_pcb</span> in a project folder from <a href="nixie_hv_kicad.zip?v=fc509639">nixie_hv_kicad.zip</a>, which holds the libraries, the transformer's 3D model, the design rules and these generators as scripts. The board is the by-function arrangement at the width limit set beside the preview: every footprint placed on its side with its nets assigned and the outline drawn, ready to route. It has no tracks, vias or copper pours. A stacked build is one file with two outlines, each drawn from its parts side.</p>
     <div class="panel">
       <div class="genrow">
         <button type="button" class="primary" id="kbuild">Build the schematic</button>
@@ -1047,7 +1065,7 @@ function checks(e,m,pk){
     if(st.onB1.includes("cell")) W.push(["note","With the protection on board 2 the cell current crosses the gap twice, through pin posts."]);
     if(e.led==="1") W.push(["note","The charge LED sits between the boards and shows only edge-on. STAT2 is also on the I/O connector."]);
     const outside=NOWP.filter(p=>p.fit&&p.f.th&&!p.f.edge).map(p=>p.ref);
-    if(outside.length) W.push(["note",outside.join(", ")+" mount"+(outside.length>1?"":"s")+" on an outside face, pins or shaft pointing away from the stack. The placement allows 2 mm inside the gap for the solder tails: trim them to that. The board file still draws "+(outside.length>1?"them":"it")+" on the parts side, so flip "+(outside.length>1?"them":"it")+" to the back in KiCad before looking at the stack in 3D."]);
+    if(outside.length) W.push(["note",outside.join(", ")+" mount"+(outside.length>1?"":"s")+" on an outside face, pins or shaft pointing away from the stack. The placement allows 2 mm inside the gap for the solder tails: trim them to that. The 3D view here shows "+(outside.length>1?"them":"it")+" outside; the board file still draws "+(outside.length>1?"them":"it")+" on the parts side, so flip "+(outside.length>1?"them":"it")+" to the back in KiCad."]);
     if(NOWP.some(p=>/:Pads_/.test(p.fpn))) W.push(["note","The solder pads are on the outside face of board 1."]);
     if(st.slot) W.push(["note","Board 1 has a "+st.slot.w.toFixed(1)+" × "+st.slot.h.toFixed(1)+" mm cut-out for the transformer."]);
   }
@@ -1339,13 +1357,14 @@ function render(){
   NOW=compute(sel); NOWP=NOW.P;
   renderTiles(NOW.e,NOW.m,NOW.pk); renderDecisions(NOW.e,NOW.m); renderLife(NOW.e,NOW.m); renderBoard(NOW.pk);
   renderCuts(NOW.e,NOW.m); renderBars(NOW.P); renderWarnings(checks(NOW.e,NOW.m,NOW.pk)); renderBom(NOW.P.concat(NOW.posts)); renderModels(NOW.P.concat(NOW.posts.slice(0,1)));
-  const two=NOW.e.stack==="two"; $("c-arr").disabled=two; $("c-low").disabled=two; if(two) $("c-arr").value="func"; else $("c-arr").value=cond.arr==="tight"?"tight":"func";
+  const two=NOW.e.stack==="two"; $("v3openrow").style.display=two?"":"none"; $("c-arr").disabled=two; $("c-low").disabled=two; if(two) $("c-arr").value="func"; else $("c-arr").value=cond.arr==="tight"?"tight":"func";
   const cfg=KIT.options.map(([k])=>k+"="+NOW.e[k]).join(" ");
   $("cfgline").textContent=cfg;
   if(built!==null && built!==cfg){ $("kout").value=""; $("kcopy").disabled=true; $("ksave").disabled=true; $("kmsg").textContent="Options changed: build again."; built=null; }
   const pkey=cfg+"|"+JSON.stringify(layCfg());
   if(builtP!==null && builtP!==pkey){ $("pout").value=""; $("pcopy").disabled=true; $("psave").disabled=true; $("pmsg").textContent="Options changed: build again."; builtP=null; }
   save();
+  if(window.NIXIE.onchange) window.NIXIE.onchange();
 }
 function syncEnvInputs(){ $("c-env").value=cond.env; $("c-ew").value=cond.ew; $("c-el").value=cond.el; const off=cond.env==="ratio"; $("c-ew").disabled=off; $("c-el").disabled=off; }
 function copyText(t,done,area){
@@ -1394,8 +1413,11 @@ function init(){
   $("kcfg").addEventListener("click",()=>copyText($("cfgline").textContent,ok=>{ $("kmsg").textContent=ok?"Option string copied.":"Copying was refused here: select the option string by hand."; }));
   render();
 }
+window.NIXIE={state:()=>({pk:NOW&&NOW.pk,T:BOARD_T}),onchange:null};      // what the 3D view (view3d.js) draws
+$("v3open").addEventListener("input",ev=>{ const d=Number(ev.target.value); $("v3openv").textContent=d<1?"closed":d>179?"laid open":d+"°"; });
 init();
 </script>
+<script src="view3d.js" defer></script>
 <style>
 /* slopswap: the artifact's own tokens now point at the Jumperless theme */
 :root,:root:not([data-theme="light"]),:root[data-theme="dark"]{--bg:var(--jl-bg,#27272b);--panel:var(--jl-surface,#323238);--ink:var(--jl-fg,#f3f3f5);--muted:var(--jl-muted,#aaaab5);--line:var(--jl-line,#4b4b54);--accent:var(--jl-accent,#f03060);--body:var(--jl-font-body,Lato,'Helvetica Neue',Arial,sans-serif);--mono:var(--jl-font-mono,ui-monospace,Menlo,Consolas,monospace);--display:var(--jl-font-display,Michroma,'Avenir Next','Helvetica Neue',Arial,sans-serif);}
