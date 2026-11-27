@@ -1,0 +1,15 @@
+{
+	"name": "slopswap-unfurl",
+	"main": "src/index.js",
+	"compatibility_date": "2026-09-29",
+	// Reachable only on the page's own hostname: no workers.dev address, no preview addresses.
+	"workers_dev": false,
+	"preview_urls": false,
+	// The star takes the question mark and what follows it; the Worker answers nothing but this one path.
+	"routes": [{ "pattern": "slopswap.org/api/unfurl*", "zone_name": "slopswap.org" }],
+	"observability": { "enabled": true },
+	// Cloudflare's own limiter, per visitor address: a pasted link costs up to eight calls (the page, its pictures,
+	// its video, its icon), so this is some fifteen previews a minute. Needs wrangler 4.36 or newer.
+	// namespace_id is any whole number not used by another limiter on the account.
+	"ratelimits": [{ "name": "LIMIT", "namespace_id": "2711", "simple": { "limit": 120, "period": 60 } }]
+}

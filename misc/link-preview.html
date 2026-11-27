@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="en" class="console">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Link preview tester</title>
+<meta name="short-title" content="Link previews">
+<meta name="description" content="Paste a link and see how Discord, Messages, Slack, X, WhatsApp and seven more would unfold it: the card each one draws, the tags each one read, and what each would turn down.">
+<link rel="stylesheet" href="../styles/jumperless.css">
+<style>
+/* The link preview tester. The look is the site's console (styles/jumperless.css); this is the page's own layout and
+   the twelve mock cards. What each platform does with a page's tags is in link-preview.js, which has its own tests;
+   this page only fetches, and draws what those rules return.
+   Nothing read from a fetched page becomes markup: text goes in as text, addresses through LinkPreview.safeUrl, and
+   Discord's markdown through LinkPreview.md. */
+[hidden] { display: none !important; }
+body { padding-top: 3px; }
+.top { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; padding: 8px 12px; border-bottom: 1px solid var(--line); }
+.top h1 { margin-right: 6px; }
+#ask { display: flex; flex: 1 1 30rem; flex-wrap: wrap; align-items: center; gap: 6px 8px; margin: 0; }
+#ask label { display: inline-flex; align-items: center; gap: 6px; color: var(--dim); }
+#url { flex: 1 1 14rem; min-width: 0; padding: 5px 8px; }
+#said { flex: 1 0 100%; margin: 0; min-height: 1.35em; color: var(--dim); overflow-wrap: anywhere; }
+#said.bad { color: var(--problem); } #said.warn { color: var(--worse); }
+#source { display: grid; gap: 6px; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+#source textarea { width: 100%; height: 9rem; resize: vertical; }
+#source div { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; color: var(--dim); }
+#source input { flex: 1 1 14rem; min-width: 0; }
+.cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(17rem, 25rem); gap: 10px; padding: 10px; align-items: start; }
+.side { display: grid; gap: 10px; }
+.panel > .body { flex: none; overflow: visible; }            /* a page that scrolls, not a tool that fills the window */
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(21rem, 1fr)); gap: 12px; align-items: start; }
+.hint { color: var(--dim); max-width: 44rem; }
+.pv { min-width: 0; border: 1px solid var(--line); background: var(--bg); }
+.pv > header { display: flex; align-items: center; gap: 10px; padding: 4px 8px; border-bottom: 1px solid var(--line); }
+.pv h2 { flex: 1; margin: 0; }
+.pv .tag { font-family: var(--label); font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); white-space: nowrap; }
+.pv .tag.moves { color: var(--better); }
+.pv .notes { margin: 0; padding: 6px 8px 8px 22px; color: var(--dim); font-size: 12px; }
+.pv .notes:empty { display: none; }
+#checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+#checks li { display: grid; grid-template-columns: auto 1fr; gap: 1px 8px; margin: 0; }
+#checks .dot { width: 9px; height: 9px; margin-top: 4px; background: var(--better); clip-path: polygon(0 0, 100% 0, 100% 100%, 45% 100%, 0 55%); }
+#checks .warn .dot { background: var(--worse); } #checks .bad .dot { background: var(--problem); }
+#checks small { grid-column: 2; font-family: var(--label); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+#tags { table-layout: fixed; }
+#tags td { vertical-align: top; overflow-wrap: anywhere; }
+#tags td:first-child { width: 37%; }
+#tags td.v { color: var(--dim); }
+#tags td.w { width: 27%; overflow-wrap: normal; font-family: var(--label); font-size: 11px; letter-spacing: .04em; color: var(--dim); }
+@media (max-width: 900px) { .cols { grid-template-columns: 1fr; } }
+
+/* ---- the mock cards. One skeleton (.m-wrap: media, text, thumb), a skin per platform; dark first, light after. ---- */
+.m { --mbg: #313338; --card: #2b2d31; --ink: #dbdee1; --dim: #949ba4; --link: #00a8fc; --mline: #3f4147; --rad: 4px; --bar: #1e1f22; --wide: 432px;
+  padding: 14px 12px; background: var(--mbg); color: var(--ink); overflow: hidden;
+  font: 14px/1.35 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-variant-numeric: normal; }
+.m a { color: inherit; text-decoration: none; }
+.m-wrap { position: relative; display: flex; flex-direction: column; max-width: var(--wide); background: var(--card); border-radius: var(--rad); overflow: hidden; }
+.m-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; padding: 10px 12px; }
+.m-title { font-weight: 600; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.m-desc { color: var(--dim); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+.m-site, .m-domain, .m-foot, .m-author { font-size: 12px; color: var(--dim); }
+.m-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; } .m-fields b, .m-fields span { display: block; }
+.m-media { position: relative; line-height: 0; }
+.m-media img, .m-media video, .m-media canvas { display: block; width: 100%; height: auto; }
+.m-media.g2, .m-media.g3, .m-media.g4 { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+.m-media[class*="g"] :is(img, canvas) { aspect-ratio: 1; height: 100%; object-fit: cover; }
+.m-thumb { flex: none; width: 80px; height: 80px; margin: 10px; border-radius: var(--rad); overflow: hidden; line-height: 0; }
+.m-thumb :is(img, canvas) { width: 100%; height: 100%; object-fit: cover; }
+.l-small .m-wrap { flex-direction: row; } .l-small .m-text { flex: 1; }
+.m-broken { display: grid; place-items: center; min-height: 64px; padding: 8px; background: #0003; color: var(--dim); font-size: 12px; line-height: 1.3; text-align: center; }
+.m-bare { color: var(--link); text-decoration: underline; overflow-wrap: anywhere; }
+.crop .m-media { aspect-ratio: 1.91; } .crop .m-media :is(img, canvas) { height: 100%; object-fit: cover; }
+.m-under { margin-top: 4px; font-size: 13px; color: var(--dim); }
+
+/* Discord: a bar down the left, words first, the picture under them (or small, to the right) */
+.m-discord .m-wrap, .c-box { border-left: 4px solid var(--bar); }
+.m-discord .m-text { order: 1; padding: 8px 12px 10px; } .m-discord .m-media { order: 2; margin: 0 12px 12px; border-radius: 4px; overflow: hidden; }
+.m-discord .m-title { color: var(--link); font-size: 16px; } .m-discord .m-desc { color: var(--ink); -webkit-line-clamp: 6; }
+.m-discord .m-author { font-size: 14px; font-weight: 600; color: var(--ink); } .m-discord .m-domain { display: none; }
+.m-discord.l-photo .m-wrap { border: 0; background: none; } .m-discord.l-photo .m-media { margin: 0; }
+.c-box { display: grid; gap: 8px; max-width: var(--wide); padding: 12px; background: var(--card); border-radius: 4px; }
+.c-text > :is(h1, h2, h3) { display: block; margin: 0 0 2px; padding: 0; border: 0; font-family: inherit; font-size: 16px; font-weight: 600; line-height: 1.3; text-transform: none; letter-spacing: 0; color: var(--ink); }
+.c-text > :is(h1, h2, h3)::before, .c-text > :is(h1, h2, h3)::after { content: none; }
+.c-text > h1 { font-size: 20px; } .c-text > h2 { font-size: 18px; }
+.c-text a { color: var(--link); } .c-text small { display: block; font-size: 12px; color: var(--dim); } .c-text li { margin: 0 0 0 1.2em; }
+.c-text code { background: #0004; padding: 0 .3em; }
+.c-gallery { display: grid; gap: 4px; border-radius: 8px; overflow: hidden; line-height: 0; } .c-gallery.g2, .c-gallery.g3, .c-gallery.g4 { grid-template-columns: 1fr 1fr; }
+.c-gallery :is(img, video, canvas) { display: block; width: 100%; height: auto; }
+.c-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.m .c-btn { padding: 6px 14px; border-radius: 8px; background: #4e5058; color: #fff; font-weight: 500; } .c-btn::after { content: " \2197"; opacity: .7; }
+.c-sep { width: 100%; height: 1px; margin: 2px 0; border: 0; background: var(--mline); }
+.c-section { display: flex; gap: 12px; justify-content: space-between; } .c-thumb { flex: none; width: 80px; border-radius: 8px; overflow: hidden; line-height: 0; } .c-thumb :is(img, canvas) { width: 100%; }
+.light .m-discord { --mbg: #fff; --card: #f2f3f5; --ink: #313338; --dim: #5c5e66; --link: #006ce7; --mline: #e1e2e4; --bar: #e3e5e8; }
+
+/* Messages: a bubble with the picture on top, the name and the domain under it */
+.m-imessage { --mbg: #000; --card: #3b3b3d; --ink: #fff; --dim: #a1a1a6; --rad: 18px; --wide: 300px; }
+.m-imessage .m-title { font-size: 15px; } .m-imessage .m-domain { font-size: 13px; }
+.m-imessage.l-small .m-thumb { order: 2; width: 44px; height: 44px; border-radius: 9px; margin: 10px 12px 10px 0; }
+.light .m-imessage { --mbg: #fff; --card: #e9e9eb; --ink: #000; --dim: #6e6e73; }
+
+/* Slack: a bar, the site's name, the title as a link, fields, the picture under or beside */
+.m-slack { --mbg: #1a1d21; --card: transparent; --ink: #d1d2d3; --dim: #ababad; --link: #1d9bd1; --bar: #35373b; --rad: 8px; --wide: 400px; font-size: 15px; }
+.m-slack .m-wrap { border-left: 4px solid var(--bar); border-radius: 0; } .m-slack .m-text { order: 1; padding: 0 12px 4px; }
+.m-slack .m-site { font-size: 15px; font-weight: 700; color: var(--ink); } .m-slack .m-title { color: var(--link); font-weight: 700; } .m-slack .m-desc { color: var(--ink); }
+.m-slack .m-domain { display: none; } .m-slack .m-media { order: 2; max-width: 360px; margin: 6px 12px 0; border-radius: 8px; overflow: hidden; }
+.m-slack .m-thumb { margin: 0 0 0 8px; }
+.light .m-slack { --mbg: #fff; --ink: #1d1c1d; --dim: #616061; --link: #1264a3; --bar: #ddd; }
+
+/* X: the picture with the title laid over its corner, "From" under it; or a small square with words */
+.m-x { --mbg: #000; --card: #000; --ink: #e7e9ea; --dim: #71767b; --mline: #2f3336; --rad: 16px; --wide: 420px; font-size: 15px; }
+.m-x .m-wrap { border: 1px solid var(--mline); } .m-x .m-title { font-weight: 400; } .m-x.l-large .m-desc, .m-x.l-large .m-domain { display: none; }
+.m-x.l-large .m-text { position: absolute; left: 12px; right: 12px; bottom: 12px; padding: 0; align-items: flex-start; }
+.m-x.l-large .m-title { max-width: 100%; padding: 0 6px; border-radius: 4px; background: #000a; color: #fff; font-size: 13px; -webkit-line-clamp: 1; }
+.m-x.l-small .m-thumb { order: -1; width: 110px; height: 110px; margin: 0; border-radius: 0; border-right: 1px solid var(--mline); }
+.m-x.l-small .m-text { justify-content: center; } .m-x.l-small .m-domain { order: -1; font-size: 15px; } .m-x.l-small .m-desc { -webkit-line-clamp: 2; }
+.light .m-x { --mbg: #fff; --card: #fff; --ink: #0f1419; --dim: #536471; --mline: #cfd9de; }
+
+/* WhatsApp: a sent bubble holding a darker card */
+.m-whatsapp { --mbg: #0b141a; --card: #025144; --ink: #e9edef; --dim: #a5c9c1; --rad: 8px; --wide: 330px; }
+.m-whatsapp .m-wrap { box-shadow: 0 0 0 4px #005c4b; margin: 4px; } .m-whatsapp .m-title { font-size: 14px; } .m-whatsapp .m-desc { font-size: 12px; -webkit-line-clamp: 2; }
+.m-whatsapp.l-small .m-thumb { order: -1; margin: 0; width: 86px; height: 86px; border-radius: 0; }
+.light .m-whatsapp { --mbg: #efeae2; --card: #c9eec4; --ink: #111b21; --dim: #5d6f68; } .light .m-whatsapp .m-wrap { box-shadow: 0 0 0 4px #d9fdd3; }
+
+/* Facebook: the picture, then the domain in capitals, the title, a line of description */
+.m-facebook { --mbg: #18191a; --card: #242526; --ink: #e4e6eb; --dim: #b0b3b8; --rad: 0px; --wide: 460px; font-size: 15px; }
+.m-facebook .m-domain { order: -1; text-transform: uppercase; } .m-facebook .m-title { font-size: 16px; } .m-facebook .m-desc { -webkit-line-clamp: 1; }
+.m-facebook.l-small .m-thumb { order: -1; margin: 0; width: 116px; height: 116px; border-radius: 0; }
+.light .m-facebook { --mbg: #fff; --card: #f0f2f5; --ink: #050505; --dim: #65676b; }
+
+/* LinkedIn: the picture, the title, the domain */
+.m-linkedin { --mbg: #1b1f23; --card: #283036; --ink: #e9e9e9; --dim: #a5a9ac; --rad: 2px; --wide: 460px; }
+.m-linkedin.l-small .m-thumb { order: -1; margin: 8px; width: 72px; height: 72px; }
+.light .m-linkedin { --mbg: #fff; --card: #eef3f8; --ink: #191919; --dim: #666; }
+
+/* Telegram: a bubble, a thin bar, the site's name in the accent colour */
+.m-telegram { --mbg: #0e1621; --card: #182533; --ink: #f5f5f5; --dim: #b8c2cc; --link: #6ab3f3; --rad: 10px; --wide: 400px; }
+.m-telegram .m-wrap { padding: 8px 10px; } .m-telegram .m-text { order: 1; padding: 0 0 0 9px; border-left: 3px solid var(--link); }
+.m-telegram .m-site { font-size: 14px; font-weight: 600; color: var(--link); } .m-telegram .m-desc { color: var(--ink); } .m-telegram .m-domain { display: none; }
+.m-telegram .m-media { order: 2; margin: 6px 0 0 12px; border-radius: 6px; overflow: hidden; } .m-telegram .m-thumb { width: 60px; height: 60px; margin: 0 0 0 8px; }
+.light .m-telegram { --mbg: #a8c5da; --card: #fff; --ink: #000; --dim: #50616e; --link: #3a8ed8; }
+
+/* Signal: a bubble with the picture on top */
+.m-signal { --mbg: #121212; --card: #3b3b3b; --ink: #fff; --dim: #b9b9b9; --rad: 14px; --wide: 320px; }
+.m-signal .m-desc { font-size: 13px; -webkit-line-clamp: 2; }
+.light .m-signal { --mbg: #fff; --card: #e9e9e9; --ink: #1b1b1b; --dim: #5e5e5e; }
+
+/* Mastodon: the picture, then the site, the title and the description, the author under a rule */
+.m-mastodon { --mbg: #181821; --card: #181821; --ink: #fff; --dim: #9baec8; --mline: #393f4f; --rad: 8px; --wide: 460px; }
+.m-mastodon .m-wrap { border: 1px solid var(--mline); } .m-mastodon .m-site { order: -1; } .m-mastodon .m-domain { display: none; } .m-mastodon .m-title { font-size: 16px; }
+.m-mastodon .m-author { order: 9; margin-top: 6px; padding-top: 8px; border-top: 1px solid var(--mline); } .m-mastodon .m-author::before { content: "More from "; }
+.m-mastodon .m-media { aspect-ratio: 16 / 9; } .m-mastodon .m-media :is(img, canvas) { height: 100%; object-fit: cover; }
+.light .m-mastodon { --mbg: #fff; --card: #fff; --ink: #000; --dim: #45455f; --mline: #c0cdd9; }
+
+/* Bluesky: the picture, the title, the description, the domain under a rule */
+.m-bluesky { --mbg: #161e27; --card: #161e27; --ink: #f1f3f5; --dim: #8c9eb2; --mline: #2e4052; --rad: 12px; --wide: 440px; font-size: 15px; }
+.m-bluesky .m-wrap { border: 1px solid var(--mline); } .m-bluesky .m-desc { -webkit-line-clamp: 2; } .m-bluesky .m-domain { margin-top: 5px; padding-top: 6px; border-top: 1px solid var(--mline); }
+.light .m-bluesky { --mbg: #fff; --card: #fff; --ink: #0b0f14; --dim: #42576c; --mline: #d4dbe2; }
+
+/* Teams: a small picture, then the title, the description and the domain */
+.m-teams { --mbg: #1f1f1f; --card: #292929; --ink: #fff; --dim: #adadad; --link: #7f85f5; --rad: 6px; --wide: 420px; }
+.m-teams .m-thumb { order: -1; width: 96px; height: 96px; margin: 10px 0 10px 10px; } .m-teams .m-desc { -webkit-line-clamp: 2; } .m-teams .m-domain { color: var(--link); }
+.light .m-teams { --mbg: #f5f5f5; --card: #fff; --ink: #242424; --dim: #616161; --link: #4f52b2; }
+</style>
+</head>
+<body>
+<header class="top">
+  <p class="eyebrow"><a href="../">slopswap</a> / <a href="./">misc</a></p>
+  <h1>Link preview tester</h1>
+  <form id="ask">
+    <input id="url" type="text" inputmode="url" placeholder="Paste a link: https://…" aria-label="The link to preview" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <label>as <select id="as" title="Who asks for the page. Some sites answer each crawler differently."></select></label>
+    <button id="go">Preview</button>
+    <button type="button" class="quiet" id="theme" aria-pressed="true" title="Draw the cards as each app's dark or light theme">Dark</button>
+    <button type="button" class="quiet" id="paste" aria-expanded="false" aria-controls="source">Paste source</button>
+  </form>
+  <p id="said" role="status"></p>
+</header>
+<div id="source" hidden>
+  <textarea id="html" spellcheck="false" aria-label="A page's source, or just its head" placeholder="<head> … </head>   A page's source, or just its head: for a page not on the web yet, or one this cannot reach."></textarea>
+  <div><span>Its address (for its domain and its relative addresses)</span><input id="base" type="text" inputmode="url" placeholder="https://example.org/page.html" autocomplete="off" spellcheck="false"><button type="button" id="readit">Read this</button></div>
+</div>
+<main class="cols">
+  <section class="panel" style="--c:var(--r2)">
+    <div class="bar"><span class="plate"><b>01</b>Previews</span><span class="bar-note" id="note1"></span></div>
+    <div class="body">
+      <div id="cards" class="cards">
+        <p class="hint">Paste a link and each platform's card is drawn here from the page's own tags, the way that platform reads them: which picture, which words, large or small, moving or still. The rules for Discord, Messages, Slack, X and WhatsApp follow what those platforms publish; the rest are drawn from how they look today. The cards are sketches of each layout, not copies of each app. <button type="button" class="quiet on" id="try">Try this site's front page</button></p>
+      </div>
+    </div>
+  </section>
+  <div class="side">
+    <section class="panel" style="--c:var(--r7)">
+      <div class="bar"><span class="plate"><b>02</b>Checks</span><span class="bar-note" id="note2"></span></div>
+      <div class="body"><ul id="checks"><li class="hint">What would go wrong, and on which platform.</li></ul></div>
+    </section>
+    <section class="panel" style="--c:var(--r10)">
+      <div class="bar"><span class="plate"><b>03</b>Tags read</span><span class="bar-note" id="note3"></span></div>
+      <div class="body"><table id="tags"><tbody><tr><td class="v">The page's tags, in the order they are written, and who reads each.</td></tr></tbody></table></div>
+    </section>
+  </div>
+</main>
+<script src="link-preview.js"></script>
+<script>
+(function () {
+  'use strict';
+  const LP = window.LinkPreview, $ = (id) => document.getElementById(id), HERE = location.origin;
+  const el = (tag, cls, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; };
+  const NAME = Object.fromEntries(LP.PLATFORMS.map((p) => [p.id, p.name]));
+  const state = { page: null, got: null, media: {}, extra: {}, worker: null, run: 0 };
+  // Who reads which tag (the same rules as link-preview.js, said per tag for the table).
+  const ALL = LP.PLATFORMS.map((p) => p.id), but = (...no) => ALL.filter((p) => !no.includes(p));
+  const READERS = { 'og:title': ALL, 'og:description': but('imessage', 'linkedin'), 'og:image': ALL, 'og:url': ['whatsapp', 'facebook'], 'og:site_name': ['discord', 'slack', 'telegram', 'mastodon'],
+    'og:type': ['discord', 'facebook'], 'og:image:width': ['discord', 'facebook', 'linkedin'], 'og:image:height': ['discord', 'facebook', 'linkedin'], 'og:image:type': ['discord'], 'og:image:alt': ['discord', 'x', 'mastodon'],
+    'og:image:url': ['discord'], 'og:image:secure_url': ['discord'], 'og:video': ['discord', 'imessage'], 'og:video:url': ['discord', 'imessage'], 'og:video:secure_url': ['discord', 'imessage'], 'og:video:type': ['discord'],
+    'og:video:width': ['discord'], 'og:video:height': ['discord'], 'twitter:card': ['discord', 'slack', 'x', 'telegram'], 'twitter:title': ['discord', 'slack', 'x', 'telegram'], 'twitter:description': ['discord', 'slack', 'x', 'telegram'],
+    'twitter:image': ['x', 'slack', 'telegram', 'discord'], 'twitter:image:src': ['x', 'slack', 'telegram', 'discord'], 'twitter:image:alt': ['x', 'discord'], 'twitter:player:stream': ['discord'],
+    'twitter:label1': ['slack'], 'twitter:data1': ['slack'], 'twitter:label2': ['slack'], 'twitter:data2': ['slack'], 'theme-color': ['discord'],
+    'description': ['discord', 'slack', 'whatsapp', 'facebook', 'telegram', 'mastodon', 'bluesky', 'teams'], 'fediverse:creator': ['mastodon'], 'article:published_time': ['mastodon'],
+    'og:pubdate': ['discord'], 'pubdate': ['discord'], 'iso-8601-publish-date': ['discord'] };
+  const who = (ids) => (!ids || !ids.length ? '' : ids.length === ALL.length ? 'all' : ids.length > ALL.length - 4 ? 'all but ' + but(...ids).map((i) => NAME[i]).join(', ') : ids.map((i) => NAME[i]).join(', '));
+
+  function say(text, level) { const s = $('said'); s.textContent = text; s.className = level || ''; }
+
+  // ---- getting a page and its files: this site's own directly, anything else through the fetch Worker ----
+  async function first(r, most) {
+    if (!r.body) return new Uint8Array(await r.arrayBuffer()).subarray(0, most);
+    const reader = r.body.getReader(), parts = []; let size = 0;
+    for (;;) { const { done, value } = await reader.read(); if (done) break; parts.push(value); size += value.length; if (size >= most) { reader.cancel(); break; } }
+    const all = new Uint8Array(Math.min(size, most)); let at = 0;
+    for (const p of parts) { const part = p.subarray(0, all.length - at); all.set(part, at); at += part.length; }
+    return all;
+  }
+  const ours = (u) => { try { return new URL(u).origin === HERE; } catch (e) { return false; } };
+  async function worker(query) {
+    let r, body = null;
+    try { r = await fetch('/api/unfurl?' + query, { cache: 'no-store' }); body = await r.json(); } catch (e) { body = null; }
+    if (!body || typeof body !== 'object') { state.worker = false; throw new Error('NOWORKER'); }
+    state.worker = true;
+    if (body.error) throw new Error(body.error);
+    return body;
+  }
+  async function getPage(u, as) {
+    if (!ours(u)) return Object.assign(await worker('url=' + encodeURIComponent(u) + '&as=' + encodeURIComponent(as)), { via: 'worker' });
+    const r = await fetch(u, { cache: 'no-store' }), type = r.headers.get('content-type') || '';
+    if (!/html|xml/i.test(type)) return { final: r.url, status: r.status, type: type, html: '', hops: [], via: 'direct' };
+    let html = new TextDecoder().decode(await first(r, 400 * 1024));
+    const end = html.search(/<\/head\s*>/i);
+    if (end >= 0) html = html.slice(0, end) + '</head>';
+    return { final: r.url, status: r.status, type: type, html: html, hops: [], via: 'direct' };
+  }
+  function measure(u) {                                      // with no Worker the browser can still say how large a picture is
+    return new Promise(function (done) {
+      const i = new Image(); i.referrerPolicy = 'no-referrer';
+      i.onload = () => done({ status: 200, type: '', bytes: null, format: 'picture', width: i.naturalWidth, height: i.naturalHeight, animated: false, alpha: false });
+      i.onerror = () => done({ status: 0 }); i.src = u;
+    });
+  }
+  async function getMedia(u, as) {
+    if (ours(u)) {
+      const r = await fetch(u, { cache: 'no-store', headers: { Range: 'bytes=0-262143' } }), bytes = await first(r, 262144);
+      const total = /\/(\d+)\s*$/.exec(r.headers.get('content-range') || '');
+      return Object.assign({ status: r.status, type: (r.headers.get('content-type') || '').split(';')[0], bytes: total ? +total[1] : r.status === 200 && r.headers.get('content-length') ? +r.headers.get('content-length') : null },
+        LP.sniff(r.ok ? bytes : new Uint8Array(0)));
+    }
+    if (state.worker !== false) { try { return await worker('probe=' + encodeURIComponent(u) + '&as=' + encodeURIComponent(as)); } catch (e) { if (e.message !== 'NOWORKER') return { status: 0 }; } }
+    return measure(u);
+  }
+  async function getText(u) {
+    if (ours(u)) return new TextDecoder().decode(await first(await fetch(u, { cache: 'no-store' }), 64 * 1024));
+    return (await worker('text=' + encodeURIComponent(u))).text;
+  }
+  // Every file the cards would show: pictures, video, the icon, what the page's own Discord layout holds.
+  function wanted() {
+    const set = new Set(), p = state.page, add = (u) => { const s = LP.safeUrl(u); if (s) set.add(s); };
+    LP.PLATFORMS.forEach(function (pf) { const c = LP.resolve(pf.id, p, {}, state.extra); c.images.forEach(add); add(c.video); });
+    add(LP.abs(LP.pref(p, ['og:video', 'og:video:url', 'og:video:secure_url']), p.base)); add(LP.icon(p));
+    (function walk(c) { if (!c || typeof c !== 'object') return; if (c.media) add(c.media.url); (c.items || []).forEach((i) => i && i.media && add(i.media.url)); (c.components || []).forEach(walk); walk(c.accessory); })(state.extra.component && state.extra.component.tree);
+    return Array.from(set).slice(0, 14);
+  }
+
+  async function preview(input, pasted) {
+    const run = ++state.run;
+    let u = String(input || '').trim();
+    if (u && !/^[a-z][a-z0-9+.-]*:/i.test(u)) u = 'https://' + u;
+    u = LP.safeUrl(u);
+    if (!u) return say('That is not a link: it has to be an http or https address.', 'bad');
+    const as = $('as').value;
+    say('Reading ' + u + ' …'); $('go').disabled = true;
+    try {
+      const got = pasted != null ? { final: u, status: 200, type: 'text/html', html: pasted, hops: [], via: 'pasted' } : await getPage(u, as);
+      if (run !== state.run) return;
+      if (!got.html) return say(got.status >= 400 ? 'That address answers ' + got.status + ': there is nothing to preview.'
+        : 'That address is ' + (got.type.split(';')[0] || 'not a page') + ', not a page. A link straight to a picture or a video is shown as that picture or video, with no card.', 'bad');
+      state.got = got; state.page = LP.read(got.html, got.final); state.media = {}; state.extra = {};
+      const p = state.page;
+      if (p.embed.inline != null) state.extra.component = LP.component(p.embed.inline);
+      draw();
+      if (pasted == null) history.replaceState(null, '', '?url=' + encodeURIComponent(u));
+      const extras = [];
+      if (p.embed.inline == null && p.embed.href) extras.push(getText(p.embed.href).then((t) => { state.extra.component = LP.component(t); }));
+      if (p.oembed) extras.push(getText(p.oembed).then((t) => { state.extra.oembed = JSON.parse(t); }));
+      await Promise.allSettled(extras);
+      await Promise.allSettled(wanted().map((m) => getMedia(m, as).then((f) => { if (run === state.run) { state.media[m] = f; draw(); } })));
+      if (run !== state.run) return;
+      draw();
+      const how = got.via === 'direct' ? 'read directly (this site)' : got.via === 'pasted' ? 'from pasted source' : 'fetched as ' + LP.CRAWLERS[as].name + ' in ' + got.ms + ' ms';
+      const hops = got.hops && got.hops.length ? ', after ' + got.hops.length + ' redirect' + (got.hops.length > 1 ? 's' : '') + ' to ' + got.final : '';
+      if (got.status < 200 || got.status > 299) say('The page answers ' + got.status + ': Discord, and most others, show no preview for anything but a 2xx. Drawn anyway, ' + how + '.', 'bad');
+      else say(u + ': ' + how + hops + (state.worker === false && got.via !== 'direct' ? '. File sizes are unknown without the fetch Worker.' : '.'));
+    } catch (e) {
+      if (run !== state.run) return;
+      if (e.message === 'NOWORKER') { say('This page reads slopswap’s own pages by itself. For any other site it needs its fetch Worker, which is not answering (deploy it: cd .workers/unfurl && wrangler deploy). Until then, paste the page’s source below.', 'warn'); openSource(true); $('base').value = u; }
+      else say('Could not read it: ' + e.message + '.', 'bad');
+    } finally { if (run === state.run) $('go').disabled = false; }
+  }
+
+  // ---- drawing ----
+  function pic(u, frozen) {
+    const safe = LP.safeUrl(u), broken = (why) => el('div', 'm-broken', why);
+    if (!safe) return broken('no picture');
+    const i = el('img'); i.alt = ''; i.referrerPolicy = 'no-referrer';
+    i.onerror = () => i.replaceWith(broken('the picture did not load'));
+    if (frozen) i.onload = function () {                     // a platform that shows a moving picture's first frame only
+      const c = el('canvas'), k = Math.min(1, 1200 / i.naturalWidth); c.width = Math.round(i.naturalWidth * k); c.height = Math.round(i.naturalHeight * k);
+      try { c.getContext('2d').drawImage(i, 0, 0, c.width, c.height); i.replaceWith(c); } catch (e) { /* leave the picture as it is */ }
+    };
+    i.src = safe; return i;
+  }
+  function video(u, poster, plays) {
+    const safe = LP.safeUrl(u); if (!safe) return el('div', 'm-broken', 'no video');
+    const v = el('video'); v.muted = true; v.playsInline = true; v.preload = 'metadata';
+    if (LP.safeUrl(poster)) v.poster = LP.safeUrl(poster);
+    if (plays) { v.autoplay = true; v.loop = true; } else v.controls = true;
+    v.src = safe; return v;
+  }
+  const isVideo = (u) => /\.(mp4|webm|mov|m4v)([?#]|$)/i.test(u) || /mp4|mov|webm/.test((state.media[u] || {}).format || '');
+  function layout(tree) {                                    // Discord's own layout, from the page's component embed
+    const box = el('div', 'c-box');
+    if (typeof tree.accent_color === 'number') box.style.setProperty('--bar', '#' + (tree.accent_color & 0xffffff).toString(16).padStart(6, '0'));
+    const media = (m) => { const u = m && LP.safeUrl(m.url); return !u ? el('div', 'm-broken', 'no picture') : isVideo(u) ? video(u, '', false) : pic(u); };
+    const part = function (c) {
+      if (!c || typeof c !== 'object') return null;
+      if (c.type === 10) { const d = el('div', 'c-text'); d.innerHTML = LP.md(String(c.content || '')); return d; }
+      if (c.type === 12) { const items = (c.items || []).slice(0, 10), g = el('div', 'c-gallery g' + Math.min(4, items.length)); items.forEach((it) => g.append(media(it && it.media))); return g; }
+      if (c.type === 1 || c.type === 9) {
+        const r = el('div', c.type === 1 ? 'c-row' : 'c-section'), inner = c.type === 1 ? r : r.appendChild(el('div'));
+        (c.components || []).forEach((x) => { const n = part(x); if (n) inner.append(n); });
+        const acc = c.type === 9 ? part(c.accessory) : null; if (acc) r.append(acc);
+        return r;
+      }
+      if (c.type === 2) { const a = el('a', 'c-btn', ((c.emoji && c.emoji.name ? c.emoji.name + ' ' : '') + (c.label || '')).trim()), u = LP.safeUrl(c.url); if (u) { a.href = u; a.target = '_blank'; a.rel = 'noopener noreferrer'; } return a; }
+      if (c.type === 11) { const t = el('div', 'c-thumb'); t.append(media(c.media)); return t; }
+      if (c.type === 14) return el('hr', 'c-sep');
+      return null;
+    };
+    (tree.components || []).forEach((c) => { const n = part(c); if (n) box.append(n); });
+    return box;
+  }
+  function mock(id, c, pageUrl) {
+    const crop = ['x', 'facebook', 'linkedin', 'whatsapp', 'bluesky'].includes(id) && c.layout === 'large';
+    const m = el('div', 'm m-' + id + ' l-' + c.layout + (crop ? ' crop' : ''));
+    if (c.layout === 'none') { m.append(el('div', 'm-bare', pageUrl)); return m; }
+    if (c.layout === 'component') { m.append(layout(c.tree)); return m; }
+    const wrap = el('div', 'm-wrap'), text = el('div', 'm-text'), frozen = (u) => !c.animates && !!(state.media[u] && state.media[u].animated);
+    if (c.color) wrap.style.setProperty('--bar', c.color);
+    if (c.site) text.append(el('div', 'm-site', c.site));
+    if (c.author) text.append(el('div', 'm-author', c.author));
+    if (c.title) { const a = el('a', 'm-title', c.title); a.href = pageUrl; a.target = '_blank'; a.rel = 'noopener noreferrer'; text.append(a); }
+    if (c.description) text.append(el('div', 'm-desc', c.description));
+    if (c.fields.length) { const f = el('div', 'm-fields'); c.fields.forEach(function (pair) { const d = el('div'); d.append(el('b', '', pair[0]), el('span', '', pair[1])); f.append(d); }); text.append(f); }
+    text.append(el('div', 'm-domain', c.domain));
+    if (c.date) text.append(el('div', 'm-foot', c.date.slice(0, 10)));
+    let media = null;
+    if (['video', 'gallery', 'large', 'photo'].includes(c.layout)) {
+      media = el('div', 'm-media' + (c.layout === 'gallery' ? ' g' + c.images.length : ''));
+      if (c.layout === 'video') media.append(video(c.video, c.images[0], id === 'imessage'));
+      else (c.layout === 'gallery' ? c.images : c.images.slice(0, 1)).forEach((u) => media.append(pic(u, frozen(u))));
+    }
+    if (media) wrap.append(media);
+    if (c.layout !== 'photo') wrap.append(text);
+    if (c.layout === 'small') { const t = el('div', 'm-thumb'); t.append(pic(c.images[0], frozen(c.images[0]))); wrap.append(t); }
+    m.append(wrap);
+    if (id === 'x' && c.layout === 'large') m.append(el('div', 'm-under', 'From ' + c.domain));
+    return m;
+  }
+  const SAYS = { large: 'large picture', small: 'small picture', text: 'words only', video: 'video', gallery: 'gallery', photo: 'picture alone', component: 'its own layout', none: 'bare link' };
+  function draw() {
+    const p = state.page; if (!p) return;
+    const cards = $('cards'), light = cards.classList.contains('light'); cards.textContent = '';
+    LP.PLATFORMS.forEach(function (pf) {
+      const c = LP.resolve(pf.id, p, state.media, state.extra), a = el('article', 'pv'), h = el('header');
+      h.append(el('h2', '', pf.name), el('span', 'tag', SAYS[c.layout] || c.layout));
+      if (c.animates || (c.layout === 'component' && wanted().some((u) => (state.media[u] || {}).animated))) h.append(el('span', 'tag moves', 'moves'));
+      const notes = el('ul', 'notes'); c.notes.forEach((n) => notes.append(el('li', '', n)));
+      notes.append(el('li', '', pf.source === 'docs' ? 'Drawn by what ' + pf.name + ' publishes about its previews.' : 'Drawn from how ' + pf.name + ' cards look today; it publishes no rules.'));
+      a.append(h, mock(pf.id, c, p.canonical || p.url), notes); cards.append(a);
+    });
+    if (light) cards.classList.add('light');
+    const checks = LP.checks(p, state.media, state.extra), list = $('checks'); list.textContent = '';
+    const rank = { bad: 0, warn: 1, ok: 2 };
+    checks.sort((x, y) => rank[x.level] - rank[y.level]).forEach(function (k) { const li = el('li', k.level); li.append(el('span', 'dot'), el('span', '', k.text), el('small', '', who(k.who))); list.append(li); });
+    if (!checks.length) list.append(el('li', 'hint', 'Nothing to report.'));
+    const n = (lv) => checks.filter((k) => k.level === lv).length;
+    $('note2').textContent = n('bad') + ' wrong, ' + n('warn') + ' to look at';
+    const body = el('tbody'), row = function (k, v, w) { const tr = el('tr'); tr.append(el('td', '', k), el('td', 'v', v.length > 160 ? v.slice(0, 160) + '…' : v), el('td', 'w', w)); tr.title = v; body.append(tr); };
+    if (p.title) row('<title>', p.title, 'fallback for all');
+    p.metas.forEach((m) => row(m.key, m.value, who(READERS[m.key]) || (/^(og|twitter|article|fb):/.test(m.key) ? 'none of these' : '')));
+    p.icons.forEach((i) => row('icon', i.href + (i.sizes ? ' (' + i.sizes + ')' : ''), 'Messages, Slack'));
+    if (p.oembed) row('oEmbed', p.oembed, 'Discord, Slack');
+    if (p.embed.inline != null || p.embed.href) row('component embed', p.embed.href || (state.extra.component ? state.extra.component.bytes + ' bytes, in the page' : 'in the page'), 'Discord');
+    if (p.canonical) row('canonical', p.canonical, '');
+    const t = $('tags'); t.textContent = ''; t.append(body);
+    $('note3').textContent = p.metas.length + ' tags in ' + LP.kB(p.headEnd) + ' of head';
+    $('note1').textContent = LP.domain(p.url);
+  }
+
+  // ---- the controls ----
+  Object.keys(LP.CRAWLERS).forEach(function (id) { const o = el('option', '', LP.CRAWLERS[id].name); o.value = id; $('as').append(o); });
+  function openSource(open) { $('source').hidden = !open; $('paste').setAttribute('aria-expanded', String(open)); $('paste').classList.toggle('on', open); }
+  $('ask').addEventListener('submit', function (e) { e.preventDefault(); preview($('url').value); });
+  $('paste').addEventListener('click', () => openSource($('source').hidden));
+  $('readit').addEventListener('click', () => preview($('base').value || 'https://example.org/', $('html').value));
+  $('theme').addEventListener('click', function () { const light = $('cards').classList.toggle('light'); this.textContent = light ? 'Light' : 'Dark'; this.setAttribute('aria-pressed', String(!light)); });
+  $('cards').addEventListener('click', function (e) { if (e.target.id === 'try') { $('url').value = HERE + '/'; preview($('url').value); } });
+  const asked = new URLSearchParams(location.search).get('url');
+  if (asked) { $('url').value = asked; preview(asked); }
+})();
+</script>
+</body>
+</html>

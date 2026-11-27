@@ -7,8 +7,10 @@ with the project list and the most recently updated pages.
 Run locally:  python3 build.py && python3 -m http.server -d _site 8000
 """
 import datetime
+import hashlib
 import html
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -17,7 +19,7 @@ from urllib.parse import quote
 
 ROOT = Path(__file__).resolve().parent
 OUT = ROOT / "_site"
-SKIP = {"_site", "styles"}          # dotfolders (.git, .github) are skipped too
+SKIP = {"_site", "styles", "__pycache__"}   # dotfolders (.git, .github) are skipped too
 DEFAULT_THEME = "jumperless"
 RECENT = "recent.json"            # written per folder: newest pages first, read by styles/splash.js
 UNLISTED = ".unlisted"            # a folder holding this file is built as usual but left off the front page
@@ -26,6 +28,15 @@ DR_LOCK = '<meta name="darkreader-lock">'   # tells the Dark Reader extension to
 LATEST = 6                         # pages in the front page's "recently updated" list
 ARTICLE_BYTES = 20_000             # ponytail: an index.html bigger than this is an article, not a list of links,
                                    # and may appear under "recently updated"; add a <meta> marker if this misfires
+# Where the site answers: social tags need whole addresses. SLOPSWAP_AT=http://127.0.0.1:8788 builds a copy whose cards
+# point at a local server (.workers/unfurl/dev.mjs), to look at them in the link preview tester before anything is pushed.
+SITE = os.environ.get("SLOPSWAP_AT", "").rstrip("/") or "https://" + (ROOT / "CNAME").read_text().strip()
+SITE_NAME = "slopswap"
+ACCENT = "#f03060"                 # the theme's pink (--jl-accent): the stripe down the side of a Discord preview
+CARD = {"image": "styles/social-card.png", "sweep": "styles/social-sweep.webp", "video": "styles/social-sweep.mp4", "w": 1200, "h": 630,
+        "alt": "A rainbow Jumperless wordmark above a ridged circle whose picture changes with the viewing angle: a lenticular shirt print."}
+DISCORD_EMBED = True               # False leaves Discord the plain tags (if its Embed Debugger turns the layout down)
+DISCORD_BYTES = 3000               # the most Discord reads of a component embed
 
 
 def head(p: Path) -> str:
@@ -211,6 +222,81 @@ def add_icons(folder: Path, up: str) -> None:
             p.write_text(into_head(s, tag))
 
 
+def asset(rel: str) -> str:
+    """The whole address of a file of the site, named by its contents, so a platform that keeps pictures for days
+    fetches a new render and never an unchanged one."""
+    return f"{SITE}/{rel}?v={hashlib.sha256((ROOT / rel).read_bytes()).hexdigest()[:10]}"
+
+
+def discord_embed(title: str, about: str, url: str, home: bool) -> str:
+    """The page's preview as Discord lays it out from its own parts (a "component embed"): the page's name as a link,
+    what it is, the sweep moving, and buttons. JSON for a script tag in the head; every "<" is written as \\u003c so
+    no title can end the tag, and the description is cut to keep the whole under Discord's limit."""
+    plain = lambda t: re.sub(r"([\\*_`~|\[\]()<>#])", r"\\\1", " ".join(t.split()))        # markdown marks, said as they are
+    buttons = [{"type": 2, "style": 5, "label": "Open", "url": url}]
+    if not home:
+        buttons.append({"type": 2, "style": 5, "label": SITE_NAME, "url": SITE + "/"})
+    head = ("" if home else f"-# {SITE_NAME}\n") + f"### [{plain(title[:120])}]({url})"
+    words = about.split()
+    while True:
+        said = " ".join(words) + ("…" if words and len(words) < len(about.split()) else "")
+        box = {"type": 17, "accent_color": int(ACCENT[1:], 16), "components": [
+            {"type": 10, "content": head + ("\n" + plain(said) if said else "")},
+            {"type": 12, "items": [{"media": {"url": asset(CARD["sweep"])}, "description": CARD["alt"]}]},
+            {"type": 1, "components": buttons}]}
+        text = json.dumps({"component": box}, ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c")
+        if len(text.encode()) <= DISCORD_BYTES or not words:
+            return text
+        words = words[:max(0, len(words) - max(1, len(words) // 8))]
+
+
+def social_tags(s: str, url: str, home: bool) -> str:
+    """The tags that make a link to this page unfold with the site's card, or "" for a page that names a picture of
+    its own. Three lanes: a still every platform can show (og:image), the sweep as a video that Messages plays by
+    itself (og:video), and Discord's own layout with the sweep moving in it. A page keeps the title, description and
+    card type it already declares."""
+    end = re.search(r"</head>", s, re.I)
+    top = s[:end.start()] if end else s[:HEAD_BYTES]
+    if re.search(r"""property=["']og:image["']""", top):
+        return ""
+    has = lambda key: re.search(rf"""(?:property|name)=["']{key}["']""", top)
+    said = lambda key: (lambda m: html.unescape(m.group(1)) if m else "")(re.search(rf"""<meta (?:property|name)=["']{key}["'] content="([^"]*)["]""", top))
+    m = re.search(r"<title>(.*?)</title>", top, re.S | re.I)
+    title = said("og:title") or (html.unescape(m.group(1).strip()) if m else SITE_NAME)
+    about = said("og:description") or said("description")
+    esc = lambda t: html.escape(t, quote=True)
+    tag = lambda key, value, attr="property": f'<meta {attr}="{key}" content="{esc(str(value))}">'
+    out = []
+    for key, value in (("og:type", "website"), ("og:site_name", SITE_NAME), ("og:title", title), ("og:description", about), ("og:url", url)):
+        if value and not has(key):
+            out.append(tag(key, value))
+    out += [tag("og:image", asset(CARD["image"])), tag("og:image:type", "image/png"), tag("og:image:width", CARD["w"]),
+            tag("og:image:height", CARD["h"]), tag("og:image:alt", CARD["alt"]),
+            tag("og:video", asset(CARD["video"])), tag("og:video:secure_url", asset(CARD["video"])), tag("og:video:type", "video/mp4"),
+            tag("og:video:width", CARD["w"]), tag("og:video:height", CARD["h"])]
+    if not has("twitter:card"):
+        out.append(tag("twitter:card", "summary_large_image", "name"))
+    if not has("theme-color"):      # Discord takes its stripe from this; media="not all" keeps browsers from tinting their toolbar with it
+        out.append(f'<meta name="theme-color" content="{ACCENT}" media="not all">')
+    if DISCORD_EMBED:
+        out.append(f'<script id="discord:component-embed" type="application/json">{discord_embed(title, about, url, home)}</script>')
+    return "\n".join(out)
+
+
+def add_social(folder: Path, at: str) -> int:
+    """Give the built pages of a folder the site's card (see social_tags). `at` is the folder's place on the site:
+    "" for the front page, "misc/" for a project. Returns how many pages took it."""
+    n = 0
+    for p in folder.glob("*.html"):
+        s = p.read_text(errors="replace")
+        home = not at and p.name == "index.html"
+        tags = social_tags(s, f"{SITE}/{at}" + ("" if p.name == "index.html" else quote(p.name)), home)
+        if tags:
+            p.write_text(into_head(s, tags))
+            n += 1
+    return n
+
+
 def project(d: Path) -> dict:
     """What the front page shows for one folder: name, one line about it, its pages, when it last changed."""
     idx = d / "index.html"
@@ -259,6 +345,33 @@ def check() -> None:
     got = [role(n, page) for n in ("plate.jpg", "print.pdf", "data.json", "orphan.zip")]
     assert got == ["loaded", "linked", "loaded", ""], got
 
+    # social cards: a page with its own picture is left alone; any other gets the site's card, once
+    url = SITE + "/misc/x.html"
+    assert social_tags('<head><meta property="og:image" content="https://x/y.jpg"></head>', url, False) == ""
+    bare = '<head><meta charset="utf-8"><title>A &amp; B</title><meta name="description" content="What it is."></head>'
+    t = social_tags(bare, url, False)
+    for want in ('property="og:image" content="' + SITE + '/styles/social-card.png?v=', 'property="og:image:width" content="1200"',
+                 'property="og:image:height" content="630"', 'property="og:image:type" content="image/png"', 'property="og:image:alt"',
+                 'property="og:video" content="' + SITE + '/styles/social-sweep.mp4?v=', 'property="og:video:secure_url"',
+                 'property="og:video:type" content="video/mp4"', 'name="twitter:card" content="summary_large_image"',
+                 'property="og:site_name" content="slopswap"', 'property="og:url" content="' + url + '"',
+                 'property="og:title" content="A &amp; B"', 'property="og:description" content="What it is."',
+                 'name="theme-color" content="' + ACCENT + '" media="not all"', 'id="discord:component-embed"'):
+        assert want in t, want
+    assert "twitter:image" not in t
+    assert social_tags(bare.replace("<title>", '<meta property="og:title" content="Own"><title>'), url, False).count("og:title") == 0
+    # Discord's layout: valid, small enough and unable to end its own script tag, whatever a page is called
+    text = discord_embed('</script><b>*x*</b> [y](z) `q` _u_', "d " * 2500, url, False)
+    box = json.loads(text)["component"]
+    words, gallery, row = box["components"]
+    assert box["type"] == 17 and box["accent_color"] == int(ACCENT[1:], 16) and len(text.encode()) <= 3000, len(text.encode())
+    assert "</script" not in text and "<" not in text
+    assert r"\*x\*" in words["content"] and r"\[y\]" in words["content"] and r"\_u\_" in words["content"] and r"\`q\`" in words["content"], words
+    assert words["content"].startswith("-# slopswap\n### [") and "](" + url + ")" in words["content"]
+    assert gallery["type"] == 12 and len(gallery["items"]) == 1 and "/styles/social-sweep.webp?v=" in gallery["items"][0]["media"]["url"]
+    assert [sorted(b) for b in row["components"]] == [["label", "style", "type", "url"]] * 2 and all(b["style"] == 5 for b in row["components"])
+    assert len(json.loads(discord_embed("slopswap", "About.", SITE + "/", True))["component"]["components"][2]["components"]) == 1
+
 
 def main() -> None:
     check()
@@ -272,6 +385,7 @@ def main() -> None:
 
     projects = sorted(d for d in ROOT.iterdir()
                       if d.is_dir() and d.name not in SKIP and not d.name.startswith("."))
+    carded = 0
     for d in projects:
         shutil.copytree(d, OUT / d.name, ignore=shutil.ignore_patterns(UNLISTED))
         (OUT / d.name / RECENT).write_text(json.dumps(recent(d), ensure_ascii=False, indent=0))
@@ -280,16 +394,18 @@ def main() -> None:
             crumb = f'<p class="eyebrow"><a href="../">slopswap</a> / {html.escape(d.name)}</p>'
             (OUT / d.name / "index.html").write_text(
                 page(name, theme_of(d), "../", f"{crumb}\n<h1>{html.escape(name)}</h1>\n{folder_index(d)}"))
-        if theme_of(d) == DEFAULT_THEME:        # folders with their own branding (Del Mar) keep the site icon off
+        if theme_of(d) == DEFAULT_THEME:        # folders with their own branding (Del Mar) keep the site's icon and card off
             add_icons(OUT / d.name, "../")
+            carded += add_social(OUT / d.name, d.name + "/")
 
     listed = [d for d in projects if not (d / UNLISTED).exists()]
     (OUT / "index.html").write_text(landing([project(d) for d in listed]))
     add_icons(OUT, "")
+    carded += add_social(OUT, "")
     bust(OUT, version())
     locked = lock_dark_reader(OUT)
     print(f"built {len(projects)} project folders into {OUT.relative_to(ROOT)}/ "
-          f"({len(projects) - len(listed)} unlisted, {locked} pages locked against Dark Reader)")
+          f"({len(projects) - len(listed)} unlisted, {carded} pages given the social card, {locked} locked against Dark Reader)")
 
 
 if __name__ == "__main__":

@@ -102,6 +102,30 @@ The hero image is `styles/architeuthis-flux.webp`, the Architeuthis Flux mark; t
 
 A folder without its own `index.html` gets a generated one in three tiers: its pages as rows (title, the page's `<meta name="description">`, date), then the files a visitor might want (anything a page links to as a download, or that no page mentions), then, folded away, the files the pages only load (their images, data and scripts). The rows, labels and file lists are the theme's `.ix-rows`, `.ix-label` and `.ix-files`, which a hand-written index can use too.
 
+## Social cards
+
+A link to a page here, pasted into a chat, unfolds with the lenticular shirt's print. `build.py` writes the tags into every built page that names no `og:image` of its own (`social_tags`); a page with its own picture is left alone, and so are folders with their own branding (Del Mar). A page keeps the title and description it has. There are three files in `styles/`, each for the platforms that can use it:
+
+| File | Tag | Who uses it |
+|---|---|---|
+| `social-card.png` | `og:image` | Everyone. The still: 30° right, see-through wherever nothing is printed, 1200×630, under 300 kB (WhatsApp drops a heavier picture). |
+| `social-sweep.mp4` | `og:video` | Messages, which plays it by itself and repeats it. On the site's charcoal, because video has no see-through. Discord ignores it: the page does not call itself a video. |
+| `social-sweep.webp` | Discord's own layout | Discord: the page's name as a link, its description, the sweep moving (35° each way), an Open button. It is a script tag in the head, `id="discord:component-embed"`, written by `discord_embed`. |
+
+- **To render them again** (after publishing new art from the viewer): `python3 .tools/social_card.py`. It opens the viewer in a headless Chrome, lays the shirt flat, photographs it with its art and with empty pictures in the art's place, and removes the cloth the two share. It needs `pip install playwright pillow`, a Chrome, and ffmpeg; `--check` only checks the files that are there. Where the wordmark sits is `TEXT_FILL` and `TEXT_RAISE` at the top of the script; the still's angle is `STILL_AT` and the sweep's reach `HALF`.
+- **File addresses** end in `?v=` and a hash of the file, so a platform that keeps pictures for days fetches a new render and never an unchanged one.
+- **Discord.** A layout it rejects can leave a link with no preview at all, so after changing `discord_embed` paste a link into its Embed Debugger (`discord.com/developers/embeds`). If it turns the layout down, set `DISCORD_EMBED = False` in `build.py`: Discord then shows the still from the plain tags. It keeps a preview for about half an hour; add `?v=2` to the link to see a change sooner.
+- **`theme-color`** is written with `media="not all"`: Discord reads the colour for its stripe, and browsers skip the tag and keep their own toolbar colour.
+- **To see the cards before pushing:** `SLOPSWAP_AT=http://127.0.0.1:8788 python3 build.py && node .workers/unfurl/dev.mjs`, then open the tester it prints and try the front page. Run plain `python3 build.py` afterwards; `_site/` is not committed either way.
+
+## The link preview tester
+
+`misc/link-preview.html`: paste a link, and each platform's card is drawn from the page's tags the way that platform reads them, with what each would turn down and who reads which tag. `?url=` in its address runs it, so a preview can be linked.
+
+- **The rules** are `misc/link-preview.js` (no page code, no network; `node .workers/unfurl/test/core.test.mjs`). Discord, Messages, Slack, X and WhatsApp follow what those platforms publish; the other seven are drawn from how their cards look today. When a platform changes, change `resolve` and `checks` there, test first.
+- **Fetching.** The page reads this site's own pages by itself. Any other site goes through a small Worker, `slopswap.org/api/unfurl` (`.workers/unfurl/README.md`), which has to be deployed once: `cd .workers/unfurl && wrangler deploy`. Without it the page says so and takes pasted source instead.
+- **The cards** are sketches of each layout, not copies of each app, and carry no logos. Nothing read from a fetched page is ever run or put in as markup.
+
 ## Hosting
 
 GitHub Pages (workflow deploy) behind Cloudflare DNS with the proxy on, SSL mode "Full". See `.github/workflows/pages.yml`.
