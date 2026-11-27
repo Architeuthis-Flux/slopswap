@@ -95,12 +95,17 @@ body { display: flex; flex-direction: column; padding-top: 3px; overflow: hidden
     routing: { title: 'Routing lab', src: () => (COPPER.find((c) => c.id === nb.copper) || COPPER[0]).src,
       keys: COPPER.map((c) => 'lab.ui.v1:' + pathOf(c.src)) },
     cost: { title: 'Cost explorer', src: () => 'cost-explorer.html', keys: ['v6ce.v4'] },
+    lite: { title: 'Lite cost explorer', src: () => 'lite-cost-explorer.html', keys: ['v6lite.v1'] },
+    stack: { title: 'Barnacle stack', src: () => 'barnacle-stack.html', keys: ['v6stack.v1'] },
   };
   const TABS = [
     { id: 'outline', name: 'Outline', frame: 'outline', inner: 'tab-outline' },
     { id: 'mag', name: 'Magnetometers', frame: 'outline', inner: 'tab-mag' },
     { id: 'routing', name: 'Routing', frame: 'routing' },
     { id: 'cost', name: 'Cost', frame: 'cost' },
+    { id: 'lite', name: 'Lite cost', frame: 'lite', inner: 'tab-lite' },
+    { id: 'bboard', name: 'Barnacle cost', frame: 'lite', inner: 'tab-board' },
+    { id: 'stack', name: 'Stack', frame: 'stack' },
   ];
   const KEYS = Object.values(FRAMES).flatMap((f) => f.keys);
 

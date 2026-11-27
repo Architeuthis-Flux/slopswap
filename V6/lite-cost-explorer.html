@@ -1,0 +1,628 @@
+<!doctype html>
+<html lang="en" class="console">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jumperless Lite Cost Explorer</title>
+<meta name="short-title" content="Lite cost explorer">
+<meta name="description" content="A minimum-cost Jumperless priced part by part from the V5 quote upward: breadboard built in, a brain barnacle on a Barnacle Board, or a paddle for a stock breadboard, with every lever an option and every price editable; and the Barnacle Board alone.">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="../styles/jumperless.css">
+<style>
+/* The cost explorer's own layout: the options in one panel, what they cost in the other, each scrolling on its own;
+   on a narrow screen they stack and the page scrolls. The look (greys, rainbow, pink, plates, cut corners, buttons,
+   tables) is the console's: the block above when this file is opened from disk, the site's stylesheet on slopswap. */
+:root {
+  /* the names the script uses, pointed at the look's: the parts of a whole walk the rainbow, and only a problem is red */
+  --muted: var(--dim); --copper: var(--accent); --good: var(--better); --warn: var(--worse); --bad: var(--problem);
+  --bar1: var(--r2); --bar2: var(--r4); --bar3: var(--r6); --bar4: var(--r7); --bar5: var(--r9); --bar6: var(--r11);
+}
+html, body { height: 100%; }
+body { display: flex; flex-direction: column; padding-top: 3px; }
+header.top { flex: none; display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 12px; padding: 8px 12px 7px; border-bottom: 1px solid var(--line); }
+header.top .sub { flex: 1 0 100%; margin: 2px 0 0; color: var(--dim); max-width: 120ch; }
+html.embedded header.top h1 { display: none; }       /* inside the V6 notebook its tab already says which tool this is */
+main { flex: 1 1 0; min-height: 0; display: flex; }
+#panel-options { flex: 0 0 400px; --c: var(--r2); border-right: 1px solid var(--line); }
+#panel-costs { flex: 1 1 0; --c: var(--r10); }
+.panel > .body { padding: 2px 12px 24px; }
+p { max-width: 110ch; }
+
+/* an option: what it is on the left with a line about it under, the thing to set on the right */
+.row { display: flex; align-items: center; justify-content: space-between; gap: 4px 10px; padding: 3px 0; flex-wrap: wrap; }
+.row label { flex: 1 1 160px; min-width: 0; }
+.row small { display: block; color: var(--dim); font-size: 11px; line-height: 1.35; }
+input[type=number] { width: 86px; text-align: right; }
+select { max-width: 200px; }
+.seg { display: flex; gap: 3px; flex-wrap: wrap; }
+.seg button { padding: 3px 11px 3px 8px; }
+/* "est": a number that is an assumption. Not the pink (that is what is on) and not red (that is a problem) */
+.est { font-family: var(--label); font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--worse);
+  border: 1px solid currentColor; padding: 0 4px; margin-left: 5px; vertical-align: 1px; }
+
+/* the headline numbers: plates, each the next colour */
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 6px; margin: 8px 0 2px; }
+.tile { background: var(--panel-2); padding: 7px 10px 8px 11px; border-left: 3px solid var(--c, var(--line));
+  clip-path: polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, 0 100%); }
+.tile:nth-child(5n+1) { --c: var(--r2); } .tile:nth-child(5n+2) { --c: var(--r3); } .tile:nth-child(5n+3) { --c: var(--r7); }
+.tile:nth-child(5n+4) { --c: var(--r8); } .tile:nth-child(5n+5) { --c: var(--r10); }
+.tile .k { font-family: var(--label); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .09em; color: var(--dim); }
+.tile .v { font-size: 22px; font-weight: 500; line-height: 1.25; }
+.tile .d { font-size: 11px; color: var(--dim); }
+.stack { display: flex; height: 22px; border: 1px solid var(--line); margin-top: 4px; }
+.stack div { height: 100%; min-width: 0; }
+.legend { display: flex; flex-wrap: wrap; gap: 3px 14px; font-size: 12px; margin: 6px 0; }
+.legend span::before { content: ""; display: inline-block; width: 9px; height: 9px; margin-right: 5px; background: var(--c);
+  clip-path: polygon(0 0, 100% 0, 100% 60%, 60% 100%, 0 100%); }
+
+.tablewrap { overflow-x: auto; margin-bottom: 4px; }
+.body td, .body th { padding: 3px 10px 3px 4px; vertical-align: top; }
+.body td { border-bottom: 1px solid var(--line); }
+td.n, th.n { text-align: right; white-space: nowrap; }
+tr.total td { font-weight: 600; border-top: 1px solid var(--dim); }
+#bomtable th { cursor: pointer; position: sticky; top: 0; background: var(--panel); }
+.margins td.good { color: var(--better); } .margins td.warn { color: var(--worse); } .margins td.bad { color: var(--problem); }
+/* how full the board is; the mark is where a dense board gets crowded: a limit, drawn in the ink colour */
+.meter { height: 12px; background: var(--bg); border: 1px solid var(--line); position: relative; overflow: hidden; margin: 4px 0; }
+.meter .fill { position: absolute; inset: 0 auto 0 0; background: var(--accent); }
+.meter .mark { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--ink); }
+.note, .hint { font-size: 12px; color: var(--dim); }
+.hint { margin-top: 5px; }
+.chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.chip { font-size: 12px; border: 1px solid var(--line); padding: 1px 8px; background: var(--bg); }
+.chip b { font-weight: 500; color: var(--ink); }
+@media (prefers-reduced-motion: no-preference) { .stack div, .meter .fill { transition: width .25s ease; } }
+
+/* a narrow screen: one column. The options keep at most 40% of the screen and scroll inside themselves, a row of
+   choices scrolls sideways, and the costs run as long as they are */
+@media (max-width: 900px) {
+  html, body { height: auto; }
+  main { flex-direction: column; }
+  #panel-options, #panel-costs { flex: none; border-right: 0; }
+  .panel > .body { flex: none; overflow: visible; }
+  #panel-options > .body { max-height: 40vh; max-height: 40svh; overflow-y: auto; overscroll-behavior: contain; }
+  .seg { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; max-width: 100%; }
+  .seg button { flex: none; }
+}
+/* this page's own additions to the cost explorer's layout */
+header.top .tabs { margin-left: auto; }
+html.embedded header.top .tabs { display: none; }      /* inside the V6 notebook its two tabs switch the view */
+[hidden] { display: none !important; }
+.row.off { opacity: .45; }
+.row select { max-width: 230px; }
+.presets { display: flex; flex-wrap: wrap; gap: 3px; margin: 4px 0 2px; }
+.skus { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 8px; margin: 8px 0 2px; }
+.sku { background: var(--panel-2); padding: 7px 10px 9px 11px; border-left: 3px solid var(--c, var(--line));
+  clip-path: polygon(0 0, calc(100% - var(--cut)) 0, 100% var(--cut), 100% 100%, 0 100%); }
+.sku:nth-child(1) { --c: var(--r2); } .sku:nth-child(2) { --c: var(--r6); } .sku:nth-child(3) { --c: var(--r10); }
+.sku .k { font-family: var(--label); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .09em; color: var(--dim); }
+.sku .v { font-size: 22px; font-weight: 500; line-height: 1.25; }
+.sku dl { display: grid; grid-template-columns: 1fr auto; gap: 1px 10px; margin: 4px 0 0; font-size: 12px; }
+.sku dt { color: var(--dim); } .sku dd { margin: 0; text-align: right; }
+#parts input { width: 74px; text-align: right; }
+#parts input.changed { outline: 1px solid var(--accent); }
+#parts tr.grp td { font-family: var(--label); font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--dim); padding-top: 8px; }
+.flag { color: var(--problem); } .fine { color: var(--better); }
+ul.notes { margin: 4px 0; padding-left: 16px; font-size: 12px; color: var(--dim); max-width: 110ch; }
+#checkline { font-size: 12px; padding: 3px 12px; border-bottom: 1px solid var(--line); }
+</style>
+</head>
+<body>
+<header class="top">
+  <p class="eyebrow" id="crumb"><a href="../">slopswap</a> / <a href="./">V6</a></p>
+  <h1>Jumperless Lite Cost Explorer</h1>
+  <span class="tabs" role="tablist" aria-label="what is priced">
+    <button type="button" role="tab" id="tab-lite" aria-selected="true">Lite Jumperless</button>
+    <button type="button" role="tab" id="tab-board" aria-selected="false">Barnacle Board alone</button>
+  </span>
+  <p class="sub">The cheapest Jumperless that still routes, lights its rows, tracks a magnet probe and does voltage in and out, priced part by part from the V5 quote upward. Every price in the parts table can be changed; everything marked <span class="est">est</span> is an assumption.</p>
+</header>
+<div id="checkline" hidden></div>
+<main>
+<section class="panel" id="panel-options" aria-label="Options">
+  <header class="bar"><span class="plate"><b>01</b> Options</span><span class="bar-note">what it is built from: every choice is kept in this browser</span></header>
+  <div class="body" id="opts"></div>
+</section>
+<section class="panel" id="panel-costs" aria-label="Costs">
+  <header class="bar"><span class="plate"><b>02</b> Costs</span><span class="bar-note">what those choices cost, per board and per product</span></header>
+  <div class="body" id="out"></div>
+</section>
+</main>
+<script id="model">
+// The arithmetic of the page, with no DOM in it: v6_lite_checks.mjs loads this block in Node and checks it.
+// Everything is one list of cost lines built from the options. A line is { id, board, kind, block, name, q, u, est,
+// pl, area, src }: q of them at u dollars each on a board ('bb' the breadboard board, 'led' a separate LED board,
+// 'brain'). kind is part / smt / labour / mech / pcb / other. u holds today's price at about 1,000 pieces and,
+// where V5 had the part, the price in the 2025-03-11 Elecrow quote for 300, so "V5 as built" can be checked.
+const LiteModel = (function () {
+  const DEFAULTS = {
+    form: 'builtin', vol: 1000, basis: '2026', tariff: 25, sell: 149, sellBoard: 29, wholesale: 40,
+    clips: 80, shell: 'sls', clipLabour: 'block', stockbb: false,
+    ledsPerRow: 1, railLeds: 4, otherLeds: 0, ledPart: 'x1010s', ledWhere: 'bb', spreader: 'none',
+    probe: 'magnet', nmag: 9, magPart: 'mmc5603', magWhere: 'bb', magLink: 'hub',
+    mcu: 'rp', flash: 16, psram: false, brainPos: 'under',
+    dac: 'mcp4728', drivers: 'tca0372', supply: 'pump', isense: 'one', clamps: false,
+    display: 'none', controls: 'buttons', header: 'none', stemma: false, lipo: false, railLeads: false,
+    cable: 'generic', pinmap: 'wig', mainW: 140, mainH: 84, v5extras: false,
+  };
+  const PRESETS = {
+    v5: { vol: 300, basis: 'v5', clipLabour: 'hand', ledsPerRow: 5, railLeds: 100, otherLeds: 43, probe: 'wired', nmag: 0,
+      drivers: 'l272', isense: 'two', controls: 'encoder', header: 'nano', cable: 'pink', v5extras: true },
+    lite: {},
+    barnacle: { form: 'barnacle', ledWhere: 'holes' },
+    paddle: { form: 'paddle' },
+    board_bare: { form: 'barnacle', ledsPerRow: 0, railLeds: 0, nmag: 0, probe: 'none' },
+    board_full: { form: 'barnacle', ledsPerRow: 6, railLeds: 120 },
+  };
+  const BB = { w: 78.74, h: 54.99, strip: 3.43 };                    // the breadboard body and its card-edge strip, mm
+  const LED = { x1010s: [0.0237, 0.0365, 'XL-1010RGBC-2812B-S, LCSC C51900942, $0.0237 at 1k on 2026-11-27 ($0.0201 at 8k)', 0.35],
+    tz1010: [0.0233, 0, 'TUOZHAN TZ-H1010, 12 kHz PWM, LCSC C41347988, 2026-11-27', 0.35],
+    x0807: [0.0211, 0, 'XL-0807RGBC-2812B-S, 2.0 x 1.8 mm, LCSC C41413181 at 600, 2026-11-27', 0.35],
+    ws1313: [0.0568, 0, 'WS2812B-1313-V6, 1 uA idle, LCSC C52941388 at 5k (BOM notes, 2026-09)', 0.001] };          // last: mA drawn standing idle (BOM notes)
+  const MAG = { mmc5603: [0.170, 'MMC5603NJ, LCSC C404328, 2026-11-27; address 0x30 fixed'],
+    qmc6309: [0.205, 'QMC6309, LCSC C5439871, 2026-11-27; address 0x7C fixed'],
+    ak09918: [0.232, 'AK09918C, LCSC C2655004, 2026-11-27; address 0x0C fixed'],
+    tmag5273: [0.457, 'TMAG5273A2, LCSC C3715882, 2026-11-27; address set at every power-up'] };
+  const PCB4 = [2.60, 3.316], PCB2 = [1.30, 1.70];                   // $ per dm2, ENIG: today at 1k (est), and the rate that makes V5's main board $3.90
+  const SCALE = { part: { 300: 1.08, 1000: 1, 3000: 0.95, 5000: 0.92 }, smt: { 300: 1.2, 1000: 1, 3000: 0.92, 5000: 0.92 },
+    pcb: { 300: 1.25, 1000: 1, 3000: 0.94, 5000: 0.9 } };
+
+  const CHOICES = { form: ['builtin', 'barnacle', 'paddle'], basis: ['2026', 'v5'], shell: ['sls', 'mould', 'none'], clipLabour: ['block', 'hand'], ledPart: Object.keys(LED),
+    ledWhere: ['bb', 'holes', 'frame'], spreader: ['none', 'shell', 'silicone', 'tpu'], probe: ['none', 'magnet', 'wired'], magPart: Object.keys(MAG), magWhere: ['bb', 'brain'],
+    magLink: ['mux', 'hub', 'decoder'], mcu: ['rp', 'rp_v303', 'rp_h417', 'v303'], flash: [16, 4], brainPos: ['under', 'beside'], dac: ['mcp4728', 'pwm', 'ch32'], drivers: ['l272', 'tca0372'],
+    supply: ['tps65131', 'pump', 'boostinv'], isense: ['two', 'one', 'amp', 'none'], display: ['none', 'oled', 'eyespi'], controls: ['encoder', 'buttons', 'none'], header: ['none', 'nano', 'feather'],
+    cable: ['none', 'generic', 'pink'] };
+  const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, Math.round(+v) || 0));
+  // what a form rules out is forced to its neutral value here, so a left-over choice is never priced
+  function clean(o0, view) {
+    const o = { ...DEFAULTS, ...o0 }, notes = [];
+    if (view === 'board') o.form = 'barnacle';
+    for (const [k, list] of Object.entries(CHOICES)) if (!list.includes(o[k])) o[k] = DEFAULTS[k];       // a stored choice this page does not have
+    if (o.basis === 'v5') o.vol = 300;
+    if (!SCALE.part[o.vol]) o.vol = 1000;
+    o.ledsPerRow = clamp(o.ledsPerRow, 0, 6); o.railLeds = clamp(o.railLeds, 0, 120); o.otherLeds = clamp(o.otherLeds, 0, 99);
+    o.nmag = clamp(o.nmag, 0, 32); o.clips = clamp(o.clips, 0, 200);
+    for (const k of ['tariff', 'sell', 'sellBoard', 'wholesale', 'mainW', 'mainH']) { o[k] = +o[k]; if (!Number.isFinite(o[k]) || o[k] < 0) o[k] = DEFAULTS[k]; }
+    o.wholesale = Math.min(o.wholesale, 90); o.sell = Math.max(1, o.sell); o.sellBoard = Math.max(1, o.sellBoard);
+    o.mainW = Math.max(79, o.mainW); o.mainH = Math.max(55, o.mainH);                      // the breadboard is on it
+    if (o.basis !== 'v5') { o.otherLeds = 0; o.v5extras = false; }                          // V5's logo LEDs and LED board have no control: they stay with the V5 prices
+    if (o.probe === 'none') o.nmag = 0;
+    o.pinmap = o.brainPos === 'beside' ? 'rev2' : 'wig';                                    // beside is the card edge and its map; under is the header and its map
+    if (o.form === 'paddle') {
+      o.clips = 0; o.shell = 'none'; o.ledsPerRow = Math.min(o.ledsPerRow, 1); o.railLeds = 0; o.ledWhere = 'bb'; o.spreader = 'none'; o.magWhere = 'brain';
+      notes.push('Paddle: it reaches the 60 rows only. The rails need the four rail leads, and its LEDs and sensors sit on the tongue.');
+    } else { o.stockbb = false; o.railLeads = false; }
+    if (o.form === 'builtin') o.magWhere = 'bb';
+    if (o.shell === 'none' && o.spreader === 'shell') o.spreader = 'none';
+    if (o.mcu === 'v303') { o.psram = false; notes.push('CH32V303 alone: no RP2350B and no external flash, and JumperlOS has to be ported to it.'); }
+    if (o.dac === 'ch32' && o.mcu === 'rp') { o.dac = 'mcp4728'; notes.push('CH32 DACs need a CH32 on the board: priced with the MCP4728 instead.'); }
+    return { o, notes };
+  }
+
+  function lines(o, notes) {
+    const out = [], v5 = o.basis === 'v5';
+    // u: a number, or [today, V5 quote]. opts: est, pl (placements each, default 1 for a part), area (mm2 each), src
+    const add = (id, board, kind, block, name, q, u, opts = {}) => {
+      const pair = Array.isArray(u) ? u : [u, u];
+      out.push({ id, board, kind, block, name, q, u: v5 ? pair[1] : pair[0], est: !!opts.est, pl: opts.pl ?? (kind === 'part' ? 1 : 0), area: opts.area || 0, src: opts.src || '' });
+    };
+    const two = o.form === 'barnacle', pad = o.form === 'paddle';
+    const bbBoard = pad ? 'brain' : 'bb';
+
+    // ---- the breadboard: clips, shell, the work of putting them together
+    if (!pad) {
+      add('clip', 'bb', 'mech', 'Breadboard', 'Spring clip (Spring Clip6)', o.clips, [0.0599, 0.0929], { src: 'Fulimei proforma 2026-06-17; V5 paid $0.0929 for the 5-hole clip' });
+      add('clip_tool', 'bb', 'mech', 'Breadboard', 'Clip tooling, shared over the run', o.clips ? 1 / o.vol : 0, [2686, 0], { src: 'paid 2026; the V5 clip tool was paid earlier' });
+      add('shell_sls', 'bb', 'mech', 'Breadboard', 'Shell, SLS print', o.shell === 'sls' ? 1 : 0, 5.67, { src: 'JLC3DP 3201PA-F, 15 pieces, Dec 2024' });
+      add('shell_mould', 'bb', 'mech', 'Breadboard', 'Shell, moulded', o.shell === 'mould' ? 1 : 0, 0.50, { est: true, src: 'BOM notes: $0.40-0.60 a part' });
+      add('shell_tool', 'bb', 'mech', 'Breadboard', 'Shell mould, shared over the run', o.shell === 'mould' ? 1 / o.vol : 0, 6000, { est: true, src: 'BOM notes: single-cavity P20 $4-9k' });
+      const fit = o.clips > 0 ? 1 : 0;
+      add('labour_block', 'bb', 'labour', 'Breadboard', 'Clips fitted by the supplier, block pressed on', o.clipLabour === 'block' ? fit : 0, 2.50, { est: true, src: 'BOM notes section 5' });
+      add('labour_hand', 'bb', 'labour', 'Breadboard', 'Clips and shell fitted by hand', o.clipLabour === 'hand' ? fit : 0, 14.00, { est: true, src: 'inferred from the V5 assembly quote: $24.31 less SMT' });
+    }
+    // ---- LEDs and what spreads their light
+    const nled = 60 * o.ledsPerRow + o.railLeds + o.otherLeds, sep = !pad && o.ledWhere !== 'bb' && nled > 0;
+    const ledBoard = sep ? 'led' : bbBoard, L = LED[o.ledPart] || LED.x1010s;
+    add('led', ledBoard, 'part', 'LEDs', 'Addressable RGB LED', nled, [L[0], L[1] || L[0]], { src: L[2] });
+    if (sep) {
+      add('led_pcb', 'led', 'pcb', 'LEDs', 'LED board, 2 layers, the breadboard\'s size', 1, [BB.w * BB.h / 1e4 * PCB2[0], 0.25], { est: true });
+      add('led_link', 'led', 'part', 'LEDs', 'Feed to the LED board (three pins or pads)', 1, 0.10, { est: true, pl: 3 });
+      add('led_fit', 'led', 'labour', 'LEDs', 'Fitting the LED board under the breadboard', 1, 0.30, { est: true });
+      const posts = o.spreader === 'silicone' || o.spreader === 'tpu';
+      add('frame_hold', 'led', 'mech', 'LEDs', 'Retainer and insulator under the clips (open frame)', o.ledWhere === 'frame' && !posts ? 1 : 0, 0.15, { est: true, src: 'the clips drop in with no press fit, and their floors face the LED board' });
+    }
+    const sp = { silicone: ['Silicone post sheet, compression moulded', 1.50, 5000, 'research 2026-11-27: $1.00-2.50 at 1k and $3-8k tooling, both estimates'],
+      tpu: ['Clear TPU post sheet, moulded', 0.55, 3500, 'research 2026-11-27: $0.30-0.80 estimated; aluminium tool $2-5k quoted'] }[o.spreader];
+    if (sp && nled > 0) {
+      add('spread', ledBoard, 'mech', 'LEDs', sp[0], 1, sp[1], { est: true, src: sp[3] });
+      add('spread_tool', ledBoard, 'mech', 'LEDs', 'Post sheet tool, shared over the run', 1 / o.vol, sp[2], { est: true, src: sp[3] });
+    }
+    // ---- the probe and its sensors
+    const magBoard = two && o.magWhere === 'bb' ? 'bb' : 'brain', M = MAG[o.magPart] || MAG.mmc5603, n = o.nmag;
+    add('mag', magBoard, 'part', 'Probe', 'Magnetometer', n, M[0], { src: M[1], area: 4 });
+    add('mag_cap', magBoard, 'part', 'Probe', '2.2 uF at each sensor', n, 0.012, { src: 'V6 cost explorer' });
+    if (n > 0) {
+      if (o.magLink === 'mux') add('mag_mux', magBoard, 'part', 'Probe', 'TCA9548A I2C mux, one per 8 sensors', Math.ceil(n / 8), 0.463, { src: 'LCSC C130026, 2026-11-27', area: 40 });
+      if (o.magLink === 'hub') {
+        add('mag_hub', magBoard, 'part', 'Probe', 'Hub MCU CH32V003 (shared clock, one data line per sensor), one per 15', Math.ceil(n / 15), 0.189, { src: 'CH32V003F4U6, LCSC C5299908, 2026-11-27; PY32F002A is $0.117', area: 12 });
+        add('mag_hub_prog', magBoard, 'labour', 'Probe', 'Programming the hub', Math.ceil(n / 15), 0.05, { est: true });
+      }
+      if (o.magLink === 'decoder') {
+        add('mag_dec', magBoard, 'part', 'Probe', '74LVC138 clock decoder, one per 8 sensors', Math.ceil(n / 8), 0.163, { src: 'LCSC C6061, 2026-11-27', area: 35 });
+        add('mag_ctr', magBoard, 'part', 'Probe', 'Counter that steps the decoders (74HC393)', magBoard === 'bb' ? 1 : 0, 0.252, { src: 'LCSC C5641, 2026-11-27', area: 35 });
+      }
+      add('mag_ldo', magBoard, 'part', 'Probe', '3.3 V regulator for the sensors (none on the connector)', magBoard === 'bb' ? 1 : 0, 0.037, { src: 'ME6211C33, LCSC C82942, 2026-11-27', pl: 3 });
+    }
+    add('probe_stick', 'brain', 'mech', 'Probe', 'Probe: a magnet in a moulded or printed stick', o.probe === 'magnet' ? 1 : 0, 0.60, { est: true, src: 'N52 discs about $0.06 at 1,000 (undated listing); the stick is a guess' });
+    const wired = o.probe === 'wired' ? 1 : 0;
+    add('probe_parts', 'brain', 'part', 'Probe', 'Wired probe: its parts and the pad ladder board\'s', wired, [1.60, 1.92], { est: !v5, pl: 30, src: 'V5 quote: probe-sense $0.64 + probe top $1.28' });
+    add('probe_pcb', 'brain', 'pcb', 'Probe', 'Wired probe: its three boards', wired, [1.25, 1.59], { est: !v5, src: 'V5 quote: $0.57 + $0.46 + $0.56' });
+    add('probe_shell', 'brain', 'mech', 'Probe', 'Wired probe: printed housing and cap', wired, 3.00, { est: true, src: 'BOM notes: about $3 printed' });
+    add('probe_asm', 'brain', 'labour', 'Probe', 'Wired probe: assembly', wired, [1.60, 2.10], { est: true, src: 'share of the V5 small-board assembly, $3.22' });
+    const x = o.v5extras ? 1 : 0;                                    // V5's separate LED board, there to make "V5 as built" add up
+    add('v5_led_parts', 'brain', 'part', 'V5 only', 'V5 LED board parts', x, 1.72, { pl: 0, src: 'V5 quote' });
+    add('v5_led_pcb', 'brain', 'pcb', 'V5 only', 'V5 LED board', x, 0.25, { src: 'V5 quote' });
+    add('v5_led_asm', 'brain', 'labour', 'V5 only', 'V5 LED board assembly', x, 1.12, { est: true, src: 'share of the V5 small-board assembly' });
+
+    // ---- the brain
+    const rp = o.mcu !== 'v303', chips = 10 + (o.header !== 'none' ? 2 : 0);
+    add('ch446q', 'brain', 'part', 'Crossbar', 'CH446Q crossbar switch', chips, [0.90, 1.66], { est: !v5, area: 180, src: 'the V6 explorer\'s $0.90; on 2026-11-27 LCSC C109471 was $1.43 at 960 (102 in stock) and JLCPCB $0.96' });
+    add('rp2350b', 'brain', 'part', 'Controller', 'RP2350B', rp ? 1 : 0, 1.10, { est: true, area: 121, src: 'V6 explorer; Raspberry Pi\'s 2025 table: $0.90 on a 13 in reel to $1.20 single' });
+    add('xtal', 'brain', 'part', 'Controller', '12 MHz crystal', rp ? 1 : 0, [0.051, 0], { src: 'LCSC C9002, 2026-11-27; in V5\'s small parts' });
+    add('flash16', 'brain', 'part', 'Controller', '16 MB flash', rp && o.flash !== 4 ? 1 : 0, [0.483, 0.50], { src: 'ZD25Q128, LCSC C19626875, 2026-11-27 (W25Q128 was $1.37 with 10 in stock)' });
+    add('flash4', 'brain', 'part', 'Controller', '4 MB flash', rp && o.flash === 4 ? 1 : 0, 0.213, { src: 'BY25Q32, LCSC C22391875, 2026-11-27; JumperlOS\'s file system wants 16 MB' });
+    add('ch32v303', 'brain', 'part', 'Controller', 'CH32V303CBT6', o.mcu === 'rp_v303' || o.mcu === 'v303' ? 1 : 0, 0.71, { area: 100, src: 'LCSC C7494374 (BOM notes, 2026-09)' });
+    add('ch32h417', 'brain', 'part', 'Controller', 'CH32H417', o.mcu === 'rp_h417' ? 1 : 0, 3.30, { est: true, area: 177, src: 'V6 explorer' });
+    add('psram', 'brain', 'part', 'Controller', 'PSRAM APS6404L', o.psram ? 1 : 0, 1.42, { src: 'LCSC C5333729, V6 explorer' });
+    add('usbc', 'brain', 'part', 'Controller', 'USB-C receptacle', 1, [0.097, 0], { src: 'LCSC C165948, 2026-11-27; in V5\'s small parts' });
+    add('smalls', 'brain', 'part', 'Controller', 'Passives, regulators, diodes, test points', 1, [4.20, 4.00], { est: true, pl: 110, area: 1200, src: 'V5: about 110 small parts, $4.50 with the flash' });
+    add('mcp4728', 'brain', 'part', 'Analog', 'MCP4728 four-channel DAC', o.dac === 'mcp4728' ? 1 : 0, [1.461, 2.11], { area: 15, src: 'LCSC C108207, 2026-11-27' });
+    add('dac_pwm', 'brain', 'part', 'Analog', 'PWM and RC DACs (filters, two op-amp sections)', o.dac === 'pwm' ? 1 : 0, 0.10, { est: true, pl: 12, src: 'bom/README section 3b: 10 ms settling, no power-up state' });
+    add('dac_ch32', 'brain', 'part', 'Analog', 'CH32 DACs for the two signals, PWM and RC for the rails', o.dac === 'ch32' ? 1 : 0, 0.06, { est: true, pl: 8 });
+    add('l272d', 'brain', 'part', 'Analog', 'L272D rail driver', o.drivers === 'l272' ? 2 : 0, [1.259, 1.68], { area: 77, src: 'LCSC C443843, 2026-11-27' });
+    add('tca0372', 'brain', 'part', 'Analog', 'TCA0372 rail driver', o.drivers !== 'l272' ? 2 : 0, 0.616, { area: 77, src: 'LCSC C362060, 2026-11-27; pinout against the L272D not checked' });
+    add('tps65131', 'brain', 'part', 'Power', 'TPS65131 +- supply', o.supply === 'tps65131' ? 1 : 0, 2.058, { area: 16, src: 'LCSC C87663, 2026-11-27' });
+    add('tps_lc', 'brain', 'part', 'Power', 'Its two inductors and ceramics', o.supply === 'tps65131' ? 1 : 0, 0.50, { est: true, pl: 8, area: 110 });
+    add('lm2660', 'brain', 'part', 'Power', 'LM2660 charge pump, as V5', o.supply === 'pump' ? 1 : 0, [0.488, 1.20], { area: 30, src: 'LCSC C54301705, 2026-11-27' });
+    add('tant', 'brain', 'part', 'Power', 'Its tantalum capacitors', o.supply === 'pump' ? 3 : 0, [0.37, 0.373], { est: !v5, area: 12, src: 'V5: three for $1.12' });
+    add('boostinv', 'brain', 'part', 'Power', 'Boost (MT3608) and inverter (MC34063) with their parts', o.supply === 'boostinv' ? 1 : 0, 0.35, { est: true, pl: 12, area: 150, src: 'ICs $0.10 on LCSC, 2026-11-27; the circuit is untried' });
+    const nina = o.isense === 'two' ? 2 : o.isense === 'one' ? 1 : 0;
+    add('ina219', 'brain', 'part', 'Analog', 'INA219 current monitor', nina, [0.485, 0.58], { area: 9, src: 'LCSC C138706, 2026-11-27' });
+    add('isense_amp', 'brain', 'part', 'Analog', 'Shunt amplifier into an ADC pin (TP181) and its shunt', o.isense === 'amp' ? 1 : 0, 0.176, { pl: 2, area: 6, src: 'LCSC C2902349, 2026-11-27' });
+    add('lm324', 'brain', 'part', 'Analog', 'LM324 ADC buffers', 2, [0.140, 0.045], { area: 68, src: 'LCSC C7943, 2026-11-27' });
+    add('bat54s', 'brain', 'part', 'Analog', 'BAT54S row clamps', o.clamps ? 60 : 0, 0.0174, { area: 13, src: 'LCSC C47546, V6 explorer' });
+    add('oled', 'brain', 'part', 'Front', '0.91 in OLED panel and its connector', o.display === 'oled' ? 1 : 0, 1.50, { pl: 2, area: 40, src: 'panel $1.40, LCSC C5248081, 2026-11-27' });
+    add('eyespi', 'brain', 'part', 'Front', '18-pin 0.5 mm display socket', o.display === 'eyespi' ? 1 : 0, 0.062, { area: 40, src: 'LCSC C262666, 2026-11-27' });
+    add('encoder', 'brain', 'part', 'Front', 'Rotary encoder with switch', o.controls === 'encoder' ? 1 : 0, 1.30, { area: 159, src: 'V6 explorer; an Alps EC11 was $1.21 on 2026-11-27' });
+    add('buttons', 'brain', 'part', 'Front', 'Tactile switch', o.controls === 'buttons' ? 2 : 0, 0.013, { area: 20, src: 'LCSC C318884, 2026-11-27' });
+    add('hdr_nano', 'brain', 'part', 'Connectors', 'Arduino Nano sockets', o.header === 'nano' ? 1 : 0, [0.24, 0], { pl: 2, area: 220, src: 'BOM notes; in V5\'s small parts' });
+    add('hdr_feather', 'brain', 'part', 'Connectors', 'Feather sockets, 12 + 16 pins', o.header === 'feather' ? 1 : 0, 0.15, { est: true, pl: 2, area: 200 });
+    add('stemma', 'brain', 'part', 'Connectors', 'STEMMA QT / Qwiic port (JST SH 4-pin)', o.stemma ? 1 : 0, 0.137, { area: 20, src: 'LCSC C160404, 2026-11-27; a clone is $0.04' });
+    add('lipo', 'brain', 'part', 'Connectors', 'LiPo JST PH and a charger', o.lipo ? 1 : 0, 0.275, { est: true, pl: 5, area: 60, src: 'connector $0.125, LCSC C295747; the charger is a guess' });
+    if (two) {
+      const under = o.brainPos !== 'beside';
+      add('hdr_m', 'bb', 'part', 'Connectors', '2 x 35 1.27 mm header, male, on the breadboard board', under ? 1 : 0, 0.577, { src: 'LCSC C2881817, 2026-11-27' });
+      add('hdr_f', 'brain', 'part', 'Connectors', '2 x 35 1.27 mm header, female, on the brain', under ? 1 : 0, 1.119, { area: 153, src: 'LCSC C2881882, 2026-11-27, 33 in stock' });
+      add('hee70', 'brain', 'part', 'Connectors', 'HEE70LP03BK card-edge socket (the fingers are free)', under ? 0 : 1, 2.06, { area: 320, src: 'LCSC C5448235 at 495, 2026-11-27' });
+      add('second', 'brain', 'labour', 'Connectors', 'Handling a second board', 1, 0.50, { est: true });
+    }
+    if (pad) {
+      add('pad_pins', 'brain', 'part', 'Connectors', '60 pins on the tongue (2 x 30, 2.54 mm)', 1, 0.20, { est: true, pl: 2 });
+      add('pad_solder', 'brain', 'labour', 'Connectors', 'Soldering the tongue\'s pins', 1, 0.40, { est: true });
+      add('rail_leads', 'brain', 'part', 'Connectors', 'Rail lead', o.railLeads ? 4 : 0, 0.05, { est: true, pl: 0 });
+      add('stock_bb', 'brain', 'other', 'Pack', 'A stock 400-point breadboard in the box', o.stockbb ? 1 : 0, 0.60, { est: true, src: 'no priced wholesale listing found; $0.35-0.70 guessed' });
+    }
+    // ---- boards
+    const dm2 = (w, h) => w * h / 1e4;
+    if (two) {
+      add('bb_pcb', 'bb', 'pcb', 'Boards', 'Breadboard board, 2 layers, with the 70-position edge', 1, dm2(BB.w, BB.h + BB.strip) * PCB2[0], { est: true });
+      add('brain_pcb', 'brain', 'pcb', 'Boards', o.brainPos === 'beside' ? 'Brain board, 4 layers, 80 x 40' : 'Brain board, 4 layers, the breadboard\'s size', 1, (o.brainPos === 'beside' ? dm2(80, 40) : dm2(BB.w, BB.h)) * PCB4[0], { est: true });
+    } else if (pad) add('brain_pcb', 'brain', 'pcb', 'Boards', 'Brain board with its tongue, 4 layers, about 80 x 45', 1, dm2(80, 45) * PCB4[0], { est: true });
+    else add('main_pcb', 'brain', 'pcb', 'Boards', 'Main board, 4 layers, ' + o.mainW + ' x ' + o.mainH, 1, [dm2(o.mainW, o.mainH) * PCB4[0], dm2(o.mainW, o.mainH) * PCB4[1]], { est: true, src: 'V5\'s main board was $3.90 at 300; the size is a guess' });
+    // ---- the rest
+    add('cable_generic', 'brain', 'other', 'Pack', 'USB-C cable, generic', o.cable === 'generic' ? 1 : 0, 0.80, { src: 'BOM notes' });
+    add('cable_pink', 'brain', 'other', 'Pack', 'USB-C cable, pink', o.cable === 'pink' ? 1 : 0, 2.88, { src: 'V5 quote' });
+    add('box', 'brain', 'other', 'Pack', 'Box and insert', 1, [1.00, 1.36], { est: !v5, src: 'V5 quote: $1.36' });
+    add('test', 'brain', 'other', 'Pack', 'Flashing and test', 1, 0.50, { src: 'V5 quote' });
+    if (two) add('box_bb', 'bb', 'other', 'Pack', 'Box for the Barnacle Board', 1, 0.60, { est: true });
+    // ---- SMT, from the placements on each board
+    for (const b of ['bb', 'led', 'brain']) {
+      const pl = out.filter(l => l.board === b).reduce((s, l) => s + l.pl * l.q, 0);
+      add('smt_' + b, b, 'smt', 'Assembly', 'SMT placements', Math.round(pl), [0.0127, 0.0176], { src: 'V5: $8.50 for 670 at 1k; the 2025 quote works out at $0.0176' });
+    }
+    if (chips === 10) notes.push('Ten crossbar chips: no routable header. Current sense and UART move to the free places on chips K and L, a change to the routing table that has not been tried.');
+    if (o.supply === 'boostinv') notes.push('The boost-and-inverter supply is untried; the charge pumps cannot invert a 9 V rail (5.5 V input limit).');
+    if (o.dac === 'pwm') notes.push('PWM and RC DACs settle in about 10 ms and have no power-up state; the earlier study kept the MCP4728 for that reason.');
+    if (o.flash === 4 && rp) notes.push('4 MB flash: JumperlOS\'s file system was sized for 16 MB.');
+    if (o.spreader === 'silicone') notes.push('Silicone: low-molecular-weight siloxane is an established cause of contact failure, and a post over about 4.5 mm reaches the pinch. Clear TPU is the nearest substitute.');
+    if (o.ledWhere === 'frame' && sep) notes.push('Open frame: the clips drop in with no press fit, so something under them has to hold them and insulate their floors from the LED board.');
+    return { lines: out, chips, nled };
+  }
+
+  function pins(o, nled) {
+    if (o.form !== 'barnacle') return { applies: false, rows: [], need: 0, spare: 3, ok: true, notes: [] };
+    const rev2 = o.pinmap === 'rev2', onbb = o.nmag > 0 && o.magWhere === 'bb';
+    const link = onbb ? { mux: ['I2C SDA', 'I2C SCL'], hub: ['Hub UART (one wire, both ways)'], decoder: ['I2C SDA', 'I2C SCL', 'Decoder step'] }[o.magLink] : [];
+    const wired = o.probe === 'wired', idle = (LED[o.ledPart] || LED.x1010s)[3];
+    const net = rev2 ? { 65: 'PASS', 66: 'SENSE_TOP', 67: 'SENSE_BOTTOM', 68: 'GND', 69: 'LED data', 70: 'LED 5 V' }
+      : { 65: 'LED data out', 66: 'SENSE_60', 67: 'SENSE_1', 68: 'LED data in', 69: 'GND', 70: 'LED 5 V' };
+    const use = { [rev2 ? 68 : 69]: 'Ground', 70: '5 V for the LEDs' + (onbb ? ' and, through a regulator, the sensors' : ''), [rev2 ? 69 : 68]: nled ? 'LED data' : 'free: no LEDs' };
+    if (wired) { use[66] = 'Probe ladder end, row 60'; use[67] = 'Probe ladder end, row 1'; }
+    const slots = (rev2 ? [65, 67, 66] : [66, 67, 65]).filter(q => !use[q]), need = (wired ? 2 : 0) + link.length;
+    link.slice(0, slots.length).forEach((w, i) => { use[slots[i]] = w; });
+    for (const q of [65, 66, 67]) if (!use[q]) use[q] = q === 65 && !rev2 && nled ? 'free (or LED data back out)' : 'free';
+    const meets = { 65: 'the card\'s ground', 66: 'the card\'s 5 V', 67: 'the card\'s LED data', 68: 'the card\'s PASS pin', 69: 'the card\'s SENSE_BOTTOM', 70: 'the card\'s SENSE_TOP' };
+    const rows = [65, 66, 67, 68, 69, 70].map(p => ({ pin: p, net: net[p], use: use[p], flip: rev2 ? meets[p] : '' }));
+    const notes = [];
+    if (need > 3) notes.push('Asked for ' + need + ' signal pins and three are spare: ' + link.slice(slots.length).join(', ') + ' has nowhere to go.');
+    if (onbb) notes.push('There is no 3.3 V on the connector: the sensors run from a regulator on the breadboard board, off the LED 5 V.');
+    if (nled) notes.push(nled + ' LEDs draw about ' + (nled * idle < 10 ? (nled * idle).toFixed(1) : Math.round(nled * idle)) + ' mA standing idle through one 5 V pin and one ground pin (' + idle + ' mA each for this LED). Taking a 1.27 mm contact as good for about 1 A and an LED as 12 mA at full white, both estimates, brightness has to be capped in firmware above roughly ' + Math.round(1000 / 12) + ' LEDs.');
+    notes.push(rev2 ? 'Rev 2 edge. The pad positions are read from the board file; that turning the card over takes left to right and front to back is an inference from them. On that reading a turned-over card swaps the rows and rails top for bottom, and puts ground on pin 65, 5 V on 66 and LED data on 67. Whatever sits on those three must survive that.'
+      : 'This map is the header under the breadboard (WigLEDmag, V6): it cannot be plugged in turned over.');
+    return { applies: true, rows, need, spare: 3, ok: need <= 3, notes };
+  }
+
+  function price(o0, over = {}, view = 'lite') {
+    const { o, notes } = clean(o0, view), built = lines(o, notes), v5 = o.basis === 'v5';
+    const all = built.lines.filter(l => l.q > 0);
+    const scale = k => v5 ? 1 : (SCALE[k] || {})[o.vol] || 1;
+    for (const l of all) { const p = over[l.id]; l.def = l.u * scale(l.kind); l.u = typeof p === 'number' && Number.isFinite(p) && p >= 0 ? p : l.def; }
+    const sum = (boards, kind) => all.filter(l => boards.includes(l.board) && l.kind === kind).reduce((s, l) => s + l.q * l.u, 0);
+    const freight = 1.00, sku = (id, name, boards) => {
+      const s = { id, name, boards, parts: sum(boards, 'part'), smt: sum(boards, 'smt'), labour: sum(boards, 'labour'), mech: sum(boards, 'mech'), pcb: sum(boards, 'pcb'), other: sum(boards, 'other') };
+      s.exw = s.parts + s.smt + s.labour + s.mech + s.pcb + s.other; s.landed = s.exw * (1 + o.tariff / 100) + freight; return s;
+    };
+    let skus;
+    if (view === 'board') skus = [sku('board', 'Barnacle Board', ['bb', 'led'])];
+    else if (o.form === 'barnacle') {
+      const a = sku('board', 'Barnacle Board', ['bb', 'led']), b = sku('brain', 'Brain barnacle', ['brain']), c = sku('bundle', 'Both together', ['bb', 'led', 'brain']);
+      skus = [a, b, c];                                           // sold together they ship once
+    } else skus = [sku('unit', o.form === 'paddle' ? 'Jumperless, paddle' : 'Jumperless, breadboard built in', ['bb', 'led', 'brain'])];
+    const shown = view === 'board' ? all.filter(l => l.board !== 'brain') : all;
+    // will the brain's parts fit on its board? courtyard area of the big parts against both faces
+    const brainArea = o.form === 'barnacle' ? (o.brainPos === 'beside' ? 2 * 80 * 40 : 2 * BB.w * BB.h) : o.form === 'paddle' ? 2 * 80 * 35 : 2 * o.mainW * o.mainH - BB.w * BB.h;
+    const used = all.filter(l => l.board === 'brain' || o.form !== 'barnacle').reduce((s, l) => s + l.area * l.q, 0);
+    return { o, lines: shown, skus, pins: pins(o, built.nled), fit: { used, board: brainArea, util: used / brainArea }, chips: built.chips, nled: built.nled, notes };
+  }
+
+  const FEE = { direct: p => p * 0.029 + 0.30, cs: p => p * (0.12 + 0.029) + 5 };
+  function margin(p, landed, channel, w) {
+    if (channel === 'wholesale') { const rev = p * (1 - w / 100); return (rev - landed) / rev; }
+    return (p - landed - FEE[channel](p)) / p;
+  }
+  function priceFor(landed, channel, target, w) {
+    if (channel === 'wholesale') return landed / (1 - target) / (1 - w / 100);
+    return channel === 'cs' ? (landed + 5) / (1 - 0.149 - target) : (landed + 0.30) / (1 - 0.029 - target);
+  }
+  // "V5 as built" on the 2025 quote's prices has to land on the quote: $110.33 ex-works, $56.22 of it components with the RP2350B
+  function checkV5() {
+    const s = price({ ...DEFAULTS, ...PRESETS.v5 }, {}, 'lite').skus[0];
+    return { exw: s.exw, parts: s.parts, ok: Math.abs(s.exw - 110.33) < 110.33 * 0.03 && Math.abs(s.parts - 56.22) < 56.22 * 0.03 };   // $55.12 in the quote + the $1.10 RP2350B it left to the customer
+  }
+  return { DEFAULTS, PRESETS, clean, price, margin, priceFor, checkV5 };
+})();
+</script>
+<script>
+// The page: reads the controls, asks LiteModel for the lines and totals, and draws. No arithmetic lives here.
+(function () {
+  const M = LiteModel, $ = id => document.getElementById(id);
+  const KEY = 'v6lite.v1', VIEW = 'v6lite.view';
+  const st = { o: { ...M.DEFAULTS }, over: {}, view: 'lite' };
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const money = v => (v < 0 ? '−$' : '$') + Math.abs(v).toFixed(2);
+  const pct = v => (v * 100).toFixed(0) + ' %';
+  const EST = '<span class="est">est</span>';
+
+  // ---- storage: best effort. What does not parse, or is not the kind of value the option holds, is left at its default
+  function restore() {
+    try {
+      const s = JSON.parse(localStorage.getItem(KEY) || 'null');
+      if (s && typeof s === 'object') {
+        for (const [k, d] of Object.entries(M.DEFAULTS)) if (s.o && typeof s.o[k] === typeof d) st.o[k] = s.o[k];
+        for (const [k, v] of Object.entries(s.over || {})) if (typeof v === 'number' && Number.isFinite(v) && v >= 0) st.over[k] = v;
+      }
+      if (localStorage.getItem(VIEW) === 'board') st.view = 'board';
+    } catch (e) { /* a private window, or something else's data under our key: run on the defaults */ }
+  }
+  const persist = () => { try { localStorage.setItem(KEY, JSON.stringify({ o: st.o, over: st.over })); } catch (e) { /* ignore */ } };
+
+  // ---- the options. One description each; `show` says in which form and view it applies
+  const lite = (o, v) => v === 'lite', notPad = o => o.form !== 'paddle', two = o => o.form === 'barnacle';
+  const GROUPS = [
+    ['Build', [
+      { id: 'form', kind: 'seg', label: 'Breadboard', note: 'built in as V5; or a brain that plugs onto a separate Barnacle Board; or a paddle of pins pushed into a stock breadboard', show: lite,
+        choices: [['builtin', 'Built in'], ['barnacle', 'Brain + Barnacle Board'], ['paddle', 'Paddle']] },
+      { id: 'brainPos', kind: 'seg', label: 'The brain sits', note: 'under: on the 2 × 35 header, the stacked barnacle and the removable V6 base. Beside: on the card edge, which can be turned over. It decides the connector and which pin map applies', show: (o, v) => v === 'board' || (lite(o, v) && two(o)),
+        choices: [['under', 'Under the breadboard'], ['beside', 'Beside it']] },
+      { id: 'vol', kind: 'seg', label: 'Units', choices: [[300, '300'], [1000, '1k'], [3000, '3k'], [5000, '5k']] },
+      { id: 'basis', kind: 'seg', label: 'Prices', note: 'the V5 quote is Elecrow\'s of 2025-03-11 for 300 units; it is there to check the model against', choices: [['2026', 'Today, about 1k'], ['v5', 'V5 quote']] },
+      { id: 'sell', kind: 'num', label: 'Sell price, the unit or the bundle', unit: '$', step: 1, show: lite },
+      { id: 'sellBoard', kind: 'num', label: 'Sell price, Barnacle Board', unit: '$', step: 1, show: (o, v) => v === 'board' || two(o) },
+      { id: 'tariff', kind: 'num', label: 'Tariff on landed cost', est: 1, unit: '%', step: 1 },
+      { id: 'wholesale', kind: 'num', label: 'Wholesale discount off retail', est: 1, note: 'what a reseller keeps. No supplier terms are public; 30–50 % is usual', unit: '%', step: 1 },
+    ]],
+    ['Breadboard', [
+      { id: 'clips', kind: 'num', label: 'Spring clips', note: '60 row clips and 20 rail clips', step: 1, show: notPad },
+      { id: 'shell', kind: 'seg', label: 'Shell', note: 'a mould pays back above about 1,500 units', show: notPad, choices: [['sls', 'SLS print'], ['mould', 'Moulded'], ['none', 'None']] },
+      { id: 'clipLabour', kind: 'seg', label: 'Clips fitted', note: 'by the clip or breadboard supplier as a finished block, or by hand as V5 was', show: notPad, choices: [['block', 'Outsourced'], ['hand', 'By hand']] },
+      { id: 'stockbb', kind: 'chk', label: 'A stock breadboard in the box', est: 1, show: o => !notPad(o) },
+      { id: 'railLeads', kind: 'chk', label: 'Four rail leads', est: 1, note: 'the paddle reaches the rows only', show: o => !notPad(o) },
+    ]],
+    ['LEDs', [
+      { id: 'ledsPerRow', kind: 'num', label: 'LEDs per row', note: '0 to 6, one under each hole at most; the paddle has room for one', step: 1, min: 0, max: 6 },
+      { id: 'railLeds', kind: 'num', label: 'Rail LEDs', note: '0 to 120: four is one per rail, 120 is every rail hole', step: 1, min: 0, max: 120, show: notPad },
+      { id: 'ledPart', kind: 'sel', label: 'LED', choices: [['x1010s', '1010, XL-…-2812B-S'], ['tz1010', '1010, 12 kHz PWM (TUOZHAN)'], ['x0807', '2.0 × 1.8 mm, cheapest'], ['ws1313', '1313, 1 µA idle']] },
+      { id: 'ledWhere', kind: 'sel', label: 'The LEDs are', note: 'on a board below: the breadboard board is only holes or a frame, and the LED board is a separate part', show: notPad,
+        choices: [['bb', 'On the breadboard board'], ['holes', 'On a board below, through holes'], ['frame', 'On a board below an open frame']] },
+      { id: 'spreader', kind: 'sel', label: 'Light spreader', est: 1, show: notPad, choices: [['none', 'None'], ['shell', 'A translucent shell (no cost added)'], ['silicone', 'Silicone post sheet'], ['tpu', 'Clear TPU post sheet']] },
+    ]],
+    ['Probe', [
+      { id: 'probe', kind: 'seg', label: 'Probe', choices: [['none', 'None'], ['magnet', 'Magnet stick'], ['wired', 'V5 wired']] },
+      { id: 'nmag', kind: 'num', label: 'Magnetometers', note: '0 to 32; the bench array is nine', step: 1, min: 0, max: 32 },
+      { id: 'magPart', kind: 'sel', label: 'Sensor', note: 'the three under $0.60 with a range of ±30 G or more (the ±5 and ±8 G parts are left out), and the TMAG', choices: [['mmc5603', 'MMC5603NJ'], ['qmc6309', 'QMC6309'], ['ak09918', 'AK09918C'], ['tmag5273', 'TMAG5273']] },
+      { id: 'magWhere', kind: 'seg', label: 'The sensors are', note: 'on the brain they use no connector pins and sit further from the probe', show: two, choices: [['bb', 'On the breadboard board'], ['brain', 'On the brain']] },
+      { id: 'magLink', kind: 'sel', label: 'Reaching sensors that share one address', choices: [['hub', 'A hub MCU (1 pin)'], ['mux', 'I²C mux per 8 (2 pins)'], ['decoder', 'Clock decoders (3 pins)']] },
+    ]],
+    ['Brain', [
+      { id: 'mcu', kind: 'sel', label: 'Controller', show: lite, choices: [['rp', 'RP2350B alone'], ['rp_v303', 'RP2350B + CH32V303'], ['rp_h417', 'RP2350B + CH32H417'], ['v303', 'CH32V303 alone (firmware port)']] },
+      { id: 'flash', kind: 'seg', label: 'Flash', show: (o, v) => lite(o, v) && o.mcu !== 'v303', choices: [[16, '16 MB'], [4, '4 MB']] },
+      { id: 'psram', kind: 'chk', label: 'PSRAM', show: (o, v) => lite(o, v) && o.mcu !== 'v303' },
+      { id: 'dac', kind: 'sel', label: 'Voltage out', show: lite, choices: [['mcp4728', 'MCP4728, four channels'], ['pwm', 'PWM and RC filters'], ['ch32', 'The CH32\'s two DACs + PWM for the rails']] },
+      { id: 'drivers', kind: 'seg', label: 'Rail drivers', show: lite, choices: [['tca0372', 'TCA0372'], ['l272', 'L272D']] },
+      { id: 'supply', kind: 'sel', label: '± supply', show: lite, choices: [['pump', 'Charge pump, as V5'], ['tps65131', 'TPS65131'], ['boostinv', 'Boost + inverter (untried)']] },
+      { id: 'isense', kind: 'sel', label: 'Current sense', show: lite, choices: [['one', 'One INA219'], ['two', 'Two INA219, as V5'], ['amp', 'A shunt amplifier into the ADC'], ['none', 'None']] },
+      { id: 'clamps', kind: 'chk', label: 'Row clamps (60 × BAT54S)', note: 'the V6 latch-up protection; V5 has none', show: lite },
+    ]],
+    ['Front and connectors', [
+      { id: 'display', kind: 'sel', label: 'Display', show: lite, choices: [['none', 'None'], ['oled', '0.91 in OLED'], ['eyespi', '18-pin display socket only (EYESPI)']] },
+      { id: 'controls', kind: 'seg', label: 'Controls', show: lite, choices: [['buttons', 'Two buttons'], ['encoder', 'Click wheel'], ['none', 'None']] },
+      { id: 'header', kind: 'sel', label: 'Routable header', note: 'either one brings back the two crossbar chips that serve it', show: lite, choices: [['none', 'None'], ['nano', 'Arduino Nano, as V5'], ['feather', 'Feather sockets']] },
+      { id: 'stemma', kind: 'chk', label: 'STEMMA QT / Qwiic port', show: lite },
+      { id: 'lipo', kind: 'chk', label: 'LiPo connector and charger', est: 1, show: lite },
+      { id: 'cable', kind: 'seg', label: 'Cable', show: lite, choices: [['generic', 'Generic'], ['pink', 'Pink'], ['none', 'None']] },
+      { id: 'mainW', kind: 'num', label: 'Main board width', est: 1, unit: 'mm', step: 1, show: (o, v) => lite(o, v) && o.form === 'builtin' },
+      { id: 'mainH', kind: 'num', label: 'Main board height', est: 1, unit: 'mm', step: 1, show: (o, v) => lite(o, v) && o.form === 'builtin' },
+    ]],
+  ];
+  const PRESET_NAMES = [['lite', 'Lite, built in'], ['barnacle', 'Lite, brain + Barnacle Board'], ['paddle', 'Lite, paddle'], ['board_bare', 'Barnacle Board, bare'], ['board_full', 'Barnacle Board, LEDs + sensors'], ['v5', 'V5 as built']];
+
+  function buildOptions() {
+    const h = ['<h2>Start from</h2><div class="presets">' + PRESET_NAMES.map(p => `<button type="button" data-preset="${p[0]}">${p[1]}</button>`).join('') + '<button type="button" id="reset">Reset</button></div>'];
+    for (const [title, rows] of GROUPS) {
+      h.push(`<div class="grp"><h2>${title}</h2>`);
+      for (const r of rows) {
+        const lab = `${esc(r.label)}${r.est ? EST : ''}${r.note ? `<small>${esc(r.note)}</small>` : ''}`;
+        let c;
+        if (r.kind === 'seg') c = `<span id="l_${r.id}" class="lab">${lab}</span><div class="seg" role="group" aria-labelledby="l_${r.id}" data-id="${r.id}">` + r.choices.map(x => `<button type="button" data-v="${x[0]}">${esc(x[1])}</button>`).join('') + '</div>';
+        else if (r.kind === 'sel') c = `<label for="o_${r.id}">${lab}</label><select id="o_${r.id}" data-id="${r.id}">` + r.choices.map(x => `<option value="${x[0]}">${esc(x[1])}</option>`).join('') + '</select>';
+        else if (r.kind === 'num') c = `<label for="o_${r.id}">${lab}</label><span><input type="number" id="o_${r.id}" data-id="${r.id}" step="${r.step || 1}"${r.min != null ? ` min="${r.min}"` : ''}${r.max != null ? ` max="${r.max}"` : ''}> ${r.unit || ''}</span>`;
+        else c = `<label><input type="checkbox" id="o_${r.id}" data-id="${r.id}"> ${lab}</label>`;
+        h.push(`<div class="row" data-row="${r.id}">${c}</div>`);
+      }
+      h.push('</div>');
+    }
+    $('opts').innerHTML = h.join('');
+  }
+  const ROWS = GROUPS.flatMap(g => g[1]);
+  function syncOptions() {                               // put the state into the controls, and hide what does not apply
+    const o = M.clean(st.o, st.view).o;
+    for (const r of ROWS) {
+      const row = $('opts').querySelector(`[data-row="${r.id}"]`);
+      row.hidden = r.show ? !r.show(o, st.view) : false;
+      if (r.kind === 'seg') row.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === String(st.o[r.id]))));
+      else { const el = $('o_' + r.id); if (r.kind === 'chk') el.checked = !!st.o[r.id]; else if (document.activeElement !== el) el.value = st.o[r.id]; }
+    }
+    $('opts').querySelectorAll('.grp').forEach(g => { g.hidden = ![...g.querySelectorAll('.row')].some(r => !r.hidden); });
+  }
+
+  // ---- the costs
+  const KINDS = [['parts', 'Parts', 'var(--r1)'], ['smt', 'SMT assembly', 'var(--r5)'], ['labour', 'Hand work', 'var(--r8)'], ['mech', 'Mechanics', 'var(--r3)'], ['pcb', 'PCBs', 'var(--r11)'], ['other', 'Cable, box, test', 'var(--r6)']];
+  const BOARD = { bb: 'Breadboard board', led: 'LED board', brain: 'Brain' };
+  function render() {
+    persist();
+    syncOptions();
+    const r = M.price(st.o, st.over, st.view), o = r.o, head = r.skus.at(-1), w = o.wholesale;
+    const one = o.form !== 'barnacle' && st.view === 'lite';
+    if (one) BOARD.bb = BOARD.brain = o.form === 'paddle' ? 'Brain and paddle' : 'Main board'; else { BOARD.bb = 'Breadboard board'; BOARD.brain = 'Brain'; }
+    const sellOf = s => s.id === 'board' ? o.sellBoard : s.id === 'brain' ? Math.max(1, o.sell - o.sellBoard) : o.sell;
+    const cls = m => m >= 0.5 ? 'fine' : m >= 0.4 ? '' : 'flag';
+    const h = [];
+    h.push('<div class="skus">' + r.skus.map(s => {
+      const p = sellOf(s), ms = ['direct', 'cs', 'wholesale'].map(c => M.margin(p, s.landed, c, w));
+      return `<div class="sku"><div class="k">${esc(s.name)}</div><div class="v">${money(s.exw)} <small style="font-size:12px;color:var(--dim)">ex-works</small></div><dl>` +
+        KINDS.map(k => `<dt>${k[1]}</dt><dd>${money(s[k[0]])}</dd>`).join('') +
+        `<dt>Landed (tariff ${o.tariff} % + $1 freight)</dt><dd>${money(s.landed)}</dd>` +
+        `<dt>At $${p}: sold direct</dt><dd class="${cls(ms[0])}">${pct(ms[0])}</dd><dt>via Crowd Supply</dt><dd class="${cls(ms[1])}">${pct(ms[1])}</dd><dt>wholesale at ${w} % off</dt><dd class="${cls(ms[2])}">${pct(ms[2])}</dd>` +
+        `<dt>Retail for 50 %: direct</dt><dd>$${Math.ceil(M.priceFor(s.landed, 'direct', 0.5, w))}</dd><dt>Crowd Supply</dt><dd>$${Math.ceil(M.priceFor(s.landed, 'cs', 0.5, w))}</dd><dt>wholesale</dt><dd>$${Math.ceil(M.priceFor(s.landed, 'wholesale', 0.5, w))}</dd></dl></div>`;
+    }).join('') + '</div>');
+    h.push(`<p class="hint">${o.basis === 'v5' ? 'Priced at the 2025 V5 quote for 300 units.' : o.vol + ' units, today\'s prices' + (o.vol !== 1000 ? ' scaled from the 1k tier' : '') + '.'} ${r.chips} crossbar chips, ${r.nled} LEDs, ${o.nmag} magnetometers. Margins are after payment and platform fees; wholesale is the margin on what the reseller pays.</p>`);
+
+    h.push(`<h2>Where the cost goes: ${esc(head.name)}</h2><div class="stack">` + KINDS.filter(k => head[k[0]] > 0).map(k => `<div style="width:${(100 * head[k[0]] / head.exw).toFixed(2)}%;background:${k[2]};margin-right:2px" title="${k[1]} ${money(head[k[0]])}, ${pct(head[k[0]] / head.exw)}"></div>`).join('') + '</div>' +
+      '<div class="legend">' + KINDS.filter(k => head[k[0]] > 0).map(k => `<span style="--c:${k[2]}">${k[1]} <b>${money(head[k[0]])}</b> ${pct(head[k[0]] / head.exw)}</span>`).join('') + '</div>');
+    if (r.notes.length) h.push('<ul class="notes">' + r.notes.map(n => `<li>${esc(n)}</li>`).join('') + '</ul>');
+
+    h.push(`<h2>Margin by price: ${esc(head.name)}</h2><div class="tablewrap"><table class="margins"><thead><tr><th>Retail</th><th class="n">Direct</th><th class="n">Crowd Supply</th><th class="n">Wholesale, ${w} % off</th><th class="n">You receive, wholesale</th></tr></thead><tbody>` +
+      (st.view === 'board' ? [15, 19, 25, 29, 39, 49] : [59, 79, 99, 129, 149, 199, 249]).map(p => `<tr><td>$${p}</td>` + ['direct', 'cs', 'wholesale'].map(c => { const m = M.margin(p, head.landed, c, w); return `<td class="n ${cls(m)}">${pct(m)}</td>`; }).join('') + `<td class="n">${money(p * (1 - w / 100))}</td></tr>`).join('') + '</tbody></table></div>');
+
+    if (r.pins.applies) {
+      const P = r.pins;
+      h.push(`<h2>The six pins that are not rows or rails</h2><p class="${P.ok ? 'fine' : 'flag'}">${P.need} signal ${P.need === 1 ? 'pin' : 'pins'} asked for besides LED data; ${P.spare} are spare.${P.ok ? '' : ' It does not fit.'}</p>` +
+        `<div class="tablewrap"><table><thead><tr><th>Pin</th><th>Net today</th><th>Carries</th>${o.pinmap === 'rev2' ? '<th>Turned over, it meets</th>' : ''}</tr></thead><tbody>` +
+        P.rows.map(x => `<tr><td>${x.pin}</td><td>${esc(x.net)}</td><td>${esc(x.use)}</td>${o.pinmap === 'rev2' ? `<td>${esc(x.flip)}</td>` : ''}</tr>`).join('') + '</tbody></table></div>' +
+        '<ul class="notes">' + P.notes.map(n => `<li>${esc(n)}</li>`).join('') + '</ul>');
+    }
+    if (st.view === 'lite') {
+      const f = r.fit, u = f.util;
+      h.push(`<h2>Will the brain fit its board?</h2><div class="meter"><div class="fill" style="width:${Math.min(100, u * 100).toFixed(1)}%;background:${u > 0.45 ? 'var(--problem)' : u > 0.38 ? 'var(--worse)' : 'var(--accent)'}"></div><div class="mark" style="left:45%"></div></div>` +
+        `<p class="note">${Math.round(f.used).toLocaleString()} mm² of courtyard for the larger parts on ${Math.round(f.board).toLocaleString()} mm² of board, both faces${o.form === 'builtin' ? ' less the area under the clips' : ''}: ${pct(u)}. The mark is 45 %, where a dense two-sided board gets crowded. ${EST}</p>`);
+    }
+    // the parts table is the price editor
+    const groups = {};
+    for (const l of r.lines) (groups[one ? 'all' : l.board] ||= []).push(l);
+    const ORDER = { part: 0, smt: 1, labour: 2, mech: 3, pcb: 4, other: 5 };
+    h.push(`<h2>Every line, and its price</h2><p class="hint">Unit prices are shown at the chosen volume. Change any of them; a changed one is outlined, kept, and used as typed at every volume. Tooling is a total shared over the run. ${Object.keys(st.over).length ? '<button type="button" id="unprice">Put the prices back</button>' : ''}</p><div class="tablewrap"><table id="parts"><thead><tr><th>Item</th><th class="n">Qty</th><th class="n">Unit $</th><th class="n">Total $</th><th>Basis</th></tr></thead><tbody>`);
+    for (const b of ['all', 'bb', 'led', 'brain']) {
+      if (!groups[b]) continue;
+      if (b !== 'all') h.push(`<tr class="grp"><td colspan="5">${BOARD[b]}</td></tr>`);
+      groups[b].sort((x, y) => ORDER[x.kind] - ORDER[y.kind] || y.q * y.u - x.q * x.u);
+      for (const l of groups[b]) h.push(`<tr><td>${esc(l.name)}${l.est ? EST : ''}</td><td class="n">${l.q < 1 ? '1 / ' + Math.round(1 / l.q) : l.q}</td>` +
+        `<td class="n"><input type="number" step="any" min="0" data-line="${l.id}" data-def="${l.def}" value="${+l.u.toFixed(4)}" aria-label="unit price, ${esc(l.name)}"${l.u !== l.def ? ' class="changed"' : ''}></td><td class="n">${money(l.q * l.u)}</td><td>${esc(l.src)}</td></tr>`);
+    }
+    h.push('</tbody></table></div>');
+    h.push(`<h2>Where the numbers come from</h2><ul class="notes">
+      <li>V5: Elecrow's quote of 2025-03-11 for 300 units ($110.33 ex-works with the RP2350B; $55.12 of components without it) and the V5 cost notes. "V5 as built" on those prices is this page's check: open it with <code>?check</code>.</li>
+      <li>Today's prices: LCSC product pages read on 2026-11-27, and the dated ladders in the V6 cost explorer. LCSC numbers are in the Basis column: <code>lcsc.com/product-detail/&lt;C-number&gt;.html</code>.</li>
+      <li>Crossbar chips, by JumperlOS's routing table: A to H carry 56 rows; K and L carry the last four rows, the rails, the DACs, the ADCs and the GPIO; I and J carry only the Nano header, current sense and UART.</li>
+      <li>Connector standards: <a href="https://learn.adafruit.com/introducing-adafruit-stemma-qt" target="_blank" rel="noopener">STEMMA QT</a>, <a href="https://learn.adafruit.com/adafruit-feather/feather-specification" target="_blank" rel="noopener">Feather</a>, <a href="https://learn.adafruit.com/adafruit-eyespi-breakout-board" target="_blank" rel="noopener">EYESPI</a>. Reseller discount: <a href="https://www.adafruit.com/distributors" target="_blank" rel="noopener">30 % at 50 pieces for one reseller's own catalogue</a>; what a reseller asks of a supplier is not published.</li>
+      <li>Post sheets: keypad makers' <a href="https://rysilicone.com/?p=11949" target="_blank" rel="noopener">tooling and price ranges</a>, <a href="https://www.osti.gov/servlets/purl/1145450" target="_blank" rel="noopener">siloxane and contacts</a>. The per-piece figures are estimates.</li>
+      <li>All of it, with every source: <code>notes/README_v6Lite.md</code> in the V6 pile.</li></ul>`);
+    $('out').innerHTML = h.join('');
+  }
+
+  // ---- events
+  $('opts').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.preset) { st.o = { ...M.DEFAULTS, ...M.PRESETS[b.dataset.preset] }; render(); return; }
+    if (b.id === 'reset') { try { localStorage.removeItem(KEY); } catch (err) { /* ignore */ } st.o = { ...M.DEFAULTS }; st.over = {}; render(); return; }
+    const seg = b.closest('.seg'); if (!seg) return;
+    st.o[seg.dataset.id] = typeof M.DEFAULTS[seg.dataset.id] === 'number' ? +b.dataset.v : b.dataset.v; render();
+  });
+  $('opts').addEventListener('input', e => {
+    const el = e.target, id = el.dataset.id; if (!id) return;
+    if (el.type === 'checkbox') st.o[id] = el.checked;
+    else if (el.type === 'number') {                    // an empty or half-typed box changes nothing; a number outside the box's range is brought into it
+      let v = parseFloat(el.value); if (!Number.isFinite(v)) return;
+      if (el.min !== '') v = Math.max(+el.min, v); if (el.max !== '') v = Math.min(+el.max, v);
+      st.o[id] = v;
+    }
+    else st.o[id] = typeof M.DEFAULTS[id] === 'number' ? +el.value : el.value;
+    render();
+  });
+  $('out').addEventListener('change', e => {
+    const el = e.target; if (!el.dataset.line) return;
+    const v = parseFloat(el.value);
+    if (!Number.isFinite(v) || v < 0 || v === +el.dataset.def) delete st.over[el.dataset.line]; else st.over[el.dataset.line] = v;
+    render();
+  });
+  $('out').addEventListener('click', e => { if (e.target.id === 'unprice') { st.over = {}; render(); } });
+  function show(view) {
+    st.view = view;
+    $('tab-lite').setAttribute('aria-selected', String(view === 'lite')); $('tab-board').setAttribute('aria-selected', String(view === 'board'));
+    try { localStorage.setItem(VIEW, view); } catch (e) { /* ignore */ }
+    render();
+  }
+  $('tab-lite').addEventListener('click', () => show('lite'));
+  $('tab-board').addEventListener('click', () => show('board'));
+
+  restore();
+  buildOptions();
+  if (/[?&]check\b/.test(location.search)) {
+    const c = M.checkV5(), el = $('checkline');
+    el.hidden = false; el.className = c.ok ? 'fine' : 'flag';
+    el.textContent = (c.ok ? 'Check passed' : 'CHECK FAILED') + ': "V5 as built" on the 2025 quote\'s prices comes to ' + money(c.exw) + ' ex-works (the quote: $110.33) with ' + money(c.parts) + ' of components (the quote: $55.12, and the $1.10 RP2350B it left to the customer).';
+  }
+  show(st.view);
+})();
+</script>
+</body>
+</html>
