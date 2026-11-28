@@ -95,6 +95,10 @@ Self-hosts any Google Fonts the page links (Google is blocked in China), links t
 
 `lenticular-shirt/art.json` lists the images the viewer opens on, and `art-<hash>.png` beside it are those images (preview size, plus full size when ticked). They are committed by the viewer's own **Publish these on the page** button, through the GitHub API with a token kept in Kevin's browser, in commits named `lenticular-shirt: art published from the viewer`. An `art.json` with no layers means the page opens on its built-in art. Do not edit these by hand; rebuilding `index.html` leaves them alone.
 
+## A locked folder
+
+`monterey-chip-beds/` is the one private page. This repo is public, so its guide, pins, records and pin file are committed only as ciphertext (`*.enc`, AES-GCM); `unlock.js` asks for the password and decrypts in the browser, keeping the key in memory only. The plaintext lives outside every git checkout, in `~/Documents/slopswap-private/monterey-chip-beds/src/`. To change the page: edit there, run `node lock.mjs` in that folder (it asks for the passphrase), copy `enc/*.enc` here and commit. Never commit the plaintext. `node monterey-chip-beds/lock.test.mjs` checks the lock.
+
 ## Preview locally
 
 ```bash
