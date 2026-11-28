@@ -206,6 +206,9 @@ td.n, th.n { text-align: right; }
 .chips button { padding: 2px 9px; font-size: 11px; clip-path: none; }
 .chips button[aria-pressed="true"] { background: var(--accent); color: #fff; border-color: var(--accent); }
 .acts button { padding: 3px 10px; }
+.hump { border-left: 3px solid var(--line); background: var(--panel); padding: 3px 6px 2px 8px; margin: 6px 0; }
+.hump > .hint:first-child { color: var(--ink, inherit); margin: 2px 0 4px; }
+.hump .u { color: var(--dim); }
 #c-find { width: 100%; box-sizing: border-box; margin-top: 4px; }
 .partlist { display: flex; flex-direction: column; gap: 3px; margin: 6px 0; }
 .partlist button { display: block; width: 100%; text-align: left; text-transform: none; letter-spacing: .02em; font-weight: 500; padding: 4px 12px 4px 9px; border-left: 3px solid var(--line);
@@ -9021,7 +9024,7 @@ window.V6_SKETCH = {"x0": -16, "y0": -34, "x1": 104, "y1": 64, "px_per_mm": 12, 
 
 </script>
 <script>
-window.V6_DEFAULTS = {"meta":{"name":"Jumperless V6 board outline","rev":"A10c 2026-11-27","units":"mm","frame_of_reference":"x right, y DOWN (KiCad). x=0 is the wig's left edge, y=0 the wig body's top edge, so breadboard column k sits at x = 2.54*k. z=0 is the top face of the main board (= the wig PCB's top face), z up."},"grid":{"pitch":2.54,"cols":30,"dead_rows_left":2,"coupler":"none","_coupler":"an edge coupler between two units, for the check only: none, wingtat (HEE70LP03BK, boards about 6.4 apart), kiss (custom kiss slot V2, 9.2 between shoulders) or kiss_short (V3, 7.8)","_dead_rows_left":"width of the left strip in 2.54 mm rows: 0, 1, 2 or 3 (0 / 2.54 / 5.08 / 7.62). Unit pitch = (31 + this) * 2.54 and dead rows between two units = this + 1. The outline's strip edge is expected at x = -this * 2.54."},"wig":{"mode":"integrated","_mode":"integrated = breadboard area is part of the main board; removable = separate wig PCB (real WigLEDmag outline) on a right-angle 1.27 mm header pair","width":78.74,"height":54.991,"pcb_t":1.6,"shell":{"w":78.7,"h":54.6,"t":6.75},"_shell":"t: 6.75 is the injection-moulding target and the older print (Body95); the current Wiiig v7 print measures 7.1.","face":{"on":true,"t":0.71,"sits":"on","header_strip":false},"_face":"the wig's top board on the shell: the countersunk holes read from wiigtop.3mf into ref/wig_ref.json, on the breadboard body's outline, with no card edge. t = its thickness (0.71 as modelled). sits: on = it lies on the shell and adds t; inset = the shell is t shorter and the top stays at shell.t. header_strip: true puts back the 3.43 mm strip with the 2 x 35 holes that wiigtop.3mf has along the top; that card edge belongs to the wig's bottom board.","fit_gap":0.1,"pcb_gap":0.2,"connector_side":"top"},"frame":{"_outline":"The frame (top band + left strip), clockwise as seen from above, traced from Kevin's notebook page (IMG a384f12f, rectified on the breadboard's four corners; read to about +-0.5 mm). Per vertex: nothing = sharp; r = round corner; c:[cx,cy] + r = rounded chamfer (a chamfer with both ends blended, cx along the more horizontal edge, cy along the more vertical); c:\"wig\" = the WigLEDmag corner itself, point for point. n is a note.","outline":[{"x":-8.3,"y":-27.129,"c":[8.8,7.7],"r":2,"n":"top-left rounded chamfer. Drawn with the top edge at -23.0; rev A9 raised the whole top edge 4.129 so the simplified outline is square (see band_drawn)"},{"x":44.2,"y":-27.129,"r":1.2,"n":"the top edge steps up here in the drawing: left part beside the display (drawn at -23.0) ..."},{"x":46.8,"y":-28.829,"r":1.2,"n":"... right part 1.7 higher (drawn at -24.7). Give both the same y to take the step out."},{"x":78.74,"y":-28.829,"c":[6.7,5.8],"r":2,"n":"top-right rounded chamfer. Drawn right edge is at 79.0-79.3; set on the grid plane 78.74."},{"x":78.74,"y":0,"c":"wig","n":"the band curves in to meet the breadboard's corner, as drawn"},{"x":0,"y":0,"c":"wig","n":"inside corner: follows the breadboard's own corner chamfer"},{"x":0,"y":54.991,"c":"meet","n":"the strip ends level with the breadboard's bottom edge; its end meets the breadboard's corner chamfer square, at the middle of the flat"},{"x":-5.08,"y":54.991,"c":"wig","n":"bottom-left rounded chamfer"},{"x":-5.08,"y":44.29,"r":2,"n":"the drawn bump on the strip's outer edge (-5.6 from y 28 to 43). Shaped here so it sits in the waist of a breadboard standing against this edge, 0.13 clear. ASSUMPTION about what it is for; delete these four vertices for a straight edge."},{"x":-5.58,"y":42.29,"r":2},{"x":-5.58,"y":30,"r":2},{"x":-5.08,"y":28,"r":2},{"x":-5.08,"y":1.583,"r":1,"n":"the top-left block slopes out from here, as drawn. The slope is the corner chamfer of a breadboard standing on the left (2.211 x 1.583 with r 1.0), carried on in a straight line ..."},{"x":-8.3,"y":-0.722,"r":2,"n":"... to the block's left edge, drawn at about -8.3 (3.2 mm past the strip). No flat under the block."}],"band_drawn":24.7,"_band_drawn":"the top band's height in the notebook drawing (breadboard top edge to the highest part of the top edge). The outline above stands 28.829 high instead: 83.82 - 54.991, so the simplified outline (strip plane to right plane, top edge to bottom edge) is 83.82 square, which is also 33 rows high. The Top band control moves the top edge; As drawn puts this back.","fill_notches":0,"_fill_notches":"integrated only: closes notches in the one-piece bottom board narrower than twice this (0 = leave the outline as drawn)","ring_wall":2,"_ring_wall":"wall width of a board whose kind is ring (a hollow spacer); none in the default stack"},"_stack":"Bottom to top. gap is the space under that board; parts live in the gaps. A board is opened only where a part passes through it, so the bottom and top boards stay whole unless something really goes through them. The gaps here make the top flush with the breadboard (6.75).","stack":[{"id":"L0","name":"Main board","t":1.6,"gap":0,"kind":"base"},{"id":"L1","name":"Mid board","t":1.6,"gap":1.775,"kind":"board"},{"id":"L2","name":"Top board","t":1.6,"gap":1.775,"kind":"board"}],"_parts":"display: where the shaded box is in the drawing. encoder: the click wheel without its cap, at the V5 offsets (5.83 mm from the left and top edges) from the new top-left corner; the top board covers it. usbc: the V5 corner position. port: on top of the bottom board, mouth at the top edge.","_open":"Boards are opened for a part automatically where it passes through them (and, for buttons and the like, above it so it can be reached). A part can override that per board with \"open\": { \"L2\": true } to open one, or false to keep one whole. Input part types are in src/catalog.js: encoder_siq02, encoder_siq02_cap, nav_rkjxm, nav_skrh, nav_k1_1210, tact_ts1187, joy_joycon, custom_control (with \"dims\": { w, d, h, stem, top }).","parts":[{"id":"display","type":"display_tft220bar","x":30,"y":-9.9,"rot":90,"mount":{"flush":"top","offset":0}},{"id":"encoder","type":"encoder_siq02","x":-2.47,"y":-21.299,"rot":45,"mount":{"on":"L0","side":"top"}},{"id":"usbc","type":"usbc_16p","x":72.9,"y":-22.989,"rot":315,"mount":{"on":"L0","side":"top"}},{"id":"port","type":"m2_socket","x":56,"y":-19.329,"rot":0,"mount":{"on":"L0","side":"top"}},{"id":"key1","type":"btn_cantilever","x":64.5,"y":-5,"rot":90,"tongue":{"dir":90},"mount":{"on":"L1","side":"top"}},{"id":"key2","type":"btn_cantilever","x":70.5,"y":-5,"rot":90,"tongue":{"dir":90},"mount":{"on":"L1","side":"top"}}],"probe":{"dia":3.6,"len":70,"magnet":{"dia":2,"len":1,"from_tip":1},"dock":{"enabled":true,"x":-2.54,"y_tip":1,"z":null,"clearance":0.2},"_dock":"the probe lies in the space between the bottom and top boards; z = height of its axis, null = centred in that space"},"_mag":"The probe tracker's magnetometers and how the layout is judged (src/magmodel.js). list: one entry per sensor. x, y = where it is; on = the board that carries it: \"wig\" is the board under the breadboard (the wig's PCB when removable, the main board when integrated), otherwise a board id from the stack; side = top or bottom face of that board; kind = mmc (MMC5603, the default) or tmag (TMAG5273). The default is six under the breadboard and six on the frame, on the undersides. magnet.use: bench (the bench probe, 1900 mT*mm^3 as measured), probe (the cylinder drawn in probe.magnet), n42_3x6, clip (16000), or other with strength in mT*mm^3. height = the magnet's centre above the breadboard's top, mm. lean = how far the probe leans, degrees (the error is the rms over upright and four leans). noise_uT, zero_uT, gain_pct = each reading's noise, how well its zero is known, and its gain error (the 2026-11-01 MMC bench: 0.4, 1, 1). ambient: zeroed = the zero takes the ambient field out; fitted = the fit solves for a uniform field too. hold_strength: the fit holds the magnet's strength (Testolomew does). map: error, shift (how far a 10 uT ambient change moves the fix) or used (sensors in range).","mag":{"list":[{"x":26,"y":24,"on":"wig","side":"bottom"},{"x":52,"y":24,"on":"wig","side":"bottom"},{"x":72,"y":14,"on":"wig","side":"bottom"},{"x":14,"y":46,"on":"wig","side":"bottom"},{"x":42,"y":46,"on":"wig","side":"bottom"},{"x":70,"y":44,"on":"wig","side":"bottom"},{"x":10,"y":-6,"on":"L0","side":"bottom"},{"x":32,"y":-6,"on":"L0","side":"bottom"},{"x":54,"y":-6,"on":"L0","side":"bottom"},{"x":76,"y":-6,"on":"L0","side":"bottom"},{"x":-2.54,"y":16,"on":"L0","side":"bottom"},{"x":-2.54,"y":38,"on":"L0","side":"bottom"}],"magnet":{"use":"bench","strength":1900},"height":2,"lean":25,"noise_uT":0.4,"zero_uT":1,"gain_pct":1,"ambient":"zeroed","hold_strength":true,"map":"error"},"room":{"min_gap":0.6},"_room":"a board face under another board counts as component room when the gap is at least this","features":[],"_features":"manual pockets or tabs: { \"op\": \"cut\" | \"add\", \"layers\": [\"L1\"], \"x\": 0, \"y\": 0, \"w\": 10, \"h\": 5, \"r\": 0.5, \"rot\": 0, \"note\": \"\" } with x, y the rectangle centre","show":{"neighbour":false,"header40":false,"header40_row":8,"header40_col":1,"sensors":true,"sensor_layout":"custom","_sensor_layout":"custom = the sensors of mag.list below (the Magnetometers tab edits them). The older fixed choices still read: wigledmag = the test board's 9 TMAG5273 + 8 MMC5603; plan18 / plan32 = an MMC5603 grid, 3 x 6 or 4 x 8, spread evenly over the 76 x 45 hole field","coupler":false,"plugged":true,"_plugged":"the M.2 card, mini PCIe card or SO-DIMM drawn in its socket; false hides it"},"look":{"mask":"black","silk":"white","finish":"enig","shell":"black","face_mask":"black","leds":"off","screen":true},"_look":"how the 3D view paints things; no effect on the geometry. mask / face_mask: black, white, green, purple, blue, red. finish: enig or hasl. shell: black, white, clear. leds: off, rainbow, rails, probe.","area_budget_mm2":9134,"_area_budget_mm2":"courtyard area of the fitted main-board parts, from docs/V6_area.json via the expansion-port doc"};
+window.V6_DEFAULTS = {"meta":{"name":"Jumperless V6 board outline","rev":"A11e 2026-11-28","units":"mm","frame_of_reference":"x right, y DOWN (KiCad). x=0 is the wig's left edge, y=0 the wig body's top edge, so breadboard column k sits at x = 2.54*k. z=0 is the top face of the main board (= the wig PCB's top face), z up."},"grid":{"pitch":2.54,"cols":30,"dead_rows_left":2,"coupler":"none","_coupler":"an edge coupler between two units, for the check only: none, wingtat (HEE70LP03BK, boards about 6.4 apart), kiss (custom kiss slot V2, 9.2 between shoulders) or kiss_short (V3, 7.8)","_dead_rows_left":"width of the left strip in 2.54 mm rows: 0, 1, 2 or 3 (0 / 2.54 / 5.08 / 7.62). Unit pitch = (31 + this) * 2.54 and dead rows between two units = this + 1. The outline's strip edge is expected at x = -this * 2.54."},"wig":{"mode":"integrated","_mode":"integrated = breadboard area is part of the main board; removable = separate wig PCB (real WigLEDmag outline) on a right-angle 1.27 mm header pair","width":78.74,"height":54.991,"pcb_t":1.6,"shell":{"w":78.7,"h":54.6,"t":6.75},"_shell":"t: 6.75 is the injection-moulding target and the older print (Body95); the current Wiiig v7 print measures 7.1.","face":{"on":true,"t":0.71,"sits":"on","header_strip":false},"_face":"the wig's top board on the shell: the countersunk holes read from wiigtop.3mf into ref/wig_ref.json, on the breadboard body's outline, with no card edge. t = its thickness (0.71 as modelled). sits: on = it lies on the shell and adds t; inset = the shell is t shorter and the top stays at shell.t. header_strip: true puts back the 3.43 mm strip with the 2 x 35 holes that wiigtop.3mf has along the top; that card edge belongs to the wig's bottom board.","waist_r":1.02,"_waist_r":"Depth of the waist in the breadboard's right side, mm in from the right edge (rev A11d). The WigLEDmag's own waist is 0.635; 0 or anything shallower leaves the traced outline alone. 1.02 leaves the breadboard a 0.5 mm wall beside column 30 (channel 2.04 wide), which is what the extender's first column needs to stand on the grid plane with no hole position skipped. It is cut out of the breadboard's PCB, shell and top board.","fit_gap":0.1,"pcb_gap":0.2,"connector_side":"top"},"frame":{"_outline":"The frame (top band + left strip), clockwise as seen from above, traced from Kevin's notebook page (IMG a384f12f, rectified on the breadboard's four corners; read to about +-0.5 mm). Per vertex: nothing = sharp; r = round corner; c:[cx,cy] + r = rounded chamfer (a chamfer with both ends blended, cx along the more horizontal edge, cy along the more vertical); c:\"wig\" = the WigLEDmag corner itself, point for point. n is a note.","outline":[{"x":-8.3,"y":-27.129,"c":[8.8,7.7],"r":2,"n":"top-left rounded chamfer. Drawn with the top edge at -23.0; rev A9 raised the whole top edge 4.129 so the simplified outline is square (see band_drawn)"},{"x":44.2,"y":-27.129,"r":1.2,"n":"the top edge steps up here in the drawing: left part beside the display (drawn at -23.0) ..."},{"x":46.8,"y":-28.829,"r":1.2,"n":"... right part 1.7 higher (drawn at -24.7). Give both the same y to take the step out."},{"x":78.74,"y":-28.829,"c":[6.7,5.8],"r":2,"n":"top-right rounded chamfer. Drawn right edge is at 79.0-79.3; set on the grid plane 78.74."},{"x":78.74,"y":0,"c":"wig","n":"the band curves in to meet the breadboard's corner, as drawn"},{"x":0,"y":0,"c":"wig","n":"inside corner: follows the breadboard's own corner chamfer"},{"x":0,"y":54.991,"c":"meet","n":"the strip ends level with the breadboard's bottom edge; its end meets the breadboard's corner chamfer square, at the middle of the flat"},{"x":-5.08,"y":54.991,"c":"wig","n":"bottom-left rounded chamfer"},{"x":-5.08,"y":44.29,"r":2,"n":"the drawn bump on the strip's outer edge (-5.6 from y 28 to 43). Shaped here so it sits in the waist of a breadboard standing against this edge, 0.13 clear. ASSUMPTION about what it is for; delete these four vertices for a straight edge."},{"x":-5.58,"y":42.29,"r":2},{"x":-5.58,"y":30,"r":2},{"x":-5.08,"y":28,"r":2},{"x":-5.08,"y":1.583,"r":1,"n":"the top-left block slopes out from here, as drawn. The slope is the corner chamfer of a breadboard standing on the left (2.211 x 1.583 with r 1.0), carried on in a straight line ..."},{"x":-8.3,"y":-0.722,"r":2,"n":"... to the block's left edge, drawn at about -8.3 (3.2 mm past the strip). No flat under the block."}],"band_drawn":24.7,"_band_drawn":"the top band's height in the notebook drawing (breadboard top edge to the highest part of the top edge). The outline above stands 28.829 high instead: 83.82 - 54.991, so the simplified outline (strip plane to right plane, top edge to bottom edge) is 83.82 square, which is also 33 rows high. The Top band control moves the top edge; As drawn puts this back.","fill_notches":0,"_fill_notches":"integrated only: closes notches in the one-piece bottom board narrower than twice this (0 = leave the outline as drawn)","ring_wall":2,"_ring_wall":"wall width of a board whose kind is ring (a hollow spacer); none in the default stack"},"_stack":"Bottom to top. gap is the space under that board; parts live in the gaps. A board is opened only where a part passes through it, so the bottom and top boards stay whole unless something really goes through them. The gaps here make the top flush with the breadboard (6.75).","stack":[{"id":"L0","name":"Main board","t":1.6,"gap":0,"kind":"base"},{"id":"L1","name":"Mid board","t":1.6,"gap":1.775,"kind":"board"},{"id":"L2","name":"Top board","t":1.6,"gap":1.775,"kind":"board"}],"_parts":"display: the 2.2 inch bar with its picture (the active area) centred on the breadboard, x = 39.37; the module's centre is 1.375 further right because the dead border is wider at the FPC end (rev A10d; until then it sat at x 30 where the shaded box is in the drawing, with two cantilevered keys, key1 and key2, to its right at x 64.5 and 70.5, y -5). encoder: the click wheel without its cap, at the V5 offsets (5.83 mm from the left and top edges) from the new top-left corner; the top board covers it. usbc: the V5 corner position. port: the general expansion port, an M.2 socket on top of the bottom board with its mouth at the top edge (everything an expansion may want: data, power, buses, and routable lanes too). side: since rev A11c a part of its own, the 1.27 mm right-angle socket, 2 x 11, on top of the bottom board where the top band ends under the USB-C, turned 180 so its mouth is in the right edge (x = 78.74 - 5.82) and its pin 1 is the lowest; it carries routable lanes only, and the extender plugs into it (rev A11 and A11b had it in the port's place, with no port on the top edge). dims.n = positions per row.","_open":"Boards are opened for a part automatically where it passes through them (and, for buttons and the like, above it so it can be reached). A part can override that per board with \"open\": { \"L2\": true } to open one, or false to keep one whole. Input part types are in src/catalog.js: encoder_siq02, encoder_siq02_cap, nav_rkjxm, nav_skrh, nav_k1_1210, tact_ts1187, joy_joycon, custom_control (with \"dims\": { w, d, h, stem, top }).","parts":[{"id":"display","type":"display_tft220bar","x":40.745,"y":-9.9,"rot":90,"mount":{"flush":"top","offset":0}},{"id":"encoder","type":"encoder_siq02","x":-2.47,"y":-21.299,"rot":45,"mount":{"on":"L0","side":"top"}},{"id":"usbc","type":"usbc_16p","x":72.9,"y":-22.989,"rot":315,"mount":{"on":"L0","side":"top"}},{"id":"port","type":"m2_socket","x":56,"y":-19.329,"rot":0,"mount":{"on":"L0","side":"top"}},{"id":"side","type":"skt_ra_127","x":72.92,"y":-3.2,"rot":180,"mount":{"on":"L0","side":"top"},"dims":{"n":11}}],"_extender":"A narrow breadboard standing against the unit's right side, plugged into the socket in the side of the top band (the part of type skt_ra_127). Each of its rows goes to one pin of that socket, so it has no crossbar of its own. on: draw it and check it. cols: its columns (rows = 2 x cols). dead_rows: the 0.1 inch positions with no hole between this unit's last column and its first. 0 (rev A11d) = none: its first column stands on the unit's right grid plane, in the part of its edge that bows into the breadboard's waist (wig.waist_r has to be deep enough: 1.02), and its rails start rail_skip columns later (1 to 3), because the breadboard's corners leave no room there. 1 = the two boards touch with their usual 2.54 mm margins. head: how far its head stands above the breadboard's top edge, beside the top band (mm); it is the extender's one board there, with the header on it in the open. cover: true puts a second board over the head, level with the frame's top board (rev A11 drew one; off since A11b). key: its edge fills the 0.635 mm waist in the breadboard's side, less the fit gap. Rev A11c took the wire staples and the rail jumpers out (\"ties\": \"staple\" and \"jumpers\": true still draw them; nothing in the page sets them): the header pair and the key are what hold it.","extender":{"on":true,"cols":11,"dead_rows":0,"rail_skip":1,"head":18.5,"cover":false,"key":true},"probe":{"dia":3.6,"len":70,"magnet":{"dia":2,"len":1,"from_tip":1},"dock":{"enabled":true,"x":-2.54,"y_tip":1,"z":null,"clearance":0.2},"_dock":"the probe lies in the space between the bottom and top boards; z = height of its axis, null = centred in that space"},"_mag":"The probe tracker's magnetometers and how the layout is judged (src/magmodel.js). list: one entry per sensor. x, y = where it is; on = the board that carries it: \"wig\" is the board under the breadboard (the wig's PCB when removable, the main board when integrated), otherwise a board id from the stack; side = top or bottom face of that board; kind = mmc (MMC5603, the default) or tmag (TMAG5273). The default is six under the breadboard and six on the frame, on the undersides. magnet.use: bench (the bench probe, 1900 mT*mm^3 as measured), probe (the cylinder drawn in probe.magnet), n42_3x6, clip (16000), or other with strength in mT*mm^3. height = the magnet's centre above the breadboard's top, mm. lean = how far the probe leans, degrees (the error is the rms over upright and four leans). noise_uT, zero_uT, gain_pct = each reading's noise, how well its zero is known, and its gain error (the 2026-11-01 MMC bench: 0.4, 1, 1). ambient: zeroed = the zero takes the ambient field out; fitted = the fit solves for a uniform field too. hold_strength: the fit holds the magnet's strength (Testolomew does). map: error, shift (how far a 10 uT ambient change moves the fix) or used (sensors in range).","mag":{"list":[{"x":26,"y":24,"on":"wig","side":"bottom"},{"x":52,"y":24,"on":"wig","side":"bottom"},{"x":72,"y":14,"on":"wig","side":"bottom"},{"x":14,"y":46,"on":"wig","side":"bottom"},{"x":42,"y":46,"on":"wig","side":"bottom"},{"x":70,"y":44,"on":"wig","side":"bottom"},{"x":10,"y":-6,"on":"L0","side":"bottom"},{"x":32,"y":-6,"on":"L0","side":"bottom"},{"x":54,"y":-6,"on":"L0","side":"bottom"},{"x":76,"y":-6,"on":"L0","side":"bottom"},{"x":-2.54,"y":16,"on":"L0","side":"bottom"},{"x":-2.54,"y":38,"on":"L0","side":"bottom"}],"magnet":{"use":"bench","strength":1900},"height":2,"lean":25,"noise_uT":0.4,"zero_uT":1,"gain_pct":1,"ambient":"zeroed","hold_strength":true,"map":"error"},"room":{"min_gap":0.6},"_room":"a board face under another board counts as component room when the gap is at least this","features":[],"_features":"manual pockets or tabs: { \"op\": \"cut\" | \"add\", \"layers\": [\"L1\"], \"x\": 0, \"y\": 0, \"w\": 10, \"h\": 5, \"r\": 0.5, \"rot\": 0, \"note\": \"\" } with x, y the rectangle centre","show":{"neighbour":false,"header40":false,"header40_row":8,"header40_col":1,"sensors":true,"sensor_layout":"custom","_sensor_layout":"custom = the sensors of mag.list below (the Magnetometers tab edits them). The older fixed choices still read: wigledmag = the test board's 9 TMAG5273 + 8 MMC5603; plan18 / plan32 = an MMC5603 grid, 3 x 6 or 4 x 8, spread evenly over the 76 x 45 hole field","coupler":false,"plugged":true,"_plugged":"the M.2 card, mini PCIe card or SO-DIMM drawn in its socket; false hides it"},"look":{"mask":"black","silk":"white","finish":"enig","shell":"black","face_mask":"black","leds":"off","screen":true},"_look":"how the 3D view paints things; no effect on the geometry. mask / face_mask: black, white, green, purple, blue, red. finish: enig or hasl. shell: black, white, clear. leds: off, rainbow, rails, probe.","area_budget_mm2":9134,"_area_budget_mm2":"courtyard area of the fitted main-board parts, from docs/V6_area.json via the expansion-port doc"};
 window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","datum":{"x0":115.841532,"y0":28.304321,"note":"x0 = wig left edge, y0 = wig body top edge (corner flats)"},"outline":[[69.85,54.991],[76.1812,54.9912],[76.2265,54.9907],[76.3166,54.9827],[76.4057,54.9668],[76.493,54.943],[76.5779,54.9117],[76.6597,54.873],[76.7378,54.8272],[76.7749,54.8013],[77.0118,54.6454],[78.2967,53.7257],[78.3335,53.6998],[78.4029,53.6425],[78.467,53.5793],[78.5253,53.5106],[78.5773,53.4372],[78.6227,53.3594],[78.6611,53.278],[78.6921,53.1935],[78.7156,53.1066],[78.7314,53.0179],[78.7393,52.9283],[78.7398,52.8832],[78.7398,45.2008],[78.7362,45.0538],[78.7255,44.9072],[78.7075,44.7614],[78.6824,44.6165],[78.6503,44.4731],[78.1944,42.6497],[78.1623,42.5063],[78.1372,42.3615],[78.1192,42.2156],[78.1084,42.069],[78.1048,41.9221],[78.1048,13.4507],[78.1084,13.3038],[78.1192,13.1572],[78.1372,13.0114],[78.1623,12.8666],[78.1944,12.7231],[78.6503,10.8997],[78.6824,10.7563],[78.7075,10.6115],[78.7255,10.4656],[78.7362,10.3191],[78.7398,10.1721],[78.74,2.1082],[78.7395,2.0632],[78.7316,1.9735],[78.7158,1.8849],[78.6923,1.798],[78.6613,1.7135],[78.6229,1.632],[78.5775,1.5543],[78.5255,1.4808],[78.4672,1.4122],[78.4031,1.349],[78.3337,1.2917],[78.2968,1.2658],[77.0021,0.339],[76.775,0.1895],[76.7378,0.1637],[76.6598,0.1179],[76.578,0.0792],[76.4931,0.0479],[76.4058,0.0241],[76.3167,0.0082],[76.2273,0.0003],[76.2,0],[71.2353,0],[71.0884,-0.0036],[70.9418,-0.0144],[70.7959,-0.0324],[70.6511,-0.0574],[70.5077,-0.0896],[65.3796,-1.3716],[65.2702,-1.3784],[65.1656,-1.3455],[65.0798,-1.2771],[64.8195,-0.9436],[64.7833,-0.8826],[64.7707,-0.8128],[64.7691,0.5367],[64.7423,0.6367],[64.6691,0.7098],[64.5668,0.7366],[62.43,0.7366],[62.33,0.7098],[62.2568,0.6366],[62.23,0.532],[62.23,-2.8268],[62.212,-2.9427],[62.1595,-3.0476],[62.0776,-3.1316],[61.7474,-3.3274],[61.646,-3.3861],[61.534,-3.4206],[61.4171,-3.429],[39.37,-3.429],[17.3229,-3.429],[17.206,-3.4206],[17.094,-3.3861],[16.9926,-3.3274],[16.6624,-3.1316],[16.5805,-3.0476],[16.528,-2.9427],[16.51,-2.827],[16.51,0.5366],[16.4832,0.6366],[16.41,0.7098],[16.31,0.7366],[14.1709,0.7366],[14.0709,0.7099],[13.9977,0.6367],[13.9709,0.5367],[13.9693,-0.8128],[13.9567,-0.8826],[13.9205,-0.9436],[13.6602,-1.2771],[13.5744,-1.3455],[13.4698,-1.3784],[13.3604,-1.3716],[8.2323,-0.0896],[8.0889,-0.0574],[7.9441,-0.0323],[7.7982,-0.0144],[7.6516,-0.0036],[7.5047,0],[2.5127,0.0003],[2.5127,0.0003],[2.4233,0.0082],[2.3342,0.0241],[2.2469,0.0479],[2.162,0.0792],[2.0802,0.1179],[2.0022,0.1637],[1.965,0.1895],[1.7379,0.339],[0.4432,1.2658],[0.4063,1.2917],[0.3369,1.349],[0.2728,1.4122],[0.2145,1.4808],[0.1625,1.5543],[0.1171,1.632],[0.0787,1.7135],[0.0477,1.798],[0.0242,1.8849],[0.0084,1.9735],[0.0005,2.0632],[0,2.1082],[0.0002,10.1721],[0.0038,10.3191],[0.0145,10.4656],[0.0325,10.6115],[0.0576,10.7563],[0.0897,10.8997],[0.5456,12.7231],[0.5777,12.8666],[0.6028,13.0114],[0.6208,13.1572],[0.6316,13.3038],[0.6352,13.4507],[0.6352,41.9221],[0.6316,42.069],[0.6208,42.2156],[0.6028,42.3615],[0.5777,42.5063],[0.5456,42.6497],[0.0897,44.4731],[0.0576,44.6165],[0.0325,44.7614],[0.0146,44.9072],[0.0038,45.0538],[0.0002,45.2008],[0.0002,52.8832],[0.0007,52.9283],[0.0086,53.0179],[0.0244,53.1066],[0.0479,53.1935],[0.0789,53.278],[0.1173,53.3594],[0.1627,53.4372],[0.2147,53.5106],[0.273,53.5793],[0.3371,53.6425],[0.4065,53.6998],[0.4433,53.7257],[1.7282,54.6454],[1.9651,54.8013],[2.0022,54.8272],[2.0803,54.873],[2.1621,54.9117],[2.247,54.943],[2.3343,54.9668],[2.4234,54.9827],[2.5135,54.9907],[2.5588,54.9912],[8.89,54.9908]],"cols":[2.5405,5.0805,7.6205,10.1605,12.7005,15.2405,17.7805,20.3205,22.8605,25.4005,27.9405,30.4805,33.0205,35.5605,38.1005,40.6405,43.1805,45.7205,48.2605,50.8005,53.3405,55.8805,58.4205,60.9605,63.5005,66.0405,68.5805,71.1205,73.6605,76.2005],"rows":[3.5557,6.0957,13.7157,16.2557,18.7957,21.3357,23.8757,26.4157,28.9557,31.4957,34.0357,36.5757,39.1157,41.6557,49.2757,51.8157],"mmc":[{"ref":"U9","x":71.12,"y":8.636,"side":"F"},{"ref":"U5","x":24.13,"y":8.636,"side":"F"},{"ref":"U8","x":54.61,"y":46.736,"side":"F"},{"ref":"U2","x":7.62,"y":8.636,"side":"F"},{"ref":"U7","x":54.61,"y":8.636,"side":"F"},{"ref":"U6","x":24.13,"y":46.736,"side":"F"},{"ref":"U10","x":71.12,"y":46.736,"side":"F"},{"ref":"U4","x":7.62,"y":46.736,"side":"F"}],"tmag":[{"ref":"M54","x":39.37,"y":4.826,"side":"B"},{"ref":"M55","x":8.89,"y":50.546,"side":"B"},{"ref":"M59","x":69.85,"y":50.546,"side":"B"},{"ref":"M58","x":2.54,"y":27.686,"side":"B"},{"ref":"M56","x":69.85,"y":4.826,"side":"B"},{"ref":"M53","x":76.2,"y":27.686,"side":"B"},{"ref":"M57","x":39.37,"y":50.546,"side":"B"},{"ref":"M51","x":39.37,"y":27.706,"side":"B"},{"ref":"M52","x":8.89,"y":4.826,"side":"B"}],"footprints":[{"name":"PinHeader_2x35_P1.27_wiig_card","ref":"J2","x":17.78,"y":-0.254,"rot":90,"side":"F","pads_local":[[1.27,2.54],[1.27,3.81],[1.27,5.08],[1.27,6.35],[1.27,7.62],[1.27,8.89],[1.27,10.16],[1.27,11.43],[1.27,12.7],[1.27,13.97],[1.27,15.24],[1.27,16.51],[1.27,17.78],[1.27,19.05],[1.27,20.32],[1.27,22.86],[1.27,24.13],[1.27,25.4],[1.27,26.67],[1.27,27.94],[1.27,29.21],[1.27,30.48],[1.27,31.75],[1.27,33.02],[1.27,34.29],[1.27,35.56],[1.27,36.83],[1.27,38.1],[1.27,39.37],[1.27,40.64],[0,2.54],[0,3.81],[0,5.08],[0,6.35],[0,7.62],[0,8.89],[0,10.16],[0,11.43],[0,12.7],[0,13.97],[0,15.24],[0,16.51],[0,17.78],[0,19.05],[0,20.32],[0,22.86],[0,24.13],[0,25.4],[0,26.67],[0,27.94],[0,29.21],[0,30.48],[0,31.75],[0,33.02],[0,34.29],[0,35.56],[0,36.83],[0,38.1],[0,39.37],[0,40.64],[1.27,41.91],[1.27,43.18],[0,1.27],[0,0],[0,21.59],[0,41.91],[0,43.18],[-2.286,21.59],[1.27,21.59],[1.27,0],[1.27,1.27]]},{"name":"Breadboard_6NonHoles","ref":"J11","x":39.37,"y":27.686,"rot":0,"side":"F","pads_local":null},{"name":"SideConnect_sparserrr_Bottom_tighter","ref":"J3","x":39.37,"y":54.991,"rot":0,"side":"F","pads_local":null},{"name":"fulledge_gap","ref":"J13","x":78.105,"y":27.686,"rot":0,"side":"F","pads_local":null},{"name":"fulledge_gap","ref":"J12","x":0.635,"y":27.686,"rot":180,"side":"B","pads_local":null}],"face":{"source":"V6pile/Wig/Wiig/wiigtop.3mf (Fusion export, 2026-08-19)","w":78.74,"h":58.42,"t":0.71,"csk_depth":0.416,"y0":-3.429,"y1":54.991,"outline":[[0.273,1.412],[0.337,1.349],[0.406,1.292],[0.443,1.266],[1.738,0.339],[1.965,0.19],[2.002,0.164],[2.08,0.118],[2.162,0.079],[2.247,0.048],[2.334,0.024],[2.423,0.008],[2.513,0],[2.54,0],[7.505,0],[7.749,-0.01],[7.992,-0.04],[8.232,-0.089],[13.36,-1.371],[13.407,-1.379],[13.454,-1.38],[13.501,-1.373],[13.546,-1.359],[13.588,-1.338],[13.627,-1.31],[13.66,-1.277],[13.92,-0.943],[13.938,-0.921],[13.951,-0.896],[13.961,-0.869],[13.967,-0.841],[13.969,-0.813],[13.971,1.172],[13.974,1.207],[13.983,1.24],[13.998,1.272],[14.018,1.3],[14.042,1.325],[14.071,1.345],[14.102,1.36],[14.136,1.369],[14.171,1.372],[16.31,1.372],[16.345,1.369],[16.378,1.36],[16.41,1.345],[16.439,1.325],[16.463,1.3],[16.483,1.272],[16.498,1.24],[16.507,1.206],[16.51,1.172],[16.51,-2.827],[16.515,-2.885],[16.528,-2.943],[16.55,-2.997],[16.58,-3.047],[16.618,-3.093],[16.662,-3.131],[16.993,-3.327],[17.067,-3.373],[17.149,-3.406],[17.235,-3.425],[17.323,-3.429],[39.37,-3.429],[61.417,-3.429],[61.505,-3.425],[61.591,-3.406],[61.673,-3.373],[61.747,-3.327],[62.078,-3.131],[62.122,-3.093],[62.159,-3.048],[62.19,-2.997],[62.212,-2.943],[62.225,-2.886],[62.23,-2.827],[62.23,1.172],[62.232,1.203],[62.24,1.234],[62.252,1.263],[62.268,1.289],[62.289,1.313],[62.312,1.334],[62.339,1.35],[62.368,1.362],[62.399,1.369],[62.43,1.372],[64.569,1.372],[64.604,1.369],[64.638,1.36],[64.669,1.345],[64.698,1.325],[64.722,1.3],[64.742,1.272],[64.757,1.24],[64.766,1.207],[64.769,1.172],[64.771,-0.813],[64.773,-0.841],[64.779,-0.869],[64.789,-0.896],[64.802,-0.921],[64.82,-0.943],[65.08,-1.277],[65.113,-1.31],[65.152,-1.338],[65.194,-1.359],[65.239,-1.373],[65.286,-1.38],[65.333,-1.379],[65.38,-1.371],[70.508,-0.089],[70.748,-0.04],[70.991,-0.01],[71.235,0],[76.2,0],[76.227,0],[76.317,0.008],[76.406,0.024],[76.493,0.048],[76.578,0.079],[76.66,0.118],[76.738,0.164],[76.775,0.19],[77.002,0.339],[78.297,1.266],[78.334,1.292],[78.403,1.349],[78.467,1.412],[78.525,1.481],[78.578,1.554],[78.623,1.632],[78.661,1.714],[78.692,1.798],[78.716,1.885],[78.732,1.974],[78.739,2.063],[78.74,2.108],[78.74,10.172],[78.73,10.417],[78.7,10.66],[78.65,10.9],[78.194,12.723],[78.145,12.963],[78.115,13.206],[78.105,13.451],[78.105,41.922],[78.115,42.167],[78.145,42.41],[78.194,42.65],[78.65,44.473],[78.7,44.713],[78.73,44.956],[78.74,45.201],[78.74,52.883],[78.739,52.928],[78.731,53.018],[78.716,53.107],[78.692,53.194],[78.661,53.278],[78.623,53.36],[78.577,53.437],[78.525,53.511],[78.467,53.579],[78.403,53.643],[78.333,53.7],[78.297,53.726],[77.012,54.646],[76.775,54.801],[76.738,54.827],[76.66,54.873],[76.578,54.912],[76.493,54.943],[76.406,54.967],[76.317,54.983],[76.226,54.991],[76.181,54.991],[64.751,54.991],[39.37,54.991],[13.989,54.991],[2.559,54.991],[2.514,54.991],[2.423,54.983],[2.334,54.967],[2.247,54.943],[2.162,54.912],[2.08,54.873],[2.002,54.827],[1.965,54.801],[1.728,54.646],[0.443,53.726],[0.407,53.7],[0.337,53.643],[0.273,53.579],[0.215,53.511],[0.163,53.437],[0.117,53.36],[0.079,53.278],[0.048,53.194],[0.024,53.107],[0.009,53.018],[0.001,52.928],[0,52.883],[0,45.201],[0.01,44.956],[0.04,44.713],[0.09,44.473],[0.546,42.65],[0.595,42.41],[0.625,42.167],[0.635,41.922],[0.635,13.451],[0.625,13.206],[0.595,12.963],[0.546,12.723],[0.09,10.9],[0.04,10.66],[0.01,10.417],[0,10.172],[0,2.108],[0.001,2.063],[0.008,1.974],[0.024,1.885],[0.048,1.798],[0.079,1.714],[0.117,1.632],[0.162,1.554],[0.215,1.481]],"holes":[[17.78,-1.524,0.65,0.65],[19.05,-1.524,0.65,0.65],[20.32,-1.524,0.65,0.65],[21.59,-1.524,0.65,0.65],[22.86,-1.524,0.65,0.65],[24.13,-1.524,0.65,0.65],[25.4,-1.524,0.65,0.65],[26.67,-1.524,0.65,0.65],[27.94,-1.524,0.65,0.65],[29.21,-1.524,0.65,0.65],[30.48,-1.524,0.65,0.65],[31.75,-1.524,0.65,0.65],[33.02,-1.524,0.65,0.65],[34.29,-1.524,0.65,0.65],[35.56,-1.524,0.65,0.65],[36.83,-1.524,0.65,0.65],[38.1,-1.524,0.65,0.65],[39.37,-1.524,0.65,0.65],[40.64,-1.524,0.65,0.65],[41.91,-1.524,0.65,0.65],[43.18,-1.524,0.65,0.65],[44.45,-1.524,0.65,0.65],[45.72,-1.524,0.65,0.65],[46.99,-1.524,0.65,0.65],[48.26,-1.524,0.65,0.65],[49.53,-1.524,0.65,0.65],[50.8,-1.524,0.65,0.65],[52.07,-1.524,0.65,0.65],[53.34,-1.524,0.65,0.65],[54.61,-1.524,0.65,0.65],[55.88,-1.524,0.65,0.65],[57.15,-1.524,0.65,0.65],[58.42,-1.524,0.65,0.65],[59.69,-1.524,0.65,0.65],[60.96,-1.524,0.65,0.65],[17.78,-0.254,0.65,0.65],[19.05,-0.254,0.65,0.65],[20.32,-0.254,0.65,0.65],[21.59,-0.254,0.65,0.65],[22.86,-0.254,0.65,0.65],[24.13,-0.254,0.65,0.65],[25.4,-0.254,0.65,0.65],[26.67,-0.254,0.65,0.65],[27.94,-0.254,0.65,0.65],[29.21,-0.254,0.65,0.65],[30.48,-0.254,0.65,0.65],[31.75,-0.254,0.65,0.65],[33.02,-0.254,0.65,0.65],[34.29,-0.254,0.65,0.65],[35.56,-0.254,0.65,0.65],[36.83,-0.254,0.65,0.65],[38.1,-0.254,0.65,0.65],[39.37,-0.254,0.65,0.65],[40.64,-0.254,0.65,0.65],[41.91,-0.254,0.65,0.65],[43.18,-0.254,0.65,0.65],[44.45,-0.254,0.65,0.65],[45.72,-0.254,0.65,0.65],[46.99,-0.254,0.65,0.65],[48.26,-0.254,0.65,0.65],[49.53,-0.254,0.65,0.65],[50.8,-0.254,0.65,0.65],[52.07,-0.254,0.65,0.65],[53.34,-0.254,0.65,0.65],[54.61,-0.254,0.65,0.65],[55.88,-0.254,0.65,0.65],[57.15,-0.254,0.65,0.65],[58.42,-0.254,0.65,0.65],[59.69,-0.254,0.65,0.65],[60.96,-0.254,0.65,0.65],[2.54,3.556,2.032,1.2],[5.08,3.556,2.032,1.2],[7.62,3.556,2.032,1.2],[10.16,3.556,2.032,1.2],[12.7,3.556,2.032,1.2],[15.24,3.556,2.032,1.2],[17.78,3.556,2.032,1.2],[20.32,3.556,2.032,1.2],[22.86,3.556,2.032,1.2],[25.4,3.556,2.032,1.2],[27.94,3.556,2.032,1.2],[30.48,3.556,2.032,1.2],[33.02,3.556,2.032,1.2],[35.56,3.556,2.032,1.2],[38.1,3.556,2.032,1.2],[40.64,3.556,2.032,1.2],[43.18,3.556,2.032,1.2],[45.72,3.556,2.032,1.2],[48.26,3.556,2.032,1.2],[50.8,3.556,2.032,1.2],[53.34,3.556,2.032,1.2],[55.88,3.556,2.032,1.2],[58.42,3.556,2.032,1.2],[60.96,3.556,2.032,1.2],[63.5,3.556,2.032,1.2],[66.04,3.556,2.032,1.2],[68.58,3.556,2.032,1.2],[71.12,3.556,2.032,1.2],[73.66,3.556,2.032,1.2],[76.2,3.556,2.032,1.2],[2.54,6.096,2.032,1.2],[5.08,6.096,2.032,1.2],[7.62,6.096,2.032,1.2],[10.16,6.096,2.032,1.2],[12.7,6.096,2.032,1.2],[15.24,6.096,2.032,1.2],[17.78,6.096,2.032,1.2],[20.32,6.096,2.032,1.2],[22.86,6.096,2.032,1.2],[25.4,6.096,2.032,1.2],[27.94,6.096,2.032,1.2],[30.48,6.096,2.032,1.2],[33.02,6.096,2.032,1.2],[35.56,6.096,2.032,1.2],[38.1,6.096,2.032,1.2],[40.64,6.096,2.032,1.2],[43.18,6.096,2.032,1.2],[45.72,6.096,2.032,1.2],[48.26,6.096,2.032,1.2],[50.8,6.096,2.032,1.2],[53.34,6.096,2.032,1.2],[55.88,6.096,2.032,1.2],[58.42,6.096,2.032,1.2],[60.96,6.096,2.032,1.2],[63.5,6.096,2.032,1.2],[66.04,6.096,2.032,1.2],[68.58,6.096,2.032,1.2],[71.12,6.096,2.032,1.2],[73.66,6.096,2.032,1.2],[76.2,6.096,2.032,1.2],[2.54,8.636,2.032,1.2],[76.2,8.636,2.032,1.2],[2.54,13.716,2.032,1.2],[5.08,13.716,2.032,1.2],[7.62,13.716,2.032,1.2],[10.16,13.716,2.032,1.2],[12.7,13.716,2.032,1.2],[15.24,13.716,2.032,1.2],[17.78,13.716,2.032,1.2],[20.32,13.716,2.032,1.2],[22.86,13.716,2.032,1.2],[25.4,13.716,2.032,1.2],[27.94,13.716,2.032,1.2],[30.48,13.716,2.032,1.2],[33.02,13.716,2.032,1.2],[35.56,13.716,2.032,1.2],[38.1,13.716,2.032,1.2],[40.64,13.716,2.032,1.2],[43.18,13.716,2.032,1.2],[45.72,13.716,2.032,1.2],[48.26,13.716,2.032,1.2],[50.8,13.716,2.032,1.2],[53.34,13.716,2.032,1.2],[55.88,13.716,2.032,1.2],[58.42,13.716,2.032,1.2],[60.96,13.716,2.032,1.2],[63.5,13.716,2.032,1.2],[66.04,13.716,2.032,1.2],[68.58,13.716,2.032,1.2],[71.12,13.716,2.032,1.2],[73.66,13.716,2.032,1.2],[76.2,13.716,2.032,1.2],[2.54,16.256,2.032,1.2],[5.08,16.256,2.032,1.2],[7.62,16.256,2.032,1.2],[10.16,16.256,2.032,1.2],[12.7,16.256,2.032,1.2],[15.24,16.256,2.032,1.2],[17.78,16.256,2.032,1.2],[20.32,16.256,2.032,1.2],[22.86,16.256,2.032,1.2],[25.4,16.256,2.032,1.2],[27.94,16.256,2.032,1.2],[30.48,16.256,2.032,1.2],[33.02,16.256,2.032,1.2],[35.56,16.256,2.032,1.2],[38.1,16.256,2.032,1.2],[40.64,16.256,2.032,1.2],[43.18,16.256,2.032,1.2],[45.72,16.256,2.032,1.2],[48.26,16.256,2.032,1.2],[50.8,16.256,2.032,1.2],[53.34,16.256,2.032,1.2],[55.88,16.256,2.032,1.2],[58.42,16.256,2.032,1.2],[60.96,16.256,2.032,1.2],[63.5,16.256,2.032,1.2],[66.04,16.256,2.032,1.2],[68.58,16.256,2.032,1.2],[71.12,16.256,2.032,1.2],[73.66,16.256,2.032,1.2],[76.2,16.256,2.032,1.2],[2.54,18.796,2.032,1.2],[5.08,18.796,2.032,1.2],[7.62,18.796,2.032,1.2],[10.16,18.796,2.032,1.2],[12.7,18.796,2.032,1.2],[15.24,18.796,2.032,1.2],[17.78,18.796,2.032,1.2],[20.32,18.796,2.032,1.2],[22.86,18.796,2.032,1.2],[25.4,18.796,2.032,1.2],[27.94,18.796,2.032,1.2],[30.48,18.796,2.032,1.2],[33.02,18.796,2.032,1.2],[35.56,18.796,2.032,1.2],[38.1,18.796,2.032,1.2],[40.64,18.796,2.032,1.2],[43.18,18.796,2.032,1.2],[45.72,18.796,2.032,1.2],[48.26,18.796,2.032,1.2],[50.8,18.796,2.032,1.2],[53.34,18.796,2.032,1.2],[55.88,18.796,2.032,1.2],[58.42,18.796,2.032,1.2],[60.96,18.796,2.032,1.2],[63.5,18.796,2.032,1.2],[66.04,18.796,2.032,1.2],[68.58,18.796,2.032,1.2],[71.12,18.796,2.032,1.2],[73.66,18.796,2.032,1.2],[76.2,18.796,2.032,1.2],[2.54,21.336,2.032,1.2],[5.08,21.336,2.032,1.2],[7.62,21.336,2.032,1.2],[10.16,21.336,2.032,1.2],[12.7,21.336,2.032,1.2],[15.24,21.336,2.032,1.2],[17.78,21.336,2.032,1.2],[20.32,21.336,2.032,1.2],[22.86,21.336,2.032,1.2],[25.4,21.336,2.032,1.2],[27.94,21.336,2.032,1.2],[30.48,21.336,2.032,1.2],[33.02,21.336,2.032,1.2],[35.56,21.336,2.032,1.2],[38.1,21.336,2.032,1.2],[40.64,21.336,2.032,1.2],[43.18,21.336,2.032,1.2],[45.72,21.336,2.032,1.2],[48.26,21.336,2.032,1.2],[50.8,21.336,2.032,1.2],[53.34,21.336,2.032,1.2],[55.88,21.336,2.032,1.2],[58.42,21.336,2.032,1.2],[60.96,21.336,2.032,1.2],[63.5,21.336,2.032,1.2],[66.04,21.336,2.032,1.2],[68.58,21.336,2.032,1.2],[71.12,21.336,2.032,1.2],[73.66,21.336,2.032,1.2],[76.2,21.336,2.032,1.2],[2.54,23.876,2.032,1.2],[5.08,23.876,2.032,1.2],[7.62,23.876,2.032,1.2],[10.16,23.876,2.032,1.2],[12.7,23.876,2.032,1.2],[15.24,23.876,2.032,1.2],[17.78,23.876,2.032,1.2],[20.32,23.876,2.032,1.2],[22.86,23.876,2.032,1.2],[25.4,23.876,2.032,1.2],[27.94,23.876,2.032,1.2],[30.48,23.876,2.032,1.2],[33.02,23.876,2.032,1.2],[35.56,23.876,2.032,1.2],[38.1,23.876,2.032,1.2],[40.64,23.876,2.032,1.2],[43.18,23.876,2.032,1.2],[45.72,23.876,2.032,1.2],[48.26,23.876,2.032,1.2],[50.8,23.876,2.032,1.2],[53.34,23.876,2.032,1.2],[55.88,23.876,2.032,1.2],[58.42,23.876,2.032,1.2],[60.96,23.876,2.032,1.2],[63.5,23.876,2.032,1.2],[66.04,23.876,2.032,1.2],[68.58,23.876,2.032,1.2],[71.12,23.876,2.032,1.2],[73.66,23.876,2.032,1.2],[76.2,23.876,2.032,1.2],[2.54,26.416,2.032,1.2],[5.08,26.416,2.032,1.2],[7.62,26.416,2.032,1.2],[10.16,26.416,2.032,1.2],[12.7,26.416,2.032,1.2],[15.24,26.416,2.032,1.2],[17.78,26.416,2.032,1.2],[20.32,26.416,2.032,1.2],[22.86,26.416,2.032,1.2],[25.4,26.416,2.032,1.2],[27.94,26.416,2.032,1.2],[30.48,26.416,2.032,1.2],[33.02,26.416,2.032,1.2],[35.56,26.416,2.032,1.2],[38.1,26.416,2.032,1.2],[40.64,26.416,2.032,1.2],[43.18,26.416,2.032,1.2],[45.72,26.416,2.032,1.2],[48.26,26.416,2.032,1.2],[50.8,26.416,2.032,1.2],[53.34,26.416,2.032,1.2],[55.88,26.416,2.032,1.2],[58.42,26.416,2.032,1.2],[60.96,26.416,2.032,1.2],[63.5,26.416,2.032,1.2],[66.04,26.416,2.032,1.2],[68.58,26.416,2.032,1.2],[71.12,26.416,2.032,1.2],[73.66,26.416,2.032,1.2],[76.2,26.416,2.032,1.2],[2.54,28.986,2.032,1.2],[5.08,28.986,2.032,1.2],[7.62,28.986,2.032,1.2],[10.16,28.986,2.032,1.2],[12.7,28.986,2.032,1.2],[15.24,28.986,2.032,1.2],[17.78,28.986,2.032,1.2],[20.32,28.986,2.032,1.2],[22.86,28.986,2.032,1.2],[25.4,28.986,2.032,1.2],[27.94,28.986,2.032,1.2],[30.48,28.986,2.032,1.2],[33.02,28.986,2.032,1.2],[35.56,28.986,2.032,1.2],[38.1,28.986,2.032,1.2],[40.64,28.986,2.032,1.2],[43.18,28.986,2.032,1.2],[45.72,28.986,2.032,1.2],[48.26,28.986,2.032,1.2],[50.8,28.986,2.032,1.2],[53.34,28.986,2.032,1.2],[55.88,28.986,2.032,1.2],[58.42,28.986,2.032,1.2],[60.96,28.986,2.032,1.2],[63.5,28.986,2.032,1.2],[66.04,28.986,2.032,1.2],[68.58,28.986,2.032,1.2],[71.12,28.986,2.032,1.2],[73.66,28.986,2.032,1.2],[76.2,28.986,2.032,1.2],[2.54,31.526,2.032,1.2],[5.08,31.526,2.032,1.2],[7.62,31.526,2.032,1.2],[10.16,31.526,2.032,1.2],[12.7,31.526,2.032,1.2],[15.24,31.526,2.032,1.2],[17.78,31.526,2.032,1.2],[20.32,31.526,2.032,1.2],[22.86,31.526,2.032,1.2],[25.4,31.526,2.032,1.2],[27.94,31.526,2.032,1.2],[30.48,31.526,2.032,1.2],[33.02,31.526,2.032,1.2],[35.56,31.526,2.032,1.2],[38.1,31.526,2.032,1.2],[40.64,31.526,2.032,1.2],[43.18,31.526,2.032,1.2],[45.72,31.526,2.032,1.2],[48.26,31.526,2.032,1.2],[50.8,31.526,2.032,1.2],[53.34,31.526,2.032,1.2],[55.88,31.526,2.032,1.2],[58.42,31.526,2.032,1.2],[60.96,31.526,2.032,1.2],[63.5,31.526,2.032,1.2],[66.04,31.526,2.032,1.2],[68.58,31.526,2.032,1.2],[71.12,31.526,2.032,1.2],[73.66,31.526,2.032,1.2],[76.2,31.526,2.032,1.2],[2.54,34.066,2.032,1.2],[5.08,34.066,2.032,1.2],[7.62,34.066,2.032,1.2],[10.16,34.066,2.032,1.2],[12.7,34.066,2.032,1.2],[15.24,34.066,2.032,1.2],[17.78,34.066,2.032,1.2],[20.32,34.066,2.032,1.2],[22.86,34.066,2.032,1.2],[25.4,34.066,2.032,1.2],[27.94,34.066,2.032,1.2],[30.48,34.066,2.032,1.2],[33.02,34.066,2.032,1.2],[35.56,34.066,2.032,1.2],[38.1,34.066,2.032,1.2],[40.64,34.066,2.032,1.2],[43.18,34.066,2.032,1.2],[45.72,34.066,2.032,1.2],[48.26,34.066,2.032,1.2],[50.8,34.066,2.032,1.2],[53.34,34.066,2.032,1.2],[55.88,34.066,2.032,1.2],[58.42,34.066,2.032,1.2],[60.96,34.066,2.032,1.2],[63.5,34.066,2.032,1.2],[66.04,34.066,2.032,1.2],[68.58,34.066,2.032,1.2],[71.12,34.066,2.032,1.2],[73.66,34.066,2.032,1.2],[76.2,34.066,2.032,1.2],[2.54,36.606,2.032,1.2],[5.08,36.606,2.032,1.2],[7.62,36.606,2.032,1.2],[10.16,36.606,2.032,1.2],[12.7,36.606,2.032,1.2],[15.24,36.606,2.032,1.2],[17.78,36.606,2.032,1.2],[20.32,36.606,2.032,1.2],[22.86,36.606,2.032,1.2],[25.4,36.606,2.032,1.2],[27.94,36.606,2.032,1.2],[30.48,36.606,2.032,1.2],[33.02,36.606,2.032,1.2],[35.56,36.606,2.032,1.2],[38.1,36.606,2.032,1.2],[40.64,36.606,2.032,1.2],[43.18,36.606,2.032,1.2],[45.72,36.606,2.032,1.2],[48.26,36.606,2.032,1.2],[50.8,36.606,2.032,1.2],[53.34,36.606,2.032,1.2],[55.88,36.606,2.032,1.2],[58.42,36.606,2.032,1.2],[60.96,36.606,2.032,1.2],[63.5,36.606,2.032,1.2],[66.04,36.606,2.032,1.2],[68.58,36.606,2.032,1.2],[71.12,36.606,2.032,1.2],[73.66,36.606,2.032,1.2],[76.2,36.606,2.032,1.2],[2.54,39.146,2.032,1.2],[5.08,39.146,2.032,1.2],[7.62,39.146,2.032,1.2],[10.16,39.146,2.032,1.2],[12.7,39.146,2.032,1.2],[15.24,39.146,2.032,1.2],[17.78,39.146,2.032,1.2],[20.32,39.146,2.032,1.2],[22.86,39.146,2.032,1.2],[25.4,39.146,2.032,1.2],[27.94,39.146,2.032,1.2],[30.48,39.146,2.032,1.2],[33.02,39.146,2.032,1.2],[35.56,39.146,2.032,1.2],[38.1,39.146,2.032,1.2],[40.64,39.146,2.032,1.2],[43.18,39.146,2.032,1.2],[45.72,39.146,2.032,1.2],[48.26,39.146,2.032,1.2],[50.8,39.146,2.032,1.2],[53.34,39.146,2.032,1.2],[55.88,39.146,2.032,1.2],[58.42,39.146,2.032,1.2],[60.96,39.146,2.032,1.2],[63.5,39.146,2.032,1.2],[66.04,39.146,2.032,1.2],[68.58,39.146,2.032,1.2],[71.12,39.146,2.032,1.2],[73.66,39.146,2.032,1.2],[76.2,39.146,2.032,1.2],[2.54,41.686,2.032,1.2],[5.08,41.686,2.032,1.2],[7.62,41.686,2.032,1.2],[10.16,41.686,2.032,1.2],[12.7,41.686,2.032,1.2],[15.24,41.686,2.032,1.2],[17.78,41.686,2.032,1.2],[20.32,41.686,2.032,1.2],[22.86,41.686,2.032,1.2],[25.4,41.686,2.032,1.2],[27.94,41.686,2.032,1.2],[30.48,41.686,2.032,1.2],[33.02,41.686,2.032,1.2],[35.56,41.686,2.032,1.2],[38.1,41.686,2.032,1.2],[40.64,41.686,2.032,1.2],[43.18,41.686,2.032,1.2],[45.72,41.686,2.032,1.2],[48.26,41.686,2.032,1.2],[50.8,41.686,2.032,1.2],[53.34,41.686,2.032,1.2],[55.88,41.686,2.032,1.2],[58.42,41.686,2.032,1.2],[60.96,41.686,2.032,1.2],[63.5,41.686,2.032,1.2],[66.04,41.686,2.032,1.2],[68.58,41.686,2.032,1.2],[71.12,41.686,2.032,1.2],[73.66,41.686,2.032,1.2],[76.2,41.686,2.032,1.2],[2.54,46.736,2.032,1.2],[76.201,46.736,2.032,1.2],[2.54,49.276,2.032,1.2],[5.08,49.276,2.032,1.2],[7.62,49.276,2.032,1.2],[10.16,49.276,2.032,1.2],[12.7,49.276,2.032,1.2],[15.24,49.276,2.032,1.2],[17.78,49.276,2.032,1.2],[20.32,49.276,2.032,1.2],[22.86,49.276,2.032,1.2],[25.4,49.276,2.032,1.2],[27.94,49.276,2.032,1.2],[30.48,49.276,2.032,1.2],[33.02,49.276,2.032,1.2],[35.56,49.276,2.032,1.2],[38.1,49.276,2.032,1.2],[40.64,49.276,2.032,1.2],[43.18,49.276,2.032,1.2],[45.72,49.276,2.032,1.2],[48.26,49.276,2.032,1.2],[50.8,49.276,2.032,1.2],[53.34,49.276,2.032,1.2],[55.88,49.276,2.032,1.2],[58.42,49.276,2.032,1.2],[60.96,49.276,2.032,1.2],[63.5,49.276,2.032,1.2],[66.04,49.276,2.032,1.2],[68.58,49.276,2.032,1.2],[71.12,49.276,2.032,1.2],[73.66,49.276,2.032,1.2],[76.2,49.276,2.032,1.2],[2.54,51.816,2.032,1.2],[5.08,51.816,2.032,1.2],[7.62,51.816,2.032,1.2],[10.16,51.816,2.032,1.2],[12.7,51.816,2.032,1.2],[15.24,51.816,2.032,1.2],[17.78,51.816,2.032,1.2],[20.32,51.816,2.032,1.2],[22.86,51.816,2.032,1.2],[25.4,51.816,2.032,1.2],[27.94,51.816,2.032,1.2],[30.48,51.816,2.032,1.2],[33.02,51.816,2.032,1.2],[35.56,51.816,2.032,1.2],[38.1,51.816,2.032,1.2],[40.64,51.816,2.032,1.2],[43.18,51.816,2.032,1.2],[45.72,51.816,2.032,1.2],[48.26,51.816,2.032,1.2],[50.8,51.816,2.032,1.2],[53.34,51.816,2.032,1.2],[55.88,51.816,2.032,1.2],[58.42,51.816,2.032,1.2],[60.96,51.816,2.032,1.2],[63.5,51.816,2.032,1.2],[66.04,51.816,2.032,1.2],[68.58,51.816,2.032,1.2],[71.12,51.816,2.032,1.2],[73.66,51.816,2.032,1.2],[76.2,51.816,2.032,1.2]]}};
 </script>
 <script>
@@ -9289,6 +9292,86 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     bodies: [body(R(-36.5, -23.5, 36.5, 0), 0, 4.0, { name: 'socket + latches' })], ghosts: [body(R(-34.8, -30, 34.8, -1), 1.4, 2.6, { name: '69.6 x 30 module' })], mouth: [0, -1],
     source: 'Port survey: 73 x 23.5 mm with latches, 4.0 high, 1.2 mm card 69.6 wide. The envelope is the whole 73 x 23.5 block; the real part is a socket bar and two latch arms.' };
 
+  // ---- the expansion port in the unit's side (rev A11): a 1.27 mm right-angle socket, two rows of n, on top of the main board
+  //      with its mouth in the board's edge, and the pin header that plugs into it from a board standing beside the unit.
+  //      Same frame as the 2 x 35 pair above (origin on pin 1 of the solder row, pins along +y): the socket's mouth is at
+  //      x = -5.82, the header's plastic ends at x = 2.77 and its pins at 6.77, so a mated pair has its rows 8.59 apart.
+  //      The lengths follow n. Only the 2 x 35 pair has a mesh, so these are drawn as their boxes.
+  function ra127(n) { return Math.max(2, Math.min(40, Math.round(+n) || 11)); }
+  catalog.skt_ra_127 = {
+    label: '1.27 mm right-angle socket, 2 x n (side port)', group: 'port', on: 'base', color: 0x111111, height: 3.1, clearance: 0.25,
+    dims: { n: 11 }, dimLabels: { n: 'Positions per row' }, dimUnits: { n: 'x 2 pins' }, dimStep: { n: 1 },
+    make: function (d) { var n = ra127(d.n), L = (n - 1) * 1.27; return { bodies: [body(R(-5.82, -0.81, 0.075, L + 0.81), 0, 3.1, { name: 'socket' })], height: 3.1, n: n, pins: 2 * n, span: +L.toFixed(3), len: +(L + 1.62).toFixed(2), label: '1.27 mm right-angle socket, 2 x ' + n + ' (side port)' }; },
+    mouth: [-1, 0],
+    source: 'The GCT BD091 class socket of KiCad\'s PinSocket_2xN_P1.27mm_Horizontal: body 4.4 deep (5.82 with the tails), 3.1 high, 0.81 past the end pins. 1 A a pin. About $0.31 for a 2 x 40 at one piece (edge-connector survey, 2026-10-18). No mating force or cycle life is published for these.'
+  };
+  catalog.hdr_ra_127 = {
+    label: '1.27 mm right-angle pin header, 2 x n', group: 'port', on: 'base', color: 0x111111, height: 3.4, clearance: 0.25,
+    dims: { n: 11, pin: 4 }, dimLabels: { n: 'Positions per row', pin: 'Pin length' }, dimUnits: { n: 'x 2 pins', pin: 'mm' }, dimStep: { n: 1, pin: 0.1 },
+    make: function (d) { var n = ra127(d.n), L = (n - 1) * 1.27, pin = d.pin > 0 ? +d.pin : 4.0; return { bodies: [body(R(-0.2, -0.635, 2.77, L + 0.635), 0, 3.4, { name: 'plastic' }), body(R(2.77, -0.2, 2.77 + pin, L + 0.2), 0.55, 2.85, { name: 'pins', cut: false, clearance: 0 })], height: 3.4, n: n, pins: 2 * n, span: +L.toFixed(3), pin: pin, label: '1.27 mm right-angle pin header, 2 x ' + n }; },
+    source: 'KiCad PinHeader_2xN_P1.27mm_Horizontal: plastic 3.4 high and 2.97 deep, pins 4.0 long (pin: another length, as the Samtec CLP-DH wants). About $0.22 for a 2 x 40 at one piece.'
+  };
+  // ---- other sockets for the side (rev A11d): the horizontal, two-row, surface-mount sockets Kevin picked out on 2026-11-28
+  //      (LCSC C6484780 Samtec CLP-105-02-F-DH-TR, C3322500 Amphenol 71609-310ALF, C18198068 XKB X6521FRS-2x04-C59D11). Same
+  //      frame as skt_ra_127: origin on pin 1, pins along +y, mouth at x = -depth. Drawn as their boxes. SIDE_KINDS says, per
+  //      socket: pitch, depth from the mouth to the back of the part, how far its body runs past the end pins, its height, the
+  //      header that mates, that header's pin length, and the insertion depth the socket takes where its maker gives one.
+  catalog.skt_h_clp127 = {
+    label: '1.27 mm horizontal SMD socket, 2 x n (Samtec CLP-DH)', group: 'port', on: 'base', color: 0x111111, height: 3.43, clearance: 0.25,
+    dims: { n: 11 }, dimLabels: { n: 'Positions per row' }, dimUnits: { n: 'x 2 pins' }, dimStep: { n: 1 },
+    make: function (d) { var n = ra127(d.n), L = (n - 1) * 1.27; return { bodies: [body(R(-4.57, -0.85, 0, L + 0.85), 0, 3.43, { name: 'socket' })], height: 3.43, n: n, pins: 2 * n, span: +L.toFixed(3), len: +(n * 1.27 + 0.43).toFixed(2), label: '1.27 mm horizontal SMD socket, 2 x ' + n + ' (CLP-DH)' }; },
+    mouth: [-1, 0],
+    source: 'Samtec CLP-1xx-02-F-DH (LCSC C6484780 is the 2 x 5): 3.43 high, 4.57 deep, n x 1.27 + 0.43 long (Arrow\'s figures for the 2 x 2, 2 x 4, 2 x 8 and 2 x 24; Samtec\'s catalogue page for the length rule). Side entry 2.31 to 2.67 mm, which wants the short-pin header (FTSH -01 lead style), not a 4.0 mm pin. 3.3 A a pin. $2.87 at LCSC for the 2 x 5 (6 in stock), $2.21 on Octopart for the 2 x 10; read 2026-11-28. The drawing itself was not read.'
+  };
+  catalog.skt_h_254 = {
+    label: '2.54 mm horizontal SMD socket, 2 x n (XKB X6521FRS, Amphenol 71609)', group: 'port', on: 'base', color: 0x111111, height: 6.0, clearance: 0.25,
+    dims: { n: 5 }, dimLabels: { n: 'Positions per row' }, dimUnits: { n: 'x 2 pins' }, dimStep: { n: 1 },
+    make: function (d) { var n = ra127(d.n), L = (n - 1) * 2.54; return { bodies: [body(R(-8.4, -1.23, 0, L + 1.23), 0, 6.0, { name: 'socket' }), body(R(-9.65, -0.6, 1.25, L + 0.6), 0, 0.5, { name: 'leads', cut: false, clearance: 0 })], height: 6.0, n: n, pins: 2 * n, span: +L.toFixed(3), len: +(n * 2.54 - 0.08).toFixed(2), label: '2.54 mm horizontal SMD socket, 2 x ' + n }; },
+    mouth: [-1, 0],
+    source: 'XKB X6521FRS-2x04-C59D11 (LCSC C18198068): 5.9 high, 3 A, brass, $0.32 for the 2 x 4, 6,782 in stock. Amphenol Dubox 71609 (LCSC C3322500 is the 2 x 10, $2.84, 50 in stock): 5.85 high at LCSC, 6.03 at Arrow, 8.4 deep and 7.54 long for the 2 x 3, gold on phosphor bronze, 0.64 mm square posts. The Dubox catalogue Kevin sent (page 15, drawing 71609): body 8.40 deep and 6.00 high, 2.54 x positions - 0.08 long, gull-wing leads at BOTH ends, 10.90 over the leads (pads 11.43 apart), 2 to 25 positions a row; a pin goes 3.6 to 7.5 mm in and can pass right through (that is what dual entry means: open at both ends); 200 cycles, 0.30 N a contact to pull out at least. The leads at the mouth end want 1.25 mm of board in front of the body, so its mouth cannot stand on the board\'s edge. ASSUMPTION: the XKB part has the same body and leads; its drawing was not read. Read 2026-11-28.'
+  };
+  catalog.hdr_ra_254 = {
+    label: '2.54 mm right-angle pin header, 2 x n', group: 'port', on: 'base', color: 0x111111, height: 5.08, clearance: 0.25,
+    dims: { n: 5, pin: 6 }, dimLabels: { n: 'Positions per row', pin: 'Pin length' }, dimUnits: { n: 'x 2 pins', pin: 'mm' }, dimStep: { n: 1, pin: 0.1 },
+    make: function (d) { var n = ra127(d.n), L = (n - 1) * 2.54, pin = d.pin > 0 ? +d.pin : 6.0; return { bodies: [body(R(0.23, -1.27, 2.77, L + 1.27), 0, 5.08, { name: 'plastic' }), body(R(2.77, -0.32, 2.77 + pin, L + 0.32), 0.95, 4.13, { name: 'pins', cut: false, clearance: 0 })], height: 5.08, n: n, pins: 2 * n, span: +L.toFixed(3), pin: pin, label: '2.54 mm right-angle pin header, 2 x ' + n }; },
+    source: 'The usual 0.64 mm square-post right-angle header, two rows: plastic 2.54 deep and 5.08 high, pins 6.0 long (ASSUMPTION: not taken from a drawing).'
+  };
+  // ---- upright sockets and the press-in joint (rev A11e, Kevin 2026-11-28: "we'd want super low profile headers if we did
+  //      vertical ... we'd want the headers on the middle board and cutouts so they can go all the way through the v6").
+  //      skt_v_127: a 1.27 mm upright SMD socket, two rows of n, h high. Origin on pin 1, pins along +y, the second row at
+  //      x = 1.27. hdr_v_127: the upright pin header that goes up into it from a tab of the extender's board.
+  //      ASSUMPTION: body 3.1 wide and 0.8 past the end pins (the usual size; none of the three drawings was read).
+  catalog.skt_v_127 = {
+    label: '1.27 mm upright SMD socket, 2 x n', group: 'port', on: 'board', color: 0x111111, height: 2.1, clearance: 0.25,
+    dims: { n: 11, h: 2.1 }, dimLabels: { n: 'Positions per row', h: 'Height' }, dimUnits: { n: 'x 2 pins', h: 'mm' }, dimStep: { n: 1, h: 0.1 },
+    make: function (d) { var n = ra127(d.n), L = (n - 1) * 1.27, h = d.h > 0 ? +d.h : 2.1; return { bodies: [body(R(-0.92, -0.8, 2.19, L + 0.8), 0, h, { name: 'socket' })], height: h, n: n, pins: 2 * n, span: +L.toFixed(3), len: +(L + 1.6).toFixed(2), label: '1.27 mm upright SMD socket, 2 x ' + n + ', ' + h + ' high' }; },
+    source: 'Kevin\'s three, LCSC 2026-11-28: Yxcon F321-1214A4CMUB2 (C7494846), 2 x 14, 2.1 mm high, $0.70, 1,970 in stock; Hong Cheng HC-PM127-4.3H-2x13PS (C22436133), 4.3 high, $0.13; HC-PM127-4.3H-2x16PS (C41376131), 4.3 high, $0.14. All gold on phosphor bronze, 1 A. LCSC lists each as top entry; whether a pin can pass right through was not confirmed from a drawing.'
+  };
+  catalog.hdr_v_127 = {
+    label: '1.27 mm upright pin header, 2 x n', group: 'port', on: 'base', color: 0x111111, height: 4, clearance: 0.25,
+    dims: { n: 11, pin: 3 }, dimLabels: { n: 'Positions per row', pin: 'Pin length' }, dimUnits: { n: 'x 2 pins', pin: 'mm' }, dimStep: { n: 1, pin: 0.1 },
+    make: function (d) { var n = ra127(d.n), L = (n - 1) * 1.27, pin = d.pin > 0 ? +d.pin : 3; return { bodies: [body(R(-0.92, -0.8, 2.19, L + 0.8), 0, 1.0, { name: 'plastic' }), body(R(-0.2, -0.2, 1.47, L + 0.2), 1.0, 1.0 + pin, { name: 'pins', cut: false, clearance: 0 })], height: 1.0 + pin, n: n, pins: 2 * n, span: +L.toFixed(3), pin: pin, label: '1.27 mm upright pin header, 2 x ' + n + ', ' + pin + ' mm pins' }; },
+    source: 'An upright 1.27 mm header with a 1.0 mm base (ASSUMPTION). The usual pin above the base is 3.0 mm; the press-in joint wants longer ones.'
+  };
+  var VERT_KINDS = { '2.1': { label: '2.1 high (Yxcon F321)', price: 'Yxcon F321-1214A4CMUB2, $0.70 for a 2 x 14 at LCSC' }, '4.3': { label: '4.3 high (Hong Cheng HC-PM127)', price: 'Hong Cheng HC-PM127-4.3H, $0.13 for a 2 x 13 and $0.14 for a 2 x 16 at LCSC' } };
+  var SIDE_KINDS = {
+    skt_ra_127: { label: '1.27 mm right-angle, through-hole, 3.1 high', pitch: 1.27, depth: 5.82, end: 0.81, high: 3.1, hdr: 'hdr_ra_127', pin: 4.0, takes: null, n: 11, price: 'XKB X1321FR-2xNN-C43D24 at LCSC: $0.24 for a 2 x 5, $0.30 for a 2 x 7, $0.38 for a 2 x 10' },
+    skt_h_clp127: { label: '1.27 mm horizontal SMD, 3.43 high (Samtec CLP-DH)', pitch: 1.27, depth: 4.57, end: 0.85, high: 3.43, hdr: 'hdr_ra_127', pin: 2.5, takes: [2.31, 2.67], n: 11, price: '$2.87 for a 2 x 5 at LCSC, $2.21 for a 2 x 10 on Octopart' },
+    skt_h_254: { label: '2.54 mm horizontal SMD, 6.0 high, open at both ends (XKB X6521FRS, Amphenol 71609)', pitch: 2.54, depth: 8.4, lead: 1.25, end: 1.23, high: 6.0, hdr: 'hdr_ra_254', pin: 6.0, takes: [3.6, 7.5], n: 5, price: 'XKB $0.32 for a 2 x 4; Amphenol $2.84 for a 2 x 10, both at LCSC' }
+  };
+  // ---- the extender (rev A11): a narrow breadboard standing against the unit's right side, plugged into that socket, its rows
+  //      wired one each to the socket's pins. These are the numbers a design that says nothing takes (v6_outline.json "extender").
+  //      head = how far its head stands above the breadboard's top edge, beside the top band: it is the extender's one board,
+  //      with the header on it in the open. cover = a second board over the head, level with the frame's top board (off: Kevin,
+  //      2026-11-27, "the side port top area doesn't need a top board, it can just be one pcb"); key = its edge fills the waist in the breadboard's side; ties = what holds the seam shut at
+  //      the two holes beside the rails; wire = the staple's wire; jumpers = the four rails carried across on jumpers.
+  //      Rev A11c: no staples and no rail jumpers (Kevin, 2026-11-28: "we're not going to use ties on the rails, that's inelegant").
+  //      ties: 'staple' and jumpers: true still draw them for a design that asks; nothing in the page sets them.
+  var EXTENDER = { on: false, cols: 11, dead_rows: 0, rail_skip: 1, head: 18.5, cover: false, key: true, ties: 'none', wire: 1.0, jumpers: false, chan: 2.04, clip: 1.86, join: 'side' };       // dead_rows 0 since rev A11d
+  var extTies = { none: 'none', staple: 'wire staples in the holes beside the rails' };
+  // where the socket in the right side goes when the page adds it: mouth in the edge, pin 1 the lowest, just above the breadboard's corner
+  var SIDE = { id: 'side', type: 'skt_ra_127', back: 5.82, y: -3.2, rot: 180, n: 11 };
+
   // ---- chips and other tall or large parts, to try where they fit. Bodies are the package outlines over the leads.
   function chip(label, w, d, h, src) { return { label: label, group: 'chip', on: 'base', color: 0x18181b, height: h, clearance: 0.25, cut: true, bodies: [body(R(-w / 2, -d / 2, w / 2, d / 2), 0, h, { name: 'package' })], source: src }; }
   catalog.ic_ch446q = chip('CH446Q crossbar, LQFP-44 (12 x 12 over leads)', 12.0, 12.0, 1.6, 'LQFP-44 10 x 10 body, 12 x 12 over the leads, 1.6 max high (JEDEC MS-026). V6 has 12 + 5 lane + 1 port. Courtyard in V6_area.json: 13.4 x 13.4.');
@@ -9374,16 +9457,21 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     minipcie: { label: 'mini PCIe socket', parts: ['minipcie'] },
     sodimm: { label: 'DDR4 SO-DIMM socket', parts: ['sodimm_ddr4'] }
   };
+  // Rev A11c: the socket in the unit's right side (skt_ra_127) is not one of these. It is a part of its own, "side", beside the
+  // general expansion port on the top edge, and carries the routable lanes only (Side port and extender in the page).
 
   // The "Controls" selectors in the viewer: one slot each, swapped in place. at = [x, y, rot] for a part added fresh.
+  // Since rev A10d the display lies across the middle of the top band (x 10.7 to 70.8), so a fresh part lands on the board that
+  // is left: the block on the left under the click wheel (directional switch, joystick) or the 7.9 mm strip on the right
+  // (the two buttons, one above the other). No joystick in the list fits either place.
   var controls = [
     { key: 'wheel', label: 'Click wheel', ids: ['encoder'], at: [[-2.47, -17.17, 45]],
       options: [['none', 'none'], ['encoder_siq02', 'SIQ-02FVS3, no cap'], ['encoder_siq02_cap', 'SIQ-02FVS3 with the V5 cap']] },
-    { key: 'nav', label: 'Directional switch', ids: ['nav'], at: [[54, -7.5, 0]],
+    { key: 'nav', label: 'Directional switch', ids: ['nav'], at: [[4.5, -6.5, 0]],
       options: [['none', 'none'], ['nav_rkjxm', 'ALPS RKJXM stick (through-hole)'], ['nav_skrh', 'ALPS SKRHADE010 (SMD)'], ['nav_k1_1210', 'Hroparts K1-1210UN (flat SMD)']] },
-    { key: 'joy', label: 'Joystick', ids: ['joy'], at: [[58, -10.5, 0]],
+    { key: 'joy', label: 'Joystick', ids: ['joy'], at: [[4.5, -6.5, 0]],
       options: [['none', 'none'], ['joy_joycon', 'Joy-Con type thumbstick'], ['custom_control', 'custom (your numbers)']] },
-    { key: 'buttons', label: 'Buttons A and B', ids: ['btn_a', 'btn_b'], at: [[66.5, -6, 0], [73.5, -6, 0]],
+    { key: 'buttons', label: 'Buttons A and B', ids: ['btn_a', 'btn_b'], at: [[74.8, -5.5, 0], [74.8, -12.5, 0]],
       options: [['none', 'none'], ['tact_ts1187', 'tact 5.1 x 5.1, 1.7 high']] }
   ];
 
@@ -9404,7 +9492,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     return o;
   }
 
-  return { parts: catalog, footprints: LIB.footprints, tongue: TONGUE, tongueShape: tongueShape, window: WINDOW, windowShape: windowShape, portTypes: portTypes, controls: controls, couplers: couplers, displays: Object.keys(catalog).filter(function (k) { return catalog[k].group === 'display'; }), get: get };
+  return { parts: catalog, footprints: LIB.footprints, tongue: TONGUE, tongueShape: tongueShape, window: WINDOW, windowShape: windowShape, portTypes: portTypes, controls: controls, couplers: couplers, extender: EXTENDER, extTies: extTies, ra127: ra127, sideKinds: SIDE_KINDS, vertKinds: VERT_KINDS, side: SIDE, displays: Object.keys(catalog).filter(function (k) { return catalog[k].group === 'display'; }), get: get };
 });
 
 </script>
@@ -9910,6 +9998,28 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     var fb = bbox(frameL), yt = round(fb.y0), yb = Math.max(w.height, round(fb.y1));
     var wigPts = ref.outline && ref.outline.length > 3 ? ref.outline : rectPts(0, 0, w.width, w.height);
     var wigRegion = region([wigPts]);
+    // rev A11d: the waist in the breadboard's right side made deeper than the WigLEDmag's own (wig.waist_r, mm in from the right
+    // edge), so that a board on that side can bow far enough into it to carry a column of holes on the grid plane. The cut is
+    // taken out of the breadboard's own outline, so its PCB, shell and top board all get it. waist.own is what the traced outline has.
+    // The top board is cut to the half-pitch line instead (once the waist is deep enough for a column on the seam), so that the
+    // countersinks of the two columns either side of the seam keep the same land: the shell's seam gives the whole wall to the
+    // breadboard, which would leave the extender's countersinks 0.1 mm past its own edge.
+    var waist = null, waistCut = null, waistCutFace = null, wigFaceRegion = null;
+    (function () {
+      var W0 = w.width, mid = wigPts.filter(function (p) { return p[0] > W0 - 3 && p[0] < W0 - 0.002 && p[1] > 4 && p[1] < w.height - 4; });
+      if (!mid.length) { waist = { own: 0, depth: 0, deepened: false, y0: null, y1: null, flat: null }; return; }
+      var ya = Math.min.apply(null, mid.map(function (p) { return p[1]; })), yb = Math.max.apply(null, mid.map(function (p) { return p[1]; }));
+      var own = round(W0 - Math.min.apply(null, mid.map(function (p) { return p[0]; })), 3), d = Math.min(1.6, +w.waist_r || 0);
+      waist = { own: own, depth: own, deepened: false, y0: round(ya, 3), y1: round(yb, 3), flat: null };
+      if (!(d > own + 1e-6)) return;
+      var ramp = Math.min(1.8, (yb - ya) / 4);
+      function cutOf(dd) { return region([[[W0 + 1, ya], [W0, ya], [W0 - dd, ya + ramp], [W0 - dd, yb - ramp], [W0, yb], [W0 + 1, yb]]]); }
+      var df = d < 1 ? d : Math.max(d, P.grid.pitch / 2 + w.fit_gap / 2);
+      waistCut = cutOf(d); waistCutFace = cutOf(df); wigFaceRegion = diff(wigRegion, waistCutFace);
+      wigRegion = diff(wigRegion, waistCut);
+      var we = expolys(wigRegion); if (we.length) wigPts = we[0].outer;
+      waist = { own: own, depth: round(d, 3), face: round(df, 3), deepened: true, y0: round(ya, 3), y1: round(yb, 3), flat: [round(ya + ramp, 3), round(yb - ramp, 3)] };
+    })();
     // Where the frame runs along the breadboard, the spaces the breadboard's own outline leaves against it (the corner chamfers,
     // the waist) belong to the frame, so a board's inner edge follows the breadboard's contour: each board is then cut by
     // whichever part of the wig is at its height, less the fit gap. Only a space with more than 5 mm of edge against the frame
@@ -9985,7 +10095,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
 
     // --- parts ---
     var parts = [];
-    function addPart(o) {
+    function addPart(o, into) {             // into: a list other than this unit's parts (the extender's)
       // o: {id, type, label, x, y, rot, plane:{z, dir, bottom}, bodies:[{shape,z0,z1,...}], clearance, ...}
       var p = { id: o.id, type: o.type, label: o.label, x: o.x, y: o.y, rot: o.rot || 0, bottom: !!o.plane.bottom, zPlane: round(o.plane.z), dir: o.plane.dir,
         mountLayer: o.mountLayer || null, color: o.color, model: o.model || null, source: o.source || '', system: !!o.system, movable: o.movable !== false,
@@ -10004,7 +10114,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
       (o.ghosts || []).forEach(function (b) { p.ghosts.push(conv(b, true)); });
       p.z0 = Math.min.apply(null, p.bodies.map(function (b) { return b.z0; }));
       p.z1 = Math.max.apply(null, p.bodies.map(function (b) { return b.z1; }));
-      parts.push(p);
+      (into || parts).push(p);
       return p;
     }
     function plane(m, height) {
@@ -10017,6 +10127,155 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
       if (m && m.flush === 'top') return { z: zTop + (m.offset || 0) - height, dir: 1, bottom: false, layer: top.id };
       return { z: (m && m.z) || 0, dir: 1, bottom: false, layer: null };
     }
+
+    // --- the extender (rev A11): a narrow breadboard that stands against this unit's right side and plugs into the socket in
+    //     the side of the top band (a part of type skt_ra_127). Each of its rows goes to one pin of that socket, so it has no
+    //     crossbar of its own. Its left edge is on this unit's right grid plane and its first column is dead_rows pitches past
+    //     it, so both boards' holes are on one 0.1 inch grid. It is another unit: nothing of it cuts this unit's boards or
+    //     counts in this unit's checks. What it is made of is in R.extender; checks.extender says how the two meet.
+    // --- rev A11e: the press-in joint (extender.join 'press'). An upright socket on the mid board (a part of type skt_v_127)
+    //     with the top and the bottom board opened over and under it, so a pin can go all the way through; and in the bottom
+    //     board a knob-shaped cutout running out to the right edge. A tab of the extender's one board fills it from the back,
+    //     its upright pins going up into the socket. The knob is wider than its neck, so the tab cannot be pulled out
+    //     sideways. The cutout belongs to the unit: it is there with or without an extender.
+    var press = null;
+    (function () {
+      var XJ = P.extender || {}; if (XJ.join !== 'press') return;
+      var vp = null; (P.parts || []).forEach(function (u) { if (!vp && u.type === 'skt_v_127') vp = u; });
+      if (!vp) return;
+      var vc = Catalog.get(vp), gapT = 0.05, m = 0.6, under = 0.8;
+      var kx0 = vp.x - 0.92 - m, kx1 = Math.min(vp.x + 2.19 + m, xr - 1.0), ky0 = vp.y - 0.8 - m, ky1 = vp.y + vc.span + 0.8 + m, nw = Math.max(2, ky1 - ky0 - 2 * under), yc = (ky0 + ky1) / 2;
+      var shape = union(region([rectPts(kx0, ky0, kx1, ky1)]), region([rectPts(kx1 - 0.2, yc - nw / 2, xr + 0.3, yc + nw / 2)]));
+      press = { id: vp.id, n: vc.n, pins: vc.pins, h: vc.height, x: +vp.x, y: +vp.y, span: vc.span, len: vc.len, knob: [round(kx0), round(ky0), round(kx1), round(ky1)], neck: round(nw), under: round((ky1 - ky0 - nw) / 2), gap: gapT,
+        rects: [[kx0, ky0, kx1, ky1], [kx1, yc - nw / 2, xr, yc + nw / 2]],
+        cut: inter(shape, region([rectPts(kx0 - 1, ky0 - 1, xr + 0.01, ky1 + 1)])), tab: inter(offset(shape, -gapT), region([rectPts(kx0 - 1, ky0 - 1, xr + 0.3, ky1 + 1)])) };
+    })();
+    var ext = null;
+    if (P.extender && P.extender.on) (function () {
+      var X = {}, XD = Catalog.extender || {}, k;
+      for (k in XD) X[k] = XD[k];
+      for (k in P.extender) if (k.charAt(0) !== '_') X[k] = P.extender[k];
+      var edRaw = Math.round(+X.dead_rows), en = Math.max(1, Math.min(40, Math.round(+X.cols) || 11)), ed = Math.max(0, Math.min(MAX_DEAD + 1, isFinite(edRaw) ? edRaw : 1));      // 0 since rev A11d: no hole position skipped
+      var ex0 = xr, ex1 = round(xr + (ed + en) * pitch), eh = Math.max(0, +X.head || 0), H = w.height, W = w.width, quiet = [];
+      var rowsY = ref.rows && ref.rows.length ? ref.rows : (function () { var a = []; for (var r = 0; r < 20; r++) if (r !== 2 && r !== 3 && r !== 16 && r !== 17) a.push(3.556 + r * pitch); return a; })();
+      var ecols = []; for (k = 0; k < en; k++) ecols.push(round(xr + (ed + k) * pitch));
+      // its plan: the breadboard part has the wig's own corners; the head stands beside the top band, a rounded chamfer on its free corner
+      var bodyR = region([buildOutline([{ x: ex0, y: 0, c: 'wig' }, { x: ex1, y: 0, c: 'wig' }, { x: ex1, y: H, c: 'wig' }, { x: ex0, y: H, c: 'wig' }], ref, quiet).pts]);
+      var boardR = bodyR;
+      if (eh > 0.5) {
+        var cw = Math.min(5.5, (ex1 - ex0) / 3), ch = Math.min(4.8, eh / 3);
+        boardR = region([buildOutline([{ x: ex0, y: -eh, r: Math.min(1.2, eh / 3) }, { x: ex1, y: -eh, c: [cw, ch], r: Math.min(2, ch) }, { x: ex1, y: H, c: 'wig' }, { x: ex0, y: H, c: 'wig' }], ref, quiet).pts]);
+      }
+      // the key: the waist the breadboard has in its right side is filled by this board's edge, less the fit gap, so the two
+      // cannot slide along the seam. The corners' spaces are left alone.
+      var keyed = 0;
+      function keyOf(gap, reg) {             // reg: the breadboard's top board, whose waist is cut deeper than the shell's (rev A11d)
+        var kk = [];
+        // the breadboard's edge is a few um inside its rectangle all the way down, which would join the waist to the corners:
+        // only the middle of the side is looked at, and a sliver thinner than 0.06 is dropped
+        var left = offset(offset(diff(region([rectPts(W - 3, 4, W, H - 4)]), reg || wigRegion), -0.03), 0.03);
+        expolys(left).forEach(function (e) {
+          var pc = region([e.outer]), b = bbox(pc);
+          if (area(pc) < 0.5 || b.x1 < W - 0.05) return;
+          kk = kk.concat(inter(offset(union(pc, region([rectPts(W - 0.04, b.y0, W + 2, b.y1)])), -gap), region([rectPts(W - 3, b.y0, W + 1, b.y1)])));
+        });
+        return kk;
+      }
+      var sx = (W - w.shell.w) / 2, sy = (H - w.shell.h) / 2;
+      var shellR = inter(bodyR, region([rectPts(ex0 + sx, sy, ex1 - sx, sy + w.shell.h)])), faceR = faceP ? bodyR : null;
+      if (X.key !== false) {
+        var kb = keyOf(w.pcb_gap), ks = keyOf(w.fit_gap);
+        if (kb.length) { boardR = union(boardR, kb); keyed = round(area(inter(union(kb), region([rectPts(0, 0, W, H)]))), 2); }
+        if (ks.length) shellR = union(shellR, ks);
+        if (faceR) { var kf = wigFaceRegion ? keyOf(w.fit_gap, wigFaceRegion) : ks; if (kf.length) faceR = union(faceR, kf); }
+      }
+      // only if asked for (rev A11b: the head is the one board): a second board over the head, level with the frame's top board,
+      // following the top of this board's own shell
+      var coverR = [];
+      if (X.cover === true && eh > 0.5 && layers.length > 1) coverR = clean(diff(inter(boardR, region([rectPts(ex0 - 1, -eh - 1, ex1 + 1, 4)])), offset(shellR, w.fit_gap)));
+      // the ties: the wig's top board has a hole beside each rail pair, on its first and last columns (wiigtop.3mf). This board has
+      // the same on its own first column, so a wire staple across the seam goes down one of each.
+      var tieY = [], tieX = round(g.cols * pitch), big = null;
+      ((ref.face && ref.face.holes) || []).forEach(function (h) {
+        if (h[2] < 1.5 || h[1] < 0) return;
+        if (!big) big = [h[2], h[3]];
+        if (h[0] > W / 2 && !rowsY.some(function (r) { return Math.abs(r - h[1]) < 0.05; }) && !tieY.some(function (t) { return Math.abs(t - h[1]) < 0.05; })) { tieY.push(h[1]); if (Math.abs(h[0] - g.cols * pitch) > 0.05) tieX = round(h[0]); }
+      });
+      var tieRef = tieY.length > 0;
+      if (!tieRef) tieY = [8.636, 46.736];
+      tieY.sort(function (a, b) { return a - b; }); big = big || [2.032, 1.2];
+      var kind = X.ties === 'staple' ? 'staple' : 'none', wire = Math.max(0.3, +X.wire || 1.0);       // only if asked for (rev A11c)
+      // With no dead row the first column stands on the grid plane, in the part of this board that bows into the breadboard's waist.
+      // The rails are at the breadboard's corners, where there is no waist to bow into, so they start rail_skip columns later.
+      var skip = ed === 0 ? Math.max(1, Math.min(3, Math.round(+X.rail_skip) || 1)) : 0, nR = rowsY.length, tc = Math.min(skip, en - 1);
+      function isRail(i) { return nR >= 8 && (i < 2 || i >= nR - 2); }
+      var holes = [];
+      if (faceR) {
+        ecols.forEach(function (cx, ci) { rowsY.forEach(function (cy, ri) { if (ci < skip && isRail(ri)) return; holes.push([cx, cy, big[0], big[1]]); }); });
+        tieY.forEach(function (ty) { holes.push([ecols[tc], ty, big[0], big[1]]); if (en - 1 > tc) holes.push([ecols[en - 1], ty, big[0], big[1]]); });
+      }
+      // That column on the grid plane: the breadboard keeps a wall beside its own last column, and this board's first channel is open
+      // on that side, closed by that wall. chan and clip are the shell's channel and the spring clip's width (2.04 and 1.86 in
+      // claude_V6_breadboard_shell_DFM.md); the clip's solder tab wants land on this board 0.55 either side of the column line.
+      var seamCol = null;
+      if (ed === 0) {
+        var chan = +X.chan || 2.04, clipW = +X.clip || 1.86, mainY = rowsY.filter(function (y, i) { return !isRail(i); });
+        var c0 = mainY[0] - pitch / 2 - 0.25, c1 = mainY[mainY.length - 1] + pitch / 2 + 0.25, lastCol = g.cols * pitch;
+        var strip = region([rectPts(W - 3, c0, W + 3, c1)]), space = diff(strip, wigRegion);
+        var ueMin = bbox(space).x0, ueMax = bbox(inter(wigRegion, strip)).x1;                                   // the breadboard's edge along the channels: deepest and shallowest
+        var eSpace = diff(region([rectPts(W - 3, c0, xr + 0.6, c1)]), boardR), ebMax = area(eSpace) > 0.001 ? bbox(eSpace).x1 : W - 3;     // this board's edge there, where it is furthest right
+        var wall = round(ueMin - (lastCol + chan / 2), 3), clear = round((xr - clipW / 2) - ueMax, 3), land = round((xr - 0.55) - ebMax, 3);
+        // the two top boards: the land each keeps outside the countersinks of its column beside the seam
+        var cs = big[0], fLand = null;
+        if (faceR) {
+          var fSpace = diff(region([rectPts(W - 3, c0, xr + 0.6, c1)]), faceR), feMax = area(fSpace) > 0.001 ? bbox(fSpace).x1 : W - 3;
+          var uf = wigFaceRegion || wigRegion, ufMin = bbox(diff(strip, uf)).x0;
+          fLand = { ext: round((xr - cs / 2) - feMax, 3), unit: round(ufMin - (lastCol + cs / 2), 3), countersink: cs };
+        }
+        seamCol = { x: round(xr), chan: chan, clip: clipW, face_land: fLand, y0: round(c0, 2), y1: round(c1, 2), unit_edge: [round(ueMin, 3), round(ueMax, 3)], wall: wall, clip_clear: clear, board_edge: round(ebMax, 3), land: land,
+          need: round(W - (lastCol + chan / 2 + 0.5), 3), has: waist ? waist.depth : 0, own: waist ? waist.own : 0, bowed: X.key !== false && keyed > 0,
+          fits: X.key !== false && wall >= 0.4 - 1e-6 && clear >= 0.05 - 1e-6 && land >= 0.1 - 1e-6 && (!fLand || (fLand.ext >= 0.1 - 1e-6 && fLand.unit >= 0.1 - 1e-6)) };
+        if (!seamCol.fits) notes.push('The extender has no dead row, but its first column does not fit on the seam: ' + (X.key === false ? 'its edge does not bow into the waist.' : 'the waist in the breadboard\'s side is ' + seamCol.has + ' mm deep and a column there needs ' + seamCol.need + '.'));
+      }
+      var room = Math.min.apply(null, tieY.map(function (ty) { return Math.min.apply(null, rowsY.map(function (r) { return Math.abs(r - ty); })); }));
+      // the socket it plugs into, and its own header: plastic face on this board's edge, pin 1 level with the socket's
+      var SKs = Catalog.sideKinds, sp = null; (P.parts || []).forEach(function (u) { if (!sp && SKs[u.type]) sp = u; });
+      var SK = SKs[sp ? sp.type : 'skt_ra_127'];             // which socket it is (rev A11d): its depth, pitch and height, and the header and pin length that mate
+      var port = null, hy = -3.2, hn = Math.max(2, en);
+      if (sp) {
+        var sc = Catalog.get(sp), rot = (((+sp.rot || 0) % 360) + 360) % 360, onTop = !!sp.mount && sp.mount.on === layers[0].id && sp.mount.side !== 'bottom';
+        var faces = Math.abs(rot - 180) < 0.01 && onTop, mouth = round(sp.x + SK.depth);
+        hy = +sp.y; hn = sc.n;
+        port = { id: sp.id, kind: sp.type, kind_label: SK.label, pitch: SK.pitch, high: SK.high, price: SK.price, pin: SK.pin, takes: SK.takes, n: sc.n, pins: sc.pins, len: sc.len, faces: faces, mouth_x: mouth, inset: round(xr - mouth), y0: round(sp.y - sc.span - SK.end), y1: round(sp.y + SK.end) };
+        port.engage = faces ? round(Math.max(0, Math.min(SK.pin, SK.pin - Math.max(0, port.inset))), 2) : 0;        // how far the header's pins go in
+        port.pin_ok = !SK.takes || (port.engage >= SK.takes[0] - 1e-6 && port.engage <= SK.takes[1] + 1e-6);              // inside the insertion depth its maker gives
+        port.room = layers.length > 1 ? round(top.z0 - SK.high, 2) : null;                                                // under the top board; negative = it stands into it
+        port.open_seam = faces && port.inset < -0.005 ? round(-port.inset) : 0;                          // a mouth that stands out past the edge holds the seam open
+        if (!faces) notes.push('The side socket (' + sp.id + ') is not on top of the main board with its mouth to the right (rotation 180), so the extender\'s header does not meet it.');
+      }
+      var boardOwn = boardR;                 // without the press-in tab, which lies under the unit's upper boards on purpose
+      if (press) {
+        var L1p = layers.length > 1 ? layers[1] : null, tipZ = L1p ? round(L1p.z1 + press.h, 2) : 4, pinL = round(tipZ - 1.0, 2), vk = (Catalog.vertKinds || {})[String(press.h)];
+        port = { id: press.id, kind: 'skt_v_127', kind_label: 'upright 1.27 mm socket on the mid board, ' + press.h + ' high', pitch: 1.27, high: press.h, price: vk ? vk.price : null, pin: pinL, takes: null, n: press.n, pins: press.pins, len: press.len,
+          faces: true, mouth_x: round(xr), inset: 0, y0: round(press.y - 0.8), y1: round(press.y + press.span + 0.8), engage: press.h, pin_ok: true, open_seam: 0, room: L1p ? round(zTop - (L1p.z1 + press.h), 2) : null,
+          press: { knob: press.knob, neck: press.neck, under: press.under, gap: press.gap, pin_len: pinL, pin_tip: tipZ, socket_z: L1p ? [round(L1p.z1, 3), round(L1p.z1 + press.h, 3)] : null, bottom_t: layers[0].t, top_z: round(zTop) } };
+        hn = press.n; hy = press.y; boardR = union(boardR, press.tab);
+      }
+      var HD = press ? Catalog.get({ type: 'hdr_v_127', dims: { n: hn, pin: port.pin } }) : Catalog.get({ type: SK.hdr, dims: { n: hn, pin: SK.pin } }), extParts = [];
+      addPart({ id: 'ext_hdr', type: press ? 'hdr_v_127' : SK.hdr, label: HD.label + ' (on the extender)', x: press ? press.x : round(xr + 2.77), y: hy, rot: press ? 0 : 180, plane: { z: 0, dir: 1 }, system: true, movable: false, color: HD.color, bodies: HD.bodies, clearance: HD.clearance, source: HD.source }, extParts);
+      var hy0 = press ? round(hy - 0.8) : round(hy - HD.span - SK.pitch / 2), hy1 = press ? round(hy + HD.span + 0.8) : round(hy + SK.pitch / 2);
+      var railRows = rowsY.length >= 4 && X.jumpers === true ? [rowsY[0], rowsY[1], rowsY[rowsY.length - 2], rowsY[rowsY.length - 1]] : [];
+      ext = { x0: round(ex0), x1: ex1, y0: round(-eh), y1: H, w: round(ex1 - ex0), cols: ecols, rows: rowsY, n_cols: en, n_rows: 2 * en, dead: ed, col_gap: round((ed + 1) * pitch), head: round(eh), keyed: keyed,
+        z: { board: [round(-layers[0].t), 0], shell: [0, round(shellTop)], face: faceR ? [round(shellTop), round(bbTop)] : null, cover: coverR.length ? [top.z0, top.z1] : null, top: round(bbTop) },
+        shapes: { board: expolys(clean(boardR)), shell: expolys(clean(shellR)), face: faceR ? expolys(clean(faceR)) : [], cover: expolys(coverR) },
+        plan: union(boardOwn, coverR),
+        holes: holes, hole: big, parts: extParts, port: port,
+        header: { n: hn, pins: 2 * hn, x: round(xr + 2.77), y: hy, y0: hy0, y1: hy1, covered: hy0 >= -eh - 1e-6 && hy1 <= 1e-6 },
+        ties: { kind: kind, wire: wire, hole: big[1], from_ref: tieRef, room: round(room, 3), at: tieY.map(function (ty) { return [tieX, round(ty)]; }),
+          list: kind === 'none' ? [] : tieY.map(function (ty) { return { y: round(ty), x0: tieX, x1: ecols[tc], span: round(ecols[tc] - tieX) }; }) },
+        jumpers: railRows.map(function (ry) { return { y: round(ry), x0: round(g.cols * pitch), x1: ecols[tc] }; }),
+        rail_skip: skip, seam_col: seamCol };
+    })();
 
     // breadboard shell (+ optional face PCB)
     var sx0 = (w.width - w.shell.w) / 2, sy0 = (w.height - w.shell.h) / 2;
@@ -10036,6 +10295,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
       var fr = ref.face && !faceP.plain ? ref.face : null;
       var faceReg = region([fr ? fr.outline : rectPts(0, 0, w.width, w.height)]);
       if (fr && faceP.header_strip !== true) faceReg = inter(faceReg, region([rectPts(-1, 0, w.width + 1, w.height + 1)]));
+      if (waistCutFace) faceReg = diff(faceReg, waistCutFace);
       var fe = expolys(faceReg); facePts = fe.length ? fe[0].outer : rectPts(0, 0, w.width, w.height);
       addPart({ id: 'face', type: 'bb_face', label: fr ? 'Wig top board' : 'Breadboard face PCB', x: 0, y: 0, rot: 0, plane: { z: shellTop, dir: 1 }, system: true, movable: false, color: 0x101012,
         clearance: w.fit_gap, bodies: [{ shape: { poly: facePts }, z0: 0, z1: faceT, name: 'face board' }], noClash: ['shell', 'wig_pcb', 'wig_hdr', 'wig_skt'],
@@ -10136,6 +10396,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
         if (tongueCut) p.boards[L.id].tongue = true;
         if (state !== 'whole' && state !== 'blocked' && cutBy.indexOf(p.id) < 0) cutBy.push(p.id);
       });
+      if (press && L.kind === 'base') { cuts = cuts.concat(press.cut); cutBy.push('tab'); }       // the knob-shaped cutout for the press-in tab (rev A11e)
       var before = area(a);
       if (cuts.length) a = diff(a, union(cuts));
       a = clean(a);
@@ -10205,6 +10466,26 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
         spare: round(have - cpl.gap, 2), rows_needed: needRows, strip_needed: round(needRows * pitch), source: cpl.source,
         x0: round(xr), x1: round(xr + have), yc: round(w.height / 2, 2), zc: round(-layers[0].t / 2, 2) };
     }
+
+    // the extender against this unit: what the two share in plan, how the socket and its header meet, and what ties the seam.
+    // play: the header pair alone is a short joint at the top of a long seam, so 0.1 mm of side play in it shows at the far
+    // bottom corner multiplied by (distance to that corner / length of the joint). near: the magnetometer closest to a tie
+    // hole or the socket, to know before anything of steel, or a magnet, is put there.
+    checks.extender = null;
+    if (ext) (function () {
+      var ov = versus('extender', 'The extender against this unit', ext.plan), pt = ext.port, need = ext.n_rows, play = null, near = null;
+      if (pt && pt.len > 0) { var yc = (pt.y0 + pt.y1) / 2; play = { joint: pt.len, arm: round(ext.y1 - yc, 1), corner: round(0.1 * (ext.y1 - yc) / pt.len, 2) }; }
+      var spots = ext.ties.at.map(function (q) { return { x: q[0], y: q[1], what: 'a tie hole' }; });
+      if (pt) spots.push({ x: pt.mouth_x - 2.9, y: (pt.y0 + pt.y1) / 2, what: 'the socket' });
+      sensorSet.mmc.concat(sensorSet.tmag).forEach(function (s) { spots.forEach(function (q) { var d = Math.hypot(s.x - q.x, s.y - q.y); if (!near || d < near.d) near = { ref: s.ref, d: round(d, 1), what: q.what }; }); });
+      var pw = ext.x1 - xl;
+      if (pt && pt.press && press) pt.press.mags = sensorSet.mmc.concat(sensorSet.tmag).filter(function (s) { return press.rects.some(function (q) { return s.x > q[0] - 1.5 && s.x < q[2] + 1.5 && s.y > q[1] - 1.5 && s.y < q[3] + 1.5; }); }).map(function (s) { return s.ref; });
+      checks.extender = { cols: ext.n_cols, rows: need, dead: ext.dead, col_gap: ext.col_gap, rail_skip: ext.rail_skip, seam_col: ext.seam_col, x0: ext.x0, x1: ext.x1, w: ext.w, head: ext.head, cover: !!ext.z.cover, keyed: ext.keyed,
+        pair_w: round(pw), pair_rows: round(pw / pitch, 3), on_grid: Math.abs(pw / pitch - Math.round(pw / pitch)) < 1e-6,
+        port: pt, need: need, spare: pt ? pt.pins - need : null, header: ext.header, overlap: ov, seam: round(ext.y1 - ext.y0, 2), tied: ext.ties.list.length > 0, play: play,
+        ties: { kind: ext.ties.kind, n: ext.ties.list.length, span: round(ext.cols[0] - ext.ties.at[0][0]), wire: ext.ties.wire, hole: ext.ties.hole, room: ext.ties.room, from_ref: ext.ties.from_ref, at: ext.ties.at },
+        jumpers: ext.jumpers.length, jumper_span: ext.jumpers.length ? round(ext.jumpers[0].x1 - ext.jumpers[0].x0) : null, near: near };
+    })();
 
     // parts that reach past the edge of the board they sit on (wanted for an edge wheel or a connector mouth; worth seeing either way)
     checks.overhang = [];
@@ -10357,8 +10638,8 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
       planes: { xl: round(xl), xr: round(xr), yt: yt, yb: yb, pitch: round(unitPitch), dead: dead, x0: round(fb.x0), x1: round(Math.max(fb.x1, xr)) },
       z: { top: round(zTop), bottom: round(zBot), bbTop: round(bbTop), shellTop: round(shellTop) },
       outline: { verts: verts.map(function (v, i) { return { x: v.x, y: v.y, from: built.spans[i].from, count: built.spans[i].count }; }), pts: built.pts },
-      layers: layers, parts: parts, probe: probe, checks: checks,
-      wig: { x0: 0, y0: 0, w: w.width, h: w.height, pcb_t: w.pcb_t, shell: { x0: sx0, y0: sy0, w: w.shell.w, h: w.shell.h, t: round(shellTop) }, face_t: faceT, face: faceP ? { t: faceT, z0: round(shellTop), z1: round(bbTop), inset: faceInset, real: !!(ref.face && !faceP.plain), strip: faceP.header_strip === true, pts: facePts, y0: round(bbox(region([facePts])).y0), holes: ref.face && !faceP.plain ? ref.face.holes.filter(function (q) { return faceP.header_strip === true || q[1] >= 0; }) : null } : null,
+      layers: layers, parts: parts, probe: probe, checks: checks, extender: ext,
+      wig: { x0: 0, y0: 0, w: w.width, h: w.height, pcb_t: w.pcb_t, waist: waist, shell: { x0: sx0, y0: sy0, w: w.shell.w, h: w.shell.h, t: round(shellTop) }, face_t: faceT, face: faceP ? { t: faceT, z0: round(shellTop), z1: round(bbTop), inset: faceInset, real: !!(ref.face && !faceP.plain), strip: faceP.header_strip === true, pts: facePts, y0: round(bbox(region([facePts])).y0), holes: ref.face && !faceP.plain ? ref.face.holes.filter(function (q) { return faceP.header_strip === true || q[1] >= 0; }) : null } : null,
         outline: wigPts, rows: rows, cols: cols,
         card_holes: ref.face ? ref.face.holes.filter(function (q) { return q[1] < 0; }) : [],
         sensors: sensorSet }
@@ -10375,7 +10656,8 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
       layers: R.layers.map(function (L) { return { id: L.id, name: L.name, kind: L.kind, t: L.t, z0: L.z0, z1: L.z1, area: L.area, gross: L.gross, pocketArea: L.pocketArea, islands: L.islands, cutBy: L.cutBy, shape: L.shape }; }),
       parts: R.parts.map(function (p) { return { id: p.id, type: p.type, label: p.label, x: p.x, y: p.y, rot: p.rot, bottom: p.bottom, zPlane: p.zPlane, dir: p.dir, z0: p.z0, z1: p.z1, model: p.model, extra: p.extra, source: p.source, boards: p.boards,
         bodies: p.bodies.map(function (b) { return { name: b.name, pts: b.pts, z0: b.z0, z1: b.z1, slot: b.slot, glass: b.glass }; }), ghosts: p.ghosts.map(function (b) { return { name: b.name, pts: b.pts, z0: b.z0, z1: b.z1 }; }) }; }),
-      probe: R.probe, wig: R.wig, checks: R.checks
+      probe: R.probe, wig: R.wig, checks: R.checks,
+      extender: R.extender ? (function (E) { var o = {}; for (var k in E) if (k !== 'plan') o[k] = E[k]; return o; })(R.extender) : null
     };
   }
 
@@ -10620,10 +10902,21 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     return txt.replace(/\n\)\n$/, '\n' + body + '\n)\n');
   }
 
+  // ---- the extender's bottom board (rev A11): its outline as lines and arcs with its header as an outline, on the unit's own
+  //      datum, so it overlays the unit's boards. Its clips, its holes and its top board are not in these files. ----
+  function extLayer(R) { var E = R.extender; return E && E.shapes.board.length ? { id: 'EX', name: 'Extender board', t: +(E.z.board[1] - E.z.board[0]).toFixed(3), z0: E.z.board[0], z1: E.z.board[1], shape: E.shapes.board } : null; }
+  function kicadExt(R) {
+    var L = extLayer(R); if (!L) return '';
+    var parts = R.extender.parts.map(function (p) { var q = {}; for (var k in p) q[k] = p[k]; q.mountLayer = 'EX'; q.system = false; return q; });
+    return kicad({ parts: parts, planes: R.planes, params: R.params, removable: R.removable }, L);
+  }
+  function dxfExt(R) { var L = extLayer(R); return L ? dxf({ parts: R.extender.parts, planes: R.planes }, L) : ''; }
+
   // ---- SVG plan of the whole stack ----
   var LAYER_COLORS = ['#35618f', '#b9763c', '#c9a13f', '#3f8f6d', '#646a78', '#7d5a94', '#3e9aa3', '#a2535f'];
   function svg(R) {
-    var x0 = R.planes.xl - 8, y0 = R.planes.yt - 8, w = R.planes.xr - R.planes.xl + 16 + 30, h = R.planes.yb - R.planes.yt + 16;
+    var E = R.extender, xe = E ? E.x1 : R.planes.xr;        // the legend stands to the right of whatever is furthest right
+    var x0 = R.planes.xl - 8, y0 = R.planes.yt - 8, w = xe - R.planes.xl + 16 + 30, h = R.planes.yb - R.planes.yt + 16;
     var o = ['<svg xmlns="http://www.w3.org/2000/svg" viewBox="' + n(x0) + ' ' + n(y0) + ' ' + n(w) + ' ' + n(h) + '" width="' + n(w * 8) + '" height="' + n(h * 8) + '" font-family="Helvetica, Arial, sans-serif">'];
     o.push('<rect x="' + n(x0) + '" y="' + n(y0) + '" width="' + n(w) + '" height="' + n(h) + '" fill="#ffffff"/>');
     function d(pts) { return 'M' + pts.map(function (q) { return n(q[0]) + ' ' + n(q[1]); }).join('L') + 'Z'; }
@@ -10631,9 +10924,19 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
       var c = LAYER_COLORS[i % LAYER_COLORS.length];
       var path = L.shape.map(function (e) { return d(e.outer) + e.holes.map(d).join(''); }).join('');
       o.push('<path d="' + path + '" fill="' + c + '" fill-opacity="0.13" fill-rule="evenodd" stroke="' + c + '" stroke-width="0.18"/>');
-      o.push('<rect x="' + n(R.planes.xr + 6) + '" y="' + n(R.planes.yt + i * 4) + '" width="3" height="2.4" fill="' + c + '" fill-opacity="0.5" stroke="' + c + '" stroke-width="0.15"/>');
-      o.push('<text x="' + n(R.planes.xr + 10) + '" y="' + n(R.planes.yt + i * 4 + 2) + '" font-size="2">' + L.id + ' ' + L.name + ' ' + n(L.t) + '</text>');
+      o.push('<rect x="' + n(xe + 6) + '" y="' + n(R.planes.yt + i * 4) + '" width="3" height="2.4" fill="' + c + '" fill-opacity="0.5" stroke="' + c + '" stroke-width="0.15"/>');
+      o.push('<text x="' + n(xe + 10) + '" y="' + n(R.planes.yt + i * 4 + 2) + '" font-size="2">' + L.id + ' ' + L.name + ' ' + n(L.t) + '</text>');
     });
+    if (E) {            // the extender: its board, its cover, its holes, its header and the ties across the seam
+      var ec = '#7a3fb0', ep = function (sh) { return sh.map(function (e) { return d(e.outer) + e.holes.map(d).join(''); }).join(''); };
+      o.push('<path d="' + ep(E.shapes.board) + '" fill="' + ec + '" fill-opacity="0.08" fill-rule="evenodd" stroke="' + ec + '" stroke-width="0.18"/>');
+      if (E.shapes.cover.length) o.push('<path d="' + ep(E.shapes.cover) + '" fill="' + ec + '" fill-opacity="0.1" fill-rule="evenodd" stroke="' + ec + '" stroke-width="0.12" stroke-dasharray="0.8 0.5"/>');
+      E.cols.forEach(function (cx) { E.rows.forEach(function (cy) { o.push('<rect x="' + n(cx - 0.5) + '" y="' + n(cy - 0.5) + '" width="1" height="1" fill="#999"/>'); }); });
+      E.parts.forEach(function (pt) { pt.bodies.forEach(function (b) { o.push('<path d="' + d(b.pts) + '" fill="none" stroke="' + ec + '" stroke-width="0.15"/>'); }); });
+      E.ties.list.forEach(function (t) { o.push('<line x1="' + n(t.x0) + '" y1="' + n(t.y) + '" x2="' + n(t.x1) + '" y2="' + n(t.y) + '" stroke="#d22" stroke-width="0.5" stroke-linecap="round"/>'); });
+      E.jumpers.forEach(function (t) { o.push('<line x1="' + n(t.x0) + '" y1="' + n(t.y) + '" x2="' + n(t.x1) + '" y2="' + n(t.y) + '" stroke="#b8860b" stroke-width="0.3" stroke-linecap="round"/>'); });
+      o.push('<text x="' + n((E.x0 + E.x1) / 2) + '" y="' + n(E.y1 + 4) + '" font-size="2" text-anchor="middle" fill="' + ec + '">extender: ' + E.n_cols + ' columns, ' + E.n_rows + ' rows</text>');
+    }
     R.wig.cols.forEach(function (cx) { R.wig.rows.forEach(function (cy) { o.push('<rect x="' + n(cx - 0.5) + '" y="' + n(cy - 0.5) + '" width="1" height="1" fill="#999"/>'); }); });
     R.parts.forEach(function (pt) {
       pt.bodies.forEach(function (b) { if (!b.slot) o.push('<path d="' + d(b.pts) + '" fill="none" stroke="#111" stroke-width="0.15" stroke-dasharray="' + (pt.bottom ? '0.6 0.4' : 'none') + '"/>'); });
@@ -10659,6 +10962,26 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     if (c.grid.units_clear_at && c.grid.units_clear_at.extra_rows > 0) o.push('       two whole units clear each other at pitch ' + c.grid.units_clear_at.pitch + ' (' + c.grid.units_clear_at.dead_rows + ' dead rows). Plan view only.');
     o.push('');
     if (c.grid.coupler) { var q = c.grid.coupler; o.push((q.fits ? '   ok  ' : '   !!  ') + 'edge coupler ' + q.label + ': needs ' + q.gap + ' mm between the boards, the strip leaves ' + q.have + (q.fits ? ' (' + q.spare + ' spare)' : '; first fits with a ' + q.strip_needed + ' mm strip')); }
+    if (c.extender) {
+      var x = c.extender, xp = x.port;
+      o.push('EXTENDER  ' + x.cols + ' columns = ' + x.rows + ' rows, ' + x.w + ' wide, against the right side: x ' + x.x0 + ' .. ' + x.x1 + ', ' + (x.dead ? x.dead + ' dead row(s)' : 'no dead row') + ' (' + x.col_gap + ' mm from column ' + R.wig.cols.length + ' to its first)');
+      if (x.seam_col) { var sc = x.seam_col; o.push((sc.fits ? '   ok  ' : '   !!  ') + 'its first column is on the grid plane (x ' + sc.x + '), in the edge that bows into the waist: waist ' + sc.has + ' deep (WigLEDmag ' + sc.own + '; a column there needs ' + sc.need + '), breadboard wall beside its last column ' + sc.wall + ', the ' + sc.clip + ' mm clip ' + (sc.clip_clear >= 0 ? 'clears it by ' + sc.clip_clear : 'is ' + (-sc.clip_clear) + ' INTO it') + ', ' + sc.land + ' of board under the solder tab' + (sc.face_land ? '; top boards meet on the half-pitch line, land outside the countersinks ' + sc.face_land.ext + ' (extender) and ' + sc.face_land.unit + ' (breadboard)' : '') + '; rails start ' + x.rail_skip + ' hole(s) in'); }
+      o.push('       unit and extender together ' + x.pair_w + ' wide = ' + x.pair_rows + ' x 2.54' + (x.on_grid ? ' (on grid: a next unit beside it keeps the grid)' : ' (OFF GRID)'));
+      if (!xp) o.push('   !!  there is no socket in the right side for it to plug into (Side port and extender: a header socket in the right side)');
+      else {
+        o.push((xp.faces && !xp.open_seam ? '   ok  ' : '   !!  ') + 'side socket (' + xp.id + ', ' + xp.kind_label + '): 2 x ' + xp.n + ' = ' + xp.pins + ' pins, ' + xp.len + ' long, y ' + xp.y0 + ' .. ' + xp.y1 + ', mouth at x ' + xp.mouth_x
+          + (!xp.faces ? ' (not facing the extender)' : Math.abs(xp.inset) < 0.005 ? ' (on the edge; the header\'s ' + xp.pin + ' mm pins go all the way in)' : xp.inset > 0 ? ' (' + xp.inset + ' inside the edge: the ' + xp.pin + ' mm pins go ' + xp.engage + ' in)' : ' (' + xp.open_seam + ' PAST the edge: the seam stands open by that)'));
+        if (xp.press) o.push('   ..  pressed in from the back: a tab in a knob-shaped cutout of the bottom board, ' + (xp.press.knob[2] - xp.press.knob[0]).toFixed(1) + ' x ' + (xp.press.knob[3] - xp.press.knob[1]).toFixed(1) + ' with a ' + xp.press.neck + ' neck (' + xp.press.under + ' undercut each side, ' + xp.press.gap + ' clear); the socket on the mid board at z ' + xp.press.socket_z.join(' .. ') + ', top and bottom boards opened for it; pins ' + xp.press.pin_len + ' above a 1.0 base' + (xp.press.mags && xp.press.mags.length ? '; magnetometer ' + xp.press.mags.join(', ') + ' is IN the cutout' : ''));
+        o.push((x.spare < 0 ? '   !!  ' : '   ..  ') + x.need + ' rows take ' + x.need + ' pins; the socket has ' + xp.pins + (x.spare < 0 ? ': ' + (-x.spare) + ' short' : x.spare === 0 ? ': none left on this side for 5 V, ground or LED data (those are on the top port, which a board on this side does not reach)' : ': ' + x.spare + ' left over on this side'));
+      }
+      o.push((x.header.covered ? '   ok  ' : '   !!  ') + 'its header: 2 x ' + x.header.n + ', y ' + x.header.y0 + ' .. ' + x.header.y1 + (x.header.covered ? ', on its head (which stands ' + x.head + ' above the breadboard\'s top edge' + (x.cover ? ', a second board over it)' : '; one board, nothing over it)') : ', NOT all on its head, which stands ' + x.head + ' above the breadboard\'s top edge'));
+      o.push(x.overlap.overlap_mm2 ? '   !!  it overlaps this unit by ' + x.overlap.overlap_mm2 + ' mm2 in plan (' + x.overlap.items.map(function (i) { return i.what + ' ' + i.mm2; }).join('; ') + ')' : '   ok  it shares no plan area with this unit' + (x.keyed ? '; its edge fills the waist in the breadboard\'s side (' + x.keyed + ' mm2 of key)' : ''));
+      o.push(x.tied ? '   ok  seam ' + x.seam + ' long, tied by ' + x.ties.n + ' wire staples (' + x.ties.wire + ' mm wire, ' + x.ties.span + ' span) at y ' + x.ties.at.map(function (q) { return q[1]; }).join(' and ') + '; those holes are ' + x.ties.hole + ' mm and ' + x.ties.room + ' from the next hole' + (x.ties.from_ref ? '' : ' (ASSUMED positions: no face board data)')
+        : '   ..  seam ' + x.seam + ' long, held by the header pair' + (x.keyed ? ' and the key' : '') + ' alone' + (x.play ? ': 0.1 mm of side play in the ' + x.play.joint + ' mm pair is ' + x.play.corner + ' mm at the bottom corner, ' + x.play.arm + ' away; nothing pulls the seam shut below the header' : ''));
+      if (x.jumpers) o.push('   ..  the rails cross the seam on ' + x.jumpers + ' jumpers of ' + x.jumper_span + ' mm');
+      if (x.near) o.push('   ..  nearest magnetometer: ' + x.near.ref + ', ' + x.near.d + ' mm from ' + x.near.what + ' (no magnets on this seam; brass or A2 for anything screwed there)');
+      o.push('');
+    }
     if (R.wig.face) o.push('FACE   ' + (R.wig.face.real ? 'wig top board (holes from wiigtop.3mf), ' + R.wig.face.holes.length + ' holes, ' + (R.wig.face.strip ? 'with' : 'no') + ' card edge' : 'plain face board') + ', ' + R.wig.face.t + ' thick, z ' + R.wig.face.z0 + ' .. ' + R.wig.face.z1 + (R.wig.face.inset ? ' (let into the shell)' : ' (on the shell)') + '; it reaches y = ' + R.wig.face.y0 + ', so ' + (R.wig.face.y0 < -0.01 ? (-R.wig.face.y0).toFixed(2) + ' mm of it lies over the frame' : 'none of it lies over the frame'));
     o.push('STACK  top board z = ' + c.flush.frame_top + ', ' + (R.wig.face ? 'shell top z = ' + c.flush.shell_top + ' (' + (c.flush.delta_shell >= 0 ? '+' : '') + c.flush.delta_shell + '), ' : '') + 'breadboard top z = ' + c.flush.bb_top + ' (' + (c.flush.delta >= 0 ? '+' : '') + c.flush.delta + '), boards ' + c.flush.total + ' mm thick in all' + (R.wig.face ? ', ' + (Math.max(c.flush.frame_top, c.flush.bb_top) - R.z.bottom).toFixed(2) + ' to the top of the wig top board' : '') + '; gaps ' + c.flush.gaps.map(function (q) { return q.gap + ' under ' + q.below; }).join(', '));
     R.layers.forEach(function (L) { o.push('       ' + L.id + ' ' + (L.name + '              ').slice(0, 14) + ' ' + L.kind + (L.kind.length < 5 ? ' ' : '') + ' t ' + L.t + '  z ' + L.z0 + ' .. ' + L.z1 + '   net ' + L.area + ' mm2 (openings ' + L.pocketArea + ')' + (L.islands !== 1 ? '  !! in ' + L.islands + ' pieces' : '') + (L.cutBy.length ? '   opened for ' + L.cutBy.join(', ') : '   whole')); });
@@ -10726,7 +11049,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     return o.join('\n') + '\n';
   }
 
-  return { dxf: dxf, kicad: kicad, kicadFace: kicadFace, kicadMod: kicadMod, kicadMods: kicadMods, fitLoop: fitLoop, footprintsOn: footprintsOn, svg: svg, report: report, slug: slug, LAYER_COLORS: LAYER_COLORS, OX: OX, OY: OY };
+  return { dxf: dxf, kicad: kicad, kicadFace: kicadFace, kicadExt: kicadExt, dxfExt: dxfExt, kicadMod: kicadMod, kicadMods: kicadMods, fitLoop: fitLoop, footprintsOn: footprintsOn, svg: svg, report: report, slug: slug, LAYER_COLORS: LAYER_COLORS, OX: OX, OY: OY };
 });
 
 </script>
@@ -10767,7 +11090,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
   }
   // bring a design made by an older page up to this one
   function migrate(p, defaults) {
-    var o = merge(defaults, p), old = p.meta && p.meta.rev;
+    var o = merge(defaults, p), old = p.meta && p.meta.rev, changes = [];
     o.meta = clone(defaults.meta);
     if (p.wig && p.wig.face === undefined && p.wig.face_pcb_t !== undefined) {      // rev A3 and older: a plain face of a given thickness
       if (p.wig.face_pcb_t > 0) o.wig.face = { on: true, t: p.wig.face_pcb_t, sits: 'on', header_strip: true, plain: true };       // 0 was the old default: the new default (the Wiiig face board) stands
@@ -10794,7 +11117,8 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
       if (!p.show || !p.show.sensor_layout || p.show.sensor_layout === 'wigledmag') o.show.sensor_layout = 'custom';
     }
     if (n <= 6) {
-      // rev A7: the 2.2 inch bar display is the default, with two cantilevered keys beside it. Only a design whose parts are
+      // rev A7: the 2.2 inch bar display is the default, with two cantilevered keys beside it (the keys went again in rev A10d,
+      // so the built-in design has none to add now and the display lands where A10d puts it). Only a design whose parts are
       // still the old default set is touched: a display that was moved or changed, or any added part, is left as it was.
       var ps = o.parts || [], std = { display: 1, encoder: 1, usbc: 1, port: 1 }, dsp = ps.filter(function (q) { return q.id === 'display'; })[0];
       if (dsp && dsp.type === 'display_amoled147' && Math.abs(dsp.x - 19) < 0.01 && Math.abs(dsp.y + 11.8) < 0.01 && ps.every(function (q) { return std[q.id]; })) {
@@ -10812,7 +11136,50 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
         if (Math.abs(q.x) < 1e-6 && Math.abs(q.y - wh) < 2e-3 && q.c === undefined && !q.r) { q.c = 'meet'; q.n = "the strip ends level with the breadboard's bottom edge; its end meets the breadboard's corner chamfer square, at the middle of the flat"; }
       });
     }
-    return { params: o, from_rev: old && old !== defaults.meta.rev ? old : null };
+    if (n < 10 || (n === 10 && (!sub || sub[1] < 'd'))) {
+      // rev A10d: the two cantilevered keys to the right of the display are gone, and the display has moved right so that its
+      // picture is centred on the breadboard. Only what is still as drawn is touched: a key that was moved, turned, remounted
+      // or given its own openings stays, and so does a display that was moved, turned or changed for another.
+      var dnew = (defaults.parts || []).filter(function (q) { return q.id === 'display'; })[0];
+      var keyAsDrawn = function (q, x) { return q.type === 'btn_cantilever' && Math.abs(q.x - x) < 0.01 && Math.abs(q.y + 5) < 0.01 && (q.rot || 0) === 90 && !!q.mount && q.mount.on === 'L1' && q.mount.side === 'top' && !q.open; };
+      o.parts = (o.parts || []).filter(function (q) { return !((q.id === 'key1' && keyAsDrawn(q, 64.5)) || (q.id === 'key2' && keyAsDrawn(q, 70.5))); });
+      o.parts.forEach(function (q) {
+        if (dnew && q.id === 'display' && q.type === 'display_tft220bar' && Math.abs(q.x - 30) < 0.01 && Math.abs(q.y + 9.9) < 0.01 && (q.rot || 0) === 90) { q.x = dnew.x; q.y = dnew.y; }
+      });
+    }
+    if (n < 11 || (n === 11 && (!sub || sub[1] < 'c'))) {
+      // rev A11c: two ports. The general expansion port is the one on the top edge (an M.2 socket in the built-in design), and the
+      // 1.27 mm right-angle socket in the unit's right side is a part of its own, "side": routable lanes only, for the extender.
+      // Rev A11 and A11b had put that socket in the port's place. Where a design still has it there it becomes "side", and the
+      // built-in top port comes back if the design then has no port. Any other design keeps its port as it is and is given the
+      // side socket, unless it already has one. The staples and the rail jumpers those two revisions drew are gone, and so is
+      // the board over the extender's head that rev A11 drew.
+      var dside = (defaults.parts || []).filter(function (q) { return q.id === 'side'; })[0], dport = (defaults.parts || []).filter(function (q) { return q.id === 'port'; })[0];
+      var ps2 = o.parts = o.parts || [], isPort = function (q) { return /^port/.test(q.id); };
+      var inPort = ps2.filter(function (q) { return isPort(q) && q.type === 'skt_ra_127'; })[0], hasSide = ps2.some(function (q) { return q.id === 'side'; });
+      if (inPort && !hasSide) {
+        inPort.id = 'side';
+        if (dport && !ps2.some(isPort)) ps2.push(clone(dport));
+        changes.push('The socket in the right side is now a part of its own, and the expansion port is back on the top edge.');
+      } else if (dside && !hasSide && !ps2.some(function (q) { return q.type === 'skt_ra_127'; })) {
+        ps2.push(clone(dside));
+        if (n < 11) changes.push('A header socket for the extender has been added in the right side; the expansion port is as it was.');
+      }
+      if (p.extender && o.extender) {
+        if (n === 11 && !sub && p.extender.cover === true) o.extender.cover = false;
+        if ((p.extender.ties && p.extender.ties !== 'none') || p.extender.jumpers) { o.extender.ties = 'none'; o.extender.jumpers = false; changes.push('The staples and the rail jumpers are gone from the extender.'); }
+      }
+    }
+    if (n < 11 || (n === 11 && (!sub || sub[1] < 'd'))) {
+      // rev A11d: no hole position is skipped between the breadboard and the extender. A design whose extender still has the one
+      // dead row it was drawn with gets none; the waist that makes room for the column (wig.waist_r) is a new setting and starts
+      // at its default either way. Two or three dead rows were chosen, and are kept.
+      if (p.extender && o.extender && +p.extender.dead_rows === 1) {
+        o.extender.dead_rows = 0;
+        changes.push('The extender no longer skips a row: its first column is on the unit\'s grid plane, and the waist in the breadboard\'s side is ' + (defaults.wig && defaults.wig.waist_r) + ' mm deep for it.');
+      }
+    }
+    return { params: o, from_rev: old && old !== defaults.meta.rev ? old : null, changes: changes };
   }
   function valid(p) { return !!(p && p.stack && p.stack.length && p.grid && p.wig && p.frame); }
 
@@ -10832,12 +11199,12 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
   }
 
   function load(defaults, hash) {
-    var note = null, from = 'built-in', p = null, st = get(K.state) || {};
+    var note = null, from = 'built-in', p = null, st = get(K.state) || {}, upgraded = false;
     if (hash && /[#&]p=/.test(hash)) { try { p = decode(hash, defaults); from = 'link'; note = 'Opened from a link. Your own last design is kept under Saved designs as "before the link".'; if (valid(st.params)) putSave('before the link', st.params); } catch (e) { note = 'The link could not be read (' + e.message + ').'; p = null; } }
-    if (!p && valid(st.params)) { var r = migrate(st.params, defaults); p = r.params; from = 'saved'; if (r.from_rev) note = 'Your saved design was made with rev ' + r.from_rev + '; it has been brought up to ' + defaults.meta.rev + '. New settings start at their defaults.'; }
+    if (!p && valid(st.params)) { var r = migrate(st.params, defaults); p = r.params; from = 'saved'; if (r.from_rev) note = 'Your saved design was made with rev ' + r.from_rev + '; it has been brought up to ' + defaults.meta.rev + '. New settings start at their defaults.' + (r.changes.length ? ' ' + r.changes.join(' ') : ''); upgraded = true; }
     if (!p) { var o = get(K.old); if (valid(o)) { var r2 = migrate(o, defaults); p = r2.params; from = 'saved'; note = 'Your design from the earlier page (rev ' + (r2.from_rev || '?') + ') has been brought up to ' + defaults.meta.rev + '.'; } }
     if (!p) p = clone(defaults);
-    return { params: p, ui: st.ui || null, cam: from === 'link' ? null : (st.cam || null), from: from, note: note, storage: !!store };
+    return { params: p, ui: st.ui || null, cam: from === 'link' ? null : (st.cam || null), from: from, note: note, storage: !!store, upgraded: upgraded };
   }
   function save(params, ui, cam) { return put(K.state, { params: params, ui: ui, cam: cam, t: Date.now() }); }
 
@@ -11663,9 +12030,11 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
   var lastMode = null;
   // the design's look plus the view's surface choices, for the materials
   function lookNow(extra) { var o = {}, k; for (k in P.look) o[k] = P.look[k]; o.texture = ui.render.texture; o.shellTex = ui.render.shellTex; for (k in (extra || {})) o[k] = extra[k]; return o; }
+  // what stands to the right of the unit: the extender, then the next unit
+  function extraWide() { return R ? (P.show.neighbour ? R.planes.pitch : 0) + (R.extender ? R.extender.x1 - R.planes.xr : 0) : 0; }
   function applyRender() {
     if (!renderer || !R) return;
-    var pl = R.planes, wide = P.show.neighbour ? pl.pitch : 0;
+    var pl = R.planes, wide = extraWide();
     Rn.apply(ui.render, { x0: pl.x0, x1: pl.x1 + wide, y0: pl.yt, y1: pl.yb, zb: R.z.bottom - (R.wig.face ? 0 : 0) - 1.5 });
     if (camera.fov !== ui.render.fov) { camera.fov = ui.render.fov || 30; camera.updateProjectionMatrix(); }
     if (lastMode !== ui.render.mode) { lastMode = ui.render.mode; Rn.refreshMaterials(scene); }
@@ -11680,7 +12049,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
   function setView(name) {
     if (!camera) return;
     // look along a fixed direction and back off until the whole unit fits the viewport
-    var pl = R ? R.planes : { x0: -8.3, x1: 78.74, yt: -24.7, yb: 55 }, wide = P.show.neighbour ? pl.pitch : 0;
+    var pl = R ? R.planes : { x0: -8.3, x1: 78.74, yt: -24.7, yb: 55 }, wide = extraWide();
     var t = [(pl.x0 + pl.x1 + wide) / 2, 2.5, (pl.yt + pl.yb) / 2];
     var dir = { iso: [-0.42, 0.72, 0.62], top: [0, 1, 0.001], under: [-0.25, -0.85, 0.45], left: [-1, 0.22, 0.05], topedge: [0.05, 0.3, -1], bottomedge: [0, 0.3, 1] }[name] || [-0.42, 0.72, 0.62];
     var len = Math.sqrt(dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2]);
@@ -11817,6 +12186,58 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     return grp;
   }
 
+  // The extender (rev A11): the narrow breadboard standing against the unit's right side, from R.extender. Its boards, shell and
+  // top board are drawn like the unit's own; its header in black with gold pins; the staples and the rail jumpers as bent wire.
+  function extenderObject() {
+    var E = R.extender, grp = new T.Group(), mode = ui.render.mode, real = mode === 'real', nL = R.layers.length, LC = Exp.LAYER_COLORS;
+    grp.userData.ext = true;
+    function slab(shape, z, material, lineColor, lift, isBoard) {
+      if (!shape || !shape.length || !z) return null;
+      var m = extrude(shape, z[0], z[1], material);
+      m.position.y = (lift || 0) * ui.explode; m.userData.lineColor = lineColor; m.children.forEach(function (ch) { ch.userData.lineColor = lineColor; });
+      if (isBoard) m.traverse(function (x) { if (x.isMesh) x.userData.isBoard = true; });
+      grp.add(m); return m;
+    }
+    if (!ui.hidden[R.layers[0].id]) slab(E.shapes.board, E.z.board, Rn.board(mode, LC[0], lookNow()), parseInt(LC[0].slice(1), 16), 0, true);
+    if (E.z.cover && !ui.hidden[R.layers[nL - 1].id]) { var lcT = LC[(nL - 1) % LC.length]; slab(E.shapes.cover, E.z.cover, Rn.board(mode, lcT, lookNow()), parseInt(lcT.slice(1), 16), nL - 1, true); }
+    if (!ui.hideShell) {
+      slab(E.shapes.shell, E.z.shell, Rn.shell(mode, lookNow()), 0x8c8c98, 0, false);
+      if (E.z.face && E.shapes.face.length) {         // its top board: every hole cut through, the countersinks and lands painted on, as on the wig's
+        var fo = E.shapes.face[0].outer, sig = [E.x1, E.n_cols, E.dead, E.keyed, E.z.face[0], E.z.face[1]].join(':'), key = 'extface:' + sig;
+        if (!geoCache[key]) {
+          var holes = E.holes.map(function (h) { var a = [], n = h[3] > 1 ? 14 : 8; for (var i = 0; i < n; i++) a.push([h[0] + Math.cos(i / n * 6.2832) * h[3] / 2, h[1] - Math.sin(i / n * 6.2832) * h[3] / 2]); return a; });
+          var fm = extrude([{ outer: fo, holes: holes }], E.z.face[0], E.z.face[1], null, false); fm.geometry.userData.keep = true; geoCache[key] = fm.geometry;
+        }
+        var mk = Rn.MASK[P.look.face_mask] || Rn.MASK.black;
+        var face = new T.Mesh(geoCache[key], real ? Rn.board(mode, mk, lookNow({ mask: P.look.face_mask, plated: true })) : mat(0xc9a43a, { metal: 0.6, rough: 0.4 }));
+        face.userData.lineColor = 0xd9b441; grp.add(face);
+        if (real) { var dc = Rn.faceDecal({ holes: E.holes, pts: fo, y0: 'ext:' + sig }, P.look, E.z.face[1] + 0.012); if (dc) grp.add(dc); }
+      } else {                                        // no top board: the holes as squares on the shell
+        var pos = [], idx = [], n0 = 0, hh = 0.95, zt = E.z.shell[1] + 0.02;
+        E.cols.forEach(function (cx) { E.rows.forEach(function (cy) { pos.push(cx - hh, zt, cy - hh, cx + hh, zt, cy - hh, cx + hh, zt, cy + hh, cx - hh, zt, cy + hh); idx.push(n0, n0 + 2, n0 + 1, n0, n0 + 3, n0 + 2); n0 += 4; }); });
+        var hg = new T.BufferGeometry(); hg.setAttribute('position', new T.BufferAttribute(new Float32Array(pos), 3)); hg.setIndex(idx); hg.computeVertexNormals();
+        grp.add(new T.Mesh(hg, new T.MeshBasicMaterial({ color: 0xa67c2e })));
+      }
+    }
+    // the header on its head: the plastic as its box, the two rows of pins one by one (they are inside the socket when it is plugged in)
+    var gold = real ? Rn.part(mode, 0xd9b441, { metal: 0.85 }) : mat(0xd9b441, { metal: 0.6, rough: 0.3 }), black = real ? Rn.part(mode, 0x141414, { metal: 0.05 }) : mat(0x141414, { rough: 0.6 });
+    E.parts.forEach(function (p) { p.bodies.forEach(function (b) { if (b.name !== 'pins') grp.add(extrude([{ outer: b.pts, holes: [] }], b.z0, b.z1, black)); }); });
+    for (var k = 0; k < E.header.n; k++) [0.95, 2.22].forEach(function (pz) {
+      var pin = new T.Mesh(new T.BoxGeometry(6.6, 0.4, 0.4), gold); pin.position.set(E.x0 - 4 + 3.3, pz, E.header.y - k * 1.27); grp.add(pin);
+    });
+    // a staple or a jumper: a bridge lying on the top face and a leg down the hole at each end
+    function wireU(x0, x1, y, dia, leg, color) {
+      var m = real ? Rn.part(mode, color, { metal: 0.9, rough: 0.3 }) : mat(color, { metal: 0.6, rough: 0.3 }), r = dia / 2, zt = E.z.top;
+      var br = new T.Mesh(new T.CylinderGeometry(r, r, x1 - x0, 10), m); br.rotation.z = Math.PI / 2; br.position.set((x0 + x1) / 2, zt + r, y); grp.add(br);
+      [x0, x1].forEach(function (x) { var lg = new T.Mesh(new T.CylinderGeometry(r, r, leg + r, 10), m); lg.position.set(x, zt + r - (leg + r) / 2, y); grp.add(lg); });
+    }
+    if (!ui.hideShell) {
+      E.ties.list.forEach(function (t) { wireU(t.x0, t.x1, t.y, E.ties.wire, 5, 0xc8ccd2); });
+      E.jumpers.forEach(function (t) { wireU(t.x0, t.x1, t.y, 0.64, 6, 0xd9b441); });
+    }
+    return grp;
+  }
+
   function header40() {
     var grp = new T.Group(), s = P.show, pitch = P.grid.pitch, rows = R.wig.rows;
     var cy = rows[Math.max(0, Math.min(rows.length - 1, s.header40_row | 0))], c0 = Math.max(1, s.header40_col | 0);
@@ -11862,11 +12283,13 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
       s.mmc.forEach(function (q) { sensorBox(q, 0.9, 0.5, 0.9, 0x18b7c9); });
       s.tmag.forEach(function (q) { sensorBox(q, 2.9, 1.1, 1.6, 0xc0399f); });
     }
+    if (R.extender) unit.add(extenderObject());
     Rn.finish([unit], ui.render);
     if (P.show.neighbour) {
       var g = unit.clone(true);
+      g.children.slice().forEach(function (ch) { if (ch.userData.ext) g.remove(ch); });      // the next unit is a unit, not a second extender
       g.traverse(function (o) { if (o.isMesh) { o.material = ghostMat; o.castShadow = false; if (o.userData.decal) o.visible = false; } if (o.isLineSegments) o.visible = false; });
-      g.position.x = R.planes.pitch; ghost.add(g);
+      g.position.x = R.planes.pitch + (R.extender ? R.extender.x1 - R.planes.xr : 0); ghost.add(g);      // past the extender, where there is one
     }
     if (P.show.header40) deco.add(header40());
     var cp = R.checks.grid.coupler;
@@ -11914,7 +12337,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     if (!renderer) return;
     if (ui.clipAxis === 'off') { renderer.clippingPlanes = []; return; }
     var pl = R.planes, t = ui.clipPos;
-    if (ui.clipAxis === 'x') { clipPlane.normal.set(-1, 0, 0); clipPlane.constant = pl.x0 - 1 + t * (pl.x1 - pl.x0 + 2); }
+    if (ui.clipAxis === 'x') { clipPlane.normal.set(-1, 0, 0); clipPlane.constant = pl.x0 - 1 + t * (pl.x1 + extraWide() - pl.x0 + 2); }
     else if (ui.clipAxis === 'y') { clipPlane.normal.set(0, 0, -1); clipPlane.constant = pl.yt - 1 + t * (pl.yb - pl.yt + 2); }
     else { clipPlane.normal.set(0, -1, 0); clipPlane.constant = R.z.bottom - 6 + t * (R.z.top - R.z.bottom + 9 + R.layers.length * ui.explode); }
     renderer.clippingPlanes = [clipPlane];
@@ -12050,6 +12473,33 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     if (ui.sel && /^port/.test(ui.sel)) ui.sel = null;
   }
 
+  // The header socket in the unit's right side (rev A11c: a part of its own, beside the expansion port on the top edge). It
+  // goes where the top band ends: mouth in the right edge, pin 1 the lowest, just above the breadboard's corner.
+  function sidePart() { return P.parts.filter(function (p) { return !!Cat.sideKinds[p.type]; })[0] || null; }
+  // rev A11e: how the extender plugs in. 'press' takes the side socket out and puts an upright socket on the mid board, with the
+  // top and the bottom board opened for it; 'side' puts the side socket back.
+  function vertPart() { return P.parts.filter(function (p) { return p.type === 'skt_v_127'; })[0] || null; }
+  function setJoin(v) {
+    var ex = P.extender, vs = vertPart(), s = sidePart(); ex.join = v;
+    if (v === 'press') {
+      if (s) { P.parts = P.parts.filter(function (p) { return p !== s; }); if (ui.sel === s.id) ui.sel = null; }
+      if (!vs) { var op = {}; op[R.layers[0].id] = true; op[R.layers[R.layers.length - 1].id] = true; P.parts.push({ id: 'vert', type: 'skt_v_127', x: +(R.planes.xr - 5.6).toFixed(2), y: -15.9, rot: 0, mount: { on: R.layers[Math.min(1, R.layers.length - 1)].id, side: 'top' }, dims: { n: 11, h: 2.1 }, open: op }); }
+    } else { if (vs) { P.parts = P.parts.filter(function (p) { return p !== vs; }); if (ui.sel === vs.id) ui.sel = null; } if (!s) setSide(true); }
+  }
+  function stackKey() { var S = P.stack; return S.length > 2 ? S[S.length - 1].t + '/' + S[0].t : ''; }
+  function setStack(v) {                 // top and bottom board thickness; the mid board stays, and the two spaces share what is left under the shell's height
+    var S = P.stack, q = String(v).split('/'); if (S.length < 3) return;
+    S[2].t = +q[0]; S[0].t = +q[1]; var gsp = +((P.wig.shell.t - S[2].t - S[1].t) / 2).toFixed(3); S[1].gap = gsp; S[2].gap = gsp;
+  }
+  function setSideKind(v) {             // another socket in the same place: its mouth stays on the edge, and its positions go to that kind's own count when the pitch changes
+    var s = sidePart(), K = Cat.sideKinds[v], K0 = s && Cat.sideKinds[s.type]; if (!s || !K) return;
+    s.dims = { n: K0 && K0.pitch === K.pitch ? Cat.ra127(s.dims && s.dims.n) : K.n }; s.type = v; s.x = +(R.planes.xr - K.depth - (K.lead || 0)).toFixed(2);       // a socket with leads at its mouth end stands that far inside the edge
+  }
+  function setSide(on) {
+    var s = sidePart(), d = Cat.side;
+    if (!on) { if (s) { P.parts = P.parts.filter(function (p) { return p !== s; }); if (ui.sel === s.id) ui.sel = null; } return; }
+    if (!s) P.parts.push({ id: P.parts.some(function (p) { return p.id === d.id; }) ? newId(d.id) : d.id, type: d.type, x: +(R.planes.xr - d.back).toFixed(2), y: d.y, rot: d.rot, mount: { on: R.layers[0].id, side: 'top' }, dims: { n: Cat.ra127(R.extender ? R.extender.n_rows / 2 : d.n) } });
+  }
   function newId(type) { var n = 1, id, stem = type.split('_')[0]; do { id = stem + (n++); } while (P.parts.some(function (p) { return p.id === id; })); return id; }
   function partSize(type) {              // plan size and height of a catalogue part, from its bodies
     try {
@@ -12072,6 +12522,15 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     P.parts.push(d); ui.sel = d.id;
   }
   function removePart(u) { P.parts = P.parts.filter(function (p) { return p.id !== u.id; }); if (ui.sel === u.id) ui.sel = null; }
+  // A display of this type turned by rot, measured from the part's own x, y: sx = where the middle of its picture (the active
+  // area) lies along x, ymax = its lowest edge (largest y, the side towards the breadboard), cover glass included.
+  function displaySeat(type, rot) {
+    var cat = Cat.parts[type], pts = [];
+    if (!cat || !cat.bodies || !cat.bodies.length) return null;
+    cat.bodies.forEach(function (b) { var q = b.shape; (q.rect ? Geo.util.rectPts(q.rect[0], q.rect[1], q.rect[2], q.rect[3]) : q.circle ? Geo.util.circlePts(q.circle[0], q.circle[1], q.circle[2]) : q.poly || []).forEach(function (pt) { pts.push(pt); }); });
+    var ymax = Math.max.apply(null, Geo.util.place(pts, 0, 0, rot || 0, false).map(function (pt) { return pt[1]; }));
+    return { sx: Geo.util.place([[0, cat.screen ? cat.screen.cy || 0 : 0]], 0, 0, rot || 0, false)[0][0], ymax: ymax };
+  }
   function boardFor(where) { var st = P.stack; return where === 'top' ? st[st.length - 1].id : (where === 'mid' && st.length > 2 ? st[1].id : st[0].id); }
   function controlValue(ctl) { var u = userPart(ctl.ids[0]); return u ? u.type : 'none'; }
   function setControl(ctl, type) {
@@ -12227,6 +12686,36 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     var pc = el('input', { type: 'checkbox', id: 'c-planes', onchange: function (e) { ui.planes = e.target.checked; buildScene(); } }); pc.checked = ui.planes;
     c.appendChild(el('div', { class: 'row' }, [el('label', { for: 'c-planes', text: 'Show the grid planes' }), pc]));
 
+    // the header socket in the right side and the extender that plugs into it (rev A11; a part of its own since A11c)
+    c = sect('Side port and extender');
+    var ex = P.extender = P.extender || clone(Cat.extender), xq = R.checks.extender, sideSkt = sidePart();
+    c.appendChild(row('It plugs in', seg([['side', 'sideways'], ['press', 'from the back']], ex.join === 'press' ? 'press' : 'side', function (v) { setJoin(v); })));
+    c.appendChild(row('Boards top / mid / bottom', seg([['1.6/1.6', '1.6 1.6 1.6'], ['0.8/0.8', '0.8 1.6 0.8'], ['0.8/1', '0.8 1.6 1.0'], ['0.8/1.2', '0.8 1.6 1.2']], stackKey(), function (v) { setStack(v); })));
+    var vertSkt = vertPart();
+    if (ex.join === 'press' && vertSkt) {
+      c.appendChild(row('Socket height', seg([[2.1, '2.1'], [4.3, '4.3']], +(vertSkt.dims && vertSkt.dims.h) || 2.1, function (v) { vertSkt.dims = vertSkt.dims || {}; vertSkt.dims.h = v; })));
+      c.appendChild(row('Socket positions per row', num(Cat.ra127(vertSkt.dims && vertSkt.dims.n), 1, function (v) { vertSkt.dims = vertSkt.dims || {}; vertSkt.dims.n = Cat.ra127(v); }, { min: 2, max: 40, id: 'c-vert-n' }), 'x 2 pins', 'c-vert-n'));
+      c.appendChild(el('div', { class: 'hint', text: 'An upright socket on the mid board, the top and the bottom board opened over and under it so a pin can go all the way through. A tab of the extender fills a knob-shaped cutout in the bottom board from the back, its pins going up into the socket.' }));
+    }
+    if (ex.join !== 'press') c.appendChild(check('c-side', 'A header socket in the right side', !!sideSkt, function (v) { setSide(v); }));
+    if (sideSkt) c.appendChild(row('Socket positions per row', num(Cat.ra127(sideSkt.dims && sideSkt.dims.n), 1, function (v) { sideSkt.dims = sideSkt.dims || {}; sideSkt.dims.n = Cat.ra127(v); }, { min: 2, max: 40, id: 'c-ext-n' }), 'x 2 pins', 'c-ext-n'));
+    if (sideSkt) c.appendChild(row('Socket', sel(Object.keys(Cat.sideKinds).map(function (k) { return [k, Cat.sideKinds[k].label]; }), sideSkt.type, function (v) { setSideKind(v); }, 'c-side-kind'), '', 'c-side-kind'));
+    c.appendChild(check('c-ext', 'Show the extender on the right', ex.on, function (v) { ex.on = v; setTimeout(function () { setView('iso'); }, 0); }));
+    if (ex.on) {
+      c.appendChild(row('Columns', num(ex.cols, 1, function (v) { ex.cols = Math.round(v); }, { min: 1, max: 40, id: 'c-ext-cols' }), '= ' + 2 * (xq ? xq.cols : ex.cols) + ' rows', 'c-ext-cols'));
+      c.appendChild(row('Dead rows at the seam', seg([[0, 'none'], [1, '1'], [2, '2'], [3, '3']], ex.dead_rows, function (v) { ex.dead_rows = v; })));
+      if (+ex.dead_rows === 0) c.appendChild(row('Its rails start', num(ex.rail_skip || 1, 1, function (v) { ex.rail_skip = Math.max(1, Math.min(3, Math.round(v))); }, { min: 1, max: 3, id: 'c-ext-skip' }), 'holes in', 'c-ext-skip'));
+      c.appendChild(row('Waist in the breadboard\'s side', num(P.wig.waist_r > 0 ? P.wig.waist_r : R.wig.waist.own, 0.01, function (v) { P.wig.waist_r = v; }, { min: 0, max: 1.6, id: 'c-waist' }), 'mm deep', 'c-waist'));
+      if (xq && xq.seam_col) c.appendChild(el('div', { class: 'hint' + (xq.seam_col.fits ? '' : ' bad'), id: 'c-waist-hint', text: 'With no dead row the extender\'s first column stands on the unit\'s grid plane, in the edge that bows into this waist. That needs it ' + xq.seam_col.need + ' mm deep; the WigLEDmag\'s own is ' + xq.seam_col.own + '. It is cut from the breadboard\'s PCB, shell and top board.' }));
+      c.appendChild(row('Head beside the band', num(ex.head, 0.5, function (v) { ex.head = v; }, { min: 0, max: 60, id: 'c-ext-head' }), 'mm', 'c-ext-head'));
+      c.appendChild(check('c-ext-cover', 'A second board over its head, level with the top board', ex.cover === true, function (v) { ex.cover = v; }));
+      c.appendChild(check('c-ext-key', 'Its edge fills the waist in the breadboard\'s side', ex.key !== false, function (v) { ex.key = v; }));
+      if (xq) c.appendChild(el('div', { class: 'hint' + (xq.overlap.overlap_mm2 || !xq.port || xq.spare < 0 ? ' bad' : ''), id: 'c-ext-hint', text: xq.w + ' mm wide, from x ' + xq.x0 + ' to ' + xq.x1 + '; its first column is ' + xq.col_gap + ' mm from column ' + g.cols + '. '
+        + (xq.port ? 'The socket has ' + xq.port.pins + ' pins for its ' + xq.rows + ' rows' + (xq.spare < 0 ? ': ' + (-xq.spare) + ' short.' : xq.spare === 0 ? ', with none left over.' : ', ' + xq.spare + ' left over.') : 'There is no socket in the right side for it.')
+        + ' Unit and extender together: ' + xq.pair_w + ' mm, ' + xq.pair_rows + ' rows.' }));
+    }
+    c.appendChild(el('div', { class: 'hint', text: 'The general expansion port is the one on the top edge (Parts, Expansion port). This socket carries routable lanes only: each row of the extender goes to one of its pins, so the extender needs no crossbar. It lies on the main board under the top board; select it under Parts to move it.' }));
+
     c = sect('Outline');
     var eo = el('input', { type: 'checkbox', id: 'c-eo', onchange: function (e) { ui.editOutline = e.target.checked; if (!ui.editOutline) ui.vsel = null; else setTimeout(function () { setView('top'); }, 0); rebuild(true); } }); eo.checked = ui.editOutline;
     c.appendChild(el('div', { class: 'row' }, [el('label', { for: 'c-eo', text: 'Edit the outline (drag the dots)' }), eo]));
@@ -12292,7 +12781,15 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     var dsp = userPart('display');
     c.appendChild(row('Display', sel([['none', 'none']].concat(Cat.displays.map(function (k) { return [k, Cat.parts[k].label]; })), dsp ? dsp.type : 'none', function (v) {
       if (v === 'none') { P.parts = P.parts.filter(function (q) { return q.id !== 'display'; }); if (ui.sel === 'display') ui.sel = null; }
-      else if (dsp) dsp.type = v; else P.parts.unshift({ id: 'display', type: v, x: 19, y: -11.8, rot: 90, mount: { flush: 'top', offset: 0 } });
+      else if (dsp) {      // another display in the same place: the picture stays centred where it was, the module stays seated on the same edge
+        var was = displaySeat(dsp.type, dsp.rot), now = displaySeat(v, dsp.rot);
+        if (was && now) { dsp.x = +(dsp.x + was.sx - now.sx).toFixed(3); dsp.y = +(dsp.y + was.ymax - now.ymax).toFixed(3); }
+        dsp.type = v;
+      } else {             // a display where there was none: where the built-in design has its own, or centred on the breadboard just above it
+        var dd = (DEFAULTS.parts || []).filter(function (q) { return q.id === 'display'; })[0], rot = dd ? dd.rot || 0 : 90, ref0 = dd && displaySeat(dd.type, rot), seat = displaySeat(v, rot);
+        var cx = ref0 ? dd.x + ref0.sx : P.wig.width / 2, yb = ref0 ? dd.y + ref0.ymax : -1.1;
+        P.parts.unshift({ id: 'display', type: v, x: +(cx - (seat ? seat.sx : 0)).toFixed(3), y: +(yb - (seat ? seat.ymax : 8.8)).toFixed(3), rot: rot, mount: { flush: 'top', offset: 0 } });
+      }
     }, 'c-dsp'), '', 'c-dsp'));
     var dinfo = dsp && Cat.parts[dsp.type] && Cat.parts[dsp.type].info;
     if (dinfo) c.appendChild(el('div', { class: 'hint', id: 'c-dsp-info' }, [dinfo.px[0] + ' x ' + dinfo.px[1] + ', ' + dinfo.ic + ', ' + dinfo.bus + '. ' + dinfo.price + '. ' + dinfo.fps + '. '].concat(dinfo.links.map(function (l, i) { return el('span', {}, [i ? ' · ' : '', el('a', { href: l[1], target: '_blank', rel: 'noopener', text: l[0] })]); }))));
@@ -12320,7 +12817,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
         c.appendChild(row('Name', el('input', { type: 'text', value: u.name || '', id: 'c-pname', placeholder: 'what it is', onchange: function (e) { if (e.target.value) u.name = e.target.value; else delete u.name; rebuild(true); } }), '', 'c-pname'));
         Object.keys(ucat.dims).forEach(function (k) {
           var cur = u.dims && u.dims[k] != null ? u.dims[k] : ucat.dims[k];
-          c.appendChild(row(ucat.dimLabels[k], num(cur, 0.1, function (v) { u.dims = u.dims || clone(ucat.dims); u.dims[k] = v; }, { min: 0, max: 60, id: 'c-dim-' + k }), 'mm', 'c-dim-' + k));
+          c.appendChild(row(ucat.dimLabels[k], num(cur, (ucat.dimStep && ucat.dimStep[k]) || 0.1, function (v) { u.dims = u.dims || clone(ucat.dims); u.dims[k] = v; }, { min: 0, max: 60, id: 'c-dim-' + k }), ucat.dimUnits && ucat.dimUnits[k] != null ? ucat.dimUnits[k] : 'mm', 'c-dim-' + k));
         });
       }
       if (ucat && ucat.group === 'display' && ucat.screen) {
@@ -12486,6 +12983,29 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     var cq = g.coupler;
     if (cq) box.appendChild(line(cq.fits ? 'ok' : 'bad', cq.fits ? 'fits' : 'short', cq.label + ' between two units', 'Needs ' + cq.gap + ' mm between the two boards (housing ' + cq.across + ' x ' + cq.len + ' x ' + cq.thick + '). The strip leaves ' + cq.have + ' mm' + (cq.fits ? ', ' + cq.spare + ' spare. ' : '; it first fits with a ' + cq.strip_needed + ' mm strip. ') + (cq.tip_gap != null ? 'Its ' + cq.tongue + ' mm tongues meet about ' + cq.tip_gap + ' apart inside it. ' : 'Tongue ' + cq.tongue + ' long. ') + 'The tongue is not part of the outline yet, and the strip is board where the coupler would sit.'));
 
+    var xq = c.extender;
+    if (xq) {
+      box.appendChild(el('h2', { text: 'Side port and extender' }));
+      box.appendChild(line(xq.on_grid ? 'ok' : 'bad', xq.rows + ' rows', 'Extender: ' + xq.cols + ' columns, ' + xq.w + ' mm wide, ' + (xq.dead ? xq.dead + ' dead row' + (xq.dead > 1 ? 's' : '') : 'no dead row') + ' at the seam', 'Its first column is ' + xq.col_gap + ' mm from column ' + P.grid.cols + ', on the same 0.1 inch grid. Unit and extender together are ' + xq.pair_w + ' mm = ' + xq.pair_rows + ' rows, so a next unit beside them keeps the grid too.'));
+      var sc = xq.seam_col;
+      if (sc) box.appendChild(sc.fits ? line('ok', sc.wall + ' mm wall', 'Its first column is on the grid plane, in the edge that bows into the waist', 'The waist in the breadboard\'s side is ' + sc.has + ' mm deep (the WigLEDmag\'s own is ' + sc.own + '), which leaves the breadboard a ' + sc.wall + ' mm wall beside column ' + P.grid.cols + '. The extender\'s first channel is open on that side and that wall closes it: the ' + sc.clip + ' mm clip clears it by ' + sc.clip_clear + ' mm, and its solder tab has ' + sc.land + ' mm of board to the edge.' + (sc.face_land ? ' The two top boards meet on the half-pitch line: ' + sc.face_land.ext + ' mm of land outside the ' + sc.face_land.countersink + ' mm countersinks on the extender, ' + sc.face_land.unit + ' on the breadboard.' : '') + ' The rails start ' + xq.rail_skip + ' hole' + (xq.rail_skip > 1 ? 's' : '') + ' in, where the breadboard\'s corners are.')
+        : line('bad', 'no room', 'Its first column does not fit on the grid plane', !sc.bowed ? 'Its edge has to fill the waist for a column there (Side port and extender).' : 'A column there needs the waist ' + sc.need + ' mm deep and it is ' + sc.has + ': the ' + sc.clip + ' mm clip would be ' + (-sc.clip_clear) + ' mm into the breadboard\'s side, and the board ' + (sc.land < 0 ? (-sc.land) + ' mm short under its solder tab.' : 'has ' + sc.land + ' mm under its solder tab.')));
+      var xp = xq.port;
+      if (xp && xp.press) { var pr = xp.press; box.appendChild(line(pr.mags && pr.mags.length ? 'warn' : 'ok', '2 x ' + xp.n, 'Pressed in from the back: a tab of the extender in a knob-shaped cutout of the bottom board', 'Socket: ' + xp.kind_label + ', its top ' + (xp.room >= 0 ? xp.room + ' mm below' : (-xp.room) + ' mm ABOVE') + ' the top face, the top and the bottom board opened over and under it so a pin can go all the way through. The cutout is ' + (pr.knob[2] - pr.knob[0]).toFixed(1) + ' x ' + (pr.knob[3] - pr.knob[1]).toFixed(1) + ' mm with a ' + pr.neck + ' mm neck to the edge: ' + pr.under + ' mm of undercut each side holds the tab in the plane, cut ' + pr.gap + ' mm clear. Pins from the tab reach the socket\'s top at z ' + pr.pin_tip + ': ' + pr.pin_len + ' mm above a 1.0 mm base (the usual 1.27 mm header has 3.0).' + (pr.mags && pr.mags.length ? ' Magnetometer ' + pr.mags.join(', ') + ' is in the cutout and has to move.' : '') + (xp.price ? ' ' + xp.price + ' (read 2026-11-28).' : ''))); }
+      if (!xp) box.appendChild(line('bad', 'no socket', 'Nothing in the right side for it to plug into', 'Side port and extender: tick the header socket in the right side.'));
+      else {
+        if (!xp.press) box.appendChild(line(!xp.faces || xp.open_seam || !xp.pin_ok ? 'bad' : xp.inset > 0.005 || (xp.room != null && xp.room < 0) ? 'warn' : 'ok', '2 x ' + xp.n, 'Side socket: ' + xp.kind_label + ', ' + xp.pins + ' pins, ' + xp.len + ' mm long', !xp.faces ? 'It has to be on top of the main board and turned 180 for its mouth to face the extender.' : 'Mouth at x ' + xp.mouth_x + (Math.abs(xp.inset) < 0.005 ? ', on the edge: the header\'s ' + xp.pin + ' mm pins go all the way in.' : xp.inset > 0 ? ', ' + xp.inset + ' mm inside the edge: the ' + xp.pin + ' mm pins go ' + xp.engage + ' in.' : ', ' + xp.open_seam + ' mm past the edge: the seam stands open by that.') + ' It runs from y ' + xp.y0 + ' to ' + xp.y1 + '.' + (xp.takes ? ' Its maker gives ' + xp.takes[0] + ' to ' + xp.takes[1] + ' mm of insertion' + (xp.pin_ok ? ', which a ' + xp.pin + ' mm pin meets' + (xp.pin < 4 ? ' (a short-pin header, not the usual 4.0).' : '.') : ': ' + xp.engage + ' mm is outside that.') : '') + (xp.room != null && xp.room < 0 ? ' It is ' + xp.high + ' mm high, ' + (-xp.room) + ' more than there is under the top board, so the top board is opened over it.' : '') + (xp.price ? ' ' + xp.price + ' (read 2026-11-28).' : '')));
+        box.appendChild(line(xq.spare < 0 ? 'bad' : xq.spare === 0 ? 'warn' : 'ok', xq.spare < 0 ? (-xq.spare) + ' short' : xq.spare + ' spare', xq.need + ' rows take ' + xq.need + ' of its ' + xp.pins + ' pins', xq.spare < 0 ? 'Fewer columns, or a longer socket.' : xq.spare === 0 ? 'None left on this side for 5 V, ground or LED data. Those are on the top port, which a board on this side does not reach, so the extender\'s rows would be dark.' : 'Left over for power or LED data on this side.'));
+      }
+      box.appendChild(line(xq.header.covered ? 'ok' : 'warn', xq.header.covered ? 'on its head' : 'off its head', 'Its header, 2 x ' + xq.header.n + ', from y ' + xq.header.y0 + ' to ' + xq.header.y1, 'The head stands ' + xq.head + ' mm above the breadboard\'s top edge' + (xq.cover ? ', with a second board over it.' : ' and is the one board, the header on it in the open.') + ' Plastic face on the extender\'s edge, pins ' + (xq.port ? xq.port.pin : 4) + ' mm into the unit.'));
+      box.appendChild(xq.overlap.overlap_mm2 ? line('bad', xq.overlap.overlap_mm2 + ' mm²', 'The extender overlaps this unit', 'Up to ' + xq.overlap.depth + ' mm between y ' + xq.overlap.y0 + ' and ' + xq.overlap.y1 + ': ' + xq.overlap.items.map(function (i) { return i.what; }).join(', ') + '. Plan view only.')
+        : line('ok', 'clear', 'The extender shares no plan area with this unit', xq.keyed ? 'Its edge fills the waist in the breadboard\'s side (' + xq.keyed + ' mm² of key), so the two cannot slide along the seam.' : 'Its edge is straight; the waist in the breadboard\'s side is left open.'));
+      box.appendChild(xq.tied ? line('ok', xq.ties.n + ' ties', 'Seam ' + xq.seam + ' mm, tied by wire staples at y ' + xq.ties.at.map(function (q) { return q[1]; }).join(' and '), xq.ties.wire + ' mm wire, ' + xq.ties.span + ' mm span, in the holes beside the rails (' + xq.ties.hole + ' mm, ' + xq.ties.room + ' mm from the next hole).')
+        : line('warn', xq.play ? xq.play.corner + ' mm' : 'loose', 'Seam ' + xq.seam + ' mm, held by ' + (xq.port && xq.port.press ? 'the tab in its cutout' : 'the header pair') + (xq.keyed ? ' and the key' : '') + ' alone', (xq.play ? 'The pair is ' + xq.play.joint + ' mm of joint at the top of the seam: 0.1 mm of side play in it is ' + xq.play.corner + ' mm at the bottom corner, ' + xq.play.arm + ' mm away. ' : '') + (xq.keyed ? 'The key stops the two sliding along the seam, not the seam opening.' : '') + ' Nothing pulls the seam shut below the header.'));
+      if (xq.jumpers) box.appendChild(line('ok', xq.jumpers + ' jumpers', 'The rails cross the seam on ' + xq.jumper_span + ' mm jumpers', 'From the rail holes of column ' + P.grid.cols + ' to the extender\'s first column.'));
+      if (xq.near) box.appendChild(line(xq.near.d < 10 ? 'warn' : 'ok', xq.near.d + ' mm', 'Nearest magnetometer (' + xq.near.ref + ') to ' + xq.near.what, 'No magnets on this seam, and brass or A2 stainless for anything screwed there.'));
+    }
+
     box.appendChild(el('h2', { text: 'Stack height' }));
     var hasFace = !!R.wig.face, d = hasFace ? c.flush.delta_shell : c.flush.delta, fk = Math.abs(d) <= 0.1 ? 'ok' : Math.abs(d) <= 0.5 ? 'warn' : 'bad';
     box.appendChild(line(fk, (d >= 0 ? '+' : '') + d + ' mm', 'Top board at ' + c.flush.frame_top + (hasFace ? ', shell top ' + c.flush.shell_top + ', wig top board ' + c.flush.bb_top : ', breadboard top ' + c.flush.bb_top), 'Total ' + (+(Math.max(c.flush.frame_top, c.flush.bb_top) - R.z.bottom).toFixed(2)) + ' mm from the main board underside' + (hasFace ? ' to the top of the ' + c.flush.face_t + ' mm wig top board' : '') + '. Gaps: ' + c.flush.gaps.map(function (q) { return q.gap + ' under ' + q.below; }).join(', ') + '.'));
@@ -12570,6 +13090,10 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
       items.push(['kicad:' + L.id, L.id + ' ' + L.name + ' for KiCad: outline as lines and arcs, ' + (nf.length ? nr + ' footprint' + (nr === 1 ? '' : 's') + (nf.length > nr ? ' + ' + (nf.length - nr) + ' outline' + (nf.length - nr === 1 ? '' : 's') : '') : 'no parts') + ' (.kicad_pcb)', Exp.slug(L) + '.kicad_pcb', function () { return Exp.kicad(R, L); }]);
     });
     if (R.wig.face && R.wig.face.holes) items.push(['kicad:WT', 'Wig top board for KiCad: outline and ' + R.wig.face.holes.length + ' holes (.kicad_pcb)', 'WT_wig_top_board.kicad_pcb', function () { return Exp.kicadFace(R); }]);
+    if (R.extender) {
+      items.push(['kicad:EX', 'Extender bottom board for KiCad: outline as lines and arcs, its header as an outline (.kicad_pcb)', 'EX_Extender_board.kicad_pcb', function () { return Exp.kicadExt(R); }]);
+      items.push(['dxf:EX', 'Extender bottom board outline (.dxf)', 'EX_Extender_board.dxf', function () { return Exp.dxfExt(R); }]);
+    }
     var mods = Exp.kicadMods(R);
     Object.keys(mods).forEach(function (k) { items.push(['mod:' + k, 'Footprint ' + k + ' (.kicad_mod)', k + '.kicad_mod', function () { return mods[k]; }]); });
     items.push(['resolved', 'Resolved geometry for the STEP script (.json)', 'resolved.json', function () { R.checks.mag = Mag.report(R, P); return JSON.stringify(Geo.plain(R)) + '\n'; }]);
@@ -12749,7 +13273,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
   rebuild(true);
   resize();
   if (bootTab === 'mag') setTab('mag', true);
-  if (boot.cam && camera && boot.cam.p && boot.cam.t) { camera.position.fromArray(boot.cam.p); controls.target.fromArray(boot.cam.t); controls.update(); } else setView('iso');
+  if (boot.cam && !boot.upgraded && camera && boot.cam.p && boot.cam.t) { camera.position.fromArray(boot.cam.p); controls.target.fromArray(boot.cam.t); controls.update(); } else setView('iso');
   clearTimeout(histT); hist.push(P); syncUndo();
   function flush() { clearTimeout(saveT); State.save(P, ui, camState()); }       // whatever is still waiting to be written goes out when the page is left
   window.addEventListener('pagehide', flush); document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') flush(); });

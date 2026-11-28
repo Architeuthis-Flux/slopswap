@@ -19,10 +19,10 @@
 <main class="page wide">
 <p class="eyebrow"><a href="../">slopswap</a> / <a href="./">V6</a></p>
 <h1>V6 board outline and stack</h1>
-<p class="muted">The readme of <code>JumperlessV6/v6mech</code>, rev A10c 2026-11-27. Kevin Cappuccio with Claude.</p>
+<p class="muted">The readme of <code>JumperlessV6/v6mech</code>, rev A11e 2026-11-28. Kevin Cappuccio with Claude.</p>
 <ul class="get cycle">
   <li><a href="board-outline.html"><b>Open the 3D viewer</b></a></li>
-  <li><a href="board-outline-v6mech.zip" download><b>Download the folder</b> (.zip, 12.7 MB): parameters, source, KiCad and DXF outlines, STEP</a></li>
+  <li><a href="board-outline-v6mech.zip" download><b>Download the folder</b> (.zip, 12.6 MB): parameters, source, KiCad and DXF outlines, STEP</a></li>
 </ul>
 <figure><a href="board-outline-on-sketch.png"><img src="board-outline-on-sketch.png" alt="The outline (pink) laid over the notebook page it was traced from"></a><figcaption>The outline (pink) laid over the notebook page it was traced from: the viewer's sketch underlay, seen from above.</figcaption></figure>
 <figure><a href="board-outline-inputs.png"><img src="board-outline-inputs.png" alt="From the top edge"></a><figcaption>From the top edge: the click wheel under the top board at the corner, a nav switch through it, two button holes. Left, the pickers and the per-board tick boxes of the selected part.</figcaption></figure>
@@ -46,7 +46,14 @@ with chamfered corners, glass let into the cut; and each bar display says what d
 where to get it); rev A8b and A8c the same day (a cantilever's tongue belongs to the top board; sixteen
 long-travel push switches, drawn pressed); rev A9 on 2026-11-25 (a Top band control, and the default outline
 made square: 83.82 x 83.82); rev A10 the same day (view controls in the 3D view itself, board opacity, lighting
-rigs, surfaces, more backdrops and benches).</p>
+rigs, surfaces, more backdrops and benches); rev A10d on 2026-11-27 (the two keys beside the display taken out, the
+display's picture centred on the breadboard, and a display changed for another keeps its picture where it was);
+rev A11 the same day (the expansion port in the unit's right side, and the extender that plugs into it); rev A11b
+(the extender's head is its one board, with nothing over it); rev A11c on 2026-11-28 (two ports: the general
+expansion port back on the top edge and a plain header socket in the right side for the extender; no staples or rail
+jumpers across the seam); rev A11d the same day (no row skipped between the breadboard and the extender, whose edge bows
+into a deeper waist; three sockets to choose from for the side); rev A11e (the extender pressed in from the back: an upright socket on the mid
+board, cutouts through the top and the bottom board, a tab in a knob-shaped cutout; thin outer boards as a switch).</p>
 <h2>Use it</h2>
 <ol>
 <li>Open <code>V6_outline_viewer.html</code> (double-click; it needs no server and no network).</li>
@@ -131,7 +138,8 @@ the geometry or any exported file.</p>
 <li><strong>Display</strong>: the fifteen candidates from the display library that are shorter than the unit, each with the
   module size and thickness from its drawing, beside the two modelled 1.47 inch ones.</li>
 <li><strong>Expansion port</strong>: M.2, PCIe x1, two SFP cages, and from the port survey a mini PCIe socket and a DDR4
-  SO-DIMM socket.</li>
+  SO-DIMM socket. Since rev A11 the built-in one is a 1.27 mm right-angle socket in the unit's right side (next
+  but one section down).</li>
 <li><strong>Add part → Chips and tall parts</strong>: CH446Q, CH32H417, RP2350B, TSSOP-16, the 6.3 mm inductor, the FPC
   connector. <strong>Mechanical</strong>: an M2 screw with a spacer in every gap, as one answer to what holds the boards apart.</li>
 <li><strong>Magnetometers</strong>: since rev A6 a list of their own with a tab to edit them (next section). The 3D view and
@@ -401,6 +409,372 @@ JumperlessFootprints; the RKJXM has no footprint yet (B25 says so too).</p>
 </div>
 <p><code>node build.mjs --check</code> exits 1 if two parts clash, a part runs into a board kept whole, or a bare
 breadboard no longer fits beside the unit.</p>
+<h2>Rev A11e: pressing in from the back, upright sockets on the mid board, thin outer boards</h2>
+<p>Kevin, 2026-11-28: "there's also the option of using vertical headers with some cutout in the main V6 bottom board so
+the extension has vertical pins and presses in from the back, and the cutout's shape is tight enough that it holds",
+then: "we'd want super low profile headers if we did vertical. the top and bottom boards are probably going to be
+0.8mm (or 1.2/1 for the bottom) and if we did this we'd want the headers on the middle board and cutouts so they can
+go all the way through the v6", with three sockets (LCSC C22436133, C7494846, C41376131).</p>
+<ul>
+<li><strong>It plugs in: sideways / from the back</strong> (<code>extender.join</code>: <code>side</code>, the built-in, or <code>press</code>). From the back takes
+  the side socket out and puts an upright socket on top of the mid board (<code>skt_v_127</code>, part <code>vert</code>), with the top and
+  the bottom board opened over and under it (<code>open: { L0: true, L2: true }</code>) so a pin can go all the way through.</li>
+<li><strong>The tab and its cutout.</strong> The bottom board has a knob-shaped cutout round the socket's place, 4.3 x 15.5 mm,
+  running out to the right edge through a 13.9 mm neck: 0.8 mm of undercut each side. A tab of the extender's one
+  board fills it from the back, cut 0.05 mm clear, and cannot be pulled out sideways. The cutout is the unit's: it is
+  there with or without an extender. The tab is not counted as overlapping the unit, since it lies under the unit's
+  upper boards on purpose.</li>
+<li><strong>The pins.</strong> An upright header on the tab (<code>hdr_v_127</code>) reaches the socket's top: 4.5 mm of pin above a 1.0 mm
+  base on the boards as drawn, 4.9 with thin outer boards. The usual 1.27 mm header has 3.0.</li>
+<li><strong>Socket height: 2.1 / 4.3.</strong> The 2.1 mm Yxcon F321 stops 1.28 mm below the top face (0.88 with thin boards). The
+  4.3 mm Hong Cheng HC-PM127 stands 0.92 mm above it.</li>
+<li><strong>Boards top / mid / bottom</strong>: 1.6 1.6 1.6 (the built-in) / 0.8 1.6 0.8 / 0.8 1.6 1.0 / 0.8 1.6 1.2. The mid board
+  stays 1.6 and the two spaces share what is left under the shell's 6.75 (2.175 each with a 0.8 top board).</li>
+<li><strong>Checks.</strong> A line in the Side port and extender box and in <code>checks.txt</code>: the cutout, neck and undercut, where the
+  socket stands, the pin length, and any magnetometer in the cutout. M10 at (76, -6) is in it and has to move.</li>
+</ul>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Socket (LCSC, read 2026-11-28)</th>
+<th>Size</th>
+<th>Price</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Yxcon F321-1214A4CMUB2 (C7494846)</td>
+<td>1.27 mm, 2 x 14, upright SMD, 2.1 high</td>
+<td>$0.70, 1,970 in stock</td>
+</tr>
+<tr>
+<td>Hong Cheng HC-PM127-4.3H-2x13PS (C22436133)</td>
+<td>1.27 mm, 2 x 13, upright SMD, 4.3 high</td>
+<td>$0.13, 762 in stock</td>
+</tr>
+<tr>
+<td>Hong Cheng HC-PM127-4.3H-2x16PS (C41376131)</td>
+<td>1.27 mm, 2 x 16, upright SMD, 4.3 high</td>
+<td>$0.14, 2,349 in stock</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Calls made without asking.</strong> The built-in design still plugs in sideways and has 1.6 mm boards; both new things are
+switches. The socket stands on top of the mid board, not under it (under it there is 1.775 to 2.175 mm, less than a
+socket and a header base). The knob is a plain rectangle with a neck, not one of the SideConnect outlines. One 2 x 11.</p>
+<p><strong>Not checked.</strong> Whether any of the three sockets lets a pin pass right through: LCSC lists each as top entry, and
+no drawing was read. The sockets' body width and the header's base are assumed. Holes in the mid board for the pins
+are not drawn. A header with 4.5 to 4.9 mm pins has not been looked for. The half-pitch lap of the two top boards at
+the seam (rev A11d) puts the extender's top board 0.2 mm over the unit's shell wall, which is in the way of pressing
+in from the back; it is not reversed yet. The seam line in the checks still gives the header pair's play.</p>
+<p><strong>Checked.</strong> <code>node tools/extcheck.mjs</code> (108 cases), <code>node build.mjs --check</code>, the four older checks, and the page in
+headless Chrome (from the back and sideways, thin boards, both socket heights): no error on the console.</p>
+<h2>Rev A11d: no row skipped at the seam, and three sockets for the side</h2>
+<p>Kevin, 2026-11-28: "on this one, the holes in the breadboard shouldn't skip a row, the edge of this expansion should bow
+in to complete the breadboard without a gap (rails will skip a hole or 2 though)". The same morning he sent three
+sockets he likes (LCSC C3322500, C6484780, C18198068: "dual entry, dual row, low(ish) profile headers") and asked for
+cheaper sources and for the variants as options. He also asked to look at tabs that lock into the board, starting from
+his SideConnect footprints; that is a study, below, and nothing of it is in the tool yet.</p>
+<ul>
+<li><strong>No dead row.</strong> <code>extender.dead_rows</code> is 0 in the built-in design: the extender's first column stands on the unit's
+  right grid plane (x 78.74), 2.54 mm from column 30. The extender is 27.94 mm wide and the pair 111.76 mm = 44 rows.
+  1, 2 and 3 are still there (<strong>Dead rows at the seam</strong>: none / 1 / 2 / 3).</li>
+<li><strong>The waist it bows into has to be deeper.</strong> A column on the grid plane needs its 2.04 mm channel from x 77.72, and
+  the WigLEDmag's waist stops at 78.105: the 1.86 mm clip would be 0.3 to 0.5 mm into the breadboard's side. So the
+  breadboard's right waist is a setting now, <code>wig.waist_r</code> (<strong>Waist in the breadboard's side</strong>), 1.02 in the built-in
+  design against the traced 0.635. 1.02 is channel plus wall: the breadboard keeps a 0.5 mm wall beside column 30
+  (the moulding spec's X wall), the extender's first channel is open on that side and that wall closes it. The clip
+  clears the wall by 0.09 mm and its solder tab has 0.27 mm of board to the edge. The cut is made in the breadboard's
+  PCB (the main board when the wig is integrated), its shell and its top board, on the right side only. 0, or anything
+  shallower than the traced waist, leaves the outline as it was.</li>
+<li><strong>The two top boards meet on the half-pitch line</strong> (the breadboard's top board is cut 1.32 deep, not 1.02). With
+  the shell's seam the extender's 2.03 mm countersinks would run 0.1 mm past its own edge; on the half-pitch line each
+  board keeps 0.2 mm outside the countersinks of its column beside the seam.</li>
+<li><strong>The rails start one hole in</strong> (<code>extender.rail_skip</code>, 1 to 3; <strong>Its rails start</strong>): the rails are at the
+  breadboard's corners, where there is no waist to bow into. The single hole beside each rail pair moves to that
+  column too.</li>
+<li><strong>Checks.</strong> <code>checks.extender.seam_col</code> and a line in the Side port and extender box: the wall, the clip's
+  clearance, the land under the solder tab and round the countersinks, or by how much the column does not fit.
+  <code>node build.mjs --check</code> fails on a shown extender whose first column does not fit.</li>
+<li><strong>A saved design</strong> whose extender still has the one dead row it was drawn with gets none, and says so; two or three
+  that were chosen are kept. The waist is a new setting and starts at 1.02 either way.</li>
+</ul>
+<p><strong>Sockets for the side</strong> (<strong>Side port and extender → Socket</strong>; <code>Cat.sideKinds</code>). Each is a catalogue part with its
+positions per row as a number, and the extender's header follows it (kind, pin length).</p>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Socket</th>
+<th>Size</th>
+<th>What it takes</th>
+<th>Price read 2026-11-28</th>
+<th>In the side</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>skt_ra_127</code>: 1.27 mm right-angle, through-hole (as rev A11)</td>
+<td>3.1 high, 5.82 deep with tails</td>
+<td>4.0 mm pins</td>
+<td>XKB X1321FR-2xNN-C43D24 at LCSC: $0.24 (2 x 5), $0.30 (2 x 7), $0.38 (2 x 10)</td>
+<td>2 x 11 fits, 22 pins</td>
+</tr>
+<tr>
+<td><code>skt_h_clp127</code>: Samtec CLP-DH, 1.27 mm horizontal SMD</td>
+<td>3.43 high, 4.57 deep, n x 1.27 + 0.43 long</td>
+<td>2.31 to 2.67 mm of pin: a short-pin header (FTSH -01 style), drawn at 2.5</td>
+<td>$2.87 (2 x 5, LCSC, 6 in stock), $2.21 (2 x 10, Octopart)</td>
+<td>2 x 11 fits, 22 pins, 1.72 mm spare under the top board</td>
+</tr>
+<tr>
+<td><code>skt_h_254</code>: 2.54 mm horizontal SMD (XKB X6521FRS, Amphenol Dubox 71609)</td>
+<td>6.0 high, 8.4 deep, leads at both ends (10.9 over them), from the Dubox drawing; ASSUMED the same for XKB</td>
+<td>0.64 mm square posts 3.6 to 7.5 mm in, drawn 6.0 long</td>
+<td>XKB $0.32 (2 x 4, 6,782 in stock); Amphenol $2.84 (2 x 10, 50 in stock)</td>
+<td>2 x 5 at most (10 pins for 22 rows); its mouth 1.25 mm inside the edge for the leads; 0.85 mm taller than the space under the top board, which is opened over it; at 8.4 deep it reaches under the display's end and clashes with it</td>
+</tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>The XKB 2.54 mm part Kevin linked is already the cheap one: a ninth of the Amphenol's price for the same kind.</li>
+<li>For the Samtec, nothing cheaper of the same kind (1.27 mm, two rows, horizontal, surface mount) turned up in the
+  searches made. The through-hole right-angle XKB X1321FR is the cheap 1.27 mm socket, about a tenth of the price, 0.3 mm
+  lower, and it takes the ordinary 4.0 mm pin.</li>
+<li><strong>Dual entry</strong> (Kevin, the same morning, with the Dubox catalogue): the pins can go all the way through. The socket is
+  open at both ends, with leads at both ends, so a pin can enter from either side and a long one passes through. The
+  upright Dubox dual-entry sockets (89898, 91615) are 7.2 mm high, more than the 5.15 mm between the main and the top
+  board; the Samtec CLP is the low family.</li>
+</ul>
+<p><strong>The SideConnect footprints</strong> (<code>JumperlessFootprints.pretty</code>, read 2026-11-28; not in the tool).</p>
+<ul>
+<li>Every one is a jigsaw edge: the board's edge steps 1.905 mm in and out (1.68 on the long-edge ones), and each
+  step leans back 0.25 mm, so a tooth is wider at its tip than at its root. Pads sit across the cut on both faces,
+  half on each board, to be bridged.</li>
+<li><code>SideConnect</code> (88 pads, 40.7 mm), <code>_sparse_left/right</code> (48, 39.9), <code>_sparserrr_left/right</code> (122, 39.9): a tooth
+  every 3.81 mm with one pad pair each. <code>_sparserrr_left_1/right_1</code> (30 + 30 pads, 29.7 mm): teeth 6 mm
+  long. <code>_Single_left/right</code> (19 and 20 pads, 10.16 mm): one tooth. <code>_short_left/right</code> (3 + 3 pads, about 4.8 mm):
+  one step, the rails' joint on the Barnacle Board. <code>_sparserrr_Top/Bottom/Bottom_tighter</code> (35 + 35 pads, 61 mm): the
+  long-edge card format with a knob at each end.</li>
+<li>What that means here: a dovetailed tooth cannot be slid in sideways. Two boards with these edges go together
+  by pressing one down into the other, and then they cannot be pulled apart in the plane. A right-angle header
+  plugs in sideways. So it is one or the other: the header pair with something that latches at the end of the push,
+  or the jigsaw with its own pads (or pins that mate from above) as the electrical joint.</li>
+<li>Where they would fit on this seam: <code>_sparserrr_*_1</code> on the 31.1 mm flat of the waist; <code>_short</code> at each rail
+  block, where the rails skip their hole. The 40 mm ones are longer than the flat, and the 61 mm ones than the side.</li>
+<li>Under the breadboard the shells stand on the teeth. With no row skipped the column on the seam is over them, so
+  the shells cannot stop short of the joint: they would have to follow the same edge, or the joint has to live at
+  the rail blocks and the head only.</li>
+</ul>
+<p><strong>Calls made without asking</strong></p>
+<ul>
+<li>The unit's own outline changed: the waist on the right is 1.02 deep in the built-in design, because the column on
+  the seam does not fit the traced 0.635. That is a change to the breadboard's shell, PCB and top board.</li>
+<li>The shell's seam gives the whole wall to the breadboard and leaves the extender's first channel open on that side;
+  the top boards' seam is on the half-pitch line.</li>
+<li>One rail hole skipped, not two.</li>
+<li>The three sockets are offered for the side socket only. They are catalogue parts, so each can also be placed
+  anywhere from the parts browser; none is drawn at the number bands.</li>
+<li>The 2.54 mm header's size and the XKB socket's depth are assumed, as marked.</li>
+</ul>
+<p><strong>Checked.</strong> <code>node tools/extcheck.mjs</code> (97 cases: the two variants with no dead row; the wall, clip, tab and
+countersink lands; every countersink inside the extender's top board; 0 to 3 dead rows at 1 to 20 columns; the waist
+as traced and the edge left straight, both reported as not fitting; rails two holes in; the three sockets; designs
+saved by A10d to A11c), <code>node build.mjs --check</code>, the four older <code>tools/*check.mjs</code>, and the page in headless Chrome
+(the waist field, dead rows none and 1, the three sockets, a saved rev A11c design): no error on the console.</p>
+<p><strong>Not checked.</strong> The three sockets' drawings (sizes are from distributor listings; pad layouts are not in the tool).
+Whether a 0.5 mm wall with an open channel beside it holds a clip in a printed or moulded shell. The ramp of the
+deeper waist against the shell's rail blocks. Prices are single listings on one day.</p>
+<h2>Rev A11c: two ports, and nothing tied across the seam</h2>
+<p><strong>Changed by rev A11d, above:</strong> the extender no longer skips a row (27.94 mm wide, not 30.48; its first column on the
+grid plane), and the waist in the breadboard's side is deeper for it. The rest of this section stands.</p>
+<p>Kevin, 2026-11-28: the expansion port "will have a lot more signals than just 22", it is "the general expansion port,
+so basically everything you'd want to add to a Jumperless"; split it into "routable connections on the side and other
+data connections on top", the top one "like an m.2 or pcie so we can also put routable connections there and have
+just the simple header on the side". And: "we're not going to use ties on the rails, that's inelegant."</p>
+<ul>
+<li><strong>Two ports.</strong> <code>port</code> is the general expansion port again, on the top edge: the M.2 socket where rev A10d had it
+  (x 56.0, y -19.329, on top of the main board). <strong>Expansion port</strong> in the Design panel chooses it from the list it
+  had before; the 1.27 mm side socket is no longer an entry in that list. <code>side</code> is the 1.27 mm right-angle socket,
+  2 x 11, now a part of its own, where rev A11 put it (x 72.92, y -3.2, turned 180, mouth in the right edge).
+  <strong>A header socket in the right side</strong>, in <strong>Side port and extender</strong>, puts it in and takes it out. The extender
+  finds its socket by type (<code>skt_ra_127</code>), whatever the part is called.</li>
+<li><strong>They fit together.</strong> The M.2 socket, the side socket and the USB-C share no space: 72 % of the component room
+  with both ports, 68 % with the side socket alone. Of the other top ports in the list, the two mini PCIe sockets, the
+  4.8 mm M.2 socket and the HEE70 card-edge slot clear the side socket as well. The SO-DIMM socket, which already ran
+  into the USB-C, runs into the side socket too. The PCIe x1 right-angle socket and the SFP cages clash with the
+  display and the USB-C as they did before, with the side socket in or out.</li>
+<li><strong>Nothing ties the seam.</strong> The staples at the holes beside the rails and the four rail jumpers are out of the
+  built-in design and out of the page. (<code>extender.ties</code> is <code>none</code> and <code>jumpers</code> is false in the catalogue. A design
+  file that sets <code>ties: "staple"</code> or <code>jumpers: true</code> by hand is still drawn and checked with them; nothing in the
+  page sets either.) What holds the extender is the header pair and the key in the waist, and the check line says what
+  that means as a caution, not a pass: 0.1 mm of side play in the 14.32 mm pair is 0.45 mm at the bottom corner of the
+  73.49 mm seam, and nothing pulls the seam shut below the header.</li>
+<li><strong>The rails.</strong> With the jumpers gone, nothing drawn joins the extender's four rails to the unit's. All 22 pins of
+  the side socket go to rows, so as drawn the extender's rails are four strips of their own.</li>
+<li><strong>A saved design.</strong> One from rev A10d or before keeps its top port as it was (moved, changed or absent) and is given
+  the side socket and the extender. One from rev A11 or A11b, where the side socket stood in the port's place, has
+  that socket renamed <code>side</code> with its place and size kept, the M.2 socket put back on the top edge, and its staples
+  and jumpers turned off. The line at the top of the Design panel says which of these happened. A design of this
+  revision is left alone.</li>
+</ul>
+<p><strong>What it leaves open</strong></p>
+<ul>
+<li><strong>Pins on the side.</strong> 22 rows take all 22, so a board on the side has no 5 V, ground or LED data, and no rails from
+  the unit; the top port is on another edge and a side board does not reach it. Three ways to get pins: fewer rows
+  (9 columns are 18 rows and leave 4 pins), the USB-C about 3 mm further up its corner so the socket can be 2 x 14
+  (6 more), or a second connector on the seam.</li>
+<li><strong>The seam.</strong> Whether the header pair and the key are enough can be felt on a first pair and not before: no
+  mating force is published for the 1.27 mm pair, and its contacts are sprung, so the 0.45 mm is a geometric worst
+  case and not a measurement. Nothing else is drawn. Two ways that are not ties, neither drawn nor checked: a spring
+  finger milled in the extender's bottom board in the centre channel, clicking into a notch in the unit's board edge
+  (about 12 x 1.0 mm, a 0.4 mm barb: 0.4 % strain in FR4, about 2 N); or a second small plug low on the seam, which
+  would also bring the missing pins but has no room above the main board under the breadboard.</li>
+<li><strong>The same lanes on two ports.</strong> If the top port carries routable connections too, whether they are the side
+  header's 22 nets again (a card in each port then shares them) or lanes of their own is not decided here; the tool
+  is mechanical and holds neither.</li>
+</ul>
+<p><strong>Checked.</strong> <code>node tools/extcheck.mjs</code> (72 cases: both variants; the two ports and the USB-C clear of each other;
+1 to 20 columns at 1 to 3 dead rows; the side socket moved in, out, turned, under the board and absent, and the top
+port absent; staples and jumpers only when a design asks; no key, a short head, no top board, a one-board stack; the
+socket's length against the USB-C; designs saved by A10d, A11, A11b and A11c), <code>node build.mjs --check</code>, the four older
+<code>tools/*check.mjs</code> (<code>migratecheck</code>'s rev A6 case now starts without a side socket, as an A6 design does), and the page
+in headless Chrome (each way of drawing it, the side socket out and in, every entry of the Expansion port list with
+the side socket in and out, the extender off and on, a saved rev A11b design): no error on the console.</p>
+<p><strong>Not checked.</strong> What rev A11 lists below still stands. Added to it: the M.2 card's swing-in path next to the USB-C
+plug and a board on the side at the same time, and anything electrical about either port.</p>
+<h2>Rev A11: the expansion port in the right side, and the extender</h2>
+<p><strong>Changed by rev A11c, above:</strong> the socket in the right side is no longer the expansion port but a part of its own
+beside it (the M.2 socket is back on the top edge), and the staples and rail jumpers described here are out of the
+built-in design and out of the page. The rest of this section stands.</p>
+<p>Kevin, 2026-11-27, with a notebook page of the unit and a narrow board beside it: "the expansion port should go on the
+side, so we can also make a jumperless extender that doesn't require any more crossbars, just have the ~22 routable
+connections go to 22 more rows of breadboard that can be replaced with whatever expansion." He asked for ways to hold
+such a board mechanically and electrically. Three were laid out (a plug in the end of the top band, a 0.1 inch socket
+rail down the side, a card edge on the seam) and he had the first, the one recommended, put in the viewer. The other
+two, and why a card edge does not work on this side, are in the claude.ai V6 project doc
+<code>claude/V6_side_port_and_extender.md</code>.</p>
+<ul>
+<li><strong>The port.</strong> The built-in design's expansion port is now a 1.27 mm right-angle socket, 2 x 11, on top of the main
+  board where the top band ends, under the USB-C: <code>skt_ra_127</code> at x 72.92, y -3.2, turned 180, so its mouth is in the
+  right edge and its pin 1 is the lowest. It is 3.1 high in the 5.15 mm between the main and the top board: the mid
+  board is opened for it, the top board is whole over it, and nothing shows but the mouth. <strong>Expansion port → 1.27 mm
+  right-angle socket in the right side</strong> puts it there; the M.2 socket and the others are still in the list. Its
+  positions per row are a number of the part (2 to 40).</li>
+<li><strong>The extender</strong> (<code>extender</code> in <code>v6_outline.json</code>; <strong>Side port and extender</strong> in the Design panel): a breadboard of
+  11 columns, 22 rows, standing against the right side. Its left edge is on the unit's right grid plane and its first
+  column is 5.08 mm from column 30 (one dead row), so the pair is on one 0.1 inch grid: 114.3 mm, 45 rows. It has the
+  breadboard's own rows, shell height and top board, and a head 18.5 mm high beside the band: its one board, with the
+  header on it in the open (rev A11 drew a second board over the head; A11b took it out, below). Columns, dead rows
+  (1 to 3), the head's height, the key and the ties are settings. Each row goes to one pin of the socket, which is
+  why it needs no crossbar.</li>
+<li><strong>How the two meet.</strong> The header (<code>hdr_ra_127</code>, as many positions as the socket) has its plastic face on the
+  extender's edge and its pins 4.0 mm into the unit, pin 1 level with the socket's. The two bottom boards are at the
+  same height, so the extender slides in sideways on the bench.</li>
+<li><strong>What holds it.</strong> The header pair is 14.3 mm of joint at the top of a 73.5 mm seam: 0.1 mm of side play in it is
+  0.45 mm at the bottom corner. So the seam is tied at the two holes the wig's top board already has beside the rails
+  on its last column (x 76.2, y 8.64 and 46.74, from <code>wiigtop.3mf</code>): the extender has the same on its first column,
+  and a staple of 1.0 mm wire, 5.08 span, goes down one of each. The extender's edge also fills the 0.635 mm waist in
+  the breadboard's side, 0.2 clear (13.4 mm² of key), so the two cannot slide along the seam. The four rails are
+  carried across on 5.08 mm jumpers and take no socket pins.</li>
+<li><strong>Checks</strong> (<code>checks.extender</code>; the Side port and extender box; EXTENDER in <code>checks.txt</code>): on the grid; the socket's
+  mouth against the edge and how far the pins go in; pins against rows; the header on the head; plan shared with the
+  unit; the ties, or the play without them; the nearest magnetometer to the socket or a tie hole.
+  <code>node build.mjs --check</code> fails if a shown extender overlaps the unit or does not meet its socket.</li>
+<li><strong>Files.</strong> <code>out/&lt;variant&gt;/EX_Extender_board.kicad_pcb</code> and <code>.dxf</code>: the extender's bottom board on the unit's datum,
+  its outline as lines and arcs, its header as an outline. <code>plan.svg</code> draws the extender in purple. Both are in
+  Export files too.</li>
+<li><strong>A saved design</strong> takes the extender (new settings start at their defaults) and, if its port was still the M.2
+  socket where the page had put it (x 56, not turned, on top of the main board), the side socket in its place; the
+  line at the top of the Design panel says so. A port that was moved or changed is kept, and the extender then says
+  it has no socket. A design brought up from an older page opens with the whole of it in view.</li>
+<li><strong>Show the next unit</strong> stands the next unit past the extender.</li>
+</ul>
+<p><strong>Rev A11b, the same evening.</strong> Kevin: "the side port top area doesn't need a top board, it can just be one pcb." The
+built-in design has no board over the extender's head (<code>extender.cover: false</code>): the head is the extender's bottom
+board alone, and the header stands on it in the open, its top 3.35 mm below the frame's top face. <strong>A second board
+over its head</strong> is still a switch in the section. A design that rev A11 saved has that board on only because A11
+drew it, so it is turned off when the design is brought up, and the line at the top of the Design panel says so; one
+turned on from A11b onwards is kept.</p>
+<p><strong>What it found</strong></p>
+<ul>
+<li>2 x 11 is as long as the socket can be there: 2 x 12 runs 0.55 mm² into the USB-C, 2 x 13 3.1 and 2 x 14 7.25. So
+  as drawn the port carries the 22 rows and nothing else: no 5 V, ground, LED data or ID, and the extender's rows
+  would be dark. Six more pins (2 x 14, 18.1 mm long) want the USB-C about 3 mm further up its corner.</li>
+<li>The tie holes are 1.2 mm and 2.54 mm from the next hole: room for a wire or an M1.4 screw head, not an M2's. The
+  "ear of the top board under an M2" offered in the chat as the permanent tie does not fit, and is not in the tool.</li>
+<li>Magnetometer M10 (76, -6) is 3.6 mm from the socket, and the two under the breadboard's right end are 7 and 9 mm
+  from that edge. No magnets on this seam; brass or A2 stainless for anything screwed there.</li>
+<li>The extender is 30.48 mm wide, not the 33 said in the chat.</li>
+</ul>
+<p><strong>Calls made without asking</strong></p>
+<ul>
+<li>"It" was taken to be the first of the three ways. Nothing of the other two is in the tool.</li>
+<li>The built-in port moved from the top edge to the side, and a saved design's untouched M.2 socket moves with it.</li>
+<li>The head's height (18.5), its rounded chamfer, the key and the rail jumpers are not in the sketch, which shows a
+  head about half the band's height with one chamfered corner. (Nor was the board over the head; it went in A11b.)</li>
+<li>The extender has no left strip of its own (one dead row). Dead rows 2 or 3 stand for one.</li>
+<li>Staples only: <code>ties</code> is <code>staple</code> or <code>none</code>.</li>
+</ul>
+<p><strong>Checked.</strong> <code>node tools/extcheck.mjs</code> (69 cases: both variants, with and without the second board over the head; 1 to 20 columns at 1 to 3 dead rows; the socket moved
+in, out, turned, under the board and absent; no ties, no key, a short head, no top board, a one-board stack; the
+socket's length against the USB-C; what a saved design keeps), <code>node build.mjs --check</code>, the four older
+<code>tools/*check.mjs</code>, and the page in headless Chrome (each way of drawing it, the stack exploded, both variants, every
+control of the section, a saved rev A10d design with its port untouched and with it moved): no error on the console.</p>
+<p><strong>Not checked.</strong> The KiCad and DXF files in KiCad. <code>step_export.py</code> does not know the extender, so the STEP is the
+unit alone. The 1.27 mm pair's mating force and cycle life (none is published), and how it takes being pushed in
+sideways with nothing to lead it: a shrouded header or two guide tabs would, and neither is drawn. Whether the moulded
+shell keeps the holes beside the rails (the shell spec left what goes there open), and what is in them today. The
+display's FPC tail, which leaves the module at that end and is not modelled. The extender's own clips, LEDs and wiring
+are not drawn. Nothing of this is built.</p>
+<h2>Rev A10d: no keys beside the display, and the picture centred</h2>
+<p>Kevin, 2026-11-27: "take out the 2 buttons from the side in the outline viewer, we'd want the screen more or less
+centered", and the display is settled as the 2.2 inch bar, with the 2.79 inch as a maybe.</p>
+<ul>
+<li><strong><code>key1</code> and <code>key2</code> are gone</strong> from the built-in design (the two cantilevered keys at x 64.5 and 70.5, y -5, their
+  switches on the mid board). The <code>btn_cantilever</code> part and the tongue cut are still in the tool: <strong>Buttons A and B</strong>
+  under Parts, or the parts browser, puts one back. The top board keeps 68 mm2 more (1577 against 1509).</li>
+<li><strong>The display's picture is centred on the breadboard.</strong> The 2.2 inch bar is at x = 40.745, y = -9.9 (it was at
+  x = 30). Its active area runs from x 12.19 to 66.55, so it stands 12.19 mm in from each end of the breadboard and its
+  middle is on x = 39.37, between columns 15 and 16. The module's own middle is 1.375 mm further right, because the dead
+  border is 1.5 mm at one end and 4.25 mm at the FPC end; the module runs from x 10.69 to 70.80. y is unchanged: the
+  module's lower edge is 1.1 mm above the breadboard's top edge.</li>
+<li><strong>Nothing clashes, with the module up through the top board or behind a window.</strong> Behind a window in the 1.6 mm top
+  board the module no longer reaches the click wheel (rev A8 and A10c had it 0.47 mm into the wheel); it has 0.155 mm
+  under it there, 0.755 with a 1.0 mm top board and 0.955 with 0.8 mm. Its upper edge passes 0.28 mm from the M.2
+  socket in plan (the socket ends at y = -18.98, the module at -18.70), and under a 1.6 mm top board the two share
+  0.57 mm of height, so that 0.28 mm is all that keeps them apart: moving the display up, or a wider module, brings the
+  clash back.</li>
+<li><strong>Changing the display for another keeps the picture where it was.</strong> Picking another type in <strong>Display</strong> used to keep
+  the part's x and y. Now the middle of the picture stays on the same x and the module's lower edge (the side towards
+  the breadboard, cover glass included) stays on the same y, whatever the two modules' sizes and borders. The 2.79 inch
+  bar therefore lands at x = 40.617, y = -13.29, centred and 1.1 mm above the breadboard, where it used to land on
+  the breadboard's shell (134 mm2 of overlap). Going to <strong>none</strong> and back puts a display where the built-in design
+  has its own.</li>
+<li><strong>The 2.79 inch bar, centred</strong> (module x 5.90 to 75.33, y -25.48 to -1.10; picture x 7.30 to 71.44): with the module
+  up through the top board it clashes with nothing (z 4.65 to 6.75, 0.55 mm above the M.2 socket). Behind a window it
+  runs into the M.2 socket, which it lies over for 142 mm2: by 1.05 mm under a 1.6 mm top board (and 0.21 mm into the
+  USB-C shell), 0.45 mm under 1.0 mm, 0.25 mm under 0.8 mm. It clears under a 0.5 mm top board, or under 0.8 mm with the
+  gap below it 0.3 mm larger (the top face then 0.3 mm above the shell, still 0.41 mm below the breadboard's face).</li>
+<li><strong>Where a fresh control lands.</strong> The display now lies across the middle of the band, so the old spots for the
+  Directional switch, Joystick and Buttons A and B selectors were under it. They are now the block on the left under the
+  click wheel (x 4.5, y -6.5) for the first two, and the 7.9 mm strip to the right of the display for the buttons, one
+  above the other (x 74.8, y -5.5 and -12.5). Eight of the nine directional switches and 27 of the 34 buttons land
+  there with no clash and nothing past the board's edge; none of the four joysticks in the list does.</li>
+<li><strong>A design the page remembers</strong> (rev A10c or older) takes the change where it is still as drawn: a <code>key1</code> or <code>key2</code>
+  that is still the cantilevered key at its old place is removed, and a 2.2 inch bar still at x 30, y -9.9, turned 90,
+  moves to the new place (keeping a window, if it has one). A key that was moved, turned, remounted or changed for
+  another part stays, and so does a display that was moved or changed. <strong>Back to the built-in design</strong> takes all of it.
+  <code>node tools/migratecheck.mjs</code> covers ten cases of this; <code>node tools/tonguecheck.mjs</code> puts the two keys and the old
+  display position back for its own cases, since the built-in design no longer has them.</li>
+<li>Run for this revision: <code>node build.mjs --check</code>, the four <code>tools/*check.mjs</code>, <code>python3 step_export.py</code> (both STEP files
+  rewritten) and <code>python3 tools/verify.py</code> (ALL OK), the last two in a cloud session with CadQuery 2.8.0 and ezdxf 1.4.5.
+  <code>dist/</code> was not rebuilt (it is as rev A10 left it on 2026-11-25) and nothing was sent to slopswap.</li>
+<li>Sections below that speak of the two keys, or of the display at x 30, describe the revisions they are about.</li>
+</ul>
 <h2>Rev A10c: the strip's end meets the breadboard's chamfer square</h2>
 <p>At the breadboard's bottom-left corner the strip stops and the breadboard's own corner chamfer begins. Until now the
 space that chamfer leaves was either filled flat to the corner or left open, by whatever the fill rule made of it.
@@ -918,7 +1292,11 @@ percentile / worst hole, and how far a 10 µT ambient change moves the fix (medi
 </tr>
 <tr>
 <td><code>tools/migratecheck.mjs</code></td>
-<td>what a saved design keeps and what it takes from a newer revision (the strip's end, rev A10c)</td>
+<td>what a saved design keeps and what it takes from a newer revision (the strip's end, rev A10c; the two keys and the display's place, rev A10d)</td>
+</tr>
+<tr>
+<td><code>tools/extcheck.mjs</code></td>
+<td>the socket in the right side and the extender (rev A11 to A11d): the two ports clear of each other, the column on the seam and the waist it needs, the three sockets for the side, on the grid, header against socket, no plan shared with the unit, nothing tied unless a design asks, the socket's length against the USB-C, what a saved design keeps</td>
 </tr>
 <tr>
 <td><code>src/catalog.js</code></td>
@@ -1011,9 +1389,10 @@ User.Comments. They are a one-way export: edits made in KiCad do not come back i
   1.6 N tact with 0.25 mm travel, square slot ends, no stress raiser at the root. Nothing was bent.</li>
 <li>The STEP file draws library parts as blocks, not their models.</li>
 <li><strong>The new parts and the magnetometers have not been looked at together.</strong> The default frame sensors sit on
-  the main board's underside at y = −6 (x 10, 32, 54, 76); the bar display lies over three of them and key2's
-  switch is about 5.5 mm from the fourth in plan. A tact switch's dome and frame are steel and a display has a
-  metal back; what they do to the probe fix is not in the magnetometer model.</li>
+  the main board's underside at y = −6 (x 10, 32, 54, 76); since rev A10d the bar display lies over the two in the
+  middle, its left end is 0.7 mm from the first in plan and its right end 5.2 mm from the fourth. A display has a
+  metal back (and a tact switch's dome and frame are steel); what they do to the probe fix is not in the magnetometer
+  model.</li>
 <li>The sketch was read from one photo of a curled page. Near the breadboard it is good to 0.2 mm (the
   traced wig lands on the real outline); at the top of the band the notebook's 5 mm dots come out 4.93 to
   5.0 apart, so allow 0.5 mm there.</li>
