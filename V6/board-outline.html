@@ -25,19 +25,26 @@ header.top { display: flex; align-items: center; gap: 10px; padding: 9px 12px 6p
 
 .rev { font-size: 11px; color: var(--dim); }
 .spacer { flex: 1; }
-#headline { display: inline-flex; gap: 6px; flex-wrap: wrap; }
+/* the verdicts in the top rail never move the page: their box counts as 48 px when the rail is laid out, takes what room is
+   left on its line, and what does not fit in it is cut off (the whole of it is in the box's tooltip, and under Checks) */
+header.top > .spacer { display: none; }
+#headline { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; flex: 1 1 48px; min-width: 0; overflow: hidden; white-space: nowrap; }
+#headline > .pill { flex: none; }
 
 /* a heading inside a panel: a small plate on a rule, each the next colour of the rainbow; here it also folds its section */
 
 .sec:first-child h2, #checks > h2:first-child { margin-top: 2px; }
 #checks > h2:nth-of-type(6n+1) { --c: var(--r2); } #checks > h2:nth-of-type(6n+2) { --c: var(--r3); } #checks > h2:nth-of-type(6n+3) { --c: var(--r7); }
 #checks > h2:nth-of-type(6n+4) { --c: var(--r8); } #checks > h2:nth-of-type(6n+5) { --c: var(--r10); } #checks > h2:nth-of-type(6n+6) { --c: var(--r11); }
+/* a section's title is in its own colour and a size up from the labels, so the folds are easy to find; folded, the colour is kept, a little quieter */
+section.sec > h2 { font-size: 14.5px; letter-spacing: .1em; color: var(--c, var(--accent)); margin-top: 16px; }
+section.sec > h2::before { width: 11px; height: 11px; }
 h2 .sech { all: unset; cursor: pointer; font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit; }
 h2 .sech::after { content: "  \2212"; color: var(--dim); font-family: var(--mono); }
 .sec.shut h2 .sech::after { content: "  +"; }
-h2 .sech:hover { color: var(--accent); } h2 .sech:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+h2 .sech:hover { color: var(--ink); } h2 .sech:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .sec.shut .secbody { display: none; }
-.sec.shut h2 { color: var(--dim); }
+section.sec.shut > h2 { color: color-mix(in srgb, var(--c, var(--accent)) 74%, var(--bg)); }
 
 /* a button is a plate with one corner cut; under the pointer it lights, pressed it turns over */
 
@@ -9367,7 +9374,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
   //      the two holes beside the rails; wire = the staple's wire; jumpers = the four rails carried across on jumpers.
   //      Rev A11c: no staples and no rail jumpers (Kevin, 2026-11-28: "we're not going to use ties on the rails, that's inelegant").
   //      ties: 'staple' and jumpers: true still draw them for a design that asks; nothing in the page sets them.
-  var EXTENDER = { on: false, cols: 11, dead_rows: 0, rail_skip: 1, head: 18.5, cover: false, key: true, ties: 'none', wire: 1.0, jumpers: false, chan: 2.04, clip: 1.86, join: 'side' };       // dead_rows 0 since rev A11d
+  var EXTENDER = { on: false, cols: 11, dead_rows: 0, rail_skip: 1, head: 18.5, cover: false, key: true, ties: 'none', wire: 1.0, jumpers: false, chan: 2.04, clip: 1.86, join: 'side', outer: 'in' };       // dead_rows 0 since rev A11d
   var extTies = { none: 'none', staple: 'wire staples in the holes beside the rails' };
   // where the socket in the right side goes when the page adds it: mouth in the edge, pin 1 the lowest, just above the breadboard's corner
   var SIDE = { id: 'side', type: 'skt_ra_127', back: 5.82, y: -3.2, rot: 180, n: 11 };
@@ -10201,7 +10208,12 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
       for (k in XD) X[k] = XD[k];
       for (k in P.extender) if (k.charAt(0) !== '_') X[k] = P.extender[k];
       var edRaw = Math.round(+X.dead_rows), en = Math.max(1, Math.min(40, Math.round(+X.cols) || 11)), ed = Math.max(0, Math.min(MAX_DEAD + 1, isFinite(edRaw) ? edRaw : 1));      // 0 since rev A11d: no hole position skipped
-      var ex0 = xr, ex1 = round(xr + (ed + en) * pitch), eh = Math.max(0, +X.head || 0), H = w.height, W = w.width, quiet = [];
+      // rev A12e: its outer edge has a breadboard's side profile too. 'in' (the default): the unit's own right side, waist and
+      // all, so the pair ends as the unit alone does and a second extender fits it as this one fits the unit. 'out': the mirror
+      // image of its own seam edge, its last column on the outer grid plane in an edge that bows out (the columns are counted
+      // the same, so the body between the two planes is one pitch narrower).
+      var outie = X.outer === 'out' && en > 1;
+      var ex0 = xr, ex1 = round(xr + (ed + en - (outie ? 1 : 0)) * pitch), eh = Math.max(0, +X.head || 0), H = w.height, W = w.width, quiet = [];
       var rowsY = ref.rows && ref.rows.length ? ref.rows : (function () { var a = []; for (var r = 0; r < 20; r++) if (r !== 2 && r !== 3 && r !== 16 && r !== 17) a.push(3.556 + r * pitch); return a; })();
       var ecols = []; for (k = 0; k < en; k++) ecols.push(round(xr + (ed + k) * pitch));
       // its plan: the breadboard part has the wig's own corners; the head stands beside the top band, a rounded chamfer on its free corner
@@ -10239,12 +10251,41 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
         return kk;
       }
       var sx = (W - w.shell.w) / 2, sy = (H - w.shell.h) / 2;
-      var shellR = inter(bodyR, region([rectPts(ex0 + sx, sy, ex1 - sx, sy + w.shell.h)])), faceR = faceP ? bodyR : null;
+      // the outer edge (rev A12e). spaceOf: what the breadboard's side leaves open in its middle (the waist), as it is; moved to
+      // this board's outer edge it is the same waist, in its shell, its board and (the deeper one) its top board. The edge
+      // that bows out is the seam's key mirrored about the middle of this board, gaps and all.
+      function spaceOf(reg) {
+        var out = [];
+        expolys(offset(offset(diff(region([rectPts(W - 3, 4, W, H - 4)]), reg || wigRegion), -0.03), 0.03)).forEach(function (e) {
+          var pc = region([e.outer]), b = bbox(pc);
+          if (area(pc) < 0.5 || b.x1 < W - 0.05) return;
+          out = out.concat(union(pc, region([rectPts(W - 0.002, b.y0, W + 0.5, b.y1)])));
+        });
+        return out;
+      }
+      function movedX(a, dx) { var kq = Math.round(dx * SC); return a.map(function (pp) { return pp.map(function (q) { return { X: q.X + kq, Y: q.Y }; }); }); }
+      var kbK = keyOf(w.pcb_gap), ksK = keyOf(w.fit_gap), kfK = faceP ? (wigFaceRegion ? keyOf(w.fit_gap, wigFaceRegion) : ksK) : [];
+      var bodyS = bodyR, bodyF = bodyR, oB = [], oS = [], oF = [], oPast = false;
+      if (outie) {
+        oB = mirrorRegion(kbK, ex0 + ex1); oS = mirrorRegion(ksK, ex0 + ex1); oF = mirrorRegion(kfK, ex0 + ex1);
+        if (oB.length) boardR = union(boardR, oB);
+      } else {
+        var oCut = movedX(spaceOf(wigRegion), ex1 - W), oCutF = wigFaceRegion ? movedX(spaceOf(wigFaceRegion), ex1 - W) : oCut;
+        if (oCut.length) {
+          bodyS = diff(bodyR, oCut);
+          oPast = area(inter(eoR, region([rectPts(ex1 + 0.05, 4, ex1 + 80, H - 4)]))) > 0.01;      // an outline drawn out past this edge keeps its board whole
+          if (!oPast) boardR = diff(boardR, oCut);
+        }
+        if (oCutF.length) bodyF = diff(bodyR, oCutF);
+      }
+      var shellR = inter(bodyS, region([rectPts(ex0 + sx, sy, ex1 - sx, sy + w.shell.h)])), faceR = faceP ? bodyF : null;
+      if (oS.length) shellR = union(shellR, oS);
+      if (faceR && oF.length) faceR = union(faceR, oF);
       if (X.key !== false) {
-        var kb = keyOf(w.pcb_gap), ks = keyOf(w.fit_gap);
+        var kb = kbK, ks = ksK;
         if (kb.length) { boardR = union(boardR, kb); keyed = round(area(inter(union(kb), region([rectPts(0, 0, W, H)]))), 2); }
         if (ks.length) shellR = union(shellR, ks);
-        if (faceR) { var kf = wigFaceRegion ? keyOf(w.fit_gap, wigFaceRegion) : ks; if (kf.length) faceR = union(faceR, kf); }
+        if (faceR) { var kf = kfK; if (kf.length) faceR = union(faceR, kf); }
       }
       // only if asked for (rev A11b: the head is the one board): a second board over the head, level with the frame's top board,
       // following the top of this board's own shell
@@ -10266,10 +10307,11 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
       // The rails are at the breadboard's corners, where there is no waist to bow into, so they start rail_skip columns later.
       var skip = ed === 0 ? Math.max(1, Math.min(3, Math.round(+X.rail_skip) || 1)) : 0, nR = rowsY.length, tc = Math.min(skip, en - 1);
       function isRail(i) { return nR >= 8 && (i < 2 || i >= nR - 2); }
+      var skipO = outie ? Math.max(1, Math.min(3, Math.round(+X.rail_skip) || 1)) : 0, tl = Math.max(tc, en - 1 - skipO);      // the same at an outer edge that bows out
       var holes = [];
       if (faceR) {
-        ecols.forEach(function (cx, ci) { rowsY.forEach(function (cy, ri) { if (ci < skip && isRail(ri)) return; holes.push([cx, cy, big[0], big[1]]); }); });
-        tieY.forEach(function (ty) { holes.push([ecols[tc], ty, big[0], big[1]]); if (en - 1 > tc) holes.push([ecols[en - 1], ty, big[0], big[1]]); });
+        ecols.forEach(function (cx, ci) { rowsY.forEach(function (cy, ri) { if ((ci < skip || ci > en - 1 - skipO) && isRail(ri)) return; holes.push([cx, cy, big[0], big[1]]); }); });
+        tieY.forEach(function (ty) { holes.push([ecols[tc], ty, big[0], big[1]]); if (tl > tc) holes.push([ecols[tl], ty, big[0], big[1]]); });
       }
       // That column on the grid plane: the breadboard keeps a wall beside its own last column, and this board's first channel is open
       // on that side, closed by that wall. chan and clip are the shell's channel and the spring clip's width (2.04 and 1.86 in
@@ -10294,6 +10336,28 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
           fits: X.key !== false && wall >= 0.4 - 1e-6 && clear >= 0.05 - 1e-6 && land >= 0.1 - 1e-6 && (!fLand || (fLand.ext >= 0.1 - 1e-6 && fLand.unit >= 0.1 - 1e-6)) };
         if (!seamCol.fits) notes.push('The extender has no dead row, but its first column does not fit on the seam: ' + (X.key === false ? 'its edge does not bow into the waist.' : 'the waist in the breadboard\'s side is ' + seamCol.has + ' mm deep and a column there needs ' + seamCol.need + '.'));
       }
+      // the outer edge's own figures (rev A12e): the wall the waist leaves beside the last column, or how far the edge bows out
+      // round a column on the outer grid plane, and the land each board keeps there.
+      var outer = (function () {
+        var chanO = +X.chan || 2.04, csO = big[0], mainO = rowsY.filter(function (y, i) { return !isRail(i); }); if (!mainO.length) mainO = rowsY;
+        var o0 = mainO[0] - pitch / 2 - 0.25, o1 = mainO[mainO.length - 1] + pitch / 2 + 0.25, lastX = ecols[en - 1];
+        var stripO = region([rectPts(Math.max(ex1 - 3, (ex0 + ex1) / 2), o0, ex1 + 3, o1)]);
+        function inmost(reg) { var sp2 = diff(stripO, reg); return area(sp2) > 0.001 ? bbox(sp2).x0 : ex1 + 3; }       // an edge along the channels, where it is furthest in
+        function outmost(reg) { var in2 = inter(stripO, reg); return area(in2) > 0.001 ? bbox(in2).x1 : ex1 - 3; }       // and where it is furthest out
+        var sIn = inmost(shellR), sOut = outmost(shellR), bIn = inmost(boardR), fIn = faceR ? inmost(faceR) : null;
+        var o = { kind: outie ? 'out' : 'in', asked: X.outer === 'out' ? 'out' : 'in', x: round(ex1), col_x: round(lastX), y0: round(o0, 2), y1: round(o1, 2), board_whole: oPast };
+        if (outie) {
+          o.bow = round(sOut - ex1, 3); o.land = round(bIn - (ex1 + 0.55), 3); o.face_land = fIn == null ? null : round(fIn - (ex1 + csO / 2), 3);
+          o.fits = o.bow >= chanO / 2 - 0.25 && o.land >= 0.1 - 1e-6 && (o.face_land == null || o.face_land >= 0.1 - 1e-6);
+        } else {
+          o.depth = round(ex1 - sIn, 3); o.wall = round(sIn - (lastX + chanO / 2), 3); o.land = round(bIn - (lastX + 0.55), 3); o.face_land = fIn == null ? null : round(fIn - (lastX + csO / 2), 3);
+          o.fits = o.wall >= 0.4 - 1e-6 && (o.face_land == null || o.face_land >= 0.1 - 1e-6);
+        }
+        return o;
+      })();
+      if (X.outer === 'out' && !outie) notes.push('An extender whose outer edge bows out needs two columns or more: with one, the edge goes in.');
+      if (!outer.fits) notes.push(outie ? 'The extender\'s outer edge bows out, but its last column does not fit on the outer grid plane: the edge stands ' + outer.bow + ' mm out and the board has ' + outer.land + ' mm beside the solder tab.'
+        : 'The extender\'s outer edge goes in ' + outer.depth + ' mm, which leaves a ' + outer.wall + ' mm wall beside its last column.');
       var room = Math.min.apply(null, tieY.map(function (ty) { return Math.min.apply(null, rowsY.map(function (r) { return Math.abs(r - ty); })); }));
       // the socket it plugs into, and its own header: plastic face on this board's edge, pin 1 level with the socket's
       var SKs = Catalog.sideKinds, sp = null; (P.parts || []).forEach(function (u) { if (!sp && SKs[u.type]) sp = u; });
@@ -10331,7 +10395,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
         ties: { kind: kind, wire: wire, hole: big[1], from_ref: tieRef, room: round(room, 3), at: tieY.map(function (ty) { return [tieX, round(ty)]; }),
           list: kind === 'none' ? [] : tieY.map(function (ty) { return { y: round(ty), x0: tieX, x1: ecols[tc], span: round(ecols[tc] - tieX) }; }) },
         jumpers: railRows.map(function (ry) { return { y: round(ry), x0: round(g.cols * pitch), x1: ecols[tc] }; }),
-        rail_skip: skip, seam_col: seamCol, tab_in: tabIn, outline: { pts: eoB.pts, verts: eoV.map(function (v) { return { x: v.x, y: v.y }; }), src: eoV, own: !!(X.outline && X.outline.length > 2) } };
+        rail_skip: skip, seam_col: seamCol, outer: outer, tab_in: tabIn, outline: { pts: eoB.pts, verts: eoV.map(function (v) { return { x: v.x, y: v.y }; }), src: eoV, own: !!(X.outline && X.outline.length > 2) } };
     })(PX, W0, wigX, wigFaceX, refX);
     // rev A12: mirrored back. Every x of what the two blocks made, their regions, and the extender's own parts turned to lie
     // on the mirror image of where the blocks put them. x0 < x1 whichever side; cols[0] is still the column next to the unit.
@@ -10369,6 +10433,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
       ext.ties.at = ext.ties.at.map(function (q) { return [MX(q[0]), q[1]]; });
       ext.ties.list.forEach(function (t) { var b0 = MX(t.x1), b1 = MX(t.x0); t.x0 = b0; t.x1 = b1; });
       ext.jumpers.forEach(function (t) { var b0 = MX(t.x1), b1 = MX(t.x0); t.x0 = b0; t.x1 = b1; });
+      if (ext.outer) { ext.outer.x = MX(ext.outer.x); ext.outer.col_x = MX(ext.outer.col_x); }
       if (ext.seam_col) { var sc = ext.seam_col; sc.x = MX(sc.x); sc.unit_edge = [MX(sc.unit_edge[1]), MX(sc.unit_edge[0])]; if (sc.board_edge != null) sc.board_edge = MX(sc.board_edge); sc.side = 'left'; }
     })();
 
@@ -10575,7 +10640,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
       sensorSet.mmc.concat(sensorSet.tmag).forEach(function (s) { spots.forEach(function (q) { var d = Math.hypot(s.x - q.x, s.y - q.y); if (!near || d < near.d) near = { ref: s.ref, d: round(d, 1), what: q.what }; }); });
       var pw = mir ? xr - ext.x0 : ext.x1 - xl;
       if (pt && pt.press && press) pt.press.mags = sensorSet.mmc.concat(sensorSet.tmag).filter(function (s) { return press.rects.some(function (q) { return s.x > q[0] - 1.5 && s.x < q[2] + 1.5 && s.y > q[1] - 1.5 && s.y < q[3] + 1.5; }); }).map(function (s) { return s.ref; });
-      checks.extender = { tab_mm2: ext.tab_in ? round(area(ext.tab_in), 1) : 0, cols: ext.n_cols, rows: need, dead: ext.dead, col_gap: ext.col_gap, rail_skip: ext.rail_skip, seam_col: ext.seam_col, x0: ext.x0, x1: ext.x1, w: ext.w, head: ext.head, cover: !!ext.z.cover, keyed: ext.keyed,
+      checks.extender = { tab_mm2: ext.tab_in ? round(area(ext.tab_in), 1) : 0, cols: ext.n_cols, rows: need, dead: ext.dead, col_gap: ext.col_gap, rail_skip: ext.rail_skip, seam_col: ext.seam_col, outer: ext.outer, x0: ext.x0, x1: ext.x1, w: ext.w, head: ext.head, cover: !!ext.z.cover, keyed: ext.keyed,
         pair_w: round(pw), pair_rows: round(pw / pitch, 3), on_grid: Math.abs(pw / pitch - Math.round(pw / pitch)) < 1e-6,
         port: pt, need: need, spare: pt ? pt.pins - need : null, header: ext.header, overlap: ov, seam: round(ext.y1 - ext.y0, 2), tied: ext.ties.list.length > 0, play: play,
         side: ext.side,
@@ -10853,20 +10918,26 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     function fail(why) { P.frame.outline = saved; return { ok: false, why: why }; }
     if (!f) return fail('no such hump');
     var e = f.e, h = f.h, L = e.list, m = L.length - 1, k;
+    var was = L.map(function (v) { return [e.a(v), e.out(v)]; }), before = humpsOn(e).length;       // the edge as it is now, for layOn
     if (ch.out != null) {
       var o = +ch.out; if (!(Math.abs(o) > HUMP_EPS)) { P.frame.outline = saved; return humpRemove(P, key); }
       if (o < 0 && e.axis !== 'y') return fail('only a hump on a side can go in: the top edge\'s base line is its lowest level');
       if (o < 0 && (h.end0 || h.end1)) return fail('a hump that takes in a corner cannot go in');
       for (k = h.k0; k <= h.k1; k++) e.setOut(L[k], e.out(L[k]) * o / h.out);
     }
-    function shift(k0, k1, d) { for (var j = k0; j <= k1; j++) if (j > 0 && j < m) e.setA(L[j], e.a(L[j]) + d); }
+    // (2026-11-28, after rev A12) The hump is taken off its edge, moved, and laid back on (layOn), so one that now overlaps
+    // another becomes one hump with it. merged: how many humps fewer the edge has for it.
+    var prof = capture(e, h), base = Math.max(0, h.k0 - 1);
+    function at(j) { return prof[j - base]; }
+    function shift(k0, k1, d) { for (var j = k0; j <= k1; j++) { var q = at(j); if (q && q.end == null) q.a += d; } }
     if (ch.slide != null && +ch.slide) shift(h.k0 - 1, h.k1 + 1, +ch.slide);
     if (ch.a0 != null && !h.end0) { var d0 = +ch.a0 - h.a0; if (h.p0 === h.p1 && h.n === 1) shift(h.k0 - 1, h.k0 - 1, d0); else shift(h.k0 - 1, h.p0 === h.p1 ? h.p0 - 1 : h.p0, d0); }
     if (ch.a1 != null && !h.end1) { var d1 = +ch.a1 - h.a1; if (h.p0 === h.p1 && h.n === 1) shift(h.k1 + 1, h.k1 + 1, d1); else shift(h.p0 === h.p1 ? h.p1 + 1 : h.p1, h.k1 + 1, d1); }
-    if (!rising(e)) return fail('it would run past the next corner of the outline');
-    var lo = e.a(L[0]) + (h.end0 ? 0 : legOf(L[0], e.axis)), hi = e.a(L[m]) - (h.end1 ? 0 : legOf(L[m], e.axis));
-    if ((!h.end0 && e.a(L[h.k0 - 1]) < lo - 1e-6) || (!h.end1 && e.a(L[h.k1 + 1]) > hi + 1e-6)) return fail('it would run into the corner at the end of that edge');
-    commit(P, E); return { ok: true };
+    removeOn(e, h);
+    var why = layOn(e, prof, was);
+    if (why) return fail(why);
+    var merged = Math.max(0, before - humpsOn(e).length);
+    commit(P, E); return { ok: true, merged: merged };
   }
   // what a hump is made of, as a list of points along its edge: { a, o, spec, end } (end 0 or 1: it is the corner at that end)
   function capture(e, h) {
@@ -10892,19 +10963,87 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     var E = edgesOf(P), f = findHump(E, key); if (!f) return { ok: false, why: 'no such hump' };
     removeOn(f.e, f.h); commit(P, E); return { ok: true };
   }
-  // lay a captured hump on an edge. The points between its ends must fall on a clear stretch of the base line.
-  function layOn(e, prof) {
-    var L = e.list, m = L.length - 1, inner = prof.filter(function (q) { return q.end == null; }), k;
-    if (inner.length) {
-      var a0 = inner[0].a, a1 = inner[inner.length - 1].a;
-      if (a0 < e.a(L[0]) + 0.05 || a1 > e.a(L[m]) - 0.05) return 'there is no room for it on that edge';
-      for (k = m - 1; k >= 1; k--) { var ak = e.a(L[k]); if (ak > a0 - 0.05 && ak < a1 + 0.05) { if (Math.abs(e.out(L[k])) > HUMP_EPS) return 'another hump is in the way there'; L.splice(k, 1); } }
-      m = L.length - 1;
-      var at = 1; while (at < m && e.a(L[at]) < a0) at++;
-      inner.forEach(function (q, i) { var v = { x: 0, y: 0 }; for (var kk in q.spec) v[kk] = q.spec[kk]; L.splice(at + i, 0, v); e.setA(v, q.a); e.setOut(v, q.o); });
+  // Lay a captured hump on an edge (2026-11-28, after rev A12). What comes out is the outline of the edge as it is and the
+  // hump together, so a hump laid where another stands becomes one hump with it: the higher of the two wherever they overlap,
+  // and a new vertex where a flank of one crosses the other. A hump that goes IN (a cut, negative out) is taken out of the
+  // edge the same way, so two cuts that overlap become one cut, the deeper of the two. Worked as polygons hanging from the
+  // edge's profile: joined for a hump, subtracted for a cut.
+  // prof: { a, o, spec, end } in rising order of a (end 0 / 1: that point is the edge's own corner). was: the edge's profile
+  // before the hump was taken off it, when it is being moved along its own edge; a hump may not ADD to the shape of a corner
+  // it is not part of, nor a cut take from one. Returns null, or why it cannot be done.
+  function layOn(e, prof, was) {
+    var L = e.list, m = L.length - 1, aS = e.a(L[0]), aE = e.a(L[m]), D = 60, i, kk;
+    var N = prof.map(function (q) { return { a: q.end === 0 ? aS : q.end === 1 ? aE : q.a, o: q.o, spec: q.spec, end: q.end }; });
+    for (i = 1; i < N.length; i++) if (N[i].a < N[i - 1].a - 1e-6) return 'its two ends would cross';
+    if (N[N.length - 1].a < aS + 0.05 || N[0].a > aE - 0.05) return 'there is no room for it on that edge';
+    var lowest = 0, highest = 0; N.forEach(function (q) { lowest = Math.min(lowest, q.o); highest = Math.max(highest, q.o); });
+    var cut = lowest < -HUMP_EPS;
+    if (cut && highest > HUMP_EPS) return 'it goes both out and in';
+    function hang(pts) { return region([[[pts[0][0], -D]].concat(pts, [[pts[pts.length - 1][0], -D]])]); }
+    var Epts = L.map(function (v) { return [e.a(v), e.out(v)]; }), strip = region([rectPts(aS, -D, aE, 1000)]);
+    var PE = hang(Epts), Npts = N.map(function (q) { return [q.a, q.o]; });
+    // a hump hangs from its own profile down; a cut is the space between the base line and its profile
+    var PN = inter(cut ? region([Npts]) : hang(Npts), strip), U = cut ? diff(PE, PN) : union(PE, PN);
+    // a hump and a cut do not go on the same stretch of an edge
+    var n0 = N[0].a, n1 = N[N.length - 1].a;
+    if (humpsOn(e).some(function (c) { return (cut ? c.out > 0 : c.out < 0) && c.a0 < n1 - 1e-6 && c.a1 > n0 + 1e-6; })) return cut ? 'a cut cannot go under a hump' : 'a hump cannot go over a cut';
+    // the corners' own shapes: nothing may be added there that was not there (nor cut from there), unless the hump takes that corner out with it
+    var P0 = was ? inter(hang(was), strip) : PE, changed = cut ? diff(P0, U) : diff(U, P0);
+    var z0 = N[0].end === 0 && N[0].o > HUMP_EPS ? 0 : legOf(L[0], e.axis), z1 = N[N.length - 1].end === 1 && N[N.length - 1].o > HUMP_EPS ? 0 : legOf(L[m], e.axis);
+    if ((z0 > 0 && area(inter(changed, region([rectPts(aS - 1, -D, aS + z0, 1000)]))) > 0.005) || (z1 > 0 && area(inter(changed, region([rectPts(aE - z1, -D, aE + 1, 1000)]))) > 0.005)) return 'it would run into the corner at the end of that edge';
+    var ex = expolys(U);
+    if (ex.length !== 1) return 'it does not fit there';
+    if (ex[0].holes.length) return 'a cut cannot go under a hump';
+    // the polygon's top, from the edge's first corner to its last
+    var ring = ex[0].outer, n = ring.length, bl = -1, br = -1, path = [];
+    for (i = 0; i < n; i++) if (Math.abs(ring[i][1] + D) < 1e-3) { if (Math.abs(ring[i][0] - aS) < 1e-3) bl = i; else if (Math.abs(ring[i][0] - aE) < 1e-3) br = i; }
+    if (bl < 0 || br < 0) return 'it does not fit there';
+    if ((bl + 1) % n === br) { for (i = (br + 1) % n; i !== bl; i = (i + 1) % n) path.push(ring[i]); path.reverse(); }
+    else for (i = (bl + 1) % n; i !== br; i = (i + 1) % n) path.push(ring[i]);
+    if (path.length < 2 || Math.abs(path[0][0] - aS) > 1e-3 || Math.abs(path[path.length - 1][0] - aE) > 1e-3) return 'it does not fit there';
+    // back to vertices: the edge's own where the outline still passes through them, the hump's where it passes through those,
+    // and a new rounded one where a flank of one crosses the other (its radius taken from the nearest vertex that went under)
+    var own = L.slice(1, m).map(function (v) { return { a: e.a(v), o: e.out(v), v: v, used: false }; });
+    var laid = N.filter(function (q) { return q.end == null; }).map(function (q) { return { a: q.a, o: q.o, spec: q.spec, used: false }; });
+    function near(list, a, o) { for (var j = 0; j < list.length; j++) if (!list[j].used && Math.abs(list[j].a - a) < 2e-3 && Math.abs(list[j].o - o) < 2e-3) return list[j]; return null; }
+    var out = [L[0]], crossings = [];
+    for (i = 1; i < path.length - 1; i++) {
+      var a = path[i][0], o = path[i][1], hit = near(own, a, o), v;
+      if (hit) { hit.used = true; out.push(hit.v); continue; }
+      v = { x: 0, y: 0 }; hit = near(laid, a, o);
+      if (hit) { hit.used = true; for (kk in hit.spec) v[kk] = hit.spec[kk]; e.setA(v, hit.a); e.setOut(v, hit.o); }
+      else { e.setA(v, a); e.setOut(v, o); crossings.push({ v: v, a: a }); }
+      out.push(v);
     }
-    m = L.length - 1;
-    prof.forEach(function (q) { if (q.end === 0) e.setOut(L[0], q.o); else if (q.end === 1) e.setOut(L[m], q.o); });
+    var under = own.concat(laid).filter(function (q) { return !q.used; });
+    crossings.forEach(function (c) {
+      var best = null; under.forEach(function (q) { var r = q.v ? q.v.r : q.spec && q.spec.r; if (r > 0 && (!best || Math.abs(q.a - c.a) < best.d)) best = { d: Math.abs(q.a - c.a), r: +r }; });
+      c.v.r = Math.min(1.5, best && best.d < 4 ? best.r : 0.8);
+    });
+    e.setOut(L[0], path[0][1]); e.setOut(L[m], path[path.length - 1][1]);
+    out.push(L[m]);
+    // A crossing can leave a very short edge beside it (two humps 0.2 mm apart in height make a 0.2 mm step). The rounds at
+    // the two ends of such an edge are made small enough to fit it here, so the outline is kept as it will be drawn.
+    function pt(j) { return j < 0 || j >= out.length ? null : [e.a(out[j]), e.out(out[j])]; }
+    function want(j) {               // how much of an edge next to it vertex j's corner takes
+      var v = out[j], p = pt(j - 1), q = pt(j), n2 = pt(j + 1);
+      if (!p || !n2) return { fixed: true, t: legOf(v, e.axis) };
+      if (v.c || !(v.r > 0)) return { fixed: true, t: v.c ? legOf(v, e.axis) : 0 };
+      var u1 = [p[0] - q[0], p[1] - q[1]], u2 = [n2[0] - q[0], n2[1] - q[1]], l1 = Math.hypot(u1[0], u1[1]) || 1, l2 = Math.hypot(u2[0], u2[1]) || 1;
+      var phi = Math.acos(Math.max(-1, Math.min(1, (u1[0] * u2[0] + u1[1] * u2[1]) / (l1 * l2))));
+      return { fixed: false, t: phi > 0.01 && phi < Math.PI - 0.01 ? v.r / Math.tan(phi / 2) : 0 };
+    }
+    for (var pass = 0; pass < 2; pass++) crossings.forEach(function (c) {
+      var ci = out.indexOf(c.v);
+      [[ci - 1, ci], [ci, ci + 1]].forEach(function (ed) {
+        var A = pt(ed[0]), B = pt(ed[1]); if (!A || !B) return;
+        var len = Math.hypot(B[0] - A[0], B[1] - A[1]) * 0.96, wa = want(ed[0]), wb = want(ed[1]), tot = wa.t + wb.t;
+        if (tot <= len || tot <= 0) return;
+        var fixedT = (wa.fixed ? wa.t : 0) + (wb.fixed ? wb.t : 0), free = tot - fixedT, k = free > 0 ? Math.max(0, len - fixedT) / free : 0;
+        [[ed[0], wa], [ed[1], wb]].forEach(function (x) { if (x[1].fixed) return; var v = out[x[0]]; v.r = Math.round(v.r * k * 1000) / 1000; if (v.r < 0.05) delete v.r; });
+      });
+    });
+    L.length = 0; out.forEach(function (v) { L.push(v); });
     if (!rising(e)) return 'it does not fit there';
     return null;
   }
@@ -11385,6 +11524,9 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
       var x = c.extender, xp = x.port;
       o.push('EXTENDER  ' + x.cols + ' columns = ' + x.rows + ' rows, ' + x.w + ' wide, against the ' + (x.side || 'right') + ' side: x ' + x.x0 + ' .. ' + x.x1 + ', ' + (x.dead ? x.dead + ' dead row(s)' : 'no dead row') + ' (' + x.col_gap + ' mm from column ' + (x.side === 'left' ? 1 : R.wig.cols.length) + ' to its first)');
       if (x.seam_col) { var sc = x.seam_col; o.push((sc.fits ? '   ok  ' : '   !!  ') + 'its first column is on the grid plane (x ' + sc.x + '), in the edge that bows into the waist: waist ' + sc.has + ' deep (WigLEDmag ' + sc.own + '; a column there needs ' + sc.need + '), breadboard wall beside its last column ' + sc.wall + ', the ' + sc.clip + ' mm clip ' + (sc.clip_clear >= 0 ? 'clears it by ' + sc.clip_clear : 'is ' + (-sc.clip_clear) + ' INTO it') + ', ' + sc.land + ' of board under the solder tab' + (sc.face_land ? '; top boards meet on the half-pitch line, land outside the countersinks ' + sc.face_land.ext + ' (extender) and ' + sc.face_land.unit + ' (breadboard)' : '') + '; rails start ' + x.rail_skip + ' hole(s) in'); }
+      if (x.outer) { var oq = x.outer; o.push((oq.fits ? '   ok  ' : '   !!  ') + 'its outer edge ' + (oq.kind === 'out'
+        ? 'is an outie: its last column on the outer grid plane (x ' + oq.col_x + '), in an edge that bows ' + oq.bow + ' out, the mirror image of its seam edge; board beside the solder tab ' + oq.land + (oq.face_land != null ? ', top board outside the countersinks ' + oq.face_land : '')
+        : 'is an innie: it goes in ' + oq.depth + ', the unit\'s own side profile; wall beside its last column ' + oq.wall + (oq.face_land != null ? ', top board outside the countersinks ' + oq.face_land : '') + (oq.board_whole ? '; its board is drawn out past that edge and left whole' : ''))); }
       o.push('       unit and extender together ' + x.pair_w + ' wide = ' + x.pair_rows + ' x 2.54' + (x.on_grid ? ' (on grid: a next unit beside it keeps the grid)' : ' (OFF GRID)'));
       if (!xp) o.push('   !!  there is no socket in the ' + (x.side || 'right') + ' side for it to plug into (Side port and extender: a header socket in the ' + (x.side || 'right') + ' side)');
       else {
@@ -12625,7 +12767,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     if (!ui.hideShell) {
       slab(E.shapes.shell, E.z.shell, Rn.shell(mode, lookNow()), 0x8c8c98, 0, false);
       if (E.z.face && E.shapes.face.length) {         // its top board: every hole cut through, the countersinks and lands painted on, as on the wig's
-        var fo = E.shapes.face[0].outer, sig = [E.x1, E.n_cols, E.dead, E.keyed, E.z.face[0], E.z.face[1]].join(':'), key = 'extface:' + sig;
+        var fo = E.shapes.face[0].outer, sig = [E.x1, E.n_cols, E.dead, E.keyed, E.outer ? E.outer.kind : '', E.holes.length, E.z.face[0], E.z.face[1]].join(':'), key = 'extface:' + sig;
         if (!geoCache[key]) {
           var holes = E.holes.map(function (h) { var a = [], n = h[3] > 1 ? 14 : 8; for (var i = 0; i < n; i++) a.push([h[0] + Math.cos(i / n * 6.2832) * h[3] / 2, h[1] - Math.sin(i / n * 6.2832) * h[3] / 2]); return a; });
           var fm = extrude([{ outer: fo, holes: holes }], E.z.face[0], E.z.face[1], null, false); fm.geometry.userData.keep = true; geoCache[key] = fm.geometry;
@@ -13205,6 +13347,10 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     c.appendChild(check('c-ext', 'Show the extender on the ' + xside, ex.on, function (v) { ex.on = v; setTimeout(function () { setView('iso'); }, 0); }));
     if (ex.on) {
       c.appendChild(row('Columns', num(ex.cols, 1, function (v) { ex.cols = Math.round(v); }, { min: 1, max: 40, id: 'c-ext-cols' }), '= ' + 2 * (xq ? xq.cols : ex.cols) + ' rows', 'c-ext-cols'));
+      c.appendChild(row('Its outer edge', seg([['in', 'innie'], ['out', 'outie']], ex.outer === 'out' ? 'out' : 'in', function (v) { ex.outer = v; })));
+      c.appendChild(el('div', { class: 'hint', id: 'c-ext-outer-hint', text: ex.outer === 'out'
+        ? 'Outie: the breadboard runs one row out. Its last column stands on the outer grid plane, in an edge that bows out as its seam edge does, so the two edges are mirror images and the body between them is one row narrower.'
+        : 'Innie: the edge goes in, with the same waist and corners as the unit\'s own side, so the pair ends as the unit alone does and a second extender fits it as this one fits the unit.' }));
       c.appendChild(row('Head beside the band', num(ex.head, 0.5, function (v) { ex.head = v; }, { min: 0, max: 60, id: 'c-ext-head' }), 'mm', 'c-ext-head'));
       c.appendChild(check('c-ext-cover', 'A second board over its head, level with the top board', ex.cover === true, function (v) { ex.cover = v; }));
       if (xq) c.appendChild(el('div', { class: 'hint' + (xq.overlap.overlap_mm2 || !xq.port || xq.spare < 0 ? ' bad' : ''), id: 'c-ext-hint', text: xq.w + ' mm wide, from x ' + xq.x0 + ' to ' + xq.x1 + '; its first column is ' + xq.col_gap + ' mm from column ' + (xq.side === 'left' ? 1 : g.cols) + '. '
@@ -13268,17 +13414,19 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     var hxP = ui.outlineOf === 'ext' ? extHumpP() : null, hx = !!hxP, hs = hx ? Geo.ops.humps(hxP.P) : Geo.ops.humps(P);
     function HP(name) { var args = [].slice.call(arguments, 1); return hx ? extHumpDo(function (Q) { return Geo.ops[name].apply(null, [Q].concat(args)); }) : Geo.ops[name].apply(null, [P].concat(args)); }
     if (ui.outlineOf === 'ext' && !hx) c.appendChild(el('div', { class: 'hint', text: 'Show the extender, and flip the board back, to work on its humps.' }));
-    function humpDo(res) { ui.humpSaid = res && !res.ok ? 'Not done: ' + res.why + '.' : ''; ui.vsel = null; }
+    // what the last hump operation has to say: a refusal (shown as a problem), or that two humps have become one
+    function humpDo(res) { ui.humpBad = !!(res && !res.ok); ui.humpSaid = res && !res.ok ? 'Not done: ' + res.why + '.' : res && res.merged ? 'It now overlaps the hump beside it, and the two are one hump. Undo takes them apart again.' : ''; ui.vsel = null; }
     if (!hs.length) c.appendChild(el('div', { class: 'hint', text: 'The outline has no humps: every outer edge is one straight line.' }));
     hs.forEach(function (h, i) {
       var ax = h.axis, box = el('div', { class: 'hump', id: 'c-hump' + i });
+      var live = function () { var Q = (hx ? (extHumpP() || { P: null }).P : P), cur = Q ? Geo.ops.humps(Q).filter(function (q) { return q.key === h.key; })[0] : null; return !!cur && Math.abs(cur.a0 - h.a0) < 1e-6 && Math.abs(cur.a1 - h.a1) < 1e-6 && Math.abs(cur.out - h.out) < 1e-6; };
       box.appendChild(el('div', { class: 'hint', text: h.label }));
-      var from = h.end0 ? el('span', { class: 'u', text: 'the ' + (ax === 'x' ? 'top-left' : 'top') + ' corner' }) : num(+h.a0.toFixed(2), 0.5, function (v) { humpDo(HP('humpSet', h.key, { a0: v })); }, { id: 'c-hump' + i + '-a0' });
-      var to = h.end1 ? el('span', { class: 'u', text: 'the ' + (ax === 'x' ? 'top-right' : 'bottom') + ' corner' }) : num(+h.a1.toFixed(2), 0.5, function (v) { humpDo(HP('humpSet', h.key, { a1: v })); }, { id: 'c-hump' + i + '-a1' });
+      var from = h.end0 ? el('span', { class: 'u', text: 'the ' + (ax === 'x' ? 'top-left' : 'top') + ' corner' }) : num(+h.a0.toFixed(2), 0.5, function (v) { if (!live()) return; humpDo(HP('humpSet', h.key, { a0: v })); }, { id: 'c-hump' + i + '-a0' });
+      var to = h.end1 ? el('span', { class: 'u', text: 'the ' + (ax === 'x' ? 'top-right' : 'bottom') + ' corner' }) : num(+h.a1.toFixed(2), 0.5, function (v) { if (!live()) return; humpDo(HP('humpSet', h.key, { a1: v })); }, { id: 'c-hump' + i + '-a1' });
       box.appendChild(row('From ' + ax, from, h.end0 ? '' : 'mm', 'c-hump' + i + '-a0'));
       box.appendChild(row('To ' + ax, to, h.end1 ? '' : 'mm', 'c-hump' + i + '-a1'));
-      box.appendChild(row(h.side === 'top' ? 'Up' : 'Out', num(+h.out.toFixed(2), 0.1, function (v) { humpDo(HP('humpSet', h.key, { out: v })); }, { min: -30, max: 30, id: 'c-hump' + i + '-out' }), 'mm', 'c-hump' + i + '-out'));
-      var btn = function (id, text, title, fn) { return el('button', { type: 'button', id: 'c-hump' + i + '-' + id, text: text, title: title, onclick: function () { humpDo(fn()); rebuild(true); } }); };
+      box.appendChild(row(h.side === 'top' ? 'Up' : 'Out', num(+h.out.toFixed(2), 0.1, function (v) { if (!live()) return; humpDo(HP('humpSet', h.key, { out: v })); }, { min: -30, max: 30, id: 'c-hump' + i + '-out' }), 'mm', 'c-hump' + i + '-out'));
+      var btn = function (id, text, title, fn) { return el('button', { type: 'button', id: 'c-hump' + i + '-' + id, text: text, title: title, onclick: function () { if (!live()) return; humpDo(fn()); rebuild(true); } }); };
       var acts = [];
       if (!(h.end0 && h.end1)) acts.push(btn('back', ax === 'x' ? '◀' : '▲', 'move it 1.27 mm ' + (ax === 'x' ? 'left' : 'up') + (h.end0 || h.end1 ? ' (its step; the other end is the corner)' : ''), function () { return HP('humpSet', h.key, { slide: -1.27 }); }),
         btn('fwd', ax === 'x' ? '▶' : '▼', 'move it 1.27 mm ' + (ax === 'x' ? 'right' : 'down') + (h.end0 || h.end1 ? ' (its step; the other end is the corner)' : ''), function () { return HP('humpSet', h.key, { slide: 1.27 }); }));
@@ -13291,7 +13439,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     });
     c.appendChild(el('div', { class: 'row' }, [el('span', { class: 'hint', text: 'Add a hump on' }), el('span', {}, [['top', 'the top edge'], ['left', 'the left side'], ['right', 'the right side']].map(function (o) {
       return el('button', { type: 'button', id: 'c-hump-add-' + o[0], text: o[1], title: 'a 1.5 mm hump in the middle of the longest clear stretch of that edge', onclick: function () { humpDo(HP('humpAdd', o[0])); rebuild(true); } }); }))]));
-    c.appendChild(el('div', { class: 'hint' + (ui.humpSaid ? ' bad' : ''), id: 'c-hump-said', text: ui.humpSaid || 'A negative Out on a side hump cuts it into the board instead. A hump is found in the outline, not kept beside it: drag its vertices under Outline and it is still listed here. Parts do not move with a hump.' }));
+    c.appendChild(el('div', { class: 'hint' + (ui.humpSaid && ui.humpBad ? ' bad' : ''), id: 'c-hump-said', text: ui.humpSaid || 'Humps moved so that they overlap merge into one. A negative Out on a side hump cuts it into the board instead. A hump is found in the outline, not kept beside it: drag its vertices under Outline and it is still listed here. Parts do not move with a hump.' }));
 
     c = sect('Stack, bottom to top');
     c.appendChild(check('c-stack-top', 'Top board level with the breadboard\'s face (the spaces move the mid board only)', P.stack_top === 'face', function (v) { if (v) P.stack_top = 'face'; else delete P.stack_top; }));
@@ -13498,6 +13646,8 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
 
   // ---------- checks ----------
   function pill(kind, text) { return el('span', { class: 'pill ' + kind, text: text }); }
+  // the top rail cuts its verdicts off where the room ends, so the whole of them is the box's tooltip
+  function pillTitle(hl) { hl.title = Array.prototype.map.call(hl.querySelectorAll('.pill'), function (q) { return q.textContent; }).join('  \u00b7  '); }
   function line(kind, label, title, detail) { return el('div', { class: 'check' }, [pill(kind, label), el('span', { class: 't', text: title }), detail ? el('span', { class: 'd', text: detail }) : null]); }
   function renderChecks() {
     var c = R.checks, box = $('checks'); box.innerHTML = '';
@@ -13505,13 +13655,14 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     var wigsFit = !nb.wig_left.overlap_mm2 && !nb.wig_right.overlap_mm2, unitsFit = !nb.unit_left.overlap_mm2;
     $('rev').textContent = (P.meta.rev || '') + '  ·  ' + (R.removable ? 'removable wig' : 'integrated');
     var hl = $('headline'); hl.innerHTML = '';
-    if (ui.tab === 'mag') { magTab.checks(box, hl); return; }
+    if (ui.tab === 'mag') { magTab.checks(box, hl); pillTitle(hl); return; }
     hl.appendChild(pill(g.on_grid && wigsFit && unitsFit ? 'ok' : g.on_grid && wigsFit ? 'warn' : 'bad', unitsFit ? g.dead_rows + ' dead row' + (g.dead_rows > 1 ? 's' : '') + ', pitch ' + g.pitch : wigsFit ? 'breadboards fit beside it, a second unit does not' : 'a neighbour overlaps'));
     hl.appendChild(document.createTextNode(' '));
     var nClash = c.clashes.length + c.blocked.length;
     hl.appendChild(pill(nClash ? 'bad' : 'ok', nClash ? nClash + ' clash' + (nClash > 1 ? 'es' : '') : 'no clashes'));
     hl.appendChild(document.createTextNode(' '));
     if (c.area.fill != null) hl.appendChild(pill(c.area.fill > 0.6 ? 'bad' : c.area.fill > 0.45 ? 'warn' : 'ok', Math.round(c.area.fill * 100) + ' % of component room used'));
+    pillTitle(hl);
 
     box.appendChild(el('h2', { text: '0.1 inch stacking' }));
     box.appendChild(line(g.on_grid ? 'ok' : 'bad', g.on_grid ? 'on grid' : 'off grid', 'Unit pitch ' + g.pitch + ' mm = ' + Math.round(g.pitch / P.grid.pitch) + ' x 2.54', 'Grid planes at x = ' + g.left_plane + ' and ' + g.right_plane + '. Dead-row pins land at x = ' + g.dead_x.join(', ') + '.'));
@@ -13531,6 +13682,10 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
       var sc = xq.seam_col;
       if (sc) box.appendChild(sc.fits ? line('ok', sc.wall + ' mm wall', 'Its first column is on the grid plane, in the edge that bows into the waist', 'The waist in the breadboard\'s side is ' + sc.has + ' mm deep (the WigLEDmag\'s own is ' + sc.own + '), which leaves the breadboard a ' + sc.wall + ' mm wall beside column ' + (xq.side === 'left' ? 1 : P.grid.cols) + '. The extender\'s first channel is open on that side and that wall closes it: the ' + sc.clip + ' mm clip clears it by ' + sc.clip_clear + ' mm, and its solder tab has ' + sc.land + ' mm of board to the edge.' + (sc.face_land ? ' The two top boards meet on the half-pitch line: ' + sc.face_land.ext + ' mm of land outside the ' + sc.face_land.countersink + ' mm countersinks on the extender, ' + sc.face_land.unit + ' on the breadboard.' : '') + ' The rails start ' + xq.rail_skip + ' hole' + (xq.rail_skip > 1 ? 's' : '') + ' in, where the breadboard\'s corners are.')
         : line('bad', 'no room', 'Its first column does not fit on the grid plane', !sc.bowed ? 'Its edge has to fill the waist for a column there (Side port and extender).' : 'A column there needs the waist ' + sc.need + ' mm deep and it is ' + sc.has + ': the ' + sc.clip + ' mm clip would be ' + (-sc.clip_clear) + ' mm into the breadboard\'s side, and the board ' + (sc.land < 0 ? (-sc.land) + ' mm short under its solder tab.' : 'has ' + sc.land + ' mm under its solder tab.')));
+      var oq = xq.outer;
+      if (oq) box.appendChild(oq.kind === 'out'
+        ? line(oq.fits ? 'ok' : 'bad', oq.bow + ' mm out', 'Its outer edge is an outie: one row out, the mirror image of its seam edge', 'Its last column is on the outer grid plane (x ' + oq.col_x + '), in an edge that bows ' + oq.bow + ' mm out. The board has ' + oq.land + ' mm beside that column\'s solder tab' + (oq.face_land != null ? ' and the top board ' + oq.face_land + ' mm outside its countersinks' : '') + '. As at the seam, that channel is open on its outer side until something with a waist stands against it, and the rails stop one hole short.')
+        : line(oq.fits ? 'ok' : 'bad', oq.wall + ' mm wall', 'Its outer edge is an innie: it goes in as the unit\'s own side does', 'The same waist, ' + oq.depth + ' mm deep, and the same corners, which leaves a ' + oq.wall + ' mm wall beside its last column' + (oq.face_land != null ? ' and ' + oq.face_land + ' mm of top board outside its countersinks' : '') + ': a second extender fits it as this one fits the unit.' + (oq.board_whole ? ' Its board is drawn out past that edge, so the board is left whole there.' : '')));
       var xp = xq.port;
       if (xp && xp.press) { var pr = xp.press; box.appendChild(line(pr.mags && pr.mags.length ? 'warn' : 'ok', '2 x ' + xp.n, 'Pressed in from the back: a tab of the extender in a knob-shaped cutout of the bottom board', 'Socket: ' + xp.kind_label + ', its top ' + (xp.room >= 0 ? xp.room + ' mm below' : (-xp.room) + ' mm ABOVE') + ' the top face, the top and the bottom board opened over and under it so a pin can go all the way through. The cutout is ' + (pr.knob[2] - pr.knob[0]).toFixed(1) + ' x ' + (pr.knob[3] - pr.knob[1]).toFixed(1) + ' mm with a ' + pr.neck + ' mm neck to the edge: ' + pr.under + ' mm of undercut each side holds the tab in the plane, cut ' + pr.gap + ' mm clear. Pins from the tab reach the socket\'s top at z ' + pr.pin_tip + ': ' + pr.pin_len + ' mm above a 1.0 mm base (the usual 1.27 mm header has 3.0).' + (pr.mags && pr.mags.length ? ' Magnetometer ' + pr.mags.join(', ') + ' is in the cutout and has to move.' : '') + (xp.price ? ' ' + xp.price + ' (read 2026-11-28).' : ''))); }
       if (!xp) box.appendChild(line('bad', 'no socket', 'Nothing in the ' + (xq.side || 'right') + ' side for it to plug into', 'Side port and extender: tick the header socket in the ' + (xq.side || 'right') + ' side.'));

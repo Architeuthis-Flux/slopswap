@@ -460,6 +460,26 @@ or another hump is in the way) is refused and the page says why; nothing is chan
 <li>Parts do not move with a hump.</li>
 <li>The same operations in code: <code>Geo.ops.humps(P)</code>, <code>humpSet</code>, <code>humpOtherEnd</code>, <code>humpOtherSide</code>, <code>humpRemove</code>, <code>humpAdd</code>.</li>
 </ul>
+<h3>Humps that overlap merge (added to A12 the same morning)</h3>
+<p>Asked for the same morning: "allow the humps to merge if i move them so they overlap". A hump that is moved (its arrows,
+its From or To, To the other end, To the other side) is taken off its edge, changed and laid back on, and what comes out
+is the upper outline of the two together: the higher of the two wherever they overlap. Until now a move that reached
+another hump was refused.</p>
+<ul>
+<li>Different heights: one hump with a step in it. Where a flank of one crosses the other there is a new rounded vertex,
+  its radius taken from the nearest vertex that went under (0.8 mm if none is near, 1.5 at most).</li>
+<li>The same height: one flat top; the step and the vertices between them are gone.</li>
+<li>Just touching: still two humps, sharing the one vertex on the edge's line.</li>
+<li>A hump still may not run into the shape of a corner it is not part of, or off the end of its edge: those are refused
+  as before, and the page says why.</li>
+<li>Merging is not undone by moving the hump back: the outline keeps no record of what it was made from. Undo takes it apart.</li>
+<li>A vertex of that edge that turned no corner (one added on a straight stretch) is dropped when its edge is rebuilt.</li>
+</ul>
+<p>The page says when a move has merged two humps. <code>humpSet</code> returns <code>{ ok, merged }</code>; <code>node tools/flipcheck.mjs</code> has the
+cases: the strip's bump slid up into the block, a new hump on the top edge slid into the raised stretch at 1.5 and at
+1.7 mm, lengthened into it, moved short of it, moved to touch it, and sent to the other end onto a hump standing there.</p>
+<p>Two cuts that overlap (a cut is a side hump with a negative Out) merge the same way, into one cut as deep as the deeper
+of the two. A hump and a cut cannot share a stretch of an edge: moving one onto the other is refused, and says so.</p>
 <h3>Flip left to right</h3>
 <p><strong>Flip left to right</strong> (Design panel, under 0.1 inch grid) mirrors the board about the breadboard's middle, x = 39.37.
 The breadboard stays where it is; the strip and the probe's dock go to the other side, and the extender, which stands
@@ -536,6 +556,82 @@ shorter side stays shortened). Undo takes a flip back as it does anything else.<
 the turn chosen for a library part that has no mouth and a plan that is its own mirror image both ways (it is turned
 about its own vertical axis, which is right for a button and may be wrong for a connector); the magnetometer tab's
 numbers on a design where the magnetometers were told to stay.</p>
+<h2>Rev A12b to A12e: the extender's own outline, its tab, and its outer edge</h2>
+<p>Added on 2026-11-28 beside rev A12 (the flip and the humps), without a change to <code>meta.rev</code>. Everything here is geometry in
+the model; nothing is built.</p>
+<p><strong>Fewer settings (A12b).</strong> Dead rows, where the rails start, the waist's depth and the "edge fills the waist" switch are no
+longer on the page: the waist is as deep as the column on the seam needs (<code>wig.waist_r</code> is a floor, not the setting), and a
+design that has those keys keeps them. The board thicknesses are a row in <em>Stack, bottom to top</em> (1.6 / 1.6, 0.8 / 0.8,
+0.8 / 1, 0.8 / 1.2). <em>Move it away</em> slides the extender out of its joint in the view only (down when it presses in from the
+back, sideways otherwise); it is also in the view bar.</p>
+<p><strong>The outline controls work on the extender (A12b).</strong> <em>Outline, Outline of: the extender</em> edits <code>extender.outline</code>, a vertex
+list in the unit's frame, seeded from the four vertices its columns and head give it (<code>R.extender.outline.src</code>). The
+breadboard part is always kept. Not while the board is flipped.</p>
+<p><strong>Dots, several at once, snapping (A12b).</strong> Dot size small / medium / large; shift-click a dot or its number to add it to the
+selection and drag the group; <em>snap</em> pulls a dragged vertex level or plumb with its neighbours inside 0.6 mm (Alt lets go).
+The arrow keys still move one vertex. The group drag and the snap were not exercised with a mouse in a browser here.</p>
+<p><strong>Humps on the extender, and humps that go in (A12c).</strong> <em>Humps of: the extender</em> runs the hump operations on a stand-in
+design whose outline is the extender's. <em>Out</em> takes a negative value on a side (not on the top edge, whose base line is its
+lowest level, and not on a corner hump): the hump is then a cut into the board.</p>
+<p><strong>The tab is outline (A12d).</strong> Whatever part of the extender's outline lies inside the unit's own outline is its tab
+(<code>R.extender.tab_in</code>), and the unit's bottom board is cut for it with 0.05 mm of clearance (<code>cutBy</code> gets <code>tab</code>). The press-in
+knob is eight ordinary vertices of the default outline in press mode, so it can be dragged; a hump drawn on the seam side
+makes its own cutout. The extender's plan, for the overlap check, is its board less the tab.</p>
+<p><strong>Corners and 45 degree humps (A12d).</strong> Two corner kinds beside the others: a 45 degree chamfer (one length) and a plain
+chamfer with two lengths. Each hump has a <em>45°</em> button that moves its feet so both flanks stand at 45 degrees; it is an
+action, not a state, so it is pressed again after <em>Out</em> changes.</p>
+<p><strong>Top board level with the breadboard's face (A12d).</strong> <code>stack_top: "face"</code> (the tick box at the top of <em>Stack, bottom to
+top</em>) puts the top board's top at the breadboard's face whatever the spaces are, so a space moves the mid board only.</p>
+<p><strong>The outer edge: innie or outie (A12e).</strong> <code>extender.outer</code>, <em>Its outer edge</em> under <em>Side port and extender</em>.</p>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th></th>
+<th>innie (<code>in</code>, the default)</th>
+<th>outie (<code>out</code>)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>the edge</td>
+<td>the unit's own side: the same corners and the same waist, 1.02 mm in</td>
+<td>the mirror image of the extender's seam edge: it bows 0.92 mm out</td>
+</tr>
+<tr>
+<td>last column</td>
+<td>one pitch inside the outer grid plane, a 0.5 mm wall beside it</td>
+<td>on the outer grid plane, its channel open on the outer side as the first one's is at the seam</td>
+</tr>
+<tr>
+<td>width for 11 columns</td>
+<td>27.94 mm (11 rows)</td>
+<td>25.40 mm (10 rows): the columns are counted the same, the body is one row narrower</td>
+</tr>
+<tr>
+<td>rails</td>
+<td>to the last column, as on the unit</td>
+<td>stop one hole short, as at the seam</td>
+</tr>
+<tr>
+<td>what stands against it</td>
+<td>a second extender, exactly as the first stands against the unit</td>
+<td>something with the unit's deep waist</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The waist is copied from the breadboard's side as it is (shell, board, and the deeper cut of the top board to the half-pitch
+line), moved to the extender's outer plane; the outie's edge is the seam's key mirrored about the middle of the extender,
+gaps included. An outline drawn out past an innie's edge keeps the board whole there (<code>checks.extender.outer.board_whole</code>);
+the shell still gets the waist. One column cannot be an outie and is drawn as an innie, with a note.
+<code>checks.extender.outer</code> has <code>kind</code>, <code>depth</code> and <code>wall</code> or <code>bow</code>, <code>land</code>, <code>face_land</code>, <code>fits</code>. <code>tools/extcheck.mjs</code> holds it to
+all of this (25 cases, both wig modes, flipped too).</p>
+<p>Not modelled: a unit whose own side is an outie (a 31st column on the unit); a socket on the extender's outer edge for a
+second extender to plug into; the shell's channels and holes under an outline that was redrawn.</p>
+<p><strong>The page (A12e).</strong> The verdicts in the top rail no longer move the page: their box takes the room left on its line and
+what does not fit is cut off (the whole text is the box's tooltip and is under Checks). The titles of the folding sections
+are in their section's colour and a size larger.</p>
 <h2>Rev A11e: pressing in from the back, upright sockets on the mid board, thin outer boards</h2>
 <p>Kevin, 2026-11-28: "there's also the option of using vertical headers with some cutout in the main V6 bottom board so
 the extension has vertical pins and presses in from the back, and the cutout's shape is tight enough that it holds",
