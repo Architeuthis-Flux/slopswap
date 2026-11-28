@@ -156,6 +156,18 @@ button.pin[aria-pressed="true"] { color: var(--focus); border-color: var(--focus
 .row.pinned { opacity: .85; }
 .row.pinned .hint { flex: 1 1 auto; text-align: left; margin: 0; }
 body.tab-mag .vstrip { display: none; }
+/* the view cube: the scene's six sides in the corner of the view, turning with the camera. Each face is nine cells: the
+   middle looks straight at that side, the rim from its edges and corners. */
+.vcube { position: absolute; z-index: 3; top: 8px; right: 10px; width: 112px; display: flex; flex-direction: column; align-items: center; gap: 3px; user-select: none; -webkit-user-select: none; }
+.vstrip[data-dock="top"]:not([hidden]) ~ .vcube { top: 56px; } .vstrip[data-dock="right"]:not([hidden]) ~ .vcube { right: 214px; }
+.vc-stage { width: 112px; height: 112px; display: grid; place-items: center; }
+.vc-box { position: relative; width: 62px; height: 62px; transform-style: preserve-3d; }
+.vc-face { position: absolute; inset: 0; box-sizing: border-box; display: grid; grid-template: 13px 1fr 13px / 13px 1fr 13px; background: var(--panel-2); border: 1px solid var(--dim); backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.vc-face[data-f="top"] { background: #55555e; } .vc-face[data-f="under"] { background: #2c2c31; }
+.vc-face .vc-l { grid-area: 1 / 1 / 4 / 4; place-self: center; pointer-events: none; font-family: var(--label); font-weight: 600; font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: var(--ink); }
+.vc-cell { all: unset; display: block; width: 100%; height: 100%; cursor: pointer; } .vc-cell:hover { background: var(--accent); } .vc-cell:focus-visible { box-shadow: inset 0 0 0 2px var(--focus); }
+.vcube .seg button { padding: 1px 7px 1px 5px; font-size: 10.5px; }
+body.tab-mag .vcube { display: none; }
 #hud { position: absolute; left: 10px; bottom: 8px; right: 10px; color: var(--dim); font-size: 11px; pointer-events: none; text-shadow: 0 0 3px var(--bg), 0 0 3px var(--bg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #view[data-bg="paper"] #hud, #view[data-bg="white"] #hud, #view[data-ground="wood"] #hud, #view[data-ground="steel"] #hud { color: #2b2b30; text-shadow: none; }
 #tip { position: absolute; display: none; pointer-events: none; z-index: 4; max-width: 300px; padding: 5px 9px 6px; background: var(--panel-2); color: var(--ink); font-size: 11.5px; border-left: 3px solid var(--accent);
@@ -12513,7 +12525,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
   var P = boot.params;
   var R = null;
   var ui = { browse: { q: '', group: 'all', mine: false }, sel: null, vsel: null, editOutline: false, sketch: false, sketchOpacity: 0.6, explode: 0, clipAxis: 'off', clipPos: 0.5, envelopes: false, planes: true, hidden: {}, hideShell: false,
-    render: { mode: 'real', bg: 'console', bgColor: '#27272b', ground: 'shadow', shadows: true, exposure: 1, light: 1, sun: 215, fov: 30, rotate: false, edges: false, decals: true, wheel: 'pan',
+    render: { mode: 'real', bg: 'console', bgColor: '#27272b', ground: 'shadow', shadows: true, exposure: 1, light: 1, sun: 215, fov: 30, proj: 'persp', rotate: false, edges: false, decals: true, wheel: 'pan',
       boardOpacity: 1, texture: 'smooth', shellTex: 'smooth', rig: 'studio', keyColor: '#ffffff', keyLevel: 1, fillColor: '#ffffff', fillLevel: 1, rimColor: '#ffffff', rimLevel: 0, skyColor: '#ffffff', ambLevel: 1 },
     // the view controls that sit in the 3D view itself: where the strip is docked (bottom, top, left, right, off) and what is in it
     viewbar: { dock: 'bottom', items: ['explode', 'extout', 'opacity', 'shell', 'mode'], fold: false },
@@ -12538,6 +12550,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
   // ---------- three ----------
   var view = $('view'), renderer = null, scene, camera, controls, unit, ghost, deco, handles, sketchTex = null;
   var raycaster = T ? new T.Raycaster() : null, pointer = T ? new T.Vector2() : null;
+  var camP = null, camO = null, camGlide = null, orthoV = T ? new T.Vector3() : null, cubeEl = null, cubeBox = null, cubeSig = '';       // the two cameras, a turn in progress, the view cube
   var clipPlane = T ? new T.Plane(new T.Vector3(-1, 0, 0), 0) : null;
   function cssVar(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
   function initThree() {
@@ -12548,19 +12561,22 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     renderer.localClippingEnabled = true;
     view.insertBefore(renderer.domElement, view.firstChild);
     scene = new T.Scene();
-    camera = new T.PerspectiveCamera(ui.render.fov || 30, 1, 1, 3000);
+    camP = camera = new T.PerspectiveCamera(ui.render.fov || 30, 1, 1, 3000);
+    camO = new T.OrthographicCamera(-1, 1, 1, -1, -4000, 8000); camO.fov = camP.fov; camO.aspect = 1;       // fov and aspect are carried on it for the code that reads them
     controls = new T.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true; controls.dampingFactor = 0.12; controls.screenSpacePanning = true;
     Rn.setup(renderer, scene);
-    controls.addEventListener('end', saveView);
+    controls.addEventListener('end', saveView); controls.addEventListener('start', function () { camGlide = null; });
     // Scrolling moves the view and pinching zooms it, about the pointer, the way a page or a map behaves. A mouse wheel can be
     // given its old job (zoom) under View. The wheel is taken here, before OrbitControls sees it; touch screens are left to it.
     function perPx() { return 2 * camera.position.distanceTo(controls.target) * Math.tan(camera.fov * Math.PI / 360) / Math.max(1, view.clientHeight); }
     function panBy(dx, dy) {
+      camGlide = null;
       var k = perPx(), d = new T.Vector3().setFromMatrixColumn(camera.matrix, 0).multiplyScalar(dx * k).add(new T.Vector3().setFromMatrixColumn(camera.matrix, 1).multiplyScalar(-dy * k));
       camera.position.add(d); controls.target.add(d);
     }
     function zoomAt(cx, cy, f) {
+      camGlide = null;
       var rc = view.getBoundingClientRect(), d = camera.position.distanceTo(controls.target), nd = Math.max(15, Math.min(2200, d * f)), k = perPx(); f = nd / d;
       var p = controls.target.clone().add(new T.Vector3().setFromMatrixColumn(camera.matrix, 0).multiplyScalar((cx - rc.left - rc.width / 2) * k)).add(new T.Vector3().setFromMatrixColumn(camera.matrix, 1).multiplyScalar(-(cy - rc.top - rc.height / 2) * k));
       camera.position.sub(p).multiplyScalar(f).add(p); controls.target.sub(p).multiplyScalar(f).add(p);
@@ -12587,7 +12603,9 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     if (window.ResizeObserver) new ResizeObserver(resize).observe(view);
     resize();
     bindPointer();
-    (function loop() { requestAnimationFrame(loop); controls.autoRotate = !!ui.render.rotate && !drag; controls.autoRotateSpeed = 1.2; controls.update(); if (ui.tab !== 'mag') renderer.render(scene, camera); })();       // nothing is drawn in 3D while the Magnetometers tab has the view
+    initCube();
+    if (ui.render.proj === 'ortho') setProjection('ortho');
+    (function loop() { requestAnimationFrame(loop); controls.autoRotate = !!ui.render.rotate && !drag; controls.autoRotateSpeed = 1.2; glideStep(); controls.update(); syncOrtho(); cubeTurn(); if (ui.tab !== 'mag') renderer.render(scene, camera); })();       // nothing is drawn in 3D while the Magnetometers tab has the view
     return true;
   }
   var lastMode = null;
@@ -12600,7 +12618,8 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     if (!renderer || !R) return;
     var pl = R.planes, wide = extraWide();
     Rn.apply(ui.render, { x0: pl.x0 - extraLeft(), x1: pl.x1 + wide, y0: pl.yt, y1: pl.yb, zb: R.z.bottom - (R.wig.face ? 0 : 0) - 1.5 });
-    if (camera.fov !== ui.render.fov) { camera.fov = ui.render.fov || 30; camera.updateProjectionMatrix(); }
+    setProjection(ui.render.proj === 'ortho' ? 'ortho' : 'persp'); cubeSync();
+    if (camera.fov !== ui.render.fov) { camP.fov = camO.fov = ui.render.fov || 30; syncOrtho(true); camera.updateProjectionMatrix(); }
     if (lastMode !== ui.render.mode) { lastMode = ui.render.mode; Rn.refreshMaterials(scene); }
     view.setAttribute('data-bg', ui.render.bg);
     view.setAttribute('data-ground', ui.render.mode === 'lines' ? '' : ui.render.ground);
@@ -12608,20 +12627,105 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
   function resize() {
     if (!renderer) return;
     var w = Math.max(1, view.clientWidth), h = Math.max(1, view.clientHeight);
-    renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+    renderer.setSize(w, h, false); camP.aspect = camO.aspect = w / h; syncOrtho(true); camera.updateProjectionMatrix();
   }
-  function setView(name) {
+  // name: one of the named views, or a direction [x, y, z] in the scene's axes (x right, y up, z the plan's y). glide: turn to
+  // it over a quarter of a second instead of jumping. keep: turn about the point being looked at, at the distance it is seen
+  // from now (the view cube), instead of backing off until the whole unit fits (the named views).
+  var VIEW_DIR = { iso: [-0.42, 0.72, 0.62], top: [0, 1, 0.001], under: [-0.25, -0.85, 0.45], left: [-1, 0.22, 0.05], topedge: [0.05, 0.3, -1], bottomedge: [0, 0.3, 1] };
+  function setView(name, glide, keep) {
     if (!camera) return;
-    // look along a fixed direction and back off until the whole unit fits the viewport
     var pl = R ? R.planes : { x0: -8.3, x1: 78.74, yt: -24.7, yb: 55 }, wide = extraWide(), wl = extraLeft();
     var t = [(pl.x0 - wl + pl.x1 + wide) / 2, 2.5, (pl.yt + pl.yb) / 2];
-    var dir = { iso: [-0.42, 0.72, 0.62], top: [0, 1, 0.001], under: [-0.25, -0.85, 0.45], left: [-1, 0.22, 0.05], topedge: [0.05, 0.3, -1], bottomedge: [0, 0.3, 1] }[name] || [-0.42, 0.72, 0.62];
+    var dir = Array.isArray(name) ? name.slice() : (VIEW_DIR[name] || VIEW_DIR.iso);
+    if (Math.abs(dir[0]) < 1e-9 && Math.abs(dir[2]) < 1e-9) dir = [0, dir[1] < 0 ? -1 : 1, 0.001];       // straight down or up: the plan's x stays to the right
     var len = Math.sqrt(dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2]);
     var rad = 0.5 * Math.sqrt(Math.pow(pl.x1 - pl.x0 + wide + wl, 2) + Math.pow(pl.yb - pl.yt, 2)) + 6;
     var half = camera.fov * Math.PI / 360, fit = Math.min(half, Math.atan(Math.tan(half) * camera.aspect));
-    var dist = rad / Math.sin(fit) * 1.02;
-    camera.position.set(t[0] + dir[0] / len * dist, t[1] + dir[1] / len * dist, t[2] + dir[2] / len * dist);
-    controls.target.set(t[0], t[1], t[2]); controls.update(); saveView();
+    var dist = rad / Math.sin(fit) * 1.02, to = new T.Vector3(dir[0] / len, dir[1] / len, dir[2] / len), tg = new T.Vector3(t[0], t[1], t[2]);
+    var off = camera.position.clone().sub(controls.target), d0 = off.length();
+    if (keep && d0 > 1) { dist = d0; tg.copy(controls.target); }
+    if (!glide || !(d0 > 1) || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+      camGlide = null; camera.position.copy(tg).addScaledVector(to, dist); controls.target.copy(tg); controls.update(); saveView(); return;
+    }
+    var from = off.clone().divideScalar(d0);
+    camGlide = { t0: performance.now(), dur: 280, from: from, turn: new T.Quaternion().setFromUnitVectors(from, to), d0: d0, d1: dist, tg0: controls.target.clone(), tg1: tg };
+  }
+  function glideStep() {
+    var g = camGlide; if (!g) return;
+    var k = Math.min(1, (performance.now() - g.t0) / g.dur), e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+    var dir = g.from.clone().applyQuaternion(new T.Quaternion().slerp(g.turn, e));
+    controls.target.lerpVectors(g.tg0, g.tg1, e);
+    camera.position.copy(controls.target).addScaledVector(dir, g.d0 + (g.d1 - g.d0) * e);
+    if (k >= 1) { camGlide = null; saveView(); }
+  }
+  // Perspective or orthographic (rev A12f). The orthographic camera is kept at the same place as the perspective one would be,
+  // and what it shows is as tall as the perspective view is at the point being looked at (distance x tan of half the lens), so
+  // zooming, panning, fitting and the saved view work on the distance for both, and changing over keeps the picture's size.
+  function setProjection(kind) {
+    if (!camP || !controls) return;
+    var next = kind === 'ortho' ? camO : camP; if (next === camera) return;
+    next.position.copy(camera.position); next.quaternion.copy(camera.quaternion); next.up.copy(camera.up); next.fov = camera.fov; next.aspect = camera.aspect; next.zoom = 1;
+    camera = next; controls.object = camera; syncOrtho(true); camera.updateProjectionMatrix(); controls.update();
+  }
+  function syncOrtho(force) {
+    if (camera !== camO) return;
+    var off = orthoV.copy(camO.position).sub(controls.target), d = off.length();
+    if (camO.zoom !== 1 && d > 0) { var nd = Math.max(15, Math.min(2200, d / camO.zoom)); camO.position.copy(controls.target).addScaledVector(off, nd / d); d = nd; camO.zoom = 1; force = true; }       // a touch pinch zooms an orthographic camera: made a distance again
+    var hh = d * Math.tan((camO.fov || 30) * Math.PI / 360), hw = hh * (camO.aspect || 1);
+    if (force || Math.abs(camO.top - hh) > 1e-9 || Math.abs(camO.right - hw) > 1e-9) { camO.left = -hw; camO.right = hw; camO.top = hh; camO.bottom = -hh; camO.updateProjectionMatrix(); }
+  }
+  // a ray from the pointer: in the orthographic view it starts well behind the camera's own plane, which can be inside the model
+  function aimRay() { raycaster.setFromCamera(pointer, camera); if (camera.isOrthographicCamera) raycaster.ray.origin.addScaledVector(raycaster.ray.direction, -4000); }
+
+  // ---------- the view cube (rev A12f): a small cube in the corner of the 3D view that turns with the camera. A click on a
+  // face looks straight at that side, on an edge or a corner from between; the two buttons under it are the projection. ----------
+  // n: the face's outward direction, u: to the right across it, v: down it, in the scene's axes
+  var CUBE_FACES = [
+    { k: 'top', label: 'Top', tf: 'rotateX(90deg)', n: [0, 1, 0], u: [1, 0, 0], v: [0, 0, 1] },
+    { k: 'under', label: 'Under', tf: 'rotateX(-90deg)', n: [0, -1, 0], u: [1, 0, 0], v: [0, 0, -1] },
+    { k: 'front', label: 'Front', tf: '', n: [0, 0, 1], u: [1, 0, 0], v: [0, -1, 0] },
+    { k: 'back', label: 'Back', tf: 'rotateY(180deg)', n: [0, 0, -1], u: [-1, 0, 0], v: [0, -1, 0] },
+    { k: 'right', label: 'Right', tf: 'rotateY(90deg)', n: [1, 0, 0], u: [0, 0, -1], v: [0, -1, 0] },
+    { k: 'left', label: 'Left', tf: 'rotateY(-90deg)', n: [-1, 0, 0], u: [0, 0, 1], v: [0, -1, 0] }
+  ];
+  function cubeSay(d) {
+    var wd = []; if (d[1] > 0.5) wd.push('above'); if (d[1] < -0.5) wd.push('below'); if (d[2] > 0.5) wd.push('the front (the bottom edge)'); if (d[2] < -0.5) wd.push('the back (the top edge)'); if (d[0] > 0.5) wd.push('the right'); if (d[0] < -0.5) wd.push('the left');
+    return 'Look from ' + wd.join(' and ');
+  }
+  function initCube() {
+    if (!view || cubeEl) return;
+    cubeBox = el('div', { class: 'vc-box' }, CUBE_FACES.map(function (f) {
+      var cells = [];
+      for (var cj = -1; cj <= 1; cj++) for (var ci = -1; ci <= 1; ci++) (function (ci, cj) {
+        var d = [f.n[0] + ci * f.u[0] + cj * f.v[0], f.n[1] + ci * f.u[1] + cj * f.v[1], f.n[2] + ci * f.u[2] + cj * f.v[2]], say = cubeSay(d);
+        cells.push(el('button', { type: 'button', class: 'vc-cell', title: say, 'aria-label': say, 'data-d': d.join(','), style: 'grid-area: ' + (cj + 2) + ' / ' + (ci + 2), onclick: function () { setView(d, true, true); } }));       // placed by hand: the label lies over all nine
+      })(ci, cj);
+      return el('div', { class: 'vc-face', 'data-f': f.k }, cells.concat([el('span', { class: 'vc-l', text: f.label })]));
+    }));
+    var proj = el('span', { class: 'seg', role: 'group', id: 'vc-proj' }, [['persp', 'Persp', 'Perspective: nearer things are drawn larger'], ['ortho', 'Ortho', 'Orthographic: no perspective. Parallel edges stay parallel and a length is drawn the same wherever it is']].map(function (o) {
+      return el('button', { type: 'button', 'data-p': o[0], text: o[1], title: o[2], onclick: function () { rset('proj', o[0], false, true); } });
+    }));
+    cubeEl = el('div', { class: 'vcube', id: 'viewcube', role: 'group', 'aria-label': 'view cube: a face, an edge or a corner looks from there' }, [el('div', { class: 'vc-stage' }, [cubeBox]), proj]);
+    view.appendChild(cubeEl); cubeSync();
+  }
+  function cubeSync() {
+    if (!cubeEl) return;
+    var pk = ui.render.proj === 'ortho' ? 'ortho' : 'persp';
+    Array.prototype.forEach.call(cubeEl.querySelectorAll('#vc-proj button'), function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-p') === pk)); });
+  }
+  // the cube shows the scene's axes as the camera sees them: the view's rotation, with y turned over for the page (y down).
+  // Each face is given the whole turn itself. With the turn on the box they stand in, a browser cannot tell which face is
+  // under the pointer whenever the box's own plane is seen edge on, which is every view from above, below, the left or the right.
+  function cubeTurn() {
+    if (!cubeBox || !camera || ui.tab === 'mag') return;
+    camera.updateMatrixWorld();
+    var a = camera.matrixWorldInverse.elements, sg = [1, -1, 1], out = [], i, j;
+    for (j = 0; j < 3; j++) { for (i = 0; i < 3; i++) out.push((a[j * 4 + i] * sg[i] * sg[j]).toFixed(4)); out.push('0'); }
+    var sig = out.join(',');
+    if (sig === cubeSig) return;
+    cubeSig = sig;
+    for (i = 0; i < CUBE_FACES.length; i++) cubeBox.children[i].style.transform = 'matrix3d(' + sig + ',0,0,0,1) ' + (CUBE_FACES[i].tf ? CUBE_FACES[i].tf + ' ' : '') + 'translateZ(31px)';
   }
 
   // materials
@@ -12921,7 +13025,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
   function pickPart(ev) {
     var r = renderer.domElement.getBoundingClientRect();
     pointer.set(((ev.clientX - r.left) / r.width) * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1);
-    raycaster.setFromCamera(pointer, camera);
+    aimRay();
     var hits = raycaster.intersectObjects(unit.children, true);
     for (var i = 0; i < hits.length; i++) {
       if (hits[i].object.isLineSegments) continue;
@@ -12937,7 +13041,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     if (!ui.editOutline) return null;
     var r = renderer.domElement.getBoundingClientRect();
     pointer.set(((ev.clientX - r.left) / r.width) * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1);
-    raycaster.setFromCamera(pointer, camera);
+    aimRay();
     var hits = raycaster.intersectObjects(handles.children, false);
     for (var i = 0; i < hits.length; i++) if (hits[i].object.userData.vertex != null) return { vertex: hits[i].object.userData.vertex, point: hits[i].object.position.clone() };
     return null;
@@ -12970,7 +13074,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
       if (drag) {
         var r = dom.getBoundingClientRect();
         pointer.set(((ev.clientX - r.left) / r.width) * 2 - 1, -((ev.clientY - r.top) / r.height) * 2 + 1);
-        raycaster.setFromCamera(pointer, camera);
+        aimRay();
         var pt = new T.Vector3();
         if (!raycaster.ray.intersectPlane(drag.plane, pt)) return;
         var u = drag.vertex != null ? OV()[drag.vertex] : userPart(drag.id), step = ev.shiftKey ? 1.27 : 0.05;
@@ -13195,6 +13299,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
       { k: 'exposure', label: 'Exposure', real: true, make: range('exposure', 0.4, 2, 0.05) },
       { k: 'decals', label: 'Part outlines printed on the boards', short: 'Outlines', check: true, real: true, make: chk('decals', { scene: true }) },
       { k: 'edges', label: 'Draw edges', short: 'Edges', check: true, real: true, make: chk('edges', { scene: true }) },
+      { k: 'proj', label: 'Projection', make: function () { return el('span', { class: 'seg', role: 'group' }, [['persp', 'Perspective'], ['ortho', 'Orthographic']].map(function (o) { return el('button', { type: 'button', 'aria-pressed': String((rs.proj === 'ortho' ? 'ortho' : 'persp') === o[0]), text: o[1], onclick: function () { rset('proj', o[0], false, true); } }); })); } },
       { k: 'fov', label: 'Lens', make: sel('fov', [[12, 'Flat (12 deg)'], [30, 'Normal (30 deg)'], [50, 'Wide (50 deg)']]) },
       { k: 'wheel', label: 'Scrolling', make: sel('wheel', [['pan', 'Moves the view (pinch zooms)'], ['zoom', 'Zooms (mouse wheel)']]) },
       { k: 'rotate', label: 'Turn slowly', short: 'Turn', check: true, make: chk('rotate') },
@@ -13869,7 +13974,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
   }
   function viewbar() {
     var vb = $('viewbar');
-    [['iso', 'Iso'], ['top', 'Top'], ['under', 'Underside'], ['topedge', 'Top edge'], ['left', 'Left edge']].forEach(function (v) { vb.appendChild(el('button', { type: 'button', text: v[1], onclick: function () { setView(v[0]); } })); });
+    [['iso', 'Iso'], ['top', 'Top'], ['under', 'Underside'], ['topedge', 'Top edge'], ['left', 'Left edge']].forEach(function (v) { vb.appendChild(el('button', { type: 'button', text: v[1], onclick: function () { setView(v[0], true); } })); });
   }
   // ---------- layout: which dock each panel is in, how big the docks are, what is folded. All of it is kept. ----------
   var DOCKS = ['left', 'right', 'bottom'], PANELS = ['panel-design', 'panel-checks'], WIDE = { left: 348, right: 338 }, phone = window.matchMedia ? window.matchMedia('(max-width: 700px)') : { matches: false };

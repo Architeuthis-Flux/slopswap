@@ -556,7 +556,7 @@ shorter side stays shortened). Undo takes a flip back as it does anything else.<
 the turn chosen for a library part that has no mouth and a plan that is its own mirror image both ways (it is turned
 about its own vertical axis, which is right for a button and may be wrong for a connector); the magnetometer tab's
 numbers on a design where the magnetometers were told to stay.</p>
-<h2>Rev A12b to A12e: the extender's own outline, its tab, and its outer edge</h2>
+<h2>Rev A12b to A12f: the extender's own outline, its tab, its outer edge; the view cube</h2>
 <p>Added on 2026-11-28 beside rev A12 (the flip and the humps), without a change to <code>meta.rev</code>. Everything here is geometry in
 the model; nothing is built.</p>
 <p><strong>Fewer settings (A12b).</strong> Dead rows, where the rails start, the waist's depth and the "edge fills the waist" switch are no
@@ -629,6 +629,19 @@ the shell still gets the waist. One column cannot be an outie and is drawn as an
 all of this (25 cases, both wig modes, flipped too).</p>
 <p>Not modelled: a unit whose own side is an outie (a 31st column on the unit); a socket on the extender's outer edge for a
 second extender to plug into; the shell's channels and holes under an outline that was redrawn.</p>
+<p><strong>Orthographic view and the view cube (A12f).</strong> <em>Projection</em> (View section, and the two buttons under the cube):
+perspective, or orthographic, which has no perspective, so parallel edges stay parallel and a length is drawn the same
+wherever it is. The orthographic camera stands where the perspective one would and shows a field as tall as the
+perspective view is at the point looked at (distance x tan of half the lens), so scrolling, pinching, the named views and
+the saved view work on the distance for both and changing over keeps the picture's size. A ray from the pointer starts
+4 m behind that camera, whose own plane can be inside the model when zoomed in. Kept with the view (<code>render.proj</code>).</p>
+<p>The cube in the corner of the 3D view turns with the camera: Top, Under, Front (the bottom edge), Back (the top edge),
+Left, Right. Each face is nine cells: the middle looks straight at that side, the rim from its edges (45 degrees) and its
+corners; a corner in the orthographic view is a true isometric. It turns about the point being looked at and keeps the
+distance, where the named views (Iso, Top, ...) back off to fit the whole unit; both now turn over a quarter of a second
+(at once with reduced motion). Straight down or up keeps the plan's x to the right. The cube is DOM, not WebGL: each face
+carries the whole rotation itself, because with the rotation on their box a browser could not tell which face was under
+the pointer in any view that saw the box edge on. It moves aside for a view strip docked at the top or the right.</p>
 <p><strong>The page (A12e).</strong> The verdicts in the top rail no longer move the page: their box takes the room left on its line and
 what does not fit is cut off (the whole text is the box's tooltip and is under Checks). The titles of the folding sections
 are in their section's colour and a size larger.</p>
