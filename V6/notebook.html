@@ -84,7 +84,8 @@ body { display: flex; flex-direction: column; padding-top: 3px; overflow: hidden
 
   // The tools. Each keeps its working state in this browser under names of its own (keys); a notebook page is a
   // copy of those values, taken when the page is put away and written back when it is opened. Nothing in a tool
-  // is changed for this: add a tool by adding a line.
+  // is changed for this. The four here are the ones the notebook does something more for (the copper picker, the
+  // link); any other page of this folder joins by a tag in its own head, read below.
   const COPPER = [
     { id: 'v6-feed-off', name: 'V6, probe feed off', src: 'routing-lab-v6-feed-off.html' },
     { id: 'v5', name: 'V5 as built', src: 'routing-lab-v5.html' },
@@ -95,19 +96,28 @@ body { display: flex; flex-direction: column; padding-top: 3px; overflow: hidden
     routing: { title: 'Routing lab', src: () => (COPPER.find((c) => c.id === nb.copper) || COPPER[0]).src,
       keys: COPPER.map((c) => 'lab.ui.v1:' + pathOf(c.src)) },
     cost: { title: 'Cost explorer', src: () => 'cost-explorer.html', keys: ['v6ce.v4'] },
-    lite: { title: 'Lite cost explorer', src: () => 'lite-cost-explorer.html', keys: ['v6lite.v1'] },
-    stack: { title: 'Barnacle stack', src: () => 'barnacle-stack.html', keys: ['v6stack.v1'] },
   };
   const TABS = [
     { id: 'outline', name: 'Outline', frame: 'outline', inner: 'tab-outline' },
     { id: 'mag', name: 'Magnetometers', frame: 'outline', inner: 'tab-mag' },
     { id: 'routing', name: 'Routing', frame: 'routing' },
     { id: 'cost', name: 'Cost', frame: 'cost' },
-    { id: 'lite', name: 'Lite cost', frame: 'lite', inner: 'tab-lite' },
-    { id: 'bboard', name: 'Barnacle cost', frame: 'lite', inner: 'tab-board' },
-    { id: 'stack', name: 'Stack', frame: 'stack' },
   ];
-  const KEYS = Object.values(FRAMES).flatMap((f) => f.keys);
+  // A page of this folder becomes a tab by saying so in its head, once for each tab it wants:
+  //   <meta name="notebook-tab" content="Lite cost" data-inner="tab-lite" data-keys="v6lite.v1" data-order="10">
+  // (the site's README, "The V6 notebook", says what each part is). The build reads those tags and puts the list in
+  // this page's head, in order; opened unbuilt, the notebook has the four tabs above.
+  let tagged = [];
+  try { tagged = JSON.parse($('notebook-tabs').textContent); } catch (e) { /* unbuilt */ }
+  const builtIn = ['board-outline.html', 'cost-explorer.html', ...COPPER.map((c) => c.src)];
+  for (const t of Array.isArray(tagged) ? tagged : []) {
+    if (!t || typeof t.id !== 'string' || !t.id || typeof t.src !== 'string' || !/^[\w.-]+\.html$/.test(t.src)) continue;
+    if (builtIn.includes(t.src) || TABS.some((x) => x.id === t.id)) continue;       // a tab the notebook already has
+    const f = FRAMES[t.src] || (FRAMES[t.src] = { title: String(t.name), src: () => t.src, keys: [] });
+    for (const k of Array.isArray(t.keys) ? t.keys : []) if (typeof k === 'string' && k && k.indexOf(S.OWN) !== 0 && !f.keys.includes(k)) f.keys.push(k);
+    TABS.push({ id: t.id, name: String(t.name), frame: t.src, inner: typeof t.inner === 'string' ? t.inner : undefined });
+  }
+  const KEYS = [...new Set(Object.values(FRAMES).flatMap((f) => f.keys))];
 
   // ---- this browser's storage. A private window may refuse it: the tabs still work, the pages do not last.
   let store = null;
@@ -123,18 +133,14 @@ body { display: flex; flex-direction: column; padding-top: 3px; overflow: hidden
   // is brought up to date when it is put away. Every other page's truth is its entry.
   let nb = { pages: {}, gone: {}, current: null, tab: 'outline', copper: COPPER[0].id, linked: true };
   const keep = () => put(NB, JSON.stringify(nb));
-  const snapshot = () => ({ t: Date.now(), copper: nb.copper, keys: Object.fromEntries(KEYS.map((k) => [k, get(k)])) });
+  // what the tools hold now, as a page. A tool this copy of the notebook has no tab for keeps what `from` had of it.
+  const snapshot = (from) => ({ t: Date.now(), copper: nb.copper, keys: { ...(from && from.keys), ...Object.fromEntries(KEYS.map((k) => [k, get(k)])) } });
   const names = () => Object.keys(nb.pages);
-  // a page read from storage or from a file: only the names the tools above use, only text or nothing
-  const clean = (p) => ({
-    t: Number(p && p.t) || 0,
-    copper: COPPER.some((c) => c.id === (p && p.copper)) ? p.copper : COPPER[0].id,
-    keys: Object.fromEntries(KEYS.map((k) => { const v = p && p.keys && p.keys[k]; return [k, typeof v === 'string' ? v : null]; })),
-    ...(p && typeof p.s === 'number' ? { s: p.s } : {}),
-  });
-  // a page from a file or from the account: the same, and whatever it says of having been synced is not this device's
-  // ponytail: only the tools this copy of the page knows are kept, so a device running an older copy of the page would
-  // drop a newer tool's state from a page it changes. Keep unknown keys too if tools are ever added while devices lag.
+  // a page read from storage, from a file or from the account: text or nothing, under any names but the notebook's
+  // own. It keeps the state of a tool this copy has no tab for (tabs come and go by tag, and another device may list
+  // more), so a page is handed on whole; only the names in KEYS are ever written to this browser's storage.
+  const clean = (p) => S.clean(p, COPPER.map((c) => c.id));
+  // the same, and whatever it says of having been synced is not this device's
   const strange = (p) => { const c = clean(p); delete c.s; return c; };
   const cleanName = (s) => String(s == null ? '' : s).replace(/\s+/g, ' ').trim().slice(0, 60);
 
@@ -213,18 +219,63 @@ body { display: flex; flex-direction: column; padding-top: 3px; overflow: hidden
     if (did.length) say('Cost follows the outline: ' + did.join(', ') + '.');
   }
 
+  // ---- newer copies. The build writes notebook.json beside this page: the version of every page of the folder
+  // (a version is the page's own bytes and its sheets', so it changes only when the page does) and of the notebook
+  // itself. It is asked for when the notebook opens, when it is come back to and once a minute while it is in view,
+  // always past every cache, and a frame is loaded by its version (page.html?v=...), so no cache can hand it an old one.
+  const OWN_V = (document.querySelector('meta[name="notebook-version"]') || {}).content || '';
+  const IDLE = 15000, HANDS = ['pointerdown', 'pointermove', 'keydown', 'wheel', 'touchstart'];
+  let ver = {}, newer = '', toldNewer = false, touched = 0;      // page -> version as last asked; a newer notebook's version; when a hand was last here
+  const at = (src) => (ver[src] ? src + '?v=' + ver[src] : src);
+  const touch = () => { touched = Date.now(); };
+  for (const t of HANDS) window.addEventListener(t, touch, { capture: true, passive: true });
+  // What is newer comes in. A tool that is not in view loads again at once. The one in view, and the notebook itself,
+  // load again when the page is come back to or when nothing in it has been touched for a while: never under a
+  // hand. A tool is told it is being left first and keeps its own state, so what was set in it is still set.
+  function refresh(back) {
+    const calm = back || document.visibilityState !== 'visible' || Date.now() - touched > IDLE;
+    if (newer && calm && !syncing && !asking) {
+      let tried = null;
+      try { tried = sessionStorage.getItem(NB + '.newer'); if (tried !== newer) { sessionStorage.setItem(NB + '.newer', newer); location.reload(); return; } } catch (e) { tried = newer; }
+      if (!toldNewer) { toldNewer = true; say('A newer notebook is published, and this browser was handed the older one again. Reload the page in a minute.'); }
+    }
+    const did = [];
+    for (const [name, f] of Object.entries(live)) {
+      const to = at(FRAMES[name].src());
+      if (f.dataset.at === to || (!f.hidden && !calm)) continue;
+      try { f.contentWindow.dispatchEvent(new Event('pagehide')); } catch (e) { /* not loaded yet */ }
+      point(name); did.push(FRAMES[name].title);
+    }
+    if (did.length) say('A newer ' + did.join(' and ') + ' was published: loaded, with everything as you had it.');
+  }
+  async function check(back) {
+    try {
+      const r = await fetch('notebook.json', { cache: 'no-store' });
+      const o = r.ok ? await r.json() : null;
+      if (o && o.v && typeof o.v === 'object') { ver = o.v; newer = OWN_V && typeof o.self === 'string' && o.self !== OWN_V ? o.self : ''; }
+    } catch (e) { /* offline, or opened unbuilt: what is loaded stays */ }
+    refresh(back);
+  }
+
   // ---- the frames
   const live = {};                                   // frame name -> its iframe, once its tab has been opened
   function flush() {                                 // the outline writes its state a moment after a change, and at once when told it is being left
     for (const f of Object.values(live)) { try { f.contentWindow.dispatchEvent(new Event('pagehide')); } catch (e) { /* not loaded yet */ } }
   }
   function drop() { for (const k of Object.keys(live)) { live[k].remove(); delete live[k]; } }
+  function point(name) {                             // load a frame, or load it again, from the newest published copy of its page
+    const f = live[name], to = at(FRAMES[name].src());
+    f.dataset.at = to; f.src = to;
+  }
   function dress(name) {                             // a tool inside the notebook drops what the notebook's bar already says (its own sheet knows .embedded)
-    try { live[name].contentDocument.documentElement.classList.add('embedded'); } catch (e) { /* a frame that cannot be reached is shown as it is */ }
+    try {
+      live[name].contentDocument.documentElement.classList.add('embedded');
+      for (const t of HANDS) live[name].contentWindow.addEventListener(t, touch, { capture: true, passive: true });
+    } catch (e) { /* a frame that cannot be reached is shown as it is */ }
     inner();
     if (name === 'cost') followNow();
   }
-  function inner() {                                 // Outline and Magnetometers are two tabs of the one outline tool
+  function inner() {                                 // a tool with views of its own (the outline's Magnetometers) has a tab here for each
     const tab = TABS.find((t) => t.id === nb.tab), f = live[tab.frame];
     if (!tab.inner || !f) return;
     try { const b = f.contentDocument.getElementById(tab.inner); if (b && b.getAttribute('aria-selected') !== 'true') b.click(); } catch (e) { /* still loading: dress() calls this again */ }
@@ -232,14 +283,17 @@ body { display: flex; flex-direction: column; padding-top: 3px; overflow: hidden
   function show(id) {
     const tab = TABS.find((t) => t.id === id) || TABS[0];
     nb.tab = tab.id;
-    for (const b of $('tabs').children) b.setAttribute('aria-selected', String(b.dataset.tab === tab.id));
+    for (const b of $('tabs').children) {
+      b.setAttribute('aria-selected', String(b.dataset.tab === tab.id));
+      if (b.dataset.tab === tab.id) b.scrollIntoView({ block: 'nearest', inline: 'nearest' });     // on a phone the row of tabs is wider than the screen
+    }
     $('copper-box').hidden = tab.frame !== 'routing';
     if (!live[tab.frame]) {
       const f = document.createElement('iframe');
       f.title = FRAMES[tab.frame].title;
       f.addEventListener('load', () => dress(tab.frame));
-      f.src = FRAMES[tab.frame].src();
       live[tab.frame] = f;
+      point(tab.frame);
       $('frames').appendChild(f);
     }
     for (const [name, f] of Object.entries(live)) f.hidden = name !== tab.frame;
@@ -253,7 +307,7 @@ body { display: flex; flex-direction: column; padding-top: 3px; overflow: hidden
   // ---- the pages
   function putAway() {                               // the open page's entry, brought up to what the tools hold
     flush();
-    const was = nb.pages[nb.current], now = snapshot();
+    const was = nb.pages[nb.current], now = snapshot(was);
     if (was && S.sig(was) === S.sig(now)) now.t = was.t;      // nothing changed: it is still the same version
     if (was && was.s != null) now.s = was.s;
     nb.pages[nb.current] = now;
@@ -344,19 +398,19 @@ body { display: flex; flex-direction: column; padding-top: 3px; overflow: hidden
   }
   // The merge is in, and the account has it: this device takes it. The tools hold the open page, so that one needs care.
   function settle(m, before, asked, sent) {
-    const was = nb.current, said = [];
+    const was = nb.current, held = nb.pages[was], said = [];
     nb.pages = m.pages; nb.gone = {};
     let reload = null;
     const copy = m.kept.find((k) => k[0] === was);
     if (copy) nb.current = copy[1];                  // both changed the open page: the tools hold this device's, now under the copy's name
     else if (m.took.includes(was) || m.dropped.includes(was)) {
       flush();
-      if (S.sig(snapshot()) !== before) {            // changed here in the moment the answer was on its way: kept the same way
+      if (S.sig(snapshot(held)) !== before) {        // changed here in the moment the answer was on its way: kept the same way
         const as = suggest(was + ' (this device ' + stamp() + ')');
-        nb.pages[as] = snapshot(); nb.current = as; m.kept.push([was, as]); owed = true;
+        nb.pages[as] = snapshot(held); nb.current = as; m.kept.push([was, as]); owed = true;
       } else if (m.took.includes(was)) reload = was;
       else if (names().length) reload = names()[0];
-      else { nb.pages[was] = snapshot(); owed = true; }          // every page was deleted elsewhere: what is open stays, as a new page
+      else { nb.pages[was] = snapshot(held); owed = true; }      // every page was deleted elsewhere: what is open stays, as a new page
     }
     const q = (n) => '"' + n + '"';
     const others = m.took.filter((n) => !m.kept.some((k) => k[0] === n));
@@ -407,7 +461,7 @@ body { display: flex; flex-direction: column; padding-top: 3px; overflow: hidden
   for (const c of COPPER) { const o = document.createElement('option'); o.value = c.id; o.textContent = c.name; $('copper').appendChild(o); }
   $('copper').addEventListener('change', () => {
     nb.copper = $('copper').value;
-    if (live.routing) live.routing.src = FRAMES.routing.src();
+    if (live.routing) point('routing');
     keep(); later(800); say('Routing shows ' + $('copper').selectedOptions[0].textContent + '. This page remembers it.');
   });
   $('page').addEventListener('change', () => {
@@ -419,7 +473,7 @@ body { display: flex; flex-direction: column; padding-top: 3px; overflow: hidden
   $('pg-copy').addEventListener('click', () => ask('copy this page as', 'Copy', suggest(nb.current + ' copy'), (name) => {
     if (!fresh(name)) return false;
     const from = nb.current;
-    putAway(); nb.pages[name] = snapshot(); nb.current = name; keep(); list(); later(800);     // the tools already hold it: nothing reloads
+    putAway(); nb.pages[name] = snapshot(nb.pages[from]); nb.current = name; keep(); list(); later(800);     // the tools already hold it: nothing reloads
     say('"' + name + '" is a copy of "' + from + '" and is the page open now. "' + from + '" stays as it was.');
   }));
   $('pg-blank').addEventListener('click', () => ask('new blank page', 'Make', suggest('Page ' + (names().length + 1)), (name) => {
@@ -480,24 +534,30 @@ body { display: flex; flex-direction: column; padding-top: 3px; overflow: hidden
     say('The key is kept in this browser only and is sent only to this site.');
   });
   $('nb-sync-off').addEventListener('click', () => { put(KEY, null); clearTimeout(timer); mark(); say('Sync is off on this device. Its pages stay here, and the account keeps its own.'); });
-  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') later(300); else syncNow(false); });
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { later(300); check(true); } else syncNow(false); });
+  setInterval(() => { if (document.visibilityState === 'visible') check(false); }, 60000);
+  setInterval(() => refresh(false), 5000);            // what was held back for a hand comes in once the hand is gone
   window.addEventListener('pagehide', () => { putAway(); keep(); });
   window.addEventListener('hashchange', () => { const want = location.hash.slice(1); if (want !== nb.tab && TABS.some((t) => t.id === want)) show(want); });
 
   list();
-  show(nb.tab);
   mark();
-  if (/[?&]check\b/.test(location.search)) {          // the link's reading of a design, tried on four made-up ones
-    const t = (params, want) => JSON.stringify(facts(params)) === JSON.stringify(want);
-    const ok = t({ parts: [{ type: 'display_tft220bar', window: {} }, { type: 'm2_socket' }], show: { sensor_layout: 'custom' }, mag: { list: [1, 2, 3] } }, { disp: 'bar22', win: 'glass', port: 'm2', nmag: 3 })
-      && t({ parts: [{ type: 'display_tft147', window: { glass: 0 } }], show: { sensor_layout: 'plan32' } }, { disp: 'tft', win: 'crop', port: 'pads', nmag: 32 })
-      && t({ parts: [{ type: 'display_tft300' }, { type: 'sfp_cage' }], show: { sensor_layout: 'wigledmag' } }, { disp: undefined, win: 'open', port: undefined, nmag: undefined })
-      && t({}, { disp: 'none', win: undefined, port: 'pads', nmag: undefined });
-    return say('Link check: ' + (ok ? 'ok' : 'FAILED'));
-  }
-  syncNow(false);
-  say(store ? 'Page "' + nb.current + '". ' + (names().length === 1 ? 'Copy it to keep this design and try another.' : names().length + ' pages in this notebook.')
-    : 'This browser will not keep anything for this page (a private window does this): the tabs work, the pages will not last.');
+  // The first tool waits a moment for the versions, so that it is loaded once, and as the newest copy.
+  Promise.race([check(true), new Promise((done) => setTimeout(done, 2500))]).then(() => {
+    show(nb.tab);
+    if (/[?&]check\b/.test(location.search)) {          // the link's reading of a design, tried on four made-up ones
+      const t = (params, want) => JSON.stringify(facts(params)) === JSON.stringify(want);
+      const ok = t({ parts: [{ type: 'display_tft220bar', window: {} }, { type: 'm2_socket' }], show: { sensor_layout: 'custom' }, mag: { list: [1, 2, 3] } }, { disp: 'bar22', win: 'glass', port: 'm2', nmag: 3 })
+        && t({ parts: [{ type: 'display_tft147', window: { glass: 0 } }], show: { sensor_layout: 'plan32' } }, { disp: 'tft', win: 'crop', port: 'pads', nmag: 32 })
+        && t({ parts: [{ type: 'display_tft300' }, { type: 'sfp_cage' }], show: { sensor_layout: 'wigledmag' } }, { disp: undefined, win: 'open', port: undefined, nmag: undefined })
+        && t({}, { disp: 'none', win: undefined, port: 'pads', nmag: undefined });
+      return say('Link check: ' + (ok ? 'ok' : 'FAILED'));
+    }
+    syncNow(false);
+    let came = null; try { came = sessionStorage.getItem(NB + '.newer'); if (came === OWN_V) sessionStorage.removeItem(NB + '.newer'); } catch (e) { /* no session storage */ }
+    say(!store ? 'This browser will not keep anything for this page (a private window does this): the tabs work, the pages will not last.'
+      : (came && came === OWN_V ? 'A newer notebook was published: loaded. ' : '') + 'Page "' + nb.current + '". ' + (names().length === 1 ? 'Copy it to keep this design and try another.' : names().length + ' pages in this notebook.'));
+  });
 })();
 </script>
 </body>

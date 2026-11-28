@@ -2,7 +2,7 @@
 // What two devices and the account must come to, case by case. No network, nothing installed.
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
-const { merge, sig, same } = createRequire(import.meta.url)('../../../V6/notebook-sync.js');
+const { merge, sig, same, clean } = createRequire(import.meta.url)('../../../V6/notebook-sync.js');
 
 const page = (t, text, s) => ({ t, ...(s === undefined ? {} : { s }), copper: 'v5', keys: { 'v6ce.v4': text } });
 const names = (o) => Object.keys(o).sort();
@@ -90,5 +90,30 @@ assert.deepEqual([m.kept, m.took], [[], ['A']]); assert.equal(m.push, true);
 assert.deepEqual(m.remote.pages.A.keys, { 'v6ce.v4': 'priced', 'v6mech.state': JSON.stringify({ params: { w: 2 } }) });
 assert.deepEqual(m.pages.A.keys, m.remote.pages.A.keys);
 assert.equal(same(two(1, { w: 1 }, null), two(2, { w: 1 }, 'priced')), true); assert.equal(same(two(1, { w: 1 }, 'a'), two(2, { w: 1 }, 'b')), false);
+
+// the tab list is not the same on every device (a page joins the notebook by a tag, and a device may hold an older
+// copy of the notebook): a page keeps the state of a tool this device has no tab for, so that it can pass it on
+const COPPERS = ['v6-feed-off', 'v5'];
+let c = clean({ t: 4, s: 4, copper: 'v5', keys: { 'v6ce.v4': 'priced', 'v6lite.v1': 'a tool this device does not list', odd: 7 } }, COPPERS);
+assert.deepEqual(c, { t: 4, copper: 'v5', keys: { 'v6ce.v4': 'priced', 'v6lite.v1': 'a tool this device does not list', odd: null }, s: 4 });
+// but never the notebook's own names (its key for the account is one of them), and never without end
+c = clean({ t: 1, copper: 'nowhere', keys: { 'v6nb.key': 'the secret', 'v6nb.v1': '{}', ok: 'x', ['k'.repeat(200)]: 'x' } }, COPPERS);
+assert.deepEqual(c, { t: 1, copper: 'v6-feed-off', keys: { ok: 'x' } });
+assert.equal(Object.keys(clean({ keys: Object.fromEntries(Array.from({ length: 500 }, (_, i) => ['k' + i, 'x'])) }, COPPERS).keys).length, 64);
+assert.deepEqual(clean(null, COPPERS), { t: 0, copper: 'v6-feed-off', keys: {} });
+// so a device with an older tab list that edits the outline sends the page up with the other tool's state still in it
+m = run({ pages: { A: clean({ t: 9, s: 5, copper: 'v5', keys: { 'v6mech.state': 'edited', 'v6lite.v1': 'kept' } }, COPPERS) } },
+  { pages: { A: { t: 5, copper: 'v5', keys: { 'v6mech.state': 'was', 'v6lite.v1': 'kept' } } }, gone: {} });
+assert.equal(m.push, true); assert.equal(m.remote.pages.A.keys['v6lite.v1'], 'kept');
+
+// a tool with nothing kept is the same as a tool the page has never heard of: a tab joining the notebook, or a
+// device that lists more tabs than another, is not a change to any page
+const bare = (keys) => ({ t: 1, copper: 'v5', keys });
+assert.equal(sig(bare({ 'v6ce.v4': 'priced' })), sig(bare({ 'v6ce.v4': 'priced', 'v6lite.v1': null })));
+assert.notEqual(sig(bare({ 'v6ce.v4': 'priced' })), sig(bare({ 'v6ce.v4': 'priced', 'v6lite.v1': 'set' })));
+// nor is a newer outline tool: it writes its own revision into the design it saves, and that is the tool's, not the design's
+const rev = (r, w) => bare({ 'v6mech.state': JSON.stringify({ params: { meta: { rev: r }, w } }) });
+assert.equal(sig(rev('A10c', 3)), sig(rev('A11e', 3))); assert.notEqual(sig(rev('A11e', 3)), sig(rev('A11e', 4)));
+assert.equal(same(rev('A10c', 3), rev('A11e', 3)), true);
 
 console.log('notebook merge: ok');

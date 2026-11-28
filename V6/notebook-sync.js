@@ -12,20 +12,23 @@
   else root.NotebookSync = factory();
 })(typeof self !== 'undefined' ? self : this, function () {
   'use strict';
+  const OWN = 'v6nb.';                               // the notebook's own names in a browser's storage: no tool's, and never a page's
 
   // What a page's design is, tool by tool, for telling whether it changed. Looking is not changing: where the 3D
   // view stands, how the panels are laid out, which example is open in the routing lab and the time the outline
   // stamps on every save travel with a page but are no part of this. (Otherwise a device that only opens the
-  // notebook would send a "new" version, and the other devices would reload for it.)
+  // notebook would send a "new" version, and the other devices would reload for it.) Nor is the outline tool's own
+  // revision, which it writes into the design it saves: a newer tool is not a changed design. And a tool with
+  // nothing kept counts as a tool the page has never heard of, because the tabs are not the same on every device.
   function design(page) {
     const keys = {};
     for (const k of Object.keys((page && page.keys) || {}).sort()) {
       let v = page.keys[k];
-      if (k.indexOf('lab.ui.') === 0) continue;
+      if (v == null || k.indexOf('lab.ui.') === 0) continue;
       if (k === 'v6mech.state' && typeof v === 'string') {
-        try { v = JSON.stringify(JSON.parse(v).params); } catch (e) { /* not JSON: compared as it is */ }
+        try { const p = Object.assign({}, JSON.parse(v).params); delete p.meta; v = JSON.stringify(p); } catch (e) { /* not JSON: compared as it is */ }
       }
-      keys[k] = v == null ? null : v;
+      keys[k] = v;
     }
     return keys;
   }
@@ -37,6 +40,23 @@
     const x = design(a), y = design(b);
     for (const k of new Set(Object.keys(x).concat(Object.keys(y)))) if (x[k] != null && y[k] != null && x[k] !== y[k]) return false;
     return true;
+  }
+
+  // A page as read from storage, from a file or from the account. It keeps the state of every tool it carries,
+  // whether or not this copy of the notebook has a tab for that tool, so that a device with an older or shorter tab
+  // list hands a page on whole. What is kept is text or nothing, under at most 64 names of a sensible length, and
+  // never under one of the notebook's own (v6nb.*: its pages and its key for the account live there).
+  // coppers: the routing runs this notebook knows, the first being the one a page falls back to.
+  function clean(p, coppers) {
+    const keys = {};
+    let n = 0;
+    for (const k of Object.keys((p && p.keys) || {})) {
+      if (!k || k.length > 120 || k.indexOf(OWN) === 0 || n >= 64) continue;
+      keys[k] = typeof p.keys[k] === 'string' ? p.keys[k] : null; n++;
+    }
+    const page = { t: Number(p && p.t) || 0, copper: coppers.indexOf(p && p.copper) >= 0 ? p.copper : coppers[0], keys: keys };
+    if (p && typeof p.s === 'number') page.s = p.s;
+    return page;
   }
 
   // The account's form of a notebook, in one fixed order, so that two of them can be compared as text.
@@ -114,5 +134,5 @@
     return { pages: pages, remote: next, push: JSON.stringify(next) !== JSON.stringify(canon(remote)), took: took, kept: kept, dropped: dropped };
   }
 
-  return { sig: sig, same: same, canon: canon, merge: merge };
+  return { OWN: OWN, sig: sig, same: same, clean: clean, canon: canon, merge: merge };
 });

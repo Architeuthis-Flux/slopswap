@@ -15,6 +15,7 @@ import re
 import shutil
 import subprocess
 import tempfile
+from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import quote
 
@@ -38,6 +39,9 @@ CARD = {"image": "styles/social-card.png", "sweep": "styles/social-sweep.webp", 
         "alt": "A rainbow Jumperless wordmark above a ridged circle whose picture changes with the viewing angle: a lenticular shirt print."}
 DISCORD_EMBED = True               # False leaves Discord the plain tags (if its Embed Debugger turns the layout down)
 DISCORD_BYTES = 3000               # the most Discord reads of a component embed
+NOTEBOOK = "notebook.html"         # a folder holding this page has a notebook: the pages of the folder that tag themselves are its tabs
+NOTEBOOK_VERSIONS = "notebook.json"   # written beside it: the version of every page of the folder, which an open notebook asks for
+NOTEBOOK_OWN = "v6nb."             # the notebook's own names in a browser's storage (V6/notebook-sync.js): no page may claim one
 
 
 def head(p: Path) -> str:
@@ -334,6 +338,101 @@ def add_social(folder: Path, at: str) -> int:
     return n
 
 
+class TabTags(HTMLParser):
+    """The <meta name="notebook-tab"> tags of a page's head, as their attributes."""
+    def __init__(self):
+        super().__init__()
+        self.found = []
+
+    def handle_starttag(self, tag, attrs):
+        a = dict(attrs)
+        if tag == "meta" and a.get("name") == "notebook-tab":
+            self.found.append(a)
+
+
+def notebook_tabs(folder: Path) -> tuple:
+    """The tabs a folder's pages ask for in its notebook, and what was wrong with the tags that cannot be tabs.
+    A page joins with one tag in its head for each tab:
+        <meta name="notebook-tab" content="Lite cost" data-inner="tab-lite" data-keys="v6lite.v1" data-order="10">
+    content is the tab's name; data-inner the id of a button of the page that the notebook presses to show that view
+    (for a page with views of its own); data-keys the names the page keeps its design under in the browser's storage,
+    which is what a notebook page saves and brings back; data-order where the tab goes, lower first, a tab without
+    one after the rest by file name. Returns (tabs, wrong); a tab is {id, name, src, inner, keys}."""
+    found, wrong = [], []
+    for p in sorted(folder.glob("*.html")):
+        if p.name == NOTEBOOK:
+            continue
+        s = p.read_text(errors="replace")
+        end = re.search(r"</head>", s, re.I)
+        top = s[:end.start()] if end else s[:HEAD_BYTES]
+        if "notebook-tab" not in top:
+            continue
+        tags = TabTags()
+        tags.feed(top)
+        for i, a in enumerate(tags.found):
+            name = " ".join((a.get("content") or "").split())
+            if not name:
+                wrong.append(f"{p.name}: a tab with no name")
+                continue
+            inner = a.get("data-inner") or None
+            if inner and not re.fullmatch(r"[\w-]+", inner):
+                wrong.append(f"{p.name}: {name!r} names {inner!r}, which is not an id, so the tab opens the page as it is")
+                inner = None
+            keys = (a.get("data-keys") or "").split()
+            for k in [k for k in keys if k.startswith(NOTEBOOK_OWN) or len(k) > 120]:
+                wrong.append(f"{p.name}: {name!r} may not keep {k!r}")
+                keys.remove(k)
+            try:
+                order = float(a.get("data-order", ""))
+            except ValueError:
+                order = float("inf")
+            found.append((order, p.name, i, {"id": re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-") or "tab",
+                                              "name": name, "src": p.name, "inner": inner, "keys": keys}))
+    tabs = []
+    for *_, tab in sorted(found, key=lambda f: f[:3]):
+        if any(t["id"] == tab["id"] for t in tabs):
+            wrong.append(f"{tab['src']}: a second tab named {tab['name']!r}")
+        else:
+            tabs.append(tab)
+    return tabs, wrong
+
+
+def page_version(p: Path, root: Path = ROOT) -> str:
+    """A page's version, from what it is made of: its own file and the sheets and scripts of this site that it names.
+    Not the commit: a push that leaves a page alone leaves its version alone, so an open notebook loads again only
+    the tools that did change."""
+    b = p.read_bytes()
+    h = hashlib.sha256(b)
+    for ref in sorted(set(re.findall(rb'(?:href|src)="([^"?#:]+\.(?:css|js))"', b))):
+        f = (p.parent / ref.decode(errors="replace")).resolve()
+        if f.is_file() and root.resolve() in f.parents:
+            h.update(f.read_bytes())
+    return h.hexdigest()[:10]
+
+
+def with_notebook(s: str, tabs: list, v: str) -> str:
+    """The notebook page with its tagged tabs and its own version in its head, where its script reads them. Every
+    "<" of the list is written as \\u003c so that no tab's name can end the tag."""
+    text = json.dumps(tabs, ensure_ascii=False, separators=(",", ":")).replace("<", "\\u003c")
+    return into_head(s, f'<meta name="notebook-version" content="{v}">\n<script type="application/json" id="notebook-tabs">{text}</script>')
+
+
+def add_notebook(src: Path, out: Path, root: Path = ROOT) -> str | None:
+    """A folder's notebook, built: its tabs put into the page, and the version of every page of the folder written
+    beside it (notebook.json), which the open notebook asks for to load a tool again when a newer one is published.
+    The notebook's own version covers its tab list, so a page that joins or leaves makes a new notebook. Returns a
+    line to print, or None for a folder with no notebook."""
+    if not (src / NOTEBOOK).exists():
+        return None
+    tabs, wrong = notebook_tabs(src)
+    versions = {p.name: page_version(p, root) for p in sorted(src.glob("*.html"))}
+    own = hashlib.sha256((versions[NOTEBOOK] + json.dumps(tabs, sort_keys=True)).encode()).hexdigest()[:10]
+    (out / NOTEBOOK).write_text(with_notebook((out / NOTEBOOK).read_text(), tabs, own))
+    (out / NOTEBOOK_VERSIONS).write_text(json.dumps({"self": own, "v": versions}, indent=0))
+    said = f"{src.name} notebook: {len(tabs)} tagged tabs ({', '.join(t['name'] for t in tabs) or 'none'})"
+    return said + "".join(f"\n  left out: {w}" for w in wrong)
+
+
 def project(d: Path) -> dict:
     """What the front page shows for one folder: name, one line about it, its pages, when it last changed."""
     idx = d / "index.html"
@@ -432,6 +531,46 @@ def check() -> None:
     assert '<script defer src="../styles/seen.js"></script>' in counted and with_seen(counted, "../") == counted and "social.js" not in counted
 
 
+    # a notebook's tabs: the pages of its folder that tag themselves, in the order they ask for; a tag that cannot be
+    # a tab is said and left out, and never stops the build
+    with tempfile.TemporaryDirectory() as d, tempfile.TemporaryDirectory() as o:
+        d, o = Path(d), Path(o)
+        (d / NOTEBOOK).write_text('<head><meta charset="utf-8"><meta name="notebook-tab" content="Itself"><title>N</title></head>')
+        (d / "b.html").write_text('<head><meta name="notebook-tab" content="Stack" data-keys="b.v1" data-order="30"></head>')
+        (d / "a.html").write_text('<head>\n<meta data-order="10" data-keys="a.v1 a.v2 v6nb.key" data-inner="tab-one" content="One &amp; only" name="notebook-tab">\n'
+                                  '<meta name="notebook-tab" content="Two" data-inner="tab two" data-order="20"><meta name="notebook-tab" content="stack">'
+                                  '<meta name="notebook-tab" content=" "></head><body><meta name="notebook-tab" content="In the body"></body>')
+        (d / "c.html").write_text('<head><meta name="notebook-tab" content="Last"></head>')
+        tabs, wrong = notebook_tabs(d)
+        assert tabs == [{"id": "one-only", "name": "One & only", "src": "a.html", "inner": "tab-one", "keys": ["a.v1", "a.v2"]},
+                        {"id": "two", "name": "Two", "src": "a.html", "inner": None, "keys": []},
+                        {"id": "stack", "name": "Stack", "src": "b.html", "inner": None, "keys": ["b.v1"]},
+                        {"id": "last", "name": "Last", "src": "c.html", "inner": None, "keys": []}], tabs
+        assert len(wrong) == 4, wrong          # the notebook's own name as a key, an inner with a space in it, a second "stack", a tab with no name
+        # a page's version: its own file and the sheets and scripts of this site it names, so nothing else's change makes a new one
+        (d / "s.css").write_text("a{}")
+        (d / "p.html").write_text('<link rel="stylesheet" href="s.css"><script src="https://x.example/y.js"></script><script src="gone.js"></script>')
+        v1 = page_version(d / "p.html", d)
+        assert re.fullmatch(r"[0-9a-f]{10}", v1) and page_version(d / "p.html", d) == v1
+        (d / "c.html").write_text("another page changed"); assert page_version(d / "p.html", d) == v1
+        (d / "s.css").write_text("a{color:red}"); v2 = page_version(d / "p.html", d); assert v2 != v1
+        (d / "p.html").write_text((d / "p.html").read_text() + " "); assert page_version(d / "p.html", d) not in (v1, v2)
+        # the built notebook carries its tabs and its own version; the versions of the folder's pages go beside it
+        shutil.copy(d / NOTEBOOK, o / NOTEBOOK)
+        said = add_notebook(d, o, d)
+        book, built = json.loads((o / NOTEBOOK_VERSIONS).read_text()), (o / NOTEBOOK).read_text()
+        assert set(book["v"]) == {NOTEBOOK, "a.html", "b.html", "c.html", "p.html"} and book["v"]["p.html"] == page_version(d / "p.html", d)
+        assert f'<meta name="notebook-version" content="{book["self"]}">' in built and built.index("charset") < built.index("notebook-version")
+        assert [t["id"] for t in json.loads(re.search(r'id="notebook-tabs">(.*?)</script>', built).group(1))] == ["one-only", "two", "stack"], built
+        assert "3 tagged tabs" in said and "left out" in said, said
+        own = book["self"]; (d / "b.html").write_text('<head><meta name="notebook-tab" content="Stack renamed"></head>')
+        shutil.copy(d / NOTEBOOK, o / NOTEBOOK); add_notebook(d, o, d)
+        assert json.loads((o / NOTEBOOK_VERSIONS).read_text())["self"] != own          # a tab changed: the notebook itself is a new version
+        (d / NOTEBOOK).unlink(); assert add_notebook(d, o, d) is None                  # a folder with no notebook gets nothing
+    held = with_notebook('<head><meta charset="utf-8"></head>', [{"name": "</script><b>"}], "abc")
+    assert "</script><b>" not in held and json.loads(re.search(r'id="notebook-tabs">(.*?)</script>', held).group(1)) == [{"name": "</script><b>"}]
+
+
 def main() -> None:
     check()
     if OUT.exists():
@@ -448,6 +587,8 @@ def main() -> None:
     for d in projects:
         shutil.copytree(d, OUT / d.name, ignore=shutil.ignore_patterns(UNLISTED))
         (OUT / d.name / RECENT).write_text(json.dumps(recent(d), ensure_ascii=False, indent=0))
+        if said := add_notebook(d, OUT / d.name):
+            print(said)
         name = d.name.replace("-", " ")
         if not (d / "index.html").exists():
             crumb = f'<p class="eyebrow"><a href="../">slopswap</a> / {html.escape(d.name)}</p>'
