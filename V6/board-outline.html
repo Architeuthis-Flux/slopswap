@@ -10298,7 +10298,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
         var L1p = layers.length > 1 ? layers[1] : null, tipZ = L1p ? round(L1p.z1 + press.h, 2) : 4, pinL = round(tipZ - 1.0, 2), vk = (Catalog.vertKinds || {})[String(press.h)];
         port = { id: press.id, kind: 'skt_v_127', kind_label: 'upright 1.27 mm socket on the mid board, ' + press.h + ' high', pitch: 1.27, high: press.h, price: vk ? vk.price : null, pin: pinL, takes: null, n: press.n, pins: press.pins, len: press.len,
           faces: true, mouth_x: round(xr), inset: 0, y0: round(press.y - 0.8), y1: round(press.y + press.span + 0.8), engage: press.h, pin_ok: true, open_seam: 0, room: L1p ? round(zTop - (L1p.z1 + press.h), 2) : null,
-          press: { knob: press.knob, neck: press.neck, under: press.under, gap: press.gap, pin_len: pinL, pin_tip: tipZ, socket_z: L1p ? [round(L1p.z1, 3), round(L1p.z1 + press.h, 3)] : null, bottom_t: layers[0].t, top_z: round(zTop) } };
+          press: { x: press.x, y: press.y, knob: press.knob, neck: press.neck, under: press.under, gap: press.gap, pin_len: pinL, pin_tip: tipZ, socket_z: L1p ? [round(L1p.z1, 3), round(L1p.z1 + press.h, 3)] : null, bottom_t: layers[0].t, top_z: round(zTop) } };
         hn = press.n; hy = press.y; boardR = union(boardR, press.tab);
       }
       var HD = press ? Catalog.get({ type: 'hdr_v_127', dims: { n: hn, pin: port.pin } }) : Catalog.get({ type: SK.hdr, dims: { n: hn, pin: SK.pin } }), extParts = [];
@@ -12337,7 +12337,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     render: { mode: 'real', bg: 'console', bgColor: '#27272b', ground: 'shadow', shadows: true, exposure: 1, light: 1, sun: 215, fov: 30, rotate: false, edges: false, decals: true, wheel: 'pan',
       boardOpacity: 1, texture: 'smooth', shellTex: 'smooth', rig: 'studio', keyColor: '#ffffff', keyLevel: 1, fillColor: '#ffffff', fillLevel: 1, rimColor: '#ffffff', rimLevel: 0, skyColor: '#ffffff', ambLevel: 1 },
     // the view controls that sit in the 3D view itself: where the strip is docked (bottom, top, left, right, off) and what is in it
-    viewbar: { dock: 'bottom', items: ['explode', 'opacity', 'shell', 'mode'], fold: false },
+    viewbar: { dock: 'bottom', items: ['explode', 'extout', 'opacity', 'shell', 'mode'], fold: false },
     layout: { dock: { 'panel-design': 'left', 'panel-checks': 'right' }, w: { left: 348, right: 338 }, h: 300, ratio: { left: 0.55, right: 0.5, bottom: 0.5 }, solo: false, text: 'm' }, fold: { 'Look': true, 'Probe dock': true, 'Saved designs': true, 'Readings': true }, panels: {},
     // the left-to-right flip (rev A12): what stays behind when the board is flipped. humps: { key: 'stay' }; corners: the two top corners' own shapes
     flip: { humps: {}, corners: 'stay', mag: 'flip', said: '' }, humpSaid: '',
@@ -12607,7 +12607,14 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     // the header on its head: the plastic as its box, the two rows of pins one by one (they are inside the socket when it is plugged in)
     var gold = real ? Rn.part(mode, 0xd9b441, { metal: 0.85 }) : mat(0xd9b441, { metal: 0.6, rough: 0.3 }), black = real ? Rn.part(mode, 0x141414, { metal: 0.05 }) : mat(0x141414, { rough: 0.6 });
     E.parts.forEach(function (p) { p.bodies.forEach(function (b) { if (b.name !== 'pins') grp.add(extrude([{ outer: b.pts, holes: [] }], b.z0, b.z1, black)); }); });
-    for (var k = 0; k < E.header.n; k++) [0.95, 2.22].forEach(function (pz) {
+    var prs = E.port && E.port.press;
+    // pressed in from the back (rev A11e): the pins stand upright on the tab, two rows, from the header's base up to the socket's top
+    if (prs) {             // read from the header's own pins body, so they are right whichever side the extender is on
+      var pb = null; E.parts.forEach(function (p) { p.bodies.forEach(function (b) { if (b.name === 'pins') pb = b; }); });
+      if (pb) { var bx0 = 1e9, bx1 = -1e9, by0 = 1e9; pb.pts.forEach(function (q) { bx0 = Math.min(bx0, q[0]); bx1 = Math.max(bx1, q[0]); by0 = Math.min(by0, q[1]); }); var pl = pb.z1 - pb.z0;
+        for (var k2 = 0; k2 < E.header.n; k2++) [bx0 + 0.2, bx1 - 0.2].forEach(function (px) { var vp = new T.Mesh(new T.BoxGeometry(0.4, pl, 0.4), gold); vp.position.set(px, pb.z0 + pl / 2, by0 + 0.2 + k2 * 1.27); grp.add(vp); }); }
+    }
+    else for (var k = 0; k < E.header.n; k++) [0.95, 2.22].forEach(function (pz) {
       var pin = new T.Mesh(new T.BoxGeometry(6.6, 0.4, 0.4), gold); pin.position.set(E.header.pin_x, pz, E.header.pin_y + k * E.header.step); grp.add(pin);
     });
     // a staple or a jumper: a bridge lying on the top face and a leg down the hole at each end
@@ -12620,6 +12627,8 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
       E.ties.list.forEach(function (t) { wireU(t.x0, t.x1, t.y, E.ties.wire, 5, 0xc8ccd2); });
       E.jumpers.forEach(function (t) { wireU(t.x0, t.x1, t.y, 0.64, 6, 0xd9b441); });
     }
+    // the extender moved away for a look at the joint: straight down when it presses in from the back, to the right when it slides in sideways
+    var xo = +ui.extOut || 0; if (xo) { if (prs) grp.position.y = -xo; else grp.position.x = E.side === 'left' ? -xo : xo; }
     return grp;
   }
 
@@ -12946,7 +12955,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
   }
 
   // ---------- view controls: one list. Each is shown in the panel's View section, or pinned into the strip in the 3D view ----------
-  var VIEW_ID = { explode: 'c-ex', opacity: 'c-bop', shell: 'c-hs', bg: 'c-bg', ground: 'c-ground', light: 'c-light', sun: 'c-sun', exposure: 'c-exp', shadows: 'c-shadow', decals: 'c-decals', edges: 'c-edges', fov: 'c-fov', wheel: 'c-wheel', rotate: 'c-rot', clip: 'c-clip', clipPos: 'c-clipp', env: 'c-env' };
+  var VIEW_ID = { explode: 'c-ex', extout: 'c-xo', opacity: 'c-bop', shell: 'c-hs', bg: 'c-bg', ground: 'c-ground', light: 'c-light', sun: 'c-sun', exposure: 'c-exp', shadows: 'c-shadow', decals: 'c-decals', edges: 'c-edges', fov: 'c-fov', wheel: 'c-wheel', rotate: 'c-rot', clip: 'c-clip', clipPos: 'c-clipp', env: 'c-env' };
   function rset(k, v, sceneToo, redraw) { ui.render[k] = v; applyRender(); if (sceneToo) buildScene(); saveView(); if (redraw) renderControls(); }
   function viewItems() {
     var rs = ui.render, real = rs.mode === 'real';
@@ -12957,6 +12966,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     var items = [
       { k: 'mode', label: 'Drawn as', make: function () { return el('span', { class: 'seg', role: 'group' }, [['real', 'Real'], ['tech', 'Flat'], ['xray', 'X-ray'], ['lines', 'Lines']].map(function (o) { return el('button', { type: 'button', 'aria-pressed': String(rs.mode === o[0]), text: o[1], onclick: function () { rset('mode', o[0], true, true); } }); })); } },
       { k: 'explode', label: 'Explode', make: range(null, 0, 14, 0.5, { get: function () { return ui.explode; }, set: function (v) { ui.explode = v; buildScene(); saveView(); } }) },
+      { k: 'extout', label: 'Extender away', make: range(null, 0, 40, 0.5, { get: function () { return +ui.extOut || 0; }, set: function (v) { ui.extOut = v; buildScene(); saveView(); } }) },
       { k: 'opacity', label: 'Board opacity', make: range('boardOpacity', 0.1, 1, 0.05, { def: 1, scene: true }) },
       { k: 'shell', label: 'Hide the breadboard shell', short: 'Hide shell', check: true, make: chk(null, { get: function () { return ui.hideShell; }, set: function (v) { ui.hideShell = v; buildScene(); saveView(); } }) },
       { k: 'bg', label: 'Backdrop', make: sel('bg', [['console', 'Console grey'], ['deep', 'Dark'], ['studio', 'Studio fade'], ['slate', 'Slate, lit in the middle'], ['blueprint', 'Blueprint'], ['dusk', 'Dusk'], ['rainbow', 'Rainbow line'], ['paper', 'Paper'], ['white', 'White'], ['custom', 'A colour of your own'], ['clear', 'None (clear PNG)']], { redraw: true }) },
@@ -13116,6 +13126,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     c = sect('Side port and extender');
     var ex = P.extender = P.extender || clone(Cat.extender), xq = R.checks.extender, sideSkt = sidePart();
     var xside = onR ? 'left' : 'right';         // the extender stands against the side the strip is not on
+    c.appendChild(row('Move it away', num(+ui.extOut || 0, 1, function (v) { ui.extOut = Math.max(0, Math.min(40, v)); saveView(); }, { min: 0, max: 40, id: 'c-ext-out' }), 'mm, in the view only', 'c-ext-out'));
     c.appendChild(row('It plugs in', seg([['side', 'sideways'], ['press', 'from the back']], ex.join === 'press' ? 'press' : 'side', function (v) { setJoin(v); })));
     c.appendChild(row('Boards top / mid / bottom', seg([['1.6/1.6', '1.6 1.6 1.6'], ['0.8/0.8', '0.8 1.6 0.8'], ['0.8/1', '0.8 1.6 1.0'], ['0.8/1.2', '0.8 1.6 1.2']], stackKey(), function (v) { setStack(v); })));
     var vertSkt = vertPart();
