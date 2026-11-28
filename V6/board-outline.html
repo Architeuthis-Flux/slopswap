@@ -10000,6 +10000,9 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     var faceT = faceP ? Math.max(0.2, +faceP.t || 0.71) : 0, faceInset = !!(faceP && faceP.sits === 'inset');
     var shellTop = faceInset ? Math.max(1, w.shell.t - faceT) : w.shell.t;
     var bbTop = shellTop + faceT;
+    // rev A12d: the top board held level with the breadboard's face (stack_top: 'face'). Its top is then the face of the
+    // breadboard whatever the spaces are, so changing a space moves the mid board only.
+    if (P.stack_top === 'face' && layers.length > 1) { top.z1 = round(bbTop); top.z0 = round(bbTop - top.t); zTop = top.z1; }
     function layerById(id) { for (var i = 0; i < layers.length; i++) if (layers[i].id === id) return layers[i]; return null; }
 
     // --- outlines ---
@@ -10211,7 +10214,15 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
         var cw = Math.min(5.5, (ex1 - ex0) / 3), ch = Math.min(4.8, eh / 3);
         eoV = [{ x: ex0, y: -eh, r: Math.min(1.2, eh / 3) }, { x: ex1, y: -eh, c: [cw, ch], r: Math.min(2, ch) }, { x: ex1, y: H, c: 'wig' }, { x: ex0, y: H, c: 'wig' }];
       } else eoV = [{ x: ex0, y: 0, c: 'wig' }, { x: ex1, y: 0, c: 'wig' }, { x: ex1, y: H, c: 'wig' }, { x: ex0, y: H, c: 'wig' }];
-      var eoB = buildOutline(eoV, ref, quiet); boardR = union(bodyR, region([eoB.pts]));
+      // rev A12d: the press-in tab is part of this outline, as vertices like any others: where none has been drawn it is the knob
+      // round the upright socket, on its neck. Whatever of the outline lies inside the unit's own outline is the tab, and the
+      // unit's bottom board is cut for it automatically (0.05 clear), so a hump drawn on the seam side makes its own cutout.
+      if (press && !(X.outline && X.outline.length > 2)) {
+        var kb = press.knob, kyc = (kb[1] + kb[3]) / 2, yn0 = round(kyc - press.neck / 2), yn1 = round(kyc + press.neck / 2);
+        if (yn0 > -eh + 0.5 && yn1 < H - 3) eoV = eoV.concat([{ x: ex0, y: yn1 }, { x: kb[2], y: yn1 }, { x: kb[2], y: kb[3] }, { x: kb[0], y: kb[3] }, { x: kb[0], y: kb[1] }, { x: kb[2], y: kb[1] }, { x: kb[2], y: yn0 }, { x: ex0, y: yn0 }]);
+      }
+      var eoB = buildOutline(eoV, ref, quiet), eoR = region([eoB.pts]); boardR = union(bodyR, eoR);
+      var tabIn = offset(offset(inter(eoR, mir ? mirrorRegion(fullOutline, W0) : fullOutline), -0.15), 0.15); if (area(tabIn) < 0.5) tabIn = null;       // this block works on the unflipped picture, so the unit's outline is brought into it;        // slivers along the seam are not a tab
       // the key: the waist the breadboard has in its right side is filled by this board's edge, less the fit gap, so the two
       // cannot slide along the seam. The corners' spaces are left alone.
       var keyed = 0;
@@ -10299,13 +10310,13 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
         port.open_seam = faces && port.inset < -0.005 ? round(-port.inset) : 0;                          // a mouth that stands out past the edge holds the seam open
         if (!faces) notes.push('The side socket (' + sp.id + ') is not on top of the main board with its mouth to the right (rotation 180), so the extender\'s header does not meet it.');
       }
-      var boardOwn = boardR;                 // without the press-in tab, which lies under the unit's upper boards on purpose
+      var boardOwn = tabIn ? diff(boardR, tabIn) : boardR;                 // without the tab, which lies in the unit's cutout and under its upper boards on purpose
       if (press) {
         var L1p = layers.length > 1 ? layers[1] : null, tipZ = L1p ? round(L1p.z1 + press.h, 2) : 4, pinL = round(tipZ - 1.0, 2), vk = (Catalog.vertKinds || {})[String(press.h)];
         port = { id: press.id, kind: 'skt_v_127', kind_label: 'upright 1.27 mm socket on the mid board, ' + press.h + ' high', pitch: 1.27, high: press.h, price: vk ? vk.price : null, pin: pinL, takes: null, n: press.n, pins: press.pins, len: press.len,
           faces: true, mouth_x: round(xr), inset: 0, y0: round(press.y - 0.8), y1: round(press.y + press.span + 0.8), engage: press.h, pin_ok: true, open_seam: 0, room: L1p ? round(zTop - (L1p.z1 + press.h), 2) : null,
           press: { x: press.x, y: press.y, knob: press.knob, neck: press.neck, under: press.under, gap: press.gap, pin_len: pinL, pin_tip: tipZ, socket_z: L1p ? [round(L1p.z1, 3), round(L1p.z1 + press.h, 3)] : null, bottom_t: layers[0].t, top_z: round(zTop) } };
-        hn = press.n; hy = press.y; boardR = union(boardR, press.tab);
+        hn = press.n; hy = press.y;
       }
       var HD = press ? Catalog.get({ type: 'hdr_v_127', dims: { n: hn, pin: port.pin } }) : Catalog.get({ type: SK.hdr, dims: { n: hn, pin: SK.pin } }), extParts = [];
       addPart({ id: 'ext_hdr', type: press ? 'hdr_v_127' : SK.hdr, label: HD.label + ' (on the extender)', x: press ? press.x : round(xr + 2.77), y: hy, rot: press ? 0 : 180, plane: { z: 0, dir: 1 }, system: true, movable: false, color: HD.color, bodies: HD.bodies, clearance: HD.clearance, source: HD.source }, extParts);
@@ -10320,7 +10331,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
         ties: { kind: kind, wire: wire, hole: big[1], from_ref: tieRef, room: round(room, 3), at: tieY.map(function (ty) { return [tieX, round(ty)]; }),
           list: kind === 'none' ? [] : tieY.map(function (ty) { return { y: round(ty), x0: tieX, x1: ecols[tc], span: round(ecols[tc] - tieX) }; }) },
         jumpers: railRows.map(function (ry) { return { y: round(ry), x0: round(g.cols * pitch), x1: ecols[tc] }; }),
-        rail_skip: skip, seam_col: seamCol, outline: { pts: eoB.pts, verts: eoV.map(function (v) { return { x: v.x, y: v.y }; }), src: eoV, own: !!(X.outline && X.outline.length > 2) } };
+        rail_skip: skip, seam_col: seamCol, tab_in: tabIn, outline: { pts: eoB.pts, verts: eoV.map(function (v) { return { x: v.x, y: v.y }; }), src: eoV, own: !!(X.outline && X.outline.length > 2) } };
     })(PX, W0, wigX, wigFaceX, refX);
     // rev A12: mirrored back. Every x of what the two blocks made, their regions, and the extender's own parts turned to lie
     // on the mirror image of where the blocks put them. x0 < x1 whichever side; cols[0] is still the column next to the unit.
@@ -10342,7 +10353,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
       var a0 = ext.x0, a1 = ext.x1;
       ext.x0 = MX(a1); ext.x1 = MX(a0); ext.cols = ext.cols.map(MX);
       ['board', 'shell', 'face', 'cover'].forEach(function (k) { ext.shapes[k] = ME(ext.shapes[k]); });
-      ext.plan = MR(ext.plan);
+      ext.plan = MR(ext.plan); if (ext.tab_in) ext.tab_in = MR(ext.tab_in);
       ext.holes = ext.holes.map(function (h) { return [MX(h[0]), h[1], h[2], h[3]]; });
       ext.parts.forEach(function (p) {
         var polys = p.bodies.map(function (b) { return unplace(b.pts, p.x, p.y, p.rot, false); }), cat = Catalog.parts[p.type];
@@ -10480,7 +10491,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
         if (tongueCut) p.boards[L.id].tongue = true;
         if (state !== 'whole' && state !== 'blocked' && cutBy.indexOf(p.id) < 0) cutBy.push(p.id);
       });
-      if (press && L.kind === 'base') { cuts = cuts.concat(press.cut); cutBy.push('tab'); }       // the knob-shaped cutout for the press-in tab (rev A11e)
+      if (L.kind === 'base') { if (ext && ext.tab_in) { cuts = cuts.concat(offset(ext.tab_in, 0.05)); cutBy.push('tab'); } else if (press) { cuts = cuts.concat(press.cut); cutBy.push('tab'); } }       // the knob-shaped cutout for the press-in tab (rev A11e)
       var before = area(a);
       if (cuts.length) a = diff(a, union(cuts));
       a = clean(a);
@@ -10564,7 +10575,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
       sensorSet.mmc.concat(sensorSet.tmag).forEach(function (s) { spots.forEach(function (q) { var d = Math.hypot(s.x - q.x, s.y - q.y); if (!near || d < near.d) near = { ref: s.ref, d: round(d, 1), what: q.what }; }); });
       var pw = mir ? xr - ext.x0 : ext.x1 - xl;
       if (pt && pt.press && press) pt.press.mags = sensorSet.mmc.concat(sensorSet.tmag).filter(function (s) { return press.rects.some(function (q) { return s.x > q[0] - 1.5 && s.x < q[2] + 1.5 && s.y > q[1] - 1.5 && s.y < q[3] + 1.5; }); }).map(function (s) { return s.ref; });
-      checks.extender = { cols: ext.n_cols, rows: need, dead: ext.dead, col_gap: ext.col_gap, rail_skip: ext.rail_skip, seam_col: ext.seam_col, x0: ext.x0, x1: ext.x1, w: ext.w, head: ext.head, cover: !!ext.z.cover, keyed: ext.keyed,
+      checks.extender = { tab_mm2: ext.tab_in ? round(area(ext.tab_in), 1) : 0, cols: ext.n_cols, rows: need, dead: ext.dead, col_gap: ext.col_gap, rail_skip: ext.rail_skip, seam_col: ext.seam_col, x0: ext.x0, x1: ext.x1, w: ext.w, head: ext.head, cover: !!ext.z.cover, keyed: ext.keyed,
         pair_w: round(pw), pair_rows: round(pw / pitch, 3), on_grid: Math.abs(pw / pitch - Math.round(pw / pitch)) < 1e-6,
         port: pt, need: need, spare: pt ? pt.pins - need : null, header: ext.header, overlap: ov, seam: round(ext.y1 - ext.y0, 2), tied: ext.ties.list.length > 0, play: play,
         side: ext.side,
@@ -10939,6 +10950,20 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     commit(P, E); return { ok: true };
   }
   // a new hump in the middle of the longest clear stretch of an edge
+  // rev A12d: both flanks of a hump at 45 degrees. Each foot is moved along the edge until it is as far from the hump's flat as
+  // the hump is high (or deep); a flank drawn in more than one piece is put on the same line.
+  function hump45(P, key) {
+    var saved = P.frame.outline; P.frame.outline = saved.map(vclone);
+    var E = edgesOf(P), f = findHump(E, key), k;
+    function fail(why) { P.frame.outline = saved; return { ok: false, why: why }; }
+    if (!f) return fail('no such hump');
+    var e = f.e, h = f.h, L = e.list, o = Math.abs(h.out);
+    if (h.end0 && h.end1) return fail('it takes in both corners of its edge');
+    if (!h.end0) { e.setA(L[h.k0 - 1], e.a(L[h.p0]) - o); for (k = h.k0; k < h.p0; k++) e.setA(L[k], e.a(L[h.p0]) - (o - Math.abs(e.out(L[k])))); }
+    if (!h.end1) { e.setA(L[h.k1 + 1], e.a(L[h.p1]) + o); for (k = h.p1 + 1; k <= h.k1; k++) e.setA(L[k], e.a(L[h.p1]) + (o - Math.abs(e.out(L[k])))); }
+    if (!rising(e)) return fail('there is no room for 45 degree flanks there');
+    P.frame.outline = E.join(); return { ok: true };
+  }
   function humpAdd(P, side) {
     var saved = P.frame.outline; P.frame.outline = saved.map(vclone);
     var E = edgesOf(P), e = E[side], best = null, k;
@@ -11052,7 +11077,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     hb.forEach(function (h) { if (report.humps.indexOf(h.key) < 0) return; nowAll.forEach(function (q) { if (q.side === h.side && Math.abs(q.out - h.out) < 0.02 && (Math.abs(q.a0 - h.a0) < 6 || Math.abs(q.a1 - h.a1) < 6 || q.end0 === h.end0 && q.end1 === h.end1)) report.kept[q.key] = true; }); });
     return report;
   }
-  var ops = { sideInfo: sideInfo, normalise: normalise, edges: edgesOf, humps: humps, humpSet: humpSet, humpRemove: humpRemove, humpOtherEnd: humpOtherEnd, humpOtherSide: humpOtherSide, humpAdd: humpAdd, partMirror: partMirror, flipMode: flipMode, flip: flip };
+  var ops = { sideInfo: sideInfo, normalise: normalise, edges: edgesOf, humps: humps, humpSet: humpSet, humpRemove: humpRemove, humpOtherEnd: humpOtherEnd, humpOtherSide: humpOtherSide, humpAdd: humpAdd, hump45: hump45, partMirror: partMirror, flipMode: flipMode, flip: flip };
 
   return { resolve: resolve, plain: plain, buildOutline: buildOutline, legacyOutline: legacyOutline, ops: ops, util: { region: region, union: union, diff: diff, inter: inter, offset: offset, area: area, expolys: expolys, place: place, rectPts: rectPts, circlePts: circlePts, round: round } };
 });
@@ -13207,11 +13232,13 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     c.appendChild(el('div', { class: 'hint', text: 'Shift-click dots, or the numbers, to select several: ' + (VM().length > 1 ? VM().map(function (i) { return i + 1; }).sort(function (a, b) { return a - b; }).join(', ') + ' are selected. ' : '') + 'Drag one of them and they all move together. The snap pulls a dot onto a neighbour\'s x or y within 0.6 mm; hold Alt to drag without it.' }));
     var q = ui.vsel != null ? ov[ui.vsel] : null;
     if (q) {
-      var kind = q.c === 'wig' ? 'wig' : q.c === 'meet' ? 'meet' : q.c ? 'chamfer' : q.r > 0 ? 'round' : 'sharp';
+      var kind = q.c === 'wig' ? 'wig' : q.c === 'meet' ? 'meet' : Array.isArray(q.c) && !(q.r > 0) ? (q.c[0] === q.c[1] ? 'chamfer45' : 'chamferplain') : q.c ? 'chamfer' : q.r > 0 ? 'round' : 'sharp';
       c.appendChild(row('Vertex ' + (ui.vsel + 1) + '  x', num(q.x, 0.1, function (v) { q.x = v; }, { id: 'c-vx' }), 'mm', 'c-vx'));
       c.appendChild(row('y', num(q.y, 0.1, function (v) { q.y = v; }, { id: 'c-vy' }), 'mm', 'c-vy'));
-      c.appendChild(row('Corner', sel([['sharp', 'sharp'], ['round', 'round'], ['chamfer', 'rounded chamfer'], ['wig', 'WigLEDmag corner'], ['meet', 'meets the breadboard\'s chamfer square']], kind, function (v) {
+      c.appendChild(row('Corner', sel([['sharp', 'sharp'], ['round', 'round'], ['chamfer45', '45° chamfer'], ['chamferplain', 'chamfer, two lengths'], ['chamfer', 'rounded chamfer'], ['wig', 'WigLEDmag corner'], ['meet', 'meets the breadboard\'s chamfer square']], kind, function (v) {
         if (v === 'sharp') { delete q.c; delete q.r; } else if (v === 'round') { delete q.c; q.r = q.r || 1; } else if (v === 'chamfer') { q.c = Array.isArray(q.c) ? q.c : [2.2, 1.6]; q.r = q.r || 1; }
+        else if (v === 'chamfer45') { var d45 = Array.isArray(q.c) ? Math.min(+q.c[0], +q.c[1]) : (q.r > 0 ? +q.r : 2); q.c = [d45, d45]; delete q.r; }      // a straight cut, the same along both edges
+        else if (v === 'chamferplain') { q.c = Array.isArray(q.c) && q.c[0] !== q.c[1] ? q.c : [2.2, 1.6]; delete q.r; }
         else if (v === 'meet') {            // the vertex goes onto the breadboard's nearest corner, where the joint is made
           q.c = 'meet'; delete q.r; q.x = Math.abs(q.x) <= Math.abs(q.x - P.wig.width) ? 0 : P.wig.width; q.y = Math.abs(q.y) <= Math.abs(q.y - P.wig.height) ? 0 : P.wig.height;
         } else { q.c = 'wig'; delete q.r; }
@@ -13257,6 +13284,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
         btn('fwd', ax === 'x' ? '▶' : '▼', 'move it 1.27 mm ' + (ax === 'x' ? 'right' : 'down') + (h.end0 || h.end1 ? ' (its step; the other end is the corner)' : ''), function () { return HP('humpSet', h.key, { slide: 1.27 }); }));
       acts.push(btn('end', ax === 'x' ? 'To the other end' : 'To the other end', 'the same hump mirrored along its edge: ' + (ax === 'x' ? 'left end for right end' : 'top for bottom') + '. The edge\'s own corners stay as they are.', function () { return HP('humpOtherEnd', h.key); }));
       if (ax === 'y' && !hx) acts.push(btn('side', 'To the ' + (h.side === 'left' ? 'right' : 'left') + ' side', 'the same hump at the same height on the other side; where that side is shorter its lower end is pulled up', function () { return HP('humpOtherSide', h.key); }));
+      if (!(h.end0 && h.end1)) acts.push(btn('45', '45°', 'both flanks at 45 degrees: each foot as far along the edge from the flat as the hump is high', function () { return HP('hump45', h.key); }));
       acts.push(btn('del', 'Remove', 'take this hump out: its edge runs straight there', function () { return HP('humpRemove', h.key); }));
       box.appendChild(el('div', { class: 'acts' }, acts));
       c.appendChild(box);
@@ -13266,6 +13294,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     c.appendChild(el('div', { class: 'hint' + (ui.humpSaid ? ' bad' : ''), id: 'c-hump-said', text: ui.humpSaid || 'A negative Out on a side hump cuts it into the board instead. A hump is found in the outline, not kept beside it: drag its vertices under Outline and it is still listed here. Parts do not move with a hump.' }));
 
     c = sect('Stack, bottom to top');
+    c.appendChild(check('c-stack-top', 'Top board level with the breadboard\'s face (the spaces move the mid board only)', P.stack_top === 'face', function (v) { if (v) P.stack_top = 'face'; else delete P.stack_top; }));
     c.appendChild(row('Boards top / mid / bottom', seg([['1.6/1.6', '1.6 1.6 1.6'], ['0.8/0.8', '0.8 1.6 0.8'], ['0.8/1', '0.8 1.6 1.0'], ['0.8/1.2', '0.8 1.6 1.2']], stackKey(), function (v) { setStack(v); })));
     var tb = el('table', { class: 'stack' }, [el('tr', {}, [el('th', { text: '' }), el('th', { text: 'Name' }), el('th', { text: 'Kind' }), el('th', { class: 'n', text: 't' }), el('th', { class: 'n', text: 'gap' })])]);
     P.stack.forEach(function (L, i) {
