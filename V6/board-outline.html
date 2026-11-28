@@ -10802,11 +10802,15 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
   function humpsOn(e) {
     var L = e.list, m = L.length - 1, list = [], k = 0;
     while (k <= m) {
-      if (e.out(L[k]) <= HUMP_EPS) { k++; continue; }
-      var k0 = k; while (k <= m && e.out(L[k]) > HUMP_EPS) k++;
-      var k1 = k - 1, out = 0, j; for (j = k0; j <= k1; j++) out = Math.max(out, e.out(L[j]));
-      var p0 = k0, p1 = k1; while (e.out(L[p0]) < out - 0.01) p0++; while (e.out(L[p1]) < out - 0.01) p1--;
-      list.push({ side: e.side, axis: e.axis, k0: k0, k1: k1, p0: p0, p1: p1, end0: k0 === 0, end1: k1 === m, out: r4(out),
+      // rev A12c: a run that stands INSIDE the base line is a hump with a negative out, a cut into the board. Only on a side,
+      // and only between two vertices on the base line: a corner that is drawn inside the grid plane is not one.
+      var ok = e.out(L[k]), sg = ok > HUMP_EPS ? 1 : ok < -HUMP_EPS && e.axis === 'y' && k > 0 ? -1 : 0;
+      if (!sg) { k++; continue; }
+      var k0 = k; while (k <= m && sg * e.out(L[k]) > HUMP_EPS) k++;
+      var k1 = k - 1, out = 0, j; for (j = k0; j <= k1; j++) out = Math.max(out, sg * e.out(L[j]));
+      if (sg < 0 && (k1 === m || Math.abs(e.out(L[k0 - 1])) > HUMP_EPS || Math.abs(e.out(L[k1 + 1])) > HUMP_EPS)) continue;
+      var p0 = k0, p1 = k1; while (sg * e.out(L[p0]) < out - 0.01) p0++; while (sg * e.out(L[p1]) < out - 0.01) p1--;
+      list.push({ side: e.side, axis: e.axis, k0: k0, k1: k1, p0: p0, p1: p1, end0: k0 === 0, end1: k1 === m, out: r4(sg * out),
         a0: r4(e.a(L[k0 === 0 ? 0 : k0 - 1])), a1: r4(e.a(L[k1 === m ? m : k1 + 1])), flat0: r4(e.a(L[p0])), flat1: r4(e.a(L[p1])), n: k1 - k0 + 1 });
     }
     list.forEach(function (h, i) { h.key = e.side + ':' + i; });
@@ -10839,7 +10843,9 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     if (!f) return fail('no such hump');
     var e = f.e, h = f.h, L = e.list, m = L.length - 1, k;
     if (ch.out != null) {
-      var o = +ch.out; if (!(o > HUMP_EPS)) { P.frame.outline = saved; return humpRemove(P, key); }
+      var o = +ch.out; if (!(Math.abs(o) > HUMP_EPS)) { P.frame.outline = saved; return humpRemove(P, key); }
+      if (o < 0 && e.axis !== 'y') return fail('only a hump on a side can go in: the top edge\'s base line is its lowest level');
+      if (o < 0 && (h.end0 || h.end1)) return fail('a hump that takes in a corner cannot go in');
       for (k = h.k0; k <= h.k1; k++) e.setOut(L[k], e.out(L[k]) * o / h.out);
     }
     function shift(k0, k1, d) { for (var j = k0; j <= k1; j++) if (j > 0 && j < m) e.setA(L[j], e.a(L[j]) + d); }
@@ -12896,6 +12902,18 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
   function editExt() { return ui.outlineOf === 'ext' && !!R.extender && R.extender.side !== 'left' && !!R.extender.outline; }
   function OV() { if (!editExt()) return P.frame.outline; var ex = P.extender; if (!ex.outline || ex.outline.length < 3) ex.outline = clone(R.extender.outline.src); return ex.outline; }
   function RO() { return editExt() ? R.extender.outline : R.outline; }
+  // rev A12c: the hump operations on the extender's outline. They are run on a stand-in design whose outline is the extender's,
+  // moved so that its seam edge is the left grid plane and its far edge the right one; what comes back is the extender's own outline.
+  function extHumpP() {
+    var E = R.extender, ex = P.extender; if (!E || !E.outline || E.side === 'left') return null;
+    var src = ex.outline && ex.outline.length > 2 ? ex.outline : E.outline.src, pitch = P.grid.pitch, x0 = R.planes.xr;
+    return { x0: x0, P: { grid: { cols: Math.round(E.w / pitch) - 1, pitch: pitch, dead_rows_left: 0 }, wig: { height: P.wig.height }, frame: { outline: clone(src).map(function (v) { v.x = +(v.x - x0).toFixed(4); return v; }) } } };
+  }
+  function extHumpDo(fn) {
+    var q = extHumpP(); if (!q) return { ok: false, why: 'the extender is not shown, or the board is flipped' };
+    var res = fn(q.P); if (!res || res.ok !== false) P.extender.outline = q.P.frame.outline.map(function (v) { v.x = +(v.x + q.x0).toFixed(4); return v; });
+    return res;
+  }
   function VM() { var nv = OV().length; ui.vmulti = (ui.vmulti || []).filter(function (i) { return i < nv; }); return ui.vmulti; }      // the vertices selected together (rev A12c)
   function vertPart() { return P.parts.filter(function (p) { return p.type === 'skt_v_127'; })[0] || null; }
   function setJoin(v) {
@@ -13219,30 +13237,33 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     // Humps (rev A12): the stretches of the outline that stand out of an edge's own line. Each can be moved along its edge,
     // made longer, shorter, higher or lower, sent to the other end of its edge or to the other side, or taken out.
     c = sect('Humps');
-    var hs = Geo.ops.humps(P);
+    if (R.extender) c.appendChild(row('Humps of', seg([['frame', 'the unit'], ['ext', 'the extender']], ui.outlineOf === 'ext' ? 'ext' : 'frame', function (v) { ui.outlineOf = v; ui.vsel = null; })));
+    var hxP = ui.outlineOf === 'ext' ? extHumpP() : null, hx = !!hxP, hs = hx ? Geo.ops.humps(hxP.P) : Geo.ops.humps(P);
+    function HP(name) { var args = [].slice.call(arguments, 1); return hx ? extHumpDo(function (Q) { return Geo.ops[name].apply(null, [Q].concat(args)); }) : Geo.ops[name].apply(null, [P].concat(args)); }
+    if (ui.outlineOf === 'ext' && !hx) c.appendChild(el('div', { class: 'hint', text: 'Show the extender, and flip the board back, to work on its humps.' }));
     function humpDo(res) { ui.humpSaid = res && !res.ok ? 'Not done: ' + res.why + '.' : ''; ui.vsel = null; }
     if (!hs.length) c.appendChild(el('div', { class: 'hint', text: 'The outline has no humps: every outer edge is one straight line.' }));
     hs.forEach(function (h, i) {
       var ax = h.axis, box = el('div', { class: 'hump', id: 'c-hump' + i });
       box.appendChild(el('div', { class: 'hint', text: h.label }));
-      var from = h.end0 ? el('span', { class: 'u', text: 'the ' + (ax === 'x' ? 'top-left' : 'top') + ' corner' }) : num(+h.a0.toFixed(2), 0.5, function (v) { humpDo(Geo.ops.humpSet(P, h.key, { a0: v })); }, { id: 'c-hump' + i + '-a0' });
-      var to = h.end1 ? el('span', { class: 'u', text: 'the ' + (ax === 'x' ? 'top-right' : 'bottom') + ' corner' }) : num(+h.a1.toFixed(2), 0.5, function (v) { humpDo(Geo.ops.humpSet(P, h.key, { a1: v })); }, { id: 'c-hump' + i + '-a1' });
+      var from = h.end0 ? el('span', { class: 'u', text: 'the ' + (ax === 'x' ? 'top-left' : 'top') + ' corner' }) : num(+h.a0.toFixed(2), 0.5, function (v) { humpDo(HP('humpSet', h.key, { a0: v })); }, { id: 'c-hump' + i + '-a0' });
+      var to = h.end1 ? el('span', { class: 'u', text: 'the ' + (ax === 'x' ? 'top-right' : 'bottom') + ' corner' }) : num(+h.a1.toFixed(2), 0.5, function (v) { humpDo(HP('humpSet', h.key, { a1: v })); }, { id: 'c-hump' + i + '-a1' });
       box.appendChild(row('From ' + ax, from, h.end0 ? '' : 'mm', 'c-hump' + i + '-a0'));
       box.appendChild(row('To ' + ax, to, h.end1 ? '' : 'mm', 'c-hump' + i + '-a1'));
-      box.appendChild(row(h.side === 'top' ? 'Up' : 'Out', num(+h.out.toFixed(2), 0.1, function (v) { humpDo(Geo.ops.humpSet(P, h.key, { out: v })); }, { min: 0, max: 30, id: 'c-hump' + i + '-out' }), 'mm', 'c-hump' + i + '-out'));
+      box.appendChild(row(h.side === 'top' ? 'Up' : 'Out', num(+h.out.toFixed(2), 0.1, function (v) { humpDo(HP('humpSet', h.key, { out: v })); }, { min: -30, max: 30, id: 'c-hump' + i + '-out' }), 'mm', 'c-hump' + i + '-out'));
       var btn = function (id, text, title, fn) { return el('button', { type: 'button', id: 'c-hump' + i + '-' + id, text: text, title: title, onclick: function () { humpDo(fn()); rebuild(true); } }); };
       var acts = [];
-      if (!(h.end0 && h.end1)) acts.push(btn('back', ax === 'x' ? '◀' : '▲', 'move it 1.27 mm ' + (ax === 'x' ? 'left' : 'up') + (h.end0 || h.end1 ? ' (its step; the other end is the corner)' : ''), function () { return Geo.ops.humpSet(P, h.key, { slide: -1.27 }); }),
-        btn('fwd', ax === 'x' ? '▶' : '▼', 'move it 1.27 mm ' + (ax === 'x' ? 'right' : 'down') + (h.end0 || h.end1 ? ' (its step; the other end is the corner)' : ''), function () { return Geo.ops.humpSet(P, h.key, { slide: 1.27 }); }));
-      acts.push(btn('end', ax === 'x' ? 'To the other end' : 'To the other end', 'the same hump mirrored along its edge: ' + (ax === 'x' ? 'left end for right end' : 'top for bottom') + '. The edge\'s own corners stay as they are.', function () { return Geo.ops.humpOtherEnd(P, h.key); }));
-      if (ax === 'y') acts.push(btn('side', 'To the ' + (h.side === 'left' ? 'right' : 'left') + ' side', 'the same hump at the same height on the other side; where that side is shorter its lower end is pulled up', function () { return Geo.ops.humpOtherSide(P, h.key); }));
-      acts.push(btn('del', 'Remove', 'take this hump out: its edge runs straight there', function () { return Geo.ops.humpRemove(P, h.key); }));
+      if (!(h.end0 && h.end1)) acts.push(btn('back', ax === 'x' ? '◀' : '▲', 'move it 1.27 mm ' + (ax === 'x' ? 'left' : 'up') + (h.end0 || h.end1 ? ' (its step; the other end is the corner)' : ''), function () { return HP('humpSet', h.key, { slide: -1.27 }); }),
+        btn('fwd', ax === 'x' ? '▶' : '▼', 'move it 1.27 mm ' + (ax === 'x' ? 'right' : 'down') + (h.end0 || h.end1 ? ' (its step; the other end is the corner)' : ''), function () { return HP('humpSet', h.key, { slide: 1.27 }); }));
+      acts.push(btn('end', ax === 'x' ? 'To the other end' : 'To the other end', 'the same hump mirrored along its edge: ' + (ax === 'x' ? 'left end for right end' : 'top for bottom') + '. The edge\'s own corners stay as they are.', function () { return HP('humpOtherEnd', h.key); }));
+      if (ax === 'y' && !hx) acts.push(btn('side', 'To the ' + (h.side === 'left' ? 'right' : 'left') + ' side', 'the same hump at the same height on the other side; where that side is shorter its lower end is pulled up', function () { return HP('humpOtherSide', h.key); }));
+      acts.push(btn('del', 'Remove', 'take this hump out: its edge runs straight there', function () { return HP('humpRemove', h.key); }));
       box.appendChild(el('div', { class: 'acts' }, acts));
       c.appendChild(box);
     });
     c.appendChild(el('div', { class: 'row' }, [el('span', { class: 'hint', text: 'Add a hump on' }), el('span', {}, [['top', 'the top edge'], ['left', 'the left side'], ['right', 'the right side']].map(function (o) {
-      return el('button', { type: 'button', id: 'c-hump-add-' + o[0], text: o[1], title: 'a 1.5 mm hump in the middle of the longest clear stretch of that edge', onclick: function () { humpDo(Geo.ops.humpAdd(P, o[0])); rebuild(true); } }); }))]));
-    c.appendChild(el('div', { class: 'hint' + (ui.humpSaid ? ' bad' : ''), id: 'c-hump-said', text: ui.humpSaid || 'A hump is found in the outline, not kept beside it: drag its vertices under Outline and it is still listed here. Parts do not move with a hump.' }));
+      return el('button', { type: 'button', id: 'c-hump-add-' + o[0], text: o[1], title: 'a 1.5 mm hump in the middle of the longest clear stretch of that edge', onclick: function () { humpDo(HP('humpAdd', o[0])); rebuild(true); } }); }))]));
+    c.appendChild(el('div', { class: 'hint' + (ui.humpSaid ? ' bad' : ''), id: 'c-hump-said', text: ui.humpSaid || 'A negative Out on a side hump cuts it into the board instead. A hump is found in the outline, not kept beside it: drag its vertices under Outline and it is still listed here. Parts do not move with a hump.' }));
 
     c = sect('Stack, bottom to top');
     c.appendChild(row('Boards top / mid / bottom', seg([['1.6/1.6', '1.6 1.6 1.6'], ['0.8/0.8', '0.8 1.6 0.8'], ['0.8/1', '0.8 1.6 1.0'], ['0.8/1.2', '0.8 1.6 1.2']], stackKey(), function (v) { setStack(v); })));
