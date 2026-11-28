@@ -10024,6 +10024,8 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
       if (!mid.length) { waist = { own: 0, depth: 0, deepened: false, y0: null, y1: null, flat: null }; return; }
       var ya = Math.min.apply(null, mid.map(function (p) { return p[1]; })), yb = Math.max.apply(null, mid.map(function (p) { return p[1]; }));
       var own = round(W0 - Math.min.apply(null, mid.map(function (p) { return p[0]; })), 3), d = Math.min(1.6, +w.waist_r || 0);
+      // it just matches (rev A12b): with an extender that skips no row, the waist is at least as deep as the column on the seam needs
+      var exA = P.extender; if (exA && exA.on && !(+exA.dead_rows > 0)) d = Math.max(d, round(W0 - (P.grid.cols * P.grid.pitch + (+exA.chan || 2.04) / 2 + 0.5), 3));
       waist = { own: own, depth: own, deepened: false, y0: round(ya, 3), y1: round(yb, 3), flat: null };
       if (!(d > own + 1e-6)) return;
       var ramp = Math.min(1.8, (yb - ya) / 4);
@@ -10201,11 +10203,15 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
       var ecols = []; for (k = 0; k < en; k++) ecols.push(round(xr + (ed + k) * pitch));
       // its plan: the breadboard part has the wig's own corners; the head stands beside the top band, a rounded chamfer on its free corner
       var bodyR = region([buildOutline([{ x: ex0, y: 0, c: 'wig' }, { x: ex1, y: 0, c: 'wig' }, { x: ex1, y: H, c: 'wig' }, { x: ex0, y: H, c: 'wig' }], ref, quiet).pts]);
-      var boardR = bodyR;
-      if (eh > 0.5) {
+      // its outline as vertices (rev A12b): the four it is given by its columns and its head, or the ones a design has in
+      // extender.outline (the page's outline controls edit those). The breadboard part is always kept.
+      var boardR = bodyR, eoV = null;
+      if (X.outline && X.outline.length > 2) eoV = X.outline;
+      else if (eh > 0.5) {
         var cw = Math.min(5.5, (ex1 - ex0) / 3), ch = Math.min(4.8, eh / 3);
-        boardR = region([buildOutline([{ x: ex0, y: -eh, r: Math.min(1.2, eh / 3) }, { x: ex1, y: -eh, c: [cw, ch], r: Math.min(2, ch) }, { x: ex1, y: H, c: 'wig' }, { x: ex0, y: H, c: 'wig' }], ref, quiet).pts]);
-      }
+        eoV = [{ x: ex0, y: -eh, r: Math.min(1.2, eh / 3) }, { x: ex1, y: -eh, c: [cw, ch], r: Math.min(2, ch) }, { x: ex1, y: H, c: 'wig' }, { x: ex0, y: H, c: 'wig' }];
+      } else eoV = [{ x: ex0, y: 0, c: 'wig' }, { x: ex1, y: 0, c: 'wig' }, { x: ex1, y: H, c: 'wig' }, { x: ex0, y: H, c: 'wig' }];
+      var eoB = buildOutline(eoV, ref, quiet); boardR = union(bodyR, region([eoB.pts]));
       // the key: the waist the breadboard has in its right side is filled by this board's edge, less the fit gap, so the two
       // cannot slide along the seam. The corners' spaces are left alone.
       var keyed = 0;
@@ -10314,7 +10320,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
         ties: { kind: kind, wire: wire, hole: big[1], from_ref: tieRef, room: round(room, 3), at: tieY.map(function (ty) { return [tieX, round(ty)]; }),
           list: kind === 'none' ? [] : tieY.map(function (ty) { return { y: round(ty), x0: tieX, x1: ecols[tc], span: round(ecols[tc] - tieX) }; }) },
         jumpers: railRows.map(function (ry) { return { y: round(ry), x0: round(g.cols * pitch), x1: ecols[tc] }; }),
-        rail_skip: skip, seam_col: seamCol };
+        rail_skip: skip, seam_col: seamCol, outline: { pts: eoB.pts, verts: eoV.map(function (v) { return { x: v.x, y: v.y }; }), src: eoV, own: !!(X.outline && X.outline.length > 2) } };
     })(PX, W0, wigX, wigFaceX, refX);
     // rev A12: mirrored back. Every x of what the two blocks made, their regions, and the extender's own parts turned to lie
     // on the mirror image of where the blocks put them. x0 < x1 whichever side; cols[0] is still the column next to the unit.
@@ -12712,14 +12718,14 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     }
     if (ui.editOutline || ui.sketch) {                 // the outline as a line, and its vertices as dots to drag
       var hy = Math.max(R.z.top, R.z.bbTop) + 0.45, lp = [];
-      R.outline.pts.concat([R.outline.pts[0]]).forEach(function (q) { lp.push(new T.Vector3(q[0], hy, q[1])); });
+      RO().pts.concat([RO().pts[0]]).forEach(function (q) { lp.push(new T.Vector3(q[0], hy, q[1])); });
       var ol = new T.Line(new T.BufferGeometry().setFromPoints(lp), new T.LineBasicMaterial({ color: 0xe0245e, depthTest: false })); ol.renderOrder = 6; handles.add(ol);
     }
     if (ui.editOutline) {
       var hy2 = Math.max(R.z.top, R.z.bbTop) + 0.5, cp = [];
-      R.outline.verts.concat([R.outline.verts[0]]).forEach(function (q) { cp.push(new T.Vector3(q.x, hy2, q.y)); });
+      RO().verts.concat([RO().verts[0]]).forEach(function (q) { cp.push(new T.Vector3(q.x, hy2, q.y)); });
       var cl = new T.Line(new T.BufferGeometry().setFromPoints(cp), new T.LineBasicMaterial({ color: 0x1f6fd0, transparent: true, opacity: 0.45, depthTest: false })); cl.renderOrder = 6; handles.add(cl);
-      R.outline.verts.forEach(function (q, i) {
+      RO().verts.forEach(function (q, i) {
         var on = ui.vsel === i, hm = new T.Mesh(new T.SphereGeometry(on ? 1.15 : 0.85, 16, 12), new T.MeshBasicMaterial({ color: on ? 0xffb300 : 0x1f6fd0, depthTest: false }));
         hm.position.set(q.x, hy2, q.y); hm.renderOrder = 7; hm.userData.vertex = i; handles.add(hm);
       });
@@ -12771,7 +12777,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
       if (ev.button !== 0) return;
       var hv = pickVertex(ev);
       if (hv) {
-        var q0 = P.frame.outline[hv.vertex]; ui.vsel = hv.vertex; ui.sel = null;
+        var q0 = OV()[hv.vertex]; ui.vsel = hv.vertex; ui.sel = null;
         drag = { vertex: hv.vertex, plane: new T.Plane(new T.Vector3(0, 1, 0), -hv.point.y), dx: q0.x - hv.point.x, dy: q0.y - hv.point.z, moved: false }; controls.enabled = false; dom.setPointerCapture(ev.pointerId);
         rebuild(true); return;
       }
@@ -12790,7 +12796,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
         raycaster.setFromCamera(pointer, camera);
         var pt = new T.Vector3();
         if (!raycaster.ray.intersectPlane(drag.plane, pt)) return;
-        var u = drag.vertex != null ? P.frame.outline[drag.vertex] : userPart(drag.id), step = ev.shiftKey ? 1.27 : 0.05;
+        var u = drag.vertex != null ? OV()[drag.vertex] : userPart(drag.id), step = ev.shiftKey ? 1.27 : 0.05;
         u.x = Math.round((pt.x + drag.dx) / step) * step; u.y = Math.round((pt.z + drag.dy) / step) * step;
         u.x = +u.x.toFixed(3); u.y = +u.y.toFixed(3); drag.moved = true;
         if (!pending) { pending = true; requestAnimationFrame(function () { pending = false; rebuild(false, true); }); }
@@ -12813,7 +12819,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
       if ((ev.ctrlKey || ev.metaKey) && (ev.key === 'z' || ev.key === 'Z')) { ev.preventDefault(); if (ev.shiftKey) redo(); else undo(); return; }
       if ((ev.ctrlKey || ev.metaKey) && ev.key === 'y') { ev.preventDefault(); redo(); return; }
       if (ui.tab === 'mag') { if (!ev.ctrlKey && !ev.metaKey) magTab.key(ev); return; }
-      var u = ui.editOutline && ui.vsel != null ? P.frame.outline[ui.vsel] : (ui.sel ? userPart(ui.sel) : null); if (!u) return;
+      var u = ui.editOutline && ui.vsel != null ? OV()[ui.vsel] : (ui.sel ? userPart(ui.sel) : null); if (!u) return;
       if (!(ui.editOutline && ui.vsel != null) && !ev.ctrlKey && !ev.metaKey && !ev.altKey) {
         var k = ev.key.toLowerCase(), did = true;
         if (k === 'r') turnPart(u, ev.shiftKey ? 45 : 90); else if (k === 'd') duplicatePart(u); else if (k === 'p' && Cat.parts[u.type] && Cat.parts[u.type].travel) { if (u.pressed) delete u.pressed; else u.pressed = true; } else if (k === 'f' && u.mount && u.mount.on) u.mount.side = u.mount.side === 'bottom' ? 'top' : 'bottom';
@@ -12875,6 +12881,11 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
   function onExtSide(u) { if (R.planes.side !== 'right') return u; var m = Geo.ops.partMirror(u, P.wig.width); u.x = m.x; u.y = m.y; u.rot = m.rot; return u; }
   // rev A11e: how the extender plugs in. 'press' takes the side socket out and puts an upright socket on the mid board, with the
   // top and the bottom board opened for it; 'side' puts the side socket back.
+  // rev A12b: the outline controls work on the extender's own outline too (Outline, Outline of: the extender). Its vertices are
+  // kept in extender.outline, first taken from the four it is given by its columns and its head. Not while the board is flipped.
+  function editExt() { return ui.outlineOf === 'ext' && !!R.extender && R.extender.side !== 'left' && !!R.extender.outline; }
+  function OV() { if (!editExt()) return P.frame.outline; var ex = P.extender; if (!ex.outline || ex.outline.length < 3) ex.outline = clone(R.extender.outline.src); return ex.outline; }
+  function RO() { return editExt() ? R.extender.outline : R.outline; }
   function vertPart() { return P.parts.filter(function (p) { return p.type === 'skt_v_127'; })[0] || null; }
   function setJoin(v) {
     var ex = P.extender, vs = vertPart(), s = sidePart(); ex.join = v;
@@ -13128,7 +13139,6 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     var xside = onR ? 'left' : 'right';         // the extender stands against the side the strip is not on
     c.appendChild(row('Move it away', num(+ui.extOut || 0, 1, function (v) { ui.extOut = Math.max(0, Math.min(40, v)); saveView(); }, { min: 0, max: 40, id: 'c-ext-out' }), 'mm, in the view only', 'c-ext-out'));
     c.appendChild(row('It plugs in', seg([['side', 'sideways'], ['press', 'from the back']], ex.join === 'press' ? 'press' : 'side', function (v) { setJoin(v); })));
-    c.appendChild(row('Boards top / mid / bottom', seg([['1.6/1.6', '1.6 1.6 1.6'], ['0.8/0.8', '0.8 1.6 0.8'], ['0.8/1', '0.8 1.6 1.0'], ['0.8/1.2', '0.8 1.6 1.2']], stackKey(), function (v) { setStack(v); })));
     var vertSkt = vertPart();
     if (ex.join === 'press' && vertSkt) {
       c.appendChild(row('Socket height', seg([[2.1, '2.1'], [4.3, '4.3']], +(vertSkt.dims && vertSkt.dims.h) || 2.1, function (v) { vertSkt.dims = vertSkt.dims || {}; vertSkt.dims.h = v; })));
@@ -13141,13 +13151,8 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     c.appendChild(check('c-ext', 'Show the extender on the ' + xside, ex.on, function (v) { ex.on = v; setTimeout(function () { setView('iso'); }, 0); }));
     if (ex.on) {
       c.appendChild(row('Columns', num(ex.cols, 1, function (v) { ex.cols = Math.round(v); }, { min: 1, max: 40, id: 'c-ext-cols' }), '= ' + 2 * (xq ? xq.cols : ex.cols) + ' rows', 'c-ext-cols'));
-      c.appendChild(row('Dead rows at the seam', seg([[0, 'none'], [1, '1'], [2, '2'], [3, '3']], ex.dead_rows, function (v) { ex.dead_rows = v; })));
-      if (+ex.dead_rows === 0) c.appendChild(row('Its rails start', num(ex.rail_skip || 1, 1, function (v) { ex.rail_skip = Math.max(1, Math.min(3, Math.round(v))); }, { min: 1, max: 3, id: 'c-ext-skip' }), 'holes in', 'c-ext-skip'));
-      c.appendChild(row('Waist in the breadboard\'s side', num(P.wig.waist_r > 0 ? P.wig.waist_r : R.wig.waist.own, 0.01, function (v) { P.wig.waist_r = v; }, { min: 0, max: 1.6, id: 'c-waist' }), 'mm deep', 'c-waist'));
-      if (xq && xq.seam_col) c.appendChild(el('div', { class: 'hint' + (xq.seam_col.fits ? '' : ' bad'), id: 'c-waist-hint', text: 'With no dead row the extender\'s first column stands on the unit\'s grid plane, in the edge that bows into this waist. That needs it ' + xq.seam_col.need + ' mm deep; the WigLEDmag\'s own is ' + xq.seam_col.own + '. It is cut from the breadboard\'s PCB, shell and top board.' }));
       c.appendChild(row('Head beside the band', num(ex.head, 0.5, function (v) { ex.head = v; }, { min: 0, max: 60, id: 'c-ext-head' }), 'mm', 'c-ext-head'));
       c.appendChild(check('c-ext-cover', 'A second board over its head, level with the top board', ex.cover === true, function (v) { ex.cover = v; }));
-      c.appendChild(check('c-ext-key', 'Its edge fills the waist in the breadboard\'s side', ex.key !== false, function (v) { ex.key = v; }));
       if (xq) c.appendChild(el('div', { class: 'hint' + (xq.overlap.overlap_mm2 || !xq.port || xq.spare < 0 ? ' bad' : ''), id: 'c-ext-hint', text: xq.w + ' mm wide, from x ' + xq.x0 + ' to ' + xq.x1 + '; its first column is ' + xq.col_gap + ' mm from column ' + (xq.side === 'left' ? 1 : g.cols) + '. '
         + (xq.port ? 'The socket has ' + xq.port.pins + ' pins for its ' + xq.rows + ' rows' + (xq.spare < 0 ? ': ' + (-xq.spare) + ' short.' : xq.spare === 0 ? ', with none left over.' : ', ' + xq.spare + ' left over.') : 'There is no socket in the ' + xside + ' side for it.')
         + ' Unit and extender together: ' + xq.pair_w + ' mm, ' + xq.pair_rows + ' rows.' }));
@@ -13160,7 +13165,12 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     if (SKETCH) { var sk = el('input', { type: 'checkbox', id: 'c-sk', onchange: function (e) { ui.sketch = e.target.checked; if (ui.sketch) setView('top'); rebuild(true); } }); sk.checked = ui.sketch;
       c.appendChild(el('div', { class: 'row' }, [el('label', { for: 'c-sk', text: 'Lay the notebook sketch over it' }), sk]));
       if (ui.sketch) c.appendChild(row('Sketch opacity', el('input', { type: 'range', min: 0.15, max: 1, step: 0.05, value: ui.sketchOpacity, id: 'c-sko', oninput: function (e) { ui.sketchOpacity = parseFloat(e.target.value); buildScene(); } }), '', 'c-sko')); }
-    var ov = f.outline, vl = el('div', { class: 'vlist' });
+    if (R.extender) {
+      c.appendChild(row('Outline of', seg([['frame', 'the unit'], ['ext', 'the extender']], ui.outlineOf === 'ext' ? 'ext' : 'frame', function (v) { ui.outlineOf = v; ui.vsel = null; })));
+      if (ui.outlineOf === 'ext' && R.extender.side === 'left') c.appendChild(el('div', { class: 'hint', text: 'Flip the board back to edit the extender\'s outline; what it has is kept and mirrored.' }));
+      if (P.extender.outline) c.appendChild(el('div', { class: 'row' }, [el('span', { class: 'hint', text: 'The extender has an outline of its own.' }), el('button', { type: 'button', text: 'Back to the one from its columns and head', onclick: function () { delete P.extender.outline; ui.vsel = null; rebuild(true); } })]));
+    }
+    var ov = OV(), vl = el('div', { class: 'vlist' });
     ov.forEach(function (q, i) { vl.appendChild(el('button', { type: 'button', 'aria-pressed': String(ui.vsel === i), text: String(i + 1), title: q.n || '', onclick: function () { ui.vsel = ui.vsel === i ? null : i; ui.editOutline = true; rebuild(true); } })); });
     c.appendChild(vl);
     var q = ui.vsel != null ? ov[ui.vsel] : null;
@@ -13221,6 +13231,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     c.appendChild(el('div', { class: 'hint' + (ui.humpSaid ? ' bad' : ''), id: 'c-hump-said', text: ui.humpSaid || 'A hump is found in the outline, not kept beside it: drag its vertices under Outline and it is still listed here. Parts do not move with a hump.' }));
 
     c = sect('Stack, bottom to top');
+    c.appendChild(row('Boards top / mid / bottom', seg([['1.6/1.6', '1.6 1.6 1.6'], ['0.8/0.8', '0.8 1.6 0.8'], ['0.8/1', '0.8 1.6 1.0'], ['0.8/1.2', '0.8 1.6 1.2']], stackKey(), function (v) { setStack(v); })));
     var tb = el('table', { class: 'stack' }, [el('tr', {}, [el('th', { text: '' }), el('th', { text: 'Name' }), el('th', { text: 'Kind' }), el('th', { class: 'n', text: 't' }), el('th', { class: 'n', text: 'gap' })])]);
     P.stack.forEach(function (L, i) {
       var eye = el('input', { type: 'checkbox', 'aria-label': 'show ' + L.id, onchange: function (e) { ui.hidden[L.id] = !e.target.checked; buildScene(); } }); eye.checked = !ui.hidden[L.id];
