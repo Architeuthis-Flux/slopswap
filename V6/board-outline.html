@@ -9024,7 +9024,7 @@ window.V6_SKETCH = {"x0": -16, "y0": -34, "x1": 104, "y1": 64, "px_per_mm": 12, 
 
 </script>
 <script>
-window.V6_DEFAULTS = {"meta":{"name":"Jumperless V6 board outline","rev":"A11e 2026-11-28","units":"mm","frame_of_reference":"x right, y DOWN (KiCad). x=0 is the wig's left edge, y=0 the wig body's top edge, so breadboard column k sits at x = 2.54*k. z=0 is the top face of the main board (= the wig PCB's top face), z up."},"grid":{"pitch":2.54,"cols":30,"dead_rows_left":2,"coupler":"none","_coupler":"an edge coupler between two units, for the check only: none, wingtat (HEE70LP03BK, boards about 6.4 apart), kiss (custom kiss slot V2, 9.2 between shoulders) or kiss_short (V3, 7.8)","_dead_rows_left":"width of the left strip in 2.54 mm rows: 0, 1, 2 or 3 (0 / 2.54 / 5.08 / 7.62). Unit pitch = (31 + this) * 2.54 and dead rows between two units = this + 1. The outline's strip edge is expected at x = -this * 2.54."},"wig":{"mode":"integrated","_mode":"integrated = breadboard area is part of the main board; removable = separate wig PCB (real WigLEDmag outline) on a right-angle 1.27 mm header pair","width":78.74,"height":54.991,"pcb_t":1.6,"shell":{"w":78.7,"h":54.6,"t":6.75},"_shell":"t: 6.75 is the injection-moulding target and the older print (Body95); the current Wiiig v7 print measures 7.1.","face":{"on":true,"t":0.71,"sits":"on","header_strip":false},"_face":"the wig's top board on the shell: the countersunk holes read from wiigtop.3mf into ref/wig_ref.json, on the breadboard body's outline, with no card edge. t = its thickness (0.71 as modelled). sits: on = it lies on the shell and adds t; inset = the shell is t shorter and the top stays at shell.t. header_strip: true puts back the 3.43 mm strip with the 2 x 35 holes that wiigtop.3mf has along the top; that card edge belongs to the wig's bottom board.","waist_r":1.02,"_waist_r":"Depth of the waist in the breadboard's right side, mm in from the right edge (rev A11d). The WigLEDmag's own waist is 0.635; 0 or anything shallower leaves the traced outline alone. 1.02 leaves the breadboard a 0.5 mm wall beside column 30 (channel 2.04 wide), which is what the extender's first column needs to stand on the grid plane with no hole position skipped. It is cut out of the breadboard's PCB, shell and top board.","fit_gap":0.1,"pcb_gap":0.2,"connector_side":"top"},"frame":{"_outline":"The frame (top band + left strip), clockwise as seen from above, traced from Kevin's notebook page (IMG a384f12f, rectified on the breadboard's four corners; read to about +-0.5 mm). Per vertex: nothing = sharp; r = round corner; c:[cx,cy] + r = rounded chamfer (a chamfer with both ends blended, cx along the more horizontal edge, cy along the more vertical); c:\"wig\" = the WigLEDmag corner itself, point for point. n is a note.","outline":[{"x":-8.3,"y":-27.129,"c":[8.8,7.7],"r":2,"n":"top-left rounded chamfer. Drawn with the top edge at -23.0; rev A9 raised the whole top edge 4.129 so the simplified outline is square (see band_drawn)"},{"x":44.2,"y":-27.129,"r":1.2,"n":"the top edge steps up here in the drawing: left part beside the display (drawn at -23.0) ..."},{"x":46.8,"y":-28.829,"r":1.2,"n":"... right part 1.7 higher (drawn at -24.7). Give both the same y to take the step out."},{"x":78.74,"y":-28.829,"c":[6.7,5.8],"r":2,"n":"top-right rounded chamfer. Drawn right edge is at 79.0-79.3; set on the grid plane 78.74."},{"x":78.74,"y":0,"c":"wig","n":"the band curves in to meet the breadboard's corner, as drawn"},{"x":0,"y":0,"c":"wig","n":"inside corner: follows the breadboard's own corner chamfer"},{"x":0,"y":54.991,"c":"meet","n":"the strip ends level with the breadboard's bottom edge; its end meets the breadboard's corner chamfer square, at the middle of the flat"},{"x":-5.08,"y":54.991,"c":"wig","n":"bottom-left rounded chamfer"},{"x":-5.08,"y":44.29,"r":2,"n":"the drawn bump on the strip's outer edge (-5.6 from y 28 to 43). Shaped here so it sits in the waist of a breadboard standing against this edge, 0.13 clear. ASSUMPTION about what it is for; delete these four vertices for a straight edge."},{"x":-5.58,"y":42.29,"r":2},{"x":-5.58,"y":30,"r":2},{"x":-5.08,"y":28,"r":2},{"x":-5.08,"y":1.583,"r":1,"n":"the top-left block slopes out from here, as drawn. The slope is the corner chamfer of a breadboard standing on the left (2.211 x 1.583 with r 1.0), carried on in a straight line ..."},{"x":-8.3,"y":-0.722,"r":2,"n":"... to the block's left edge, drawn at about -8.3 (3.2 mm past the strip). No flat under the block."}],"band_drawn":24.7,"_band_drawn":"the top band's height in the notebook drawing (breadboard top edge to the highest part of the top edge). The outline above stands 28.829 high instead: 83.82 - 54.991, so the simplified outline (strip plane to right plane, top edge to bottom edge) is 83.82 square, which is also 33 rows high. The Top band control moves the top edge; As drawn puts this back.","fill_notches":0,"_fill_notches":"integrated only: closes notches in the one-piece bottom board narrower than twice this (0 = leave the outline as drawn)","ring_wall":2,"_ring_wall":"wall width of a board whose kind is ring (a hollow spacer); none in the default stack"},"_stack":"Bottom to top. gap is the space under that board; parts live in the gaps. A board is opened only where a part passes through it, so the bottom and top boards stay whole unless something really goes through them. The gaps here make the top flush with the breadboard (6.75).","stack":[{"id":"L0","name":"Main board","t":1.6,"gap":0,"kind":"base"},{"id":"L1","name":"Mid board","t":1.6,"gap":1.775,"kind":"board"},{"id":"L2","name":"Top board","t":1.6,"gap":1.775,"kind":"board"}],"_parts":"display: the 2.2 inch bar with its picture (the active area) centred on the breadboard, x = 39.37; the module's centre is 1.375 further right because the dead border is wider at the FPC end (rev A10d; until then it sat at x 30 where the shaded box is in the drawing, with two cantilevered keys, key1 and key2, to its right at x 64.5 and 70.5, y -5). encoder: the click wheel without its cap, at the V5 offsets (5.83 mm from the left and top edges) from the new top-left corner; the top board covers it. usbc: the V5 corner position. port: the general expansion port, an M.2 socket on top of the bottom board with its mouth at the top edge (everything an expansion may want: data, power, buses, and routable lanes too). side: since rev A11c a part of its own, the 1.27 mm right-angle socket, 2 x 11, on top of the bottom board where the top band ends under the USB-C, turned 180 so its mouth is in the right edge (x = 78.74 - 5.82) and its pin 1 is the lowest; it carries routable lanes only, and the extender plugs into it (rev A11 and A11b had it in the port's place, with no port on the top edge). dims.n = positions per row.","_open":"Boards are opened for a part automatically where it passes through them (and, for buttons and the like, above it so it can be reached). A part can override that per board with \"open\": { \"L2\": true } to open one, or false to keep one whole. Input part types are in src/catalog.js: encoder_siq02, encoder_siq02_cap, nav_rkjxm, nav_skrh, nav_k1_1210, tact_ts1187, joy_joycon, custom_control (with \"dims\": { w, d, h, stem, top }).","parts":[{"id":"display","type":"display_tft220bar","x":40.745,"y":-9.9,"rot":90,"mount":{"flush":"top","offset":0}},{"id":"encoder","type":"encoder_siq02","x":-2.47,"y":-21.299,"rot":45,"mount":{"on":"L0","side":"top"}},{"id":"usbc","type":"usbc_16p","x":72.9,"y":-22.989,"rot":315,"mount":{"on":"L0","side":"top"}},{"id":"port","type":"m2_socket","x":56,"y":-19.329,"rot":0,"mount":{"on":"L0","side":"top"}},{"id":"side","type":"skt_ra_127","x":72.92,"y":-3.2,"rot":180,"mount":{"on":"L0","side":"top"},"dims":{"n":11}}],"_extender":"A narrow breadboard standing against the unit's right side, plugged into the socket in the side of the top band (the part of type skt_ra_127). Each of its rows goes to one pin of that socket, so it has no crossbar of its own. on: draw it and check it. cols: its columns (rows = 2 x cols). dead_rows: the 0.1 inch positions with no hole between this unit's last column and its first. 0 (rev A11d) = none: its first column stands on the unit's right grid plane, in the part of its edge that bows into the breadboard's waist (wig.waist_r has to be deep enough: 1.02), and its rails start rail_skip columns later (1 to 3), because the breadboard's corners leave no room there. 1 = the two boards touch with their usual 2.54 mm margins. head: how far its head stands above the breadboard's top edge, beside the top band (mm); it is the extender's one board there, with the header on it in the open. cover: true puts a second board over the head, level with the frame's top board (rev A11 drew one; off since A11b). key: its edge fills the 0.635 mm waist in the breadboard's side, less the fit gap. Rev A11c took the wire staples and the rail jumpers out (\"ties\": \"staple\" and \"jumpers\": true still draw them; nothing in the page sets them): the header pair and the key are what hold it.","extender":{"on":true,"cols":11,"dead_rows":0,"rail_skip":1,"head":18.5,"cover":false,"key":true},"probe":{"dia":3.6,"len":70,"magnet":{"dia":2,"len":1,"from_tip":1},"dock":{"enabled":true,"x":-2.54,"y_tip":1,"z":null,"clearance":0.2},"_dock":"the probe lies in the space between the bottom and top boards; z = height of its axis, null = centred in that space"},"_mag":"The probe tracker's magnetometers and how the layout is judged (src/magmodel.js). list: one entry per sensor. x, y = where it is; on = the board that carries it: \"wig\" is the board under the breadboard (the wig's PCB when removable, the main board when integrated), otherwise a board id from the stack; side = top or bottom face of that board; kind = mmc (MMC5603, the default) or tmag (TMAG5273). The default is six under the breadboard and six on the frame, on the undersides. magnet.use: bench (the bench probe, 1900 mT*mm^3 as measured), probe (the cylinder drawn in probe.magnet), n42_3x6, clip (16000), or other with strength in mT*mm^3. height = the magnet's centre above the breadboard's top, mm. lean = how far the probe leans, degrees (the error is the rms over upright and four leans). noise_uT, zero_uT, gain_pct = each reading's noise, how well its zero is known, and its gain error (the 2026-11-01 MMC bench: 0.4, 1, 1). ambient: zeroed = the zero takes the ambient field out; fitted = the fit solves for a uniform field too. hold_strength: the fit holds the magnet's strength (Testolomew does). map: error, shift (how far a 10 uT ambient change moves the fix) or used (sensors in range).","mag":{"list":[{"x":26,"y":24,"on":"wig","side":"bottom"},{"x":52,"y":24,"on":"wig","side":"bottom"},{"x":72,"y":14,"on":"wig","side":"bottom"},{"x":14,"y":46,"on":"wig","side":"bottom"},{"x":42,"y":46,"on":"wig","side":"bottom"},{"x":70,"y":44,"on":"wig","side":"bottom"},{"x":10,"y":-6,"on":"L0","side":"bottom"},{"x":32,"y":-6,"on":"L0","side":"bottom"},{"x":54,"y":-6,"on":"L0","side":"bottom"},{"x":76,"y":-6,"on":"L0","side":"bottom"},{"x":-2.54,"y":16,"on":"L0","side":"bottom"},{"x":-2.54,"y":38,"on":"L0","side":"bottom"}],"magnet":{"use":"bench","strength":1900},"height":2,"lean":25,"noise_uT":0.4,"zero_uT":1,"gain_pct":1,"ambient":"zeroed","hold_strength":true,"map":"error"},"room":{"min_gap":0.6},"_room":"a board face under another board counts as component room when the gap is at least this","features":[],"_features":"manual pockets or tabs: { \"op\": \"cut\" | \"add\", \"layers\": [\"L1\"], \"x\": 0, \"y\": 0, \"w\": 10, \"h\": 5, \"r\": 0.5, \"rot\": 0, \"note\": \"\" } with x, y the rectangle centre","show":{"neighbour":false,"header40":false,"header40_row":8,"header40_col":1,"sensors":true,"sensor_layout":"custom","_sensor_layout":"custom = the sensors of mag.list below (the Magnetometers tab edits them). The older fixed choices still read: wigledmag = the test board's 9 TMAG5273 + 8 MMC5603; plan18 / plan32 = an MMC5603 grid, 3 x 6 or 4 x 8, spread evenly over the 76 x 45 hole field","coupler":false,"plugged":true,"_plugged":"the M.2 card, mini PCIe card or SO-DIMM drawn in its socket; false hides it"},"look":{"mask":"black","silk":"white","finish":"enig","shell":"black","face_mask":"black","leds":"off","screen":true},"_look":"how the 3D view paints things; no effect on the geometry. mask / face_mask: black, white, green, purple, blue, red. finish: enig or hasl. shell: black, white, clear. leds: off, rainbow, rails, probe.","area_budget_mm2":9134,"_area_budget_mm2":"courtyard area of the fitted main-board parts, from docs/V6_area.json via the expansion-port doc"};
+window.V6_DEFAULTS = {"meta":{"name":"Jumperless V6 board outline","rev":"A12 2026-11-28","units":"mm","frame_of_reference":"x right, y DOWN (KiCad). x=0 is the wig's left edge, y=0 the wig body's top edge, so breadboard column k sits at x = 2.54*k. z=0 is the top face of the main board (= the wig PCB's top face), z up."},"grid":{"pitch":2.54,"cols":30,"dead_rows_left":2,"coupler":"none","_coupler":"an edge coupler between two units, for the check only: none, wingtat (HEE70LP03BK, boards about 6.4 apart), kiss (custom kiss slot V2, 9.2 between shoulders) or kiss_short (V3, 7.8)","_dead_rows_left":"width of the left strip in 2.54 mm rows: 0, 1, 2 or 3 (0 / 2.54 / 5.08 / 7.62). Unit pitch = (31 + this) * 2.54 and dead rows between two units = this + 1. The outline's strip edge is expected at x = -this * 2.54."},"wig":{"mode":"integrated","_mode":"integrated = breadboard area is part of the main board; removable = separate wig PCB (real WigLEDmag outline) on a right-angle 1.27 mm header pair","width":78.74,"height":54.991,"pcb_t":1.6,"shell":{"w":78.7,"h":54.6,"t":6.75},"_shell":"t: 6.75 is the injection-moulding target and the older print (Body95); the current Wiiig v7 print measures 7.1.","face":{"on":true,"t":0.71,"sits":"on","header_strip":false},"_face":"the wig's top board on the shell: the countersunk holes read from wiigtop.3mf into ref/wig_ref.json, on the breadboard body's outline, with no card edge. t = its thickness (0.71 as modelled). sits: on = it lies on the shell and adds t; inset = the shell is t shorter and the top stays at shell.t. header_strip: true puts back the 3.43 mm strip with the 2 x 35 holes that wiigtop.3mf has along the top; that card edge belongs to the wig's bottom board.","waist_r":1.02,"_waist_r":"Depth of the waist in the breadboard's right side, mm in from the right edge (rev A11d). The WigLEDmag's own waist is 0.635; 0 or anything shallower leaves the traced outline alone. 1.02 leaves the breadboard a 0.5 mm wall beside column 30 (channel 2.04 wide), which is what the extender's first column needs to stand on the grid plane with no hole position skipped. It is cut out of the breadboard's PCB, shell and top board.","fit_gap":0.1,"pcb_gap":0.2,"connector_side":"top"},"frame":{"side":"left","_side":"which side of the breadboard the strip (the probe's dock) is on: left as drawn, right after Flip left to right (rev A12). grid.dead_rows_left is then the right strip's width, the strip's plane is x = wig.width + that many rows, and the extender stands against the left side. Flip in the page mirrors the outline about x = wig.width / 2 and moves the parts by each part's on_flip: flip (the default: mirror image of its place, turned to face the mirrored way), corner (stays on its side, keeps its place from that side's top corner of the outline; the default for a USB socket and a click wheel) or stay (not moved).","_outline":"The frame (top band + left strip), clockwise as seen from above, traced from Kevin's notebook page (IMG a384f12f, rectified on the breadboard's four corners; read to about +-0.5 mm). Per vertex: nothing = sharp; r = round corner; c:[cx,cy] + r = rounded chamfer (a chamfer with both ends blended, cx along the more horizontal edge, cy along the more vertical); c:\"wig\" = the WigLEDmag corner itself, point for point. n is a note.","outline":[{"x":-8.3,"y":-27.129,"c":[8.8,7.7],"r":2,"n":"top-left rounded chamfer. Drawn with the top edge at -23.0; rev A9 raised the whole top edge 4.129 so the simplified outline is square (see band_drawn)"},{"x":44.2,"y":-27.129,"r":1.2,"n":"the top edge steps up here in the drawing: left part beside the display (drawn at -23.0) ..."},{"x":46.8,"y":-28.829,"r":1.2,"n":"... right part 1.7 higher (drawn at -24.7). Give both the same y to take the step out."},{"x":78.74,"y":-28.829,"c":[6.7,5.8],"r":2,"n":"top-right rounded chamfer. Drawn right edge is at 79.0-79.3; set on the grid plane 78.74."},{"x":78.74,"y":0,"c":"wig","n":"the band curves in to meet the breadboard's corner, as drawn"},{"x":0,"y":0,"c":"wig","n":"inside corner: follows the breadboard's own corner chamfer"},{"x":0,"y":54.991,"c":"meet","n":"the strip ends level with the breadboard's bottom edge; its end meets the breadboard's corner chamfer square, at the middle of the flat"},{"x":-5.08,"y":54.991,"c":"wig","n":"bottom-left rounded chamfer"},{"x":-5.08,"y":44.29,"r":2,"n":"the drawn bump on the strip's outer edge (-5.6 from y 28 to 43). Shaped here so it sits in the waist of a breadboard standing against this edge, 0.13 clear. ASSUMPTION about what it is for; delete these four vertices for a straight edge."},{"x":-5.58,"y":42.29,"r":2},{"x":-5.58,"y":30,"r":2},{"x":-5.08,"y":28,"r":2},{"x":-5.08,"y":1.583,"r":1,"n":"the top-left block slopes out from here, as drawn. The slope is the corner chamfer of a breadboard standing on the left (2.211 x 1.583 with r 1.0), carried on in a straight line ..."},{"x":-8.3,"y":-0.722,"r":2,"n":"... to the block's left edge, drawn at about -8.3 (3.2 mm past the strip). No flat under the block."}],"band_drawn":24.7,"_band_drawn":"the top band's height in the notebook drawing (breadboard top edge to the highest part of the top edge). The outline above stands 28.829 high instead: 83.82 - 54.991, so the simplified outline (strip plane to right plane, top edge to bottom edge) is 83.82 square, which is also 33 rows high. The Top band control moves the top edge; As drawn puts this back.","fill_notches":0,"_fill_notches":"integrated only: closes notches in the one-piece bottom board narrower than twice this (0 = leave the outline as drawn)","ring_wall":2,"_ring_wall":"wall width of a board whose kind is ring (a hollow spacer); none in the default stack"},"_stack":"Bottom to top. gap is the space under that board; parts live in the gaps. A board is opened only where a part passes through it, so the bottom and top boards stay whole unless something really goes through them. The gaps here make the top flush with the breadboard (6.75).","stack":[{"id":"L0","name":"Main board","t":1.6,"gap":0,"kind":"base"},{"id":"L1","name":"Mid board","t":1.6,"gap":1.775,"kind":"board"},{"id":"L2","name":"Top board","t":1.6,"gap":1.775,"kind":"board"}],"_parts":"display: the 2.2 inch bar with its picture (the active area) centred on the breadboard, x = 39.37; the module's centre is 1.375 further right because the dead border is wider at the FPC end (rev A10d; until then it sat at x 30 where the shaded box is in the drawing, with two cantilevered keys, key1 and key2, to its right at x 64.5 and 70.5, y -5). encoder: the click wheel without its cap, at the V5 offsets (5.83 mm from the left and top edges) from the new top-left corner; the top board covers it. usbc: the V5 corner position. port: the general expansion port, an M.2 socket on top of the bottom board with its mouth at the top edge (everything an expansion may want: data, power, buses, and routable lanes too). side: since rev A11c a part of its own, the 1.27 mm right-angle socket, 2 x 11, on top of the bottom board where the top band ends under the USB-C, turned 180 so its mouth is in the right edge (x = 78.74 - 5.82) and its pin 1 is the lowest; it carries routable lanes only, and the extender plugs into it (rev A11 and A11b had it in the port's place, with no port on the top edge). dims.n = positions per row.","_open":"Boards are opened for a part automatically where it passes through them (and, for buttons and the like, above it so it can be reached). A part can override that per board with \"open\": { \"L2\": true } to open one, or false to keep one whole. Input part types are in src/catalog.js: encoder_siq02, encoder_siq02_cap, nav_rkjxm, nav_skrh, nav_k1_1210, tact_ts1187, joy_joycon, custom_control (with \"dims\": { w, d, h, stem, top }).","parts":[{"id":"display","type":"display_tft220bar","x":40.745,"y":-9.9,"rot":90,"mount":{"flush":"top","offset":0}},{"id":"encoder","type":"encoder_siq02","x":-2.47,"y":-21.299,"rot":45,"mount":{"on":"L0","side":"top"}},{"id":"usbc","type":"usbc_16p","x":72.9,"y":-22.989,"rot":315,"mount":{"on":"L0","side":"top"}},{"id":"port","type":"m2_socket","x":56,"y":-19.329,"rot":0,"mount":{"on":"L0","side":"top"}},{"id":"side","type":"skt_ra_127","x":72.92,"y":-3.2,"rot":180,"mount":{"on":"L0","side":"top"},"dims":{"n":11}}],"_extender":"A narrow breadboard standing against the unit's right side, plugged into the socket in the side of the top band (the part of type skt_ra_127). Each of its rows goes to one pin of that socket, so it has no crossbar of its own. on: draw it and check it. cols: its columns (rows = 2 x cols). dead_rows: the 0.1 inch positions with no hole between this unit's last column and its first. 0 (rev A11d) = none: its first column stands on the unit's right grid plane, in the part of its edge that bows into the breadboard's waist (wig.waist_r has to be deep enough: 1.02), and its rails start rail_skip columns later (1 to 3), because the breadboard's corners leave no room there. 1 = the two boards touch with their usual 2.54 mm margins. head: how far its head stands above the breadboard's top edge, beside the top band (mm); it is the extender's one board there, with the header on it in the open. cover: true puts a second board over the head, level with the frame's top board (rev A11 drew one; off since A11b). key: its edge fills the 0.635 mm waist in the breadboard's side, less the fit gap. Rev A11c took the wire staples and the rail jumpers out (\"ties\": \"staple\" and \"jumpers\": true still draw them; nothing in the page sets them): the header pair and the key are what hold it.","extender":{"on":true,"cols":11,"dead_rows":0,"rail_skip":1,"head":18.5,"cover":false,"key":true},"probe":{"dia":3.6,"len":70,"magnet":{"dia":2,"len":1,"from_tip":1},"dock":{"enabled":true,"x":-2.54,"y_tip":1,"z":null,"clearance":0.2},"_dock":"the probe lies in the space between the bottom and top boards; z = height of its axis, null = centred in that space"},"_mag":"The probe tracker's magnetometers and how the layout is judged (src/magmodel.js). list: one entry per sensor. x, y = where it is; on = the board that carries it: \"wig\" is the board under the breadboard (the wig's PCB when removable, the main board when integrated), otherwise a board id from the stack; side = top or bottom face of that board; kind = mmc (MMC5603, the default) or tmag (TMAG5273). The default is six under the breadboard and six on the frame, on the undersides. magnet.use: bench (the bench probe, 1900 mT*mm^3 as measured), probe (the cylinder drawn in probe.magnet), n42_3x6, clip (16000), or other with strength in mT*mm^3. height = the magnet's centre above the breadboard's top, mm. lean = how far the probe leans, degrees (the error is the rms over upright and four leans). noise_uT, zero_uT, gain_pct = each reading's noise, how well its zero is known, and its gain error (the 2026-11-01 MMC bench: 0.4, 1, 1). ambient: zeroed = the zero takes the ambient field out; fitted = the fit solves for a uniform field too. hold_strength: the fit holds the magnet's strength (Testolomew does). map: error, shift (how far a 10 uT ambient change moves the fix) or used (sensors in range).","mag":{"list":[{"x":26,"y":24,"on":"wig","side":"bottom"},{"x":52,"y":24,"on":"wig","side":"bottom"},{"x":72,"y":14,"on":"wig","side":"bottom"},{"x":14,"y":46,"on":"wig","side":"bottom"},{"x":42,"y":46,"on":"wig","side":"bottom"},{"x":70,"y":44,"on":"wig","side":"bottom"},{"x":10,"y":-6,"on":"L0","side":"bottom"},{"x":32,"y":-6,"on":"L0","side":"bottom"},{"x":54,"y":-6,"on":"L0","side":"bottom"},{"x":76,"y":-6,"on":"L0","side":"bottom"},{"x":-2.54,"y":16,"on":"L0","side":"bottom"},{"x":-2.54,"y":38,"on":"L0","side":"bottom"}],"magnet":{"use":"bench","strength":1900},"height":2,"lean":25,"noise_uT":0.4,"zero_uT":1,"gain_pct":1,"ambient":"zeroed","hold_strength":true,"map":"error"},"room":{"min_gap":0.6},"_room":"a board face under another board counts as component room when the gap is at least this","features":[],"_features":"manual pockets or tabs: { \"op\": \"cut\" | \"add\", \"layers\": [\"L1\"], \"x\": 0, \"y\": 0, \"w\": 10, \"h\": 5, \"r\": 0.5, \"rot\": 0, \"note\": \"\" } with x, y the rectangle centre","show":{"neighbour":false,"header40":false,"header40_row":8,"header40_col":1,"sensors":true,"sensor_layout":"custom","_sensor_layout":"custom = the sensors of mag.list below (the Magnetometers tab edits them). The older fixed choices still read: wigledmag = the test board's 9 TMAG5273 + 8 MMC5603; plan18 / plan32 = an MMC5603 grid, 3 x 6 or 4 x 8, spread evenly over the 76 x 45 hole field","coupler":false,"plugged":true,"_plugged":"the M.2 card, mini PCIe card or SO-DIMM drawn in its socket; false hides it"},"look":{"mask":"black","silk":"white","finish":"enig","shell":"black","face_mask":"black","leds":"off","screen":true},"_look":"how the 3D view paints things; no effect on the geometry. mask / face_mask: black, white, green, purple, blue, red. finish: enig or hasl. shell: black, white, clear. leds: off, rainbow, rails, probe.","area_budget_mm2":9134,"_area_budget_mm2":"courtyard area of the fitted main-board parts, from docs/V6_area.json via the expansion-port doc"};
 window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","datum":{"x0":115.841532,"y0":28.304321,"note":"x0 = wig left edge, y0 = wig body top edge (corner flats)"},"outline":[[69.85,54.991],[76.1812,54.9912],[76.2265,54.9907],[76.3166,54.9827],[76.4057,54.9668],[76.493,54.943],[76.5779,54.9117],[76.6597,54.873],[76.7378,54.8272],[76.7749,54.8013],[77.0118,54.6454],[78.2967,53.7257],[78.3335,53.6998],[78.4029,53.6425],[78.467,53.5793],[78.5253,53.5106],[78.5773,53.4372],[78.6227,53.3594],[78.6611,53.278],[78.6921,53.1935],[78.7156,53.1066],[78.7314,53.0179],[78.7393,52.9283],[78.7398,52.8832],[78.7398,45.2008],[78.7362,45.0538],[78.7255,44.9072],[78.7075,44.7614],[78.6824,44.6165],[78.6503,44.4731],[78.1944,42.6497],[78.1623,42.5063],[78.1372,42.3615],[78.1192,42.2156],[78.1084,42.069],[78.1048,41.9221],[78.1048,13.4507],[78.1084,13.3038],[78.1192,13.1572],[78.1372,13.0114],[78.1623,12.8666],[78.1944,12.7231],[78.6503,10.8997],[78.6824,10.7563],[78.7075,10.6115],[78.7255,10.4656],[78.7362,10.3191],[78.7398,10.1721],[78.74,2.1082],[78.7395,2.0632],[78.7316,1.9735],[78.7158,1.8849],[78.6923,1.798],[78.6613,1.7135],[78.6229,1.632],[78.5775,1.5543],[78.5255,1.4808],[78.4672,1.4122],[78.4031,1.349],[78.3337,1.2917],[78.2968,1.2658],[77.0021,0.339],[76.775,0.1895],[76.7378,0.1637],[76.6598,0.1179],[76.578,0.0792],[76.4931,0.0479],[76.4058,0.0241],[76.3167,0.0082],[76.2273,0.0003],[76.2,0],[71.2353,0],[71.0884,-0.0036],[70.9418,-0.0144],[70.7959,-0.0324],[70.6511,-0.0574],[70.5077,-0.0896],[65.3796,-1.3716],[65.2702,-1.3784],[65.1656,-1.3455],[65.0798,-1.2771],[64.8195,-0.9436],[64.7833,-0.8826],[64.7707,-0.8128],[64.7691,0.5367],[64.7423,0.6367],[64.6691,0.7098],[64.5668,0.7366],[62.43,0.7366],[62.33,0.7098],[62.2568,0.6366],[62.23,0.532],[62.23,-2.8268],[62.212,-2.9427],[62.1595,-3.0476],[62.0776,-3.1316],[61.7474,-3.3274],[61.646,-3.3861],[61.534,-3.4206],[61.4171,-3.429],[39.37,-3.429],[17.3229,-3.429],[17.206,-3.4206],[17.094,-3.3861],[16.9926,-3.3274],[16.6624,-3.1316],[16.5805,-3.0476],[16.528,-2.9427],[16.51,-2.827],[16.51,0.5366],[16.4832,0.6366],[16.41,0.7098],[16.31,0.7366],[14.1709,0.7366],[14.0709,0.7099],[13.9977,0.6367],[13.9709,0.5367],[13.9693,-0.8128],[13.9567,-0.8826],[13.9205,-0.9436],[13.6602,-1.2771],[13.5744,-1.3455],[13.4698,-1.3784],[13.3604,-1.3716],[8.2323,-0.0896],[8.0889,-0.0574],[7.9441,-0.0323],[7.7982,-0.0144],[7.6516,-0.0036],[7.5047,0],[2.5127,0.0003],[2.5127,0.0003],[2.4233,0.0082],[2.3342,0.0241],[2.2469,0.0479],[2.162,0.0792],[2.0802,0.1179],[2.0022,0.1637],[1.965,0.1895],[1.7379,0.339],[0.4432,1.2658],[0.4063,1.2917],[0.3369,1.349],[0.2728,1.4122],[0.2145,1.4808],[0.1625,1.5543],[0.1171,1.632],[0.0787,1.7135],[0.0477,1.798],[0.0242,1.8849],[0.0084,1.9735],[0.0005,2.0632],[0,2.1082],[0.0002,10.1721],[0.0038,10.3191],[0.0145,10.4656],[0.0325,10.6115],[0.0576,10.7563],[0.0897,10.8997],[0.5456,12.7231],[0.5777,12.8666],[0.6028,13.0114],[0.6208,13.1572],[0.6316,13.3038],[0.6352,13.4507],[0.6352,41.9221],[0.6316,42.069],[0.6208,42.2156],[0.6028,42.3615],[0.5777,42.5063],[0.5456,42.6497],[0.0897,44.4731],[0.0576,44.6165],[0.0325,44.7614],[0.0146,44.9072],[0.0038,45.0538],[0.0002,45.2008],[0.0002,52.8832],[0.0007,52.9283],[0.0086,53.0179],[0.0244,53.1066],[0.0479,53.1935],[0.0789,53.278],[0.1173,53.3594],[0.1627,53.4372],[0.2147,53.5106],[0.273,53.5793],[0.3371,53.6425],[0.4065,53.6998],[0.4433,53.7257],[1.7282,54.6454],[1.9651,54.8013],[2.0022,54.8272],[2.0803,54.873],[2.1621,54.9117],[2.247,54.943],[2.3343,54.9668],[2.4234,54.9827],[2.5135,54.9907],[2.5588,54.9912],[8.89,54.9908]],"cols":[2.5405,5.0805,7.6205,10.1605,12.7005,15.2405,17.7805,20.3205,22.8605,25.4005,27.9405,30.4805,33.0205,35.5605,38.1005,40.6405,43.1805,45.7205,48.2605,50.8005,53.3405,55.8805,58.4205,60.9605,63.5005,66.0405,68.5805,71.1205,73.6605,76.2005],"rows":[3.5557,6.0957,13.7157,16.2557,18.7957,21.3357,23.8757,26.4157,28.9557,31.4957,34.0357,36.5757,39.1157,41.6557,49.2757,51.8157],"mmc":[{"ref":"U9","x":71.12,"y":8.636,"side":"F"},{"ref":"U5","x":24.13,"y":8.636,"side":"F"},{"ref":"U8","x":54.61,"y":46.736,"side":"F"},{"ref":"U2","x":7.62,"y":8.636,"side":"F"},{"ref":"U7","x":54.61,"y":8.636,"side":"F"},{"ref":"U6","x":24.13,"y":46.736,"side":"F"},{"ref":"U10","x":71.12,"y":46.736,"side":"F"},{"ref":"U4","x":7.62,"y":46.736,"side":"F"}],"tmag":[{"ref":"M54","x":39.37,"y":4.826,"side":"B"},{"ref":"M55","x":8.89,"y":50.546,"side":"B"},{"ref":"M59","x":69.85,"y":50.546,"side":"B"},{"ref":"M58","x":2.54,"y":27.686,"side":"B"},{"ref":"M56","x":69.85,"y":4.826,"side":"B"},{"ref":"M53","x":76.2,"y":27.686,"side":"B"},{"ref":"M57","x":39.37,"y":50.546,"side":"B"},{"ref":"M51","x":39.37,"y":27.706,"side":"B"},{"ref":"M52","x":8.89,"y":4.826,"side":"B"}],"footprints":[{"name":"PinHeader_2x35_P1.27_wiig_card","ref":"J2","x":17.78,"y":-0.254,"rot":90,"side":"F","pads_local":[[1.27,2.54],[1.27,3.81],[1.27,5.08],[1.27,6.35],[1.27,7.62],[1.27,8.89],[1.27,10.16],[1.27,11.43],[1.27,12.7],[1.27,13.97],[1.27,15.24],[1.27,16.51],[1.27,17.78],[1.27,19.05],[1.27,20.32],[1.27,22.86],[1.27,24.13],[1.27,25.4],[1.27,26.67],[1.27,27.94],[1.27,29.21],[1.27,30.48],[1.27,31.75],[1.27,33.02],[1.27,34.29],[1.27,35.56],[1.27,36.83],[1.27,38.1],[1.27,39.37],[1.27,40.64],[0,2.54],[0,3.81],[0,5.08],[0,6.35],[0,7.62],[0,8.89],[0,10.16],[0,11.43],[0,12.7],[0,13.97],[0,15.24],[0,16.51],[0,17.78],[0,19.05],[0,20.32],[0,22.86],[0,24.13],[0,25.4],[0,26.67],[0,27.94],[0,29.21],[0,30.48],[0,31.75],[0,33.02],[0,34.29],[0,35.56],[0,36.83],[0,38.1],[0,39.37],[0,40.64],[1.27,41.91],[1.27,43.18],[0,1.27],[0,0],[0,21.59],[0,41.91],[0,43.18],[-2.286,21.59],[1.27,21.59],[1.27,0],[1.27,1.27]]},{"name":"Breadboard_6NonHoles","ref":"J11","x":39.37,"y":27.686,"rot":0,"side":"F","pads_local":null},{"name":"SideConnect_sparserrr_Bottom_tighter","ref":"J3","x":39.37,"y":54.991,"rot":0,"side":"F","pads_local":null},{"name":"fulledge_gap","ref":"J13","x":78.105,"y":27.686,"rot":0,"side":"F","pads_local":null},{"name":"fulledge_gap","ref":"J12","x":0.635,"y":27.686,"rot":180,"side":"B","pads_local":null}],"face":{"source":"V6pile/Wig/Wiig/wiigtop.3mf (Fusion export, 2026-08-19)","w":78.74,"h":58.42,"t":0.71,"csk_depth":0.416,"y0":-3.429,"y1":54.991,"outline":[[0.273,1.412],[0.337,1.349],[0.406,1.292],[0.443,1.266],[1.738,0.339],[1.965,0.19],[2.002,0.164],[2.08,0.118],[2.162,0.079],[2.247,0.048],[2.334,0.024],[2.423,0.008],[2.513,0],[2.54,0],[7.505,0],[7.749,-0.01],[7.992,-0.04],[8.232,-0.089],[13.36,-1.371],[13.407,-1.379],[13.454,-1.38],[13.501,-1.373],[13.546,-1.359],[13.588,-1.338],[13.627,-1.31],[13.66,-1.277],[13.92,-0.943],[13.938,-0.921],[13.951,-0.896],[13.961,-0.869],[13.967,-0.841],[13.969,-0.813],[13.971,1.172],[13.974,1.207],[13.983,1.24],[13.998,1.272],[14.018,1.3],[14.042,1.325],[14.071,1.345],[14.102,1.36],[14.136,1.369],[14.171,1.372],[16.31,1.372],[16.345,1.369],[16.378,1.36],[16.41,1.345],[16.439,1.325],[16.463,1.3],[16.483,1.272],[16.498,1.24],[16.507,1.206],[16.51,1.172],[16.51,-2.827],[16.515,-2.885],[16.528,-2.943],[16.55,-2.997],[16.58,-3.047],[16.618,-3.093],[16.662,-3.131],[16.993,-3.327],[17.067,-3.373],[17.149,-3.406],[17.235,-3.425],[17.323,-3.429],[39.37,-3.429],[61.417,-3.429],[61.505,-3.425],[61.591,-3.406],[61.673,-3.373],[61.747,-3.327],[62.078,-3.131],[62.122,-3.093],[62.159,-3.048],[62.19,-2.997],[62.212,-2.943],[62.225,-2.886],[62.23,-2.827],[62.23,1.172],[62.232,1.203],[62.24,1.234],[62.252,1.263],[62.268,1.289],[62.289,1.313],[62.312,1.334],[62.339,1.35],[62.368,1.362],[62.399,1.369],[62.43,1.372],[64.569,1.372],[64.604,1.369],[64.638,1.36],[64.669,1.345],[64.698,1.325],[64.722,1.3],[64.742,1.272],[64.757,1.24],[64.766,1.207],[64.769,1.172],[64.771,-0.813],[64.773,-0.841],[64.779,-0.869],[64.789,-0.896],[64.802,-0.921],[64.82,-0.943],[65.08,-1.277],[65.113,-1.31],[65.152,-1.338],[65.194,-1.359],[65.239,-1.373],[65.286,-1.38],[65.333,-1.379],[65.38,-1.371],[70.508,-0.089],[70.748,-0.04],[70.991,-0.01],[71.235,0],[76.2,0],[76.227,0],[76.317,0.008],[76.406,0.024],[76.493,0.048],[76.578,0.079],[76.66,0.118],[76.738,0.164],[76.775,0.19],[77.002,0.339],[78.297,1.266],[78.334,1.292],[78.403,1.349],[78.467,1.412],[78.525,1.481],[78.578,1.554],[78.623,1.632],[78.661,1.714],[78.692,1.798],[78.716,1.885],[78.732,1.974],[78.739,2.063],[78.74,2.108],[78.74,10.172],[78.73,10.417],[78.7,10.66],[78.65,10.9],[78.194,12.723],[78.145,12.963],[78.115,13.206],[78.105,13.451],[78.105,41.922],[78.115,42.167],[78.145,42.41],[78.194,42.65],[78.65,44.473],[78.7,44.713],[78.73,44.956],[78.74,45.201],[78.74,52.883],[78.739,52.928],[78.731,53.018],[78.716,53.107],[78.692,53.194],[78.661,53.278],[78.623,53.36],[78.577,53.437],[78.525,53.511],[78.467,53.579],[78.403,53.643],[78.333,53.7],[78.297,53.726],[77.012,54.646],[76.775,54.801],[76.738,54.827],[76.66,54.873],[76.578,54.912],[76.493,54.943],[76.406,54.967],[76.317,54.983],[76.226,54.991],[76.181,54.991],[64.751,54.991],[39.37,54.991],[13.989,54.991],[2.559,54.991],[2.514,54.991],[2.423,54.983],[2.334,54.967],[2.247,54.943],[2.162,54.912],[2.08,54.873],[2.002,54.827],[1.965,54.801],[1.728,54.646],[0.443,53.726],[0.407,53.7],[0.337,53.643],[0.273,53.579],[0.215,53.511],[0.163,53.437],[0.117,53.36],[0.079,53.278],[0.048,53.194],[0.024,53.107],[0.009,53.018],[0.001,52.928],[0,52.883],[0,45.201],[0.01,44.956],[0.04,44.713],[0.09,44.473],[0.546,42.65],[0.595,42.41],[0.625,42.167],[0.635,41.922],[0.635,13.451],[0.625,13.206],[0.595,12.963],[0.546,12.723],[0.09,10.9],[0.04,10.66],[0.01,10.417],[0,10.172],[0,2.108],[0.001,2.063],[0.008,1.974],[0.024,1.885],[0.048,1.798],[0.079,1.714],[0.117,1.632],[0.162,1.554],[0.215,1.481]],"holes":[[17.78,-1.524,0.65,0.65],[19.05,-1.524,0.65,0.65],[20.32,-1.524,0.65,0.65],[21.59,-1.524,0.65,0.65],[22.86,-1.524,0.65,0.65],[24.13,-1.524,0.65,0.65],[25.4,-1.524,0.65,0.65],[26.67,-1.524,0.65,0.65],[27.94,-1.524,0.65,0.65],[29.21,-1.524,0.65,0.65],[30.48,-1.524,0.65,0.65],[31.75,-1.524,0.65,0.65],[33.02,-1.524,0.65,0.65],[34.29,-1.524,0.65,0.65],[35.56,-1.524,0.65,0.65],[36.83,-1.524,0.65,0.65],[38.1,-1.524,0.65,0.65],[39.37,-1.524,0.65,0.65],[40.64,-1.524,0.65,0.65],[41.91,-1.524,0.65,0.65],[43.18,-1.524,0.65,0.65],[44.45,-1.524,0.65,0.65],[45.72,-1.524,0.65,0.65],[46.99,-1.524,0.65,0.65],[48.26,-1.524,0.65,0.65],[49.53,-1.524,0.65,0.65],[50.8,-1.524,0.65,0.65],[52.07,-1.524,0.65,0.65],[53.34,-1.524,0.65,0.65],[54.61,-1.524,0.65,0.65],[55.88,-1.524,0.65,0.65],[57.15,-1.524,0.65,0.65],[58.42,-1.524,0.65,0.65],[59.69,-1.524,0.65,0.65],[60.96,-1.524,0.65,0.65],[17.78,-0.254,0.65,0.65],[19.05,-0.254,0.65,0.65],[20.32,-0.254,0.65,0.65],[21.59,-0.254,0.65,0.65],[22.86,-0.254,0.65,0.65],[24.13,-0.254,0.65,0.65],[25.4,-0.254,0.65,0.65],[26.67,-0.254,0.65,0.65],[27.94,-0.254,0.65,0.65],[29.21,-0.254,0.65,0.65],[30.48,-0.254,0.65,0.65],[31.75,-0.254,0.65,0.65],[33.02,-0.254,0.65,0.65],[34.29,-0.254,0.65,0.65],[35.56,-0.254,0.65,0.65],[36.83,-0.254,0.65,0.65],[38.1,-0.254,0.65,0.65],[39.37,-0.254,0.65,0.65],[40.64,-0.254,0.65,0.65],[41.91,-0.254,0.65,0.65],[43.18,-0.254,0.65,0.65],[44.45,-0.254,0.65,0.65],[45.72,-0.254,0.65,0.65],[46.99,-0.254,0.65,0.65],[48.26,-0.254,0.65,0.65],[49.53,-0.254,0.65,0.65],[50.8,-0.254,0.65,0.65],[52.07,-0.254,0.65,0.65],[53.34,-0.254,0.65,0.65],[54.61,-0.254,0.65,0.65],[55.88,-0.254,0.65,0.65],[57.15,-0.254,0.65,0.65],[58.42,-0.254,0.65,0.65],[59.69,-0.254,0.65,0.65],[60.96,-0.254,0.65,0.65],[2.54,3.556,2.032,1.2],[5.08,3.556,2.032,1.2],[7.62,3.556,2.032,1.2],[10.16,3.556,2.032,1.2],[12.7,3.556,2.032,1.2],[15.24,3.556,2.032,1.2],[17.78,3.556,2.032,1.2],[20.32,3.556,2.032,1.2],[22.86,3.556,2.032,1.2],[25.4,3.556,2.032,1.2],[27.94,3.556,2.032,1.2],[30.48,3.556,2.032,1.2],[33.02,3.556,2.032,1.2],[35.56,3.556,2.032,1.2],[38.1,3.556,2.032,1.2],[40.64,3.556,2.032,1.2],[43.18,3.556,2.032,1.2],[45.72,3.556,2.032,1.2],[48.26,3.556,2.032,1.2],[50.8,3.556,2.032,1.2],[53.34,3.556,2.032,1.2],[55.88,3.556,2.032,1.2],[58.42,3.556,2.032,1.2],[60.96,3.556,2.032,1.2],[63.5,3.556,2.032,1.2],[66.04,3.556,2.032,1.2],[68.58,3.556,2.032,1.2],[71.12,3.556,2.032,1.2],[73.66,3.556,2.032,1.2],[76.2,3.556,2.032,1.2],[2.54,6.096,2.032,1.2],[5.08,6.096,2.032,1.2],[7.62,6.096,2.032,1.2],[10.16,6.096,2.032,1.2],[12.7,6.096,2.032,1.2],[15.24,6.096,2.032,1.2],[17.78,6.096,2.032,1.2],[20.32,6.096,2.032,1.2],[22.86,6.096,2.032,1.2],[25.4,6.096,2.032,1.2],[27.94,6.096,2.032,1.2],[30.48,6.096,2.032,1.2],[33.02,6.096,2.032,1.2],[35.56,6.096,2.032,1.2],[38.1,6.096,2.032,1.2],[40.64,6.096,2.032,1.2],[43.18,6.096,2.032,1.2],[45.72,6.096,2.032,1.2],[48.26,6.096,2.032,1.2],[50.8,6.096,2.032,1.2],[53.34,6.096,2.032,1.2],[55.88,6.096,2.032,1.2],[58.42,6.096,2.032,1.2],[60.96,6.096,2.032,1.2],[63.5,6.096,2.032,1.2],[66.04,6.096,2.032,1.2],[68.58,6.096,2.032,1.2],[71.12,6.096,2.032,1.2],[73.66,6.096,2.032,1.2],[76.2,6.096,2.032,1.2],[2.54,8.636,2.032,1.2],[76.2,8.636,2.032,1.2],[2.54,13.716,2.032,1.2],[5.08,13.716,2.032,1.2],[7.62,13.716,2.032,1.2],[10.16,13.716,2.032,1.2],[12.7,13.716,2.032,1.2],[15.24,13.716,2.032,1.2],[17.78,13.716,2.032,1.2],[20.32,13.716,2.032,1.2],[22.86,13.716,2.032,1.2],[25.4,13.716,2.032,1.2],[27.94,13.716,2.032,1.2],[30.48,13.716,2.032,1.2],[33.02,13.716,2.032,1.2],[35.56,13.716,2.032,1.2],[38.1,13.716,2.032,1.2],[40.64,13.716,2.032,1.2],[43.18,13.716,2.032,1.2],[45.72,13.716,2.032,1.2],[48.26,13.716,2.032,1.2],[50.8,13.716,2.032,1.2],[53.34,13.716,2.032,1.2],[55.88,13.716,2.032,1.2],[58.42,13.716,2.032,1.2],[60.96,13.716,2.032,1.2],[63.5,13.716,2.032,1.2],[66.04,13.716,2.032,1.2],[68.58,13.716,2.032,1.2],[71.12,13.716,2.032,1.2],[73.66,13.716,2.032,1.2],[76.2,13.716,2.032,1.2],[2.54,16.256,2.032,1.2],[5.08,16.256,2.032,1.2],[7.62,16.256,2.032,1.2],[10.16,16.256,2.032,1.2],[12.7,16.256,2.032,1.2],[15.24,16.256,2.032,1.2],[17.78,16.256,2.032,1.2],[20.32,16.256,2.032,1.2],[22.86,16.256,2.032,1.2],[25.4,16.256,2.032,1.2],[27.94,16.256,2.032,1.2],[30.48,16.256,2.032,1.2],[33.02,16.256,2.032,1.2],[35.56,16.256,2.032,1.2],[38.1,16.256,2.032,1.2],[40.64,16.256,2.032,1.2],[43.18,16.256,2.032,1.2],[45.72,16.256,2.032,1.2],[48.26,16.256,2.032,1.2],[50.8,16.256,2.032,1.2],[53.34,16.256,2.032,1.2],[55.88,16.256,2.032,1.2],[58.42,16.256,2.032,1.2],[60.96,16.256,2.032,1.2],[63.5,16.256,2.032,1.2],[66.04,16.256,2.032,1.2],[68.58,16.256,2.032,1.2],[71.12,16.256,2.032,1.2],[73.66,16.256,2.032,1.2],[76.2,16.256,2.032,1.2],[2.54,18.796,2.032,1.2],[5.08,18.796,2.032,1.2],[7.62,18.796,2.032,1.2],[10.16,18.796,2.032,1.2],[12.7,18.796,2.032,1.2],[15.24,18.796,2.032,1.2],[17.78,18.796,2.032,1.2],[20.32,18.796,2.032,1.2],[22.86,18.796,2.032,1.2],[25.4,18.796,2.032,1.2],[27.94,18.796,2.032,1.2],[30.48,18.796,2.032,1.2],[33.02,18.796,2.032,1.2],[35.56,18.796,2.032,1.2],[38.1,18.796,2.032,1.2],[40.64,18.796,2.032,1.2],[43.18,18.796,2.032,1.2],[45.72,18.796,2.032,1.2],[48.26,18.796,2.032,1.2],[50.8,18.796,2.032,1.2],[53.34,18.796,2.032,1.2],[55.88,18.796,2.032,1.2],[58.42,18.796,2.032,1.2],[60.96,18.796,2.032,1.2],[63.5,18.796,2.032,1.2],[66.04,18.796,2.032,1.2],[68.58,18.796,2.032,1.2],[71.12,18.796,2.032,1.2],[73.66,18.796,2.032,1.2],[76.2,18.796,2.032,1.2],[2.54,21.336,2.032,1.2],[5.08,21.336,2.032,1.2],[7.62,21.336,2.032,1.2],[10.16,21.336,2.032,1.2],[12.7,21.336,2.032,1.2],[15.24,21.336,2.032,1.2],[17.78,21.336,2.032,1.2],[20.32,21.336,2.032,1.2],[22.86,21.336,2.032,1.2],[25.4,21.336,2.032,1.2],[27.94,21.336,2.032,1.2],[30.48,21.336,2.032,1.2],[33.02,21.336,2.032,1.2],[35.56,21.336,2.032,1.2],[38.1,21.336,2.032,1.2],[40.64,21.336,2.032,1.2],[43.18,21.336,2.032,1.2],[45.72,21.336,2.032,1.2],[48.26,21.336,2.032,1.2],[50.8,21.336,2.032,1.2],[53.34,21.336,2.032,1.2],[55.88,21.336,2.032,1.2],[58.42,21.336,2.032,1.2],[60.96,21.336,2.032,1.2],[63.5,21.336,2.032,1.2],[66.04,21.336,2.032,1.2],[68.58,21.336,2.032,1.2],[71.12,21.336,2.032,1.2],[73.66,21.336,2.032,1.2],[76.2,21.336,2.032,1.2],[2.54,23.876,2.032,1.2],[5.08,23.876,2.032,1.2],[7.62,23.876,2.032,1.2],[10.16,23.876,2.032,1.2],[12.7,23.876,2.032,1.2],[15.24,23.876,2.032,1.2],[17.78,23.876,2.032,1.2],[20.32,23.876,2.032,1.2],[22.86,23.876,2.032,1.2],[25.4,23.876,2.032,1.2],[27.94,23.876,2.032,1.2],[30.48,23.876,2.032,1.2],[33.02,23.876,2.032,1.2],[35.56,23.876,2.032,1.2],[38.1,23.876,2.032,1.2],[40.64,23.876,2.032,1.2],[43.18,23.876,2.032,1.2],[45.72,23.876,2.032,1.2],[48.26,23.876,2.032,1.2],[50.8,23.876,2.032,1.2],[53.34,23.876,2.032,1.2],[55.88,23.876,2.032,1.2],[58.42,23.876,2.032,1.2],[60.96,23.876,2.032,1.2],[63.5,23.876,2.032,1.2],[66.04,23.876,2.032,1.2],[68.58,23.876,2.032,1.2],[71.12,23.876,2.032,1.2],[73.66,23.876,2.032,1.2],[76.2,23.876,2.032,1.2],[2.54,26.416,2.032,1.2],[5.08,26.416,2.032,1.2],[7.62,26.416,2.032,1.2],[10.16,26.416,2.032,1.2],[12.7,26.416,2.032,1.2],[15.24,26.416,2.032,1.2],[17.78,26.416,2.032,1.2],[20.32,26.416,2.032,1.2],[22.86,26.416,2.032,1.2],[25.4,26.416,2.032,1.2],[27.94,26.416,2.032,1.2],[30.48,26.416,2.032,1.2],[33.02,26.416,2.032,1.2],[35.56,26.416,2.032,1.2],[38.1,26.416,2.032,1.2],[40.64,26.416,2.032,1.2],[43.18,26.416,2.032,1.2],[45.72,26.416,2.032,1.2],[48.26,26.416,2.032,1.2],[50.8,26.416,2.032,1.2],[53.34,26.416,2.032,1.2],[55.88,26.416,2.032,1.2],[58.42,26.416,2.032,1.2],[60.96,26.416,2.032,1.2],[63.5,26.416,2.032,1.2],[66.04,26.416,2.032,1.2],[68.58,26.416,2.032,1.2],[71.12,26.416,2.032,1.2],[73.66,26.416,2.032,1.2],[76.2,26.416,2.032,1.2],[2.54,28.986,2.032,1.2],[5.08,28.986,2.032,1.2],[7.62,28.986,2.032,1.2],[10.16,28.986,2.032,1.2],[12.7,28.986,2.032,1.2],[15.24,28.986,2.032,1.2],[17.78,28.986,2.032,1.2],[20.32,28.986,2.032,1.2],[22.86,28.986,2.032,1.2],[25.4,28.986,2.032,1.2],[27.94,28.986,2.032,1.2],[30.48,28.986,2.032,1.2],[33.02,28.986,2.032,1.2],[35.56,28.986,2.032,1.2],[38.1,28.986,2.032,1.2],[40.64,28.986,2.032,1.2],[43.18,28.986,2.032,1.2],[45.72,28.986,2.032,1.2],[48.26,28.986,2.032,1.2],[50.8,28.986,2.032,1.2],[53.34,28.986,2.032,1.2],[55.88,28.986,2.032,1.2],[58.42,28.986,2.032,1.2],[60.96,28.986,2.032,1.2],[63.5,28.986,2.032,1.2],[66.04,28.986,2.032,1.2],[68.58,28.986,2.032,1.2],[71.12,28.986,2.032,1.2],[73.66,28.986,2.032,1.2],[76.2,28.986,2.032,1.2],[2.54,31.526,2.032,1.2],[5.08,31.526,2.032,1.2],[7.62,31.526,2.032,1.2],[10.16,31.526,2.032,1.2],[12.7,31.526,2.032,1.2],[15.24,31.526,2.032,1.2],[17.78,31.526,2.032,1.2],[20.32,31.526,2.032,1.2],[22.86,31.526,2.032,1.2],[25.4,31.526,2.032,1.2],[27.94,31.526,2.032,1.2],[30.48,31.526,2.032,1.2],[33.02,31.526,2.032,1.2],[35.56,31.526,2.032,1.2],[38.1,31.526,2.032,1.2],[40.64,31.526,2.032,1.2],[43.18,31.526,2.032,1.2],[45.72,31.526,2.032,1.2],[48.26,31.526,2.032,1.2],[50.8,31.526,2.032,1.2],[53.34,31.526,2.032,1.2],[55.88,31.526,2.032,1.2],[58.42,31.526,2.032,1.2],[60.96,31.526,2.032,1.2],[63.5,31.526,2.032,1.2],[66.04,31.526,2.032,1.2],[68.58,31.526,2.032,1.2],[71.12,31.526,2.032,1.2],[73.66,31.526,2.032,1.2],[76.2,31.526,2.032,1.2],[2.54,34.066,2.032,1.2],[5.08,34.066,2.032,1.2],[7.62,34.066,2.032,1.2],[10.16,34.066,2.032,1.2],[12.7,34.066,2.032,1.2],[15.24,34.066,2.032,1.2],[17.78,34.066,2.032,1.2],[20.32,34.066,2.032,1.2],[22.86,34.066,2.032,1.2],[25.4,34.066,2.032,1.2],[27.94,34.066,2.032,1.2],[30.48,34.066,2.032,1.2],[33.02,34.066,2.032,1.2],[35.56,34.066,2.032,1.2],[38.1,34.066,2.032,1.2],[40.64,34.066,2.032,1.2],[43.18,34.066,2.032,1.2],[45.72,34.066,2.032,1.2],[48.26,34.066,2.032,1.2],[50.8,34.066,2.032,1.2],[53.34,34.066,2.032,1.2],[55.88,34.066,2.032,1.2],[58.42,34.066,2.032,1.2],[60.96,34.066,2.032,1.2],[63.5,34.066,2.032,1.2],[66.04,34.066,2.032,1.2],[68.58,34.066,2.032,1.2],[71.12,34.066,2.032,1.2],[73.66,34.066,2.032,1.2],[76.2,34.066,2.032,1.2],[2.54,36.606,2.032,1.2],[5.08,36.606,2.032,1.2],[7.62,36.606,2.032,1.2],[10.16,36.606,2.032,1.2],[12.7,36.606,2.032,1.2],[15.24,36.606,2.032,1.2],[17.78,36.606,2.032,1.2],[20.32,36.606,2.032,1.2],[22.86,36.606,2.032,1.2],[25.4,36.606,2.032,1.2],[27.94,36.606,2.032,1.2],[30.48,36.606,2.032,1.2],[33.02,36.606,2.032,1.2],[35.56,36.606,2.032,1.2],[38.1,36.606,2.032,1.2],[40.64,36.606,2.032,1.2],[43.18,36.606,2.032,1.2],[45.72,36.606,2.032,1.2],[48.26,36.606,2.032,1.2],[50.8,36.606,2.032,1.2],[53.34,36.606,2.032,1.2],[55.88,36.606,2.032,1.2],[58.42,36.606,2.032,1.2],[60.96,36.606,2.032,1.2],[63.5,36.606,2.032,1.2],[66.04,36.606,2.032,1.2],[68.58,36.606,2.032,1.2],[71.12,36.606,2.032,1.2],[73.66,36.606,2.032,1.2],[76.2,36.606,2.032,1.2],[2.54,39.146,2.032,1.2],[5.08,39.146,2.032,1.2],[7.62,39.146,2.032,1.2],[10.16,39.146,2.032,1.2],[12.7,39.146,2.032,1.2],[15.24,39.146,2.032,1.2],[17.78,39.146,2.032,1.2],[20.32,39.146,2.032,1.2],[22.86,39.146,2.032,1.2],[25.4,39.146,2.032,1.2],[27.94,39.146,2.032,1.2],[30.48,39.146,2.032,1.2],[33.02,39.146,2.032,1.2],[35.56,39.146,2.032,1.2],[38.1,39.146,2.032,1.2],[40.64,39.146,2.032,1.2],[43.18,39.146,2.032,1.2],[45.72,39.146,2.032,1.2],[48.26,39.146,2.032,1.2],[50.8,39.146,2.032,1.2],[53.34,39.146,2.032,1.2],[55.88,39.146,2.032,1.2],[58.42,39.146,2.032,1.2],[60.96,39.146,2.032,1.2],[63.5,39.146,2.032,1.2],[66.04,39.146,2.032,1.2],[68.58,39.146,2.032,1.2],[71.12,39.146,2.032,1.2],[73.66,39.146,2.032,1.2],[76.2,39.146,2.032,1.2],[2.54,41.686,2.032,1.2],[5.08,41.686,2.032,1.2],[7.62,41.686,2.032,1.2],[10.16,41.686,2.032,1.2],[12.7,41.686,2.032,1.2],[15.24,41.686,2.032,1.2],[17.78,41.686,2.032,1.2],[20.32,41.686,2.032,1.2],[22.86,41.686,2.032,1.2],[25.4,41.686,2.032,1.2],[27.94,41.686,2.032,1.2],[30.48,41.686,2.032,1.2],[33.02,41.686,2.032,1.2],[35.56,41.686,2.032,1.2],[38.1,41.686,2.032,1.2],[40.64,41.686,2.032,1.2],[43.18,41.686,2.032,1.2],[45.72,41.686,2.032,1.2],[48.26,41.686,2.032,1.2],[50.8,41.686,2.032,1.2],[53.34,41.686,2.032,1.2],[55.88,41.686,2.032,1.2],[58.42,41.686,2.032,1.2],[60.96,41.686,2.032,1.2],[63.5,41.686,2.032,1.2],[66.04,41.686,2.032,1.2],[68.58,41.686,2.032,1.2],[71.12,41.686,2.032,1.2],[73.66,41.686,2.032,1.2],[76.2,41.686,2.032,1.2],[2.54,46.736,2.032,1.2],[76.201,46.736,2.032,1.2],[2.54,49.276,2.032,1.2],[5.08,49.276,2.032,1.2],[7.62,49.276,2.032,1.2],[10.16,49.276,2.032,1.2],[12.7,49.276,2.032,1.2],[15.24,49.276,2.032,1.2],[17.78,49.276,2.032,1.2],[20.32,49.276,2.032,1.2],[22.86,49.276,2.032,1.2],[25.4,49.276,2.032,1.2],[27.94,49.276,2.032,1.2],[30.48,49.276,2.032,1.2],[33.02,49.276,2.032,1.2],[35.56,49.276,2.032,1.2],[38.1,49.276,2.032,1.2],[40.64,49.276,2.032,1.2],[43.18,49.276,2.032,1.2],[45.72,49.276,2.032,1.2],[48.26,49.276,2.032,1.2],[50.8,49.276,2.032,1.2],[53.34,49.276,2.032,1.2],[55.88,49.276,2.032,1.2],[58.42,49.276,2.032,1.2],[60.96,49.276,2.032,1.2],[63.5,49.276,2.032,1.2],[66.04,49.276,2.032,1.2],[68.58,49.276,2.032,1.2],[71.12,49.276,2.032,1.2],[73.66,49.276,2.032,1.2],[76.2,49.276,2.032,1.2],[2.54,51.816,2.032,1.2],[5.08,51.816,2.032,1.2],[7.62,51.816,2.032,1.2],[10.16,51.816,2.032,1.2],[12.7,51.816,2.032,1.2],[15.24,51.816,2.032,1.2],[17.78,51.816,2.032,1.2],[20.32,51.816,2.032,1.2],[22.86,51.816,2.032,1.2],[25.4,51.816,2.032,1.2],[27.94,51.816,2.032,1.2],[30.48,51.816,2.032,1.2],[33.02,51.816,2.032,1.2],[35.56,51.816,2.032,1.2],[38.1,51.816,2.032,1.2],[40.64,51.816,2.032,1.2],[43.18,51.816,2.032,1.2],[45.72,51.816,2.032,1.2],[48.26,51.816,2.032,1.2],[50.8,51.816,2.032,1.2],[53.34,51.816,2.032,1.2],[55.88,51.816,2.032,1.2],[58.42,51.816,2.032,1.2],[60.96,51.816,2.032,1.2],[63.5,51.816,2.032,1.2],[66.04,51.816,2.032,1.2],[68.58,51.816,2.032,1.2],[71.12,51.816,2.032,1.2],[73.66,51.816,2.032,1.2],[76.2,51.816,2.032,1.2]]}};
 </script>
 <script>
@@ -9845,6 +9845,8 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     return b;
   }
   function rectPts(x0, y0, x1, y1) { return [[x0, y0], [x1, y0], [x1, y1], [x0, y1]]; }
+  // a region mirrored left to right about x = w / 2 (each path reversed, so outers stay outers and holes stay holes)
+  function mirrorRegion(a, w) { var k = Math.round(w * SC); return a.map(function (p) { return p.map(function (q) { return { X: k - q.X, Y: q.Y }; }).reverse(); }); }
   function circlePts(cx, cy, r) {
     var n = Math.max(32, Math.ceil(2 * Math.PI * r / 0.3)), pts = [];
     for (var i = 0; i < n; i++) pts.push([cx + r * Math.cos(2 * Math.PI * i / n), cy + r * Math.sin(2 * Math.PI * i / n)]);
@@ -9860,6 +9862,11 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
   function place(pts, x, y, rotDeg, bottom) {
     var t = rotDeg * Math.PI / 180, c = Math.cos(t), s = Math.sin(t);
     return pts.map(function (p) { var lx = bottom ? -p[0] : p[0], ly = p[1]; return [x + lx * c + ly * s, y - lx * s + ly * c]; });
+  }
+  // board frame -> part frame: place() undone
+  function unplace(pts, x, y, rotDeg, bottom) {
+    var t = rotDeg * Math.PI / 180, c = Math.cos(t), s = Math.sin(t);
+    return pts.map(function (p) { var dx = p[0] - x, dy = p[1] - y, lx = dx * c - dy * s, ly = dx * s + dy * c; return [bottom ? -lx : lx, ly]; });
   }
   function round(v, n) { var k = Math.pow(10, n == null ? 3 : n); return Math.round(v * k) / k; }
 
@@ -9969,10 +9976,14 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     var g = P.grid, w = P.wig, f = P.frame;
     var pitch = g.pitch;
     var dead = Math.max(0, Math.min(MAX_DEAD, Math.round(g.dead_rows_left)));
-    var xl = -dead * pitch, xr = (g.cols + 1) * pitch, unitPitch = xr - xl;
+    // The strip (the probe's side) is on the left as drawn, or on the right after a left-to-right flip: frame.side (rev A12).
+    // xl and xr are the unit's left and right grid planes either way. W0 is the breadboard's right edge; the strip's outer
+    // plane is xl or xr, and the extender stands against the breadboard's other side.
+    var W0 = (g.cols + 1) * pitch, mir = f.side === 'right';
+    var xl = mir ? 0 : -dead * pitch, xr = mir ? W0 + dead * pitch : W0, unitPitch = xr - xl;
     var removable = w.mode === 'removable';
     var notes = [];
-    if (Math.abs(w.width - xr) > 0.005) notes.push('wig.width ' + w.width + ' is not (cols + 1) x pitch = ' + round(xr) + '; the grid value is used');
+    if (Math.abs(w.width - W0) > 0.005) notes.push('wig.width ' + w.width + ' is not (cols + 1) x pitch = ' + round(W0) + '; the grid value is used');
 
     // --- boards in z: each sits "gap" above the one below; parts live in the gaps ---
     var layers = [];
@@ -10004,7 +10015,10 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     // The top board is cut to the half-pitch line instead (once the waist is deep enough for a column on the seam), so that the
     // countersinks of the two columns either side of the seam keep the same land: the shell's seam gives the whole wall to the
     // breadboard, which would leave the extender's countersinks 0.1 mm past its own edge.
+    // With the strip on the right (frame.side, rev A12) the extender stands against the breadboard's LEFT side, and it is that
+    // waist that is cut: the block below is run on the mirror image of the breadboard and what it makes is mirrored back.
     var waist = null, waistCut = null, waistCutFace = null, wigFaceRegion = null;
+    if (mir) { wigPts = wigPts.map(function (q) { return [W0 - q[0], q[1]]; }).reverse(); wigRegion = mirrorRegion(wigRegion, W0); }
     (function () {
       var W0 = w.width, mid = wigPts.filter(function (p) { return p[0] > W0 - 3 && p[0] < W0 - 0.002 && p[1] > 4 && p[1] < w.height - 4; });
       if (!mid.length) { waist = { own: 0, depth: 0, deepened: false, y0: null, y1: null, flat: null }; return; }
@@ -10020,6 +10034,11 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
       var we = expolys(wigRegion); if (we.length) wigPts = we[0].outer;
       waist = { own: own, depth: round(d, 3), face: round(df, 3), deepened: true, y0: round(ya, 3), y1: round(yb, 3), flat: [round(ya + ramp, 3), round(yb - ramp, 3)] };
     })();
+    if (mir) {
+      wigPts = wigPts.map(function (q) { return [W0 - q[0], q[1]]; }).reverse(); wigRegion = mirrorRegion(wigRegion, W0);
+      if (waistCut) waistCut = mirrorRegion(waistCut, W0); if (waistCutFace) waistCutFace = mirrorRegion(waistCutFace, W0); if (wigFaceRegion) wigFaceRegion = mirrorRegion(wigFaceRegion, W0);
+      if (waist) waist.side = 'left';
+    }
     // Where the frame runs along the breadboard, the spaces the breadboard's own outline leaves against it (the corner chamfers,
     // the waist) belong to the frame, so a board's inner edge follows the breadboard's contour: each board is then cut by
     // whichever part of the wig is at its height, less the fit gap. Only a space with more than 5 mm of edge against the frame
@@ -10064,10 +10083,13 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
       joints.push({ vertex: vi + 1, at: [round(M[0]), round(M[1])], flat: round(best.len, 2), open: theirs });
     });
     // integrated: one board under the frame and the breadboard. Where the strip runs beside the breadboard the seam is
-    // filled (the wig's left corners and waist); the rest of the wig's edge is kept as it is on the WigLEDmag.
+    // filled (the wig's corners and waist on that side); the rest of the wig's edge is kept as it is on the WigLEDmag.
     var fullOutline = union(frameL, wigRegion);
-    var beside = inter(frameL, region([rectPts(-0.5, 0, 0, w.height)]));
-    if (area(beside) > 0.2) { var bs = bbox(beside); fullOutline = union(fullOutline, region([rectPts(-0.05, bs.y0, 3, bs.y1)])); }
+    [[rectPts(-0.5, 0, 0, w.height), function (bs) { return rectPts(-0.05, bs.y0, 3, bs.y1); }],
+     [rectPts(wW, 0, wW + 0.5, w.height), function (bs) { return rectPts(wW - 3, bs.y0, wW + 0.05, bs.y1); }]].forEach(function (sd) {
+      var beside = inter(frameL, region([sd[0]]));
+      if (area(beside) > 0.2) fullOutline = union(fullOutline, region([sd[1](bbox(beside))]));
+    });
     var fill = Math.max(0, f.fill_notches || 0);
     if (fill > 0) fullOutline = offset(offset(fullOutline, fill), -fill);
     joints.forEach(function (j) { fullOutline = diff(fullOutline, j.open); });        // the one board keeps the same joint
@@ -10138,8 +10160,26 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     //     board a knob-shaped cutout running out to the right edge. A tab of the extender's one board fills it from the back,
     //     its upright pins going up into the socket. The knob is wider than its neck, so the tab cannot be pulled out
     //     sideways. The cutout belongs to the unit: it is there with or without an extender.
+    // --- rev A12: with the strip on the right (frame.side) the extender, its socket and the press-in cutout are on the LEFT.
+    //     The two blocks below are written for the right side. They are run unchanged on the mirror image: PX is the design
+    //     with the side sockets where their mirror images are, wigX / wigFaceX the breadboard mirrored, refX the reference
+    //     board with its top board's holes mirrored, and "xr" inside them is W0, the mirrored breadboard's right edge. What
+    //     they make (press, ext) is mirrored back afterwards.
+    var PX = P, wigX = wigRegion, wigFaceX = wigFaceRegion, refX = ref;
+    if (mir) (function () {
+      var k, cx = { zBot: zBot, zTop: zTop, layers: layers };
+      PX = {}; for (k in P) PX[k] = P[k];
+      PX.parts = (P.parts || []).map(function (u) {
+        if (!((Catalog.sideKinds && Catalog.sideKinds[u.type]) || u.type === 'skt_ra_127' || u.type === 'skt_v_127')) return u;
+        var m = partMirror(u, W0, cx), c = {}; for (var kk in u) c[kk] = u[kk]; c.x = m.x; c.y = m.y; c.rot = m.rot; return c;
+      });
+      wigX = mirrorRegion(wigRegion, W0); wigFaceX = wigFaceRegion ? mirrorRegion(wigFaceRegion, W0) : null;
+      refX = {}; for (k in ref) refX[k] = ref[k];
+      if (ref.face && ref.face.holes) { refX.face = {}; for (k in ref.face) refX.face[k] = ref.face[k]; refX.face.holes = ref.face.holes.map(function (h) { return [W0 - h[0], h[1], h[2], h[3]]; }); }
+    })();
+    var notes0 = notes.length;
     var press = null;
-    (function () {
+    (function (P, xr, wigRegion, wigFaceRegion, ref) {
       var XJ = P.extender || {}; if (XJ.join !== 'press') return;
       var vp = null; (P.parts || []).forEach(function (u) { if (!vp && u.type === 'skt_v_127') vp = u; });
       if (!vp) return;
@@ -10149,9 +10189,9 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
       press = { id: vp.id, n: vc.n, pins: vc.pins, h: vc.height, x: +vp.x, y: +vp.y, span: vc.span, len: vc.len, knob: [round(kx0), round(ky0), round(kx1), round(ky1)], neck: round(nw), under: round((ky1 - ky0 - nw) / 2), gap: gapT,
         rects: [[kx0, ky0, kx1, ky1], [kx1, yc - nw / 2, xr, yc + nw / 2]],
         cut: inter(shape, region([rectPts(kx0 - 1, ky0 - 1, xr + 0.01, ky1 + 1)])), tab: inter(offset(shape, -gapT), region([rectPts(kx0 - 1, ky0 - 1, xr + 0.3, ky1 + 1)])) };
-    })();
+    })(PX, W0, wigX, wigFaceX, refX);
     var ext = null;
-    if (P.extender && P.extender.on) (function () {
+    if (P.extender && P.extender.on) (function (P, xr, wigRegion, wigFaceRegion, ref) {
       var X = {}, XD = Catalog.extender || {}, k;
       for (k in XD) X[k] = XD[k];
       for (k in P.extender) if (k.charAt(0) !== '_') X[k] = P.extender[k];
@@ -10275,6 +10315,44 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
           list: kind === 'none' ? [] : tieY.map(function (ty) { return { y: round(ty), x0: tieX, x1: ecols[tc], span: round(ecols[tc] - tieX) }; }) },
         jumpers: railRows.map(function (ry) { return { y: round(ry), x0: round(g.cols * pitch), x1: ecols[tc] }; }),
         rail_skip: skip, seam_col: seamCol };
+    })(PX, W0, wigX, wigFaceX, refX);
+    // rev A12: mirrored back. Every x of what the two blocks made, their regions, and the extender's own parts turned to lie
+    // on the mirror image of where the blocks put them. x0 < x1 whichever side; cols[0] is still the column next to the unit.
+    // for the drawing of its header's pins: pin_x the middle of the 6.6 mm pins, pin_y the first one's y, step from one to the next
+    if (ext) { ext.side = mir ? 'left' : 'right'; ext.header.pin_x = round(ext.x0 - 0.7); ext.header.pin_y = ext.header.y; ext.header.step = -1.27; }
+    if (mir) (function () {
+      function MX(x) { return round(W0 - x); }
+      function MR(a) { return mirrorRegion(a, W0); }
+      function MP(pts) { return pts.map(function (q) { return [round(W0 - q[0], 4), q[1]]; }).reverse(); }
+      function ME(list) { return (list || []).map(function (e) { return { outer: MP(e.outer), holes: e.holes.map(MP) }; }); }
+      function box(q) { return [MX(q[2]), q[1], MX(q[0]), q[3]]; }
+      for (var i = notes0; i < notes.length; i++) notes[i] = String(notes[i]).replace('with its mouth to the right (rotation 180)', 'with its mouth to the left (rotation 0)');
+      if (press) {
+        var real = null; (P.parts || []).forEach(function (u) { if (!real && u.id === press.id) real = u; });
+        press.cut = MR(press.cut); press.tab = MR(press.tab); press.knob = box(press.knob); press.rects = press.rects.map(box);
+        if (real) { press.x = +real.x; press.y = +real.y; }
+      }
+      if (!ext) return;
+      var a0 = ext.x0, a1 = ext.x1;
+      ext.x0 = MX(a1); ext.x1 = MX(a0); ext.cols = ext.cols.map(MX);
+      ['board', 'shell', 'face', 'cover'].forEach(function (k) { ext.shapes[k] = ME(ext.shapes[k]); });
+      ext.plan = MR(ext.plan);
+      ext.holes = ext.holes.map(function (h) { return [MX(h[0]), h[1], h[2], h[3]]; });
+      ext.parts.forEach(function (p) {
+        var polys = p.bodies.map(function (b) { return unplace(b.pts, p.x, p.y, p.rot, false); }), cat = Catalog.parts[p.type];
+        var m = mirrorTurn(polys, cat && cat.mouth, p.x, p.y, p.rot, false, W0);
+        p.bodies.forEach(function (b, bi) { b.pts = place(polys[bi], m.x, m.y, m.rot, false); });
+        p.ghosts.forEach(function (b) { b.pts = place(unplace(b.pts, p.x, p.y, p.rot, false), m.x, m.y, m.rot, false); });
+        p.x = round(m.x); p.y = round(m.y); p.rot = m.rot;
+      });
+      var hp = ext.parts[0];
+      if (ext.port) { ext.port.mouth_x = MX(ext.port.mouth_x); if (ext.port.press && ext.port.press.knob) ext.port.press.knob = box(ext.port.press.knob); }
+      if (hp) { ext.header.x = hp.x; ext.header.y = hp.y; }          // the header's own origin as it really lies (turned half round); its pins are at the same heights
+      ext.header.pin_x = MX(ext.header.pin_x);
+      ext.ties.at = ext.ties.at.map(function (q) { return [MX(q[0]), q[1]]; });
+      ext.ties.list.forEach(function (t) { var b0 = MX(t.x1), b1 = MX(t.x0); t.x0 = b0; t.x1 = b1; });
+      ext.jumpers.forEach(function (t) { var b0 = MX(t.x1), b1 = MX(t.x0); t.x0 = b0; t.x1 = b1; });
+      if (ext.seam_col) { var sc = ext.seam_col; sc.x = MX(sc.x); sc.unit_edge = [MX(sc.unit_edge[1]), MX(sc.unit_edge[0])]; if (sc.board_edge != null) sc.board_edge = MX(sc.board_edge); sc.side = 'left'; }
     })();
 
     // breadboard shell (+ optional face PCB)
@@ -10412,12 +10490,12 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     // --- checks ---
     var checks = { grid: {}, flush: {}, clashes: [], neighbours: [], faces: [], probe: null, notes: notes };
     checks.joints = joints.map(function (j) { return { vertex: j.vertex, at: j.at, flat: j.flat }; });      // where the frame's edge meets a chamfer of the breadboard square
-    checks.grid = { pitch: round(unitPitch), dead_rows: dead + 1, cols: g.cols, left_plane: round(xl), right_plane: round(xr), strip_w: round(-xl), on_grid: Math.abs(unitPitch / pitch - Math.round(unitPitch / pitch)) < 1e-6,
-      dead_x: (function () { var a = []; for (var j = 0; j <= dead; j++) a.push(round(-j * pitch)); return a; })() };
+    checks.grid = { pitch: round(unitPitch), dead_rows: dead + 1, cols: g.cols, left_plane: round(xl), right_plane: round(xr), strip_w: round(dead * pitch), strip_side: mir ? 'right' : 'left', on_grid: Math.abs(unitPitch / pitch - Math.round(unitPitch / pitch)) < 1e-6,
+      dead_x: (function () { var a = []; for (var j = 0; j <= dead; j++) a.push(round(mir ? W0 + j * pitch : -j * pitch)); return a; })() };
     // The simplified outline: left strip plane to right plane, top edge to bottom edge. Kevin wants it square. Square on the unit
     // pitch also puts the height on the 2.54 grid, so a unit stood above another keeps its hole rows on the grid too.
     (function () {
-      var H = round(yb - yt), bw = round(Math.max(fb.x1, xr) - fb.x0), rows = H / pitch;
+      var H = round(yb - yt), bw = round(Math.max(fb.x1, xr) - Math.min(fb.x0, xl)), rows = H / pitch;
       checks.grid.overall = { w: round(unitPitch), h: H, widest: bw, band: round(-yt), square: Math.abs(unitPitch - H) < 0.05, square_widest: Math.abs(bw - H) < 0.05,
         band_square: round(unitPitch - yb), band_square_widest: round(bw - yb), rows_high: round(rows, 3), v_on_grid: Math.abs(rows - Math.round(rows)) < 0.002 };
     })();
@@ -10464,7 +10542,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
       var have = dead * pitch, needRows = Math.ceil((cpl.gap - 1e-6) / pitch);
       checks.grid.coupler = { key: g.coupler, label: cpl.label, gap: cpl.gap, across: cpl.across, len: cpl.len, thick: cpl.thick, tongue: cpl.tongue, tip_gap: cpl.tip_gap, have: round(have), fits: have + 1e-6 >= cpl.gap,
         spare: round(have - cpl.gap, 2), rows_needed: needRows, strip_needed: round(needRows * pitch), source: cpl.source,
-        x0: round(xr), x1: round(xr + have), yc: round(w.height / 2, 2), zc: round(-layers[0].t / 2, 2) };
+        x0: round(W0), x1: round(W0 + have), yc: round(w.height / 2, 2), zc: round(-layers[0].t / 2, 2) };
     }
 
     // the extender against this unit: what the two share in plan, how the socket and its header meet, and what ties the seam.
@@ -10476,14 +10554,15 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
       var ov = versus('extender', 'The extender against this unit', ext.plan), pt = ext.port, need = ext.n_rows, play = null, near = null;
       if (pt && pt.len > 0) { var yc = (pt.y0 + pt.y1) / 2; play = { joint: pt.len, arm: round(ext.y1 - yc, 1), corner: round(0.1 * (ext.y1 - yc) / pt.len, 2) }; }
       var spots = ext.ties.at.map(function (q) { return { x: q[0], y: q[1], what: 'a tie hole' }; });
-      if (pt) spots.push({ x: pt.mouth_x - 2.9, y: (pt.y0 + pt.y1) / 2, what: 'the socket' });
+      if (pt) spots.push({ x: pt.mouth_x + (mir ? 2.9 : -2.9), y: (pt.y0 + pt.y1) / 2, what: 'the socket' });
       sensorSet.mmc.concat(sensorSet.tmag).forEach(function (s) { spots.forEach(function (q) { var d = Math.hypot(s.x - q.x, s.y - q.y); if (!near || d < near.d) near = { ref: s.ref, d: round(d, 1), what: q.what }; }); });
-      var pw = ext.x1 - xl;
+      var pw = mir ? xr - ext.x0 : ext.x1 - xl;
       if (pt && pt.press && press) pt.press.mags = sensorSet.mmc.concat(sensorSet.tmag).filter(function (s) { return press.rects.some(function (q) { return s.x > q[0] - 1.5 && s.x < q[2] + 1.5 && s.y > q[1] - 1.5 && s.y < q[3] + 1.5; }); }).map(function (s) { return s.ref; });
       checks.extender = { cols: ext.n_cols, rows: need, dead: ext.dead, col_gap: ext.col_gap, rail_skip: ext.rail_skip, seam_col: ext.seam_col, x0: ext.x0, x1: ext.x1, w: ext.w, head: ext.head, cover: !!ext.z.cover, keyed: ext.keyed,
         pair_w: round(pw), pair_rows: round(pw / pitch, 3), on_grid: Math.abs(pw / pitch - Math.round(pw / pitch)) < 1e-6,
         port: pt, need: need, spare: pt ? pt.pins - need : null, header: ext.header, overlap: ov, seam: round(ext.y1 - ext.y0, 2), tied: ext.ties.list.length > 0, play: play,
-        ties: { kind: ext.ties.kind, n: ext.ties.list.length, span: round(ext.cols[0] - ext.ties.at[0][0]), wire: ext.ties.wire, hole: ext.ties.hole, room: ext.ties.room, from_ref: ext.ties.from_ref, at: ext.ties.at },
+        side: ext.side,
+        ties: { kind: ext.ties.kind, n: ext.ties.list.length, span: round(Math.abs(ext.cols[0] - ext.ties.at[0][0])), wire: ext.ties.wire, hole: ext.ties.hole, room: ext.ties.room, from_ref: ext.ties.from_ref, at: ext.ties.at },
         jumpers: ext.jumpers.length, jumper_span: ext.jumpers.length ? round(ext.jumpers[0].x1 - ext.jumpers[0].x0) : null, near: near };
     })();
 
@@ -10609,8 +10688,9 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
 
     // probe dock
     if (probe) {
-      var innerX = sx0 - w.fit_gap;      // where the upper boards' strip ends against the shell
-      var wl = (probe.x - probe.channel_w / 2) - xl, wr = innerX - (probe.x + probe.channel_w / 2);
+      // the strip's outer plane on one side of the channel, the shell on the other
+      var wl = mir ? (probe.x - probe.channel_w / 2) - (sx0 + w.shell.w + w.fit_gap) : (probe.x - probe.channel_w / 2) - xl;
+      var wr = mir ? xr - (probe.x + probe.channel_w / 2) : (sx0 - w.fit_gap) - (probe.x + probe.channel_w / 2);
       var sens = [];
       sensorSet.mmc.forEach(function (s) { sens.push({ kind: 'MMC5603', ref: s.ref, x: s.x, y: s.y, z: s.z != null ? s.z : (s.side === 'F' ? 0 : -w.pcb_t), range: 3 }); });
       sensorSet.tmag.forEach(function (s) { sens.push({ kind: 'TMAG5273', ref: s.ref, x: s.x, y: s.y, z: s.z != null ? s.z : (s.side === 'F' ? 0 : -w.pcb_t), range: 40 }); });
@@ -10635,7 +10715,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
 
     var out = {
       params: P, removable: removable,
-      planes: { xl: round(xl), xr: round(xr), yt: yt, yb: yb, pitch: round(unitPitch), dead: dead, x0: round(fb.x0), x1: round(Math.max(fb.x1, xr)) },
+      planes: { xl: round(xl), xr: round(xr), yt: yt, yb: yb, pitch: round(unitPitch), dead: dead, x0: round(Math.min(fb.x0, xl)), x1: round(Math.max(fb.x1, xr)), side: mir ? 'right' : 'left', w: round(W0) },
       z: { top: round(zTop), bottom: round(zBot), bbTop: round(bbTop), shellTop: round(shellTop) },
       outline: { verts: verts.map(function (v, i) { return { x: v.x, y: v.y, from: built.spans[i].from, count: built.spans[i].count }; }), pts: built.pts },
       layers: layers, parts: parts, probe: probe, checks: checks, extender: ext,
@@ -10661,7 +10741,308 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     };
   }
 
-  return { resolve: resolve, plain: plain, buildOutline: buildOutline, legacyOutline: legacyOutline, util: { region: region, union: union, diff: diff, inter: inter, offset: offset, area: area, expolys: expolys, place: place, rectPts: rectPts, circlePts: circlePts, round: round } };
+  // ---------- outline operations (rev A12): the humps of the outline, and the left-to-right flip ----------
+  // These work on the parameter set (P.frame.outline and what hangs on it), not on a resolved model, so the page and the
+  // checks use the same code. Nothing here is called by resolve().
+  //
+  // The outline is read as three outer edges between four corner vertices:
+  //   top    from the top-left corner (TL) to the top-right corner (TR)
+  //   right  from TR down to the lowest vertex on the right grid plane
+  //   left   from the lowest vertex on the left grid plane up to TL
+  // and what is left over, the run along the breadboard. Each edge has a base line (the grid plane for a side; for the top
+  // edge its level nearest the breadboard). A HUMP is a run of vertices that stand outside that line. It may take in the
+  // corner at either end of its edge, which then stands out with it.
+  var HUMP_EPS = 0.05;
+  function r4(v) { return Math.round(v * 1e4) / 1e4; }
+  function vclone(v) { var o = {}; for (var k in v) o[k] = Array.isArray(v[k]) ? v[k].slice() : v[k]; return o; }
+  function sideInfo(P) {
+    var g = P.grid, dead = Math.max(0, Math.min(MAX_DEAD, Math.round(g.dead_rows_left))), W = (g.cols + 1) * g.pitch, mir = P.frame.side === 'right';
+    return { W: W, H: P.wig.height, mir: mir, dead: dead, pitch: g.pitch, xl: mir ? 0 : -dead * g.pitch, xr: mir ? W + dead * g.pitch : W };
+  }
+  // the same vertices as a list that starts at the top-left corner and runs clockwise as seen on screen (y down)
+  function normalise(verts) {
+    var a = 0, n = verts.length, i;
+    for (i = 0; i < n; i++) { var p = verts[i], q = verts[(i + 1) % n]; a += p.x * q.y - q.x * p.y; }
+    var v = a < 0 ? verts.slice().reverse() : verts.slice(), tl = 0;
+    for (i = 1; i < n; i++) if (v[i].x + v[i].y < v[tl].x + v[tl].y - 1e-9) tl = i;
+    return v.slice(tl).concat(v.slice(0, tl));
+  }
+  // how much of an edge a corner's own shape takes, measured from its vertex along x or along y
+  function legOf(v, axis) {
+    if (v.c === 'wig') return axis === 'x' ? 2.51 : 2.11;
+    if (Array.isArray(v.c)) return (axis === 'x' ? +v.c[0] : +v.c[1]) + 0.6 * (+v.r || 0);
+    return +v.r || 0;
+  }
+  function edgesOf(P) {
+    var S = sideInfo(P), V = normalise(P.frame.outline), n = V.length, i, tr = 0, br = -1, bl = -1;
+    for (i = 1; i < n; i++) if (V[i].x - V[i].y > V[tr].x - V[tr].y + 1e-9) tr = i;
+    for (i = tr; i < n; i++) if (Math.abs(V[i].x - S.xr) < 0.06 && (br < 0 || V[i].y > V[br].y)) br = i;
+    if (br < 0) { br = tr; for (i = tr + 1; i < n; i++) if (V[i].x + V[i].y > V[br].x + V[br].y) br = i; }
+    for (i = br + 1; i < n; i++) if (Math.abs(V[i].x - S.xl) < 0.06 && (bl < 0 || V[i].y > V[bl].y)) bl = i;
+    if (bl < 0) { bl = n; for (i = br + 1; i < n; i++) if (bl === n || V[i].x - V[i].y < V[bl].x - V[bl].y) bl = i; }
+    var yB = -1e9; for (i = 0; i <= tr; i++) yB = Math.max(yB, V[i].y);
+    // each edge as a list in rising order of its own coordinate (x along the top, y down a side), with how to read and set a vertex
+    var E = {
+      top: { side: 'top', axis: 'x', list: V.slice(0, tr + 1), a: function (v) { return v.x; }, out: function (v) { return yB - v.y; }, setA: function (v, a) { v.x = r4(a); }, setOut: function (v, o) { v.y = r4(yB - o); }, base: yB },
+      right: { side: 'right', axis: 'y', list: V.slice(tr, br + 1), a: function (v) { return v.y; }, out: function (v) { return v.x - S.xr; }, setA: function (v, a) { v.y = r4(a); }, setOut: function (v, o) { v.x = r4(S.xr + o); }, base: S.xr },
+      left: { side: 'left', axis: 'y', list: V.slice(bl).concat([V[0]]).reverse(), a: function (v) { return v.y; }, out: function (v) { return S.xl - v.x; }, setA: function (v, a) { v.y = r4(a); }, setOut: function (v, o) { v.x = r4(S.xl - o); }, base: S.xl }
+    };
+    E.inner = V.slice(br + 1, bl);
+    E.S = S;
+    // put the edges back together as one outline, clockwise from TL (the corner vertices are shared between two lists)
+    E.join = function () { var lf = E.left.list.slice().reverse(); return E.top.list.concat(E.right.list.slice(1), E.inner, lf.slice(0, lf.length - 1)); };
+    return E;
+  }
+  function humpsOn(e) {
+    var L = e.list, m = L.length - 1, list = [], k = 0;
+    while (k <= m) {
+      if (e.out(L[k]) <= HUMP_EPS) { k++; continue; }
+      var k0 = k; while (k <= m && e.out(L[k]) > HUMP_EPS) k++;
+      var k1 = k - 1, out = 0, j; for (j = k0; j <= k1; j++) out = Math.max(out, e.out(L[j]));
+      var p0 = k0, p1 = k1; while (e.out(L[p0]) < out - 0.01) p0++; while (e.out(L[p1]) < out - 0.01) p1--;
+      list.push({ side: e.side, axis: e.axis, k0: k0, k1: k1, p0: p0, p1: p1, end0: k0 === 0, end1: k1 === m, out: r4(out),
+        a0: r4(e.a(L[k0 === 0 ? 0 : k0 - 1])), a1: r4(e.a(L[k1 === m ? m : k1 + 1])), flat0: r4(e.a(L[p0])), flat1: r4(e.a(L[p1])), n: k1 - k0 + 1 });
+    }
+    list.forEach(function (h, i) { h.key = e.side + ':' + i; });
+    return list;
+  }
+  // every hump of the outline, with a sentence saying where it is
+  function humps(P) {
+    var E = edgesOf(P), all = [];
+    ['top', 'left', 'right'].forEach(function (sd) {
+      humpsOn(E[sd]).forEach(function (h) {
+        var lo = h.axis === 'x' ? 'left' : 'top', hi = h.axis === 'x' ? 'right' : 'bottom';
+        h.where = h.end0 && h.end1 ? 'the whole edge' : h.end0 ? 'from the ' + (h.axis === 'x' ? 'top-left' : 'top') + ' corner to ' + h.axis + ' ' + round(h.a1, 2) : h.end1 ? 'from ' + h.axis + ' ' + round(h.a0, 2) + ' to the ' + (h.axis === 'x' ? 'top-right' : 'bottom') + ' corner' : h.axis + ' ' + round(h.a0, 2) + ' to ' + round(h.a1, 2);
+        h.label = (sd === 'top' ? 'Top edge' : sd === 'left' ? 'Left side' : 'Right side') + ', ' + round(h.out, 2) + ' mm ' + (sd === 'top' ? 'up' : 'out') + ', ' + h.where;
+        h.lo = lo; h.hi = hi;
+        all.push(h);
+      });
+    });
+    return all;
+  }
+  function findHump(E, key) { var sd = String(key).split(':')[0], i = +String(key).split(':')[1], e = E[sd]; if (!e || !e.list) return null; var h = humpsOn(e)[i]; return h ? { e: e, h: h } : null; }
+  function rising(e) { var L = e.list; for (var k = 1; k < L.length; k++) if (e.a(L[k]) < e.a(L[k - 1]) - 1e-6) return false; return true; }
+  function commit(P, E) { P.frame.outline = E.join(); return true; }
+  // Change one hump: a0 / a1 move the step at that end (not an end that is the corner), out its height, slide the whole hump
+  // along its edge. Returns { ok } or { ok: false, why }; nothing is changed when it does not fit.
+  function humpSet(P, key, ch) {
+    var keep = P.frame.outline.map(vclone), saved = P.frame.outline;
+    P.frame.outline = keep.map(vclone);
+    var E = edgesOf(P), f = findHump(E, key);
+    function fail(why) { P.frame.outline = saved; return { ok: false, why: why }; }
+    if (!f) return fail('no such hump');
+    var e = f.e, h = f.h, L = e.list, m = L.length - 1, k;
+    if (ch.out != null) {
+      var o = +ch.out; if (!(o > HUMP_EPS)) { P.frame.outline = saved; return humpRemove(P, key); }
+      for (k = h.k0; k <= h.k1; k++) e.setOut(L[k], e.out(L[k]) * o / h.out);
+    }
+    function shift(k0, k1, d) { for (var j = k0; j <= k1; j++) if (j > 0 && j < m) e.setA(L[j], e.a(L[j]) + d); }
+    if (ch.slide != null && +ch.slide) shift(h.k0 - 1, h.k1 + 1, +ch.slide);
+    if (ch.a0 != null && !h.end0) { var d0 = +ch.a0 - h.a0; if (h.p0 === h.p1 && h.n === 1) shift(h.k0 - 1, h.k0 - 1, d0); else shift(h.k0 - 1, h.p0 === h.p1 ? h.p0 - 1 : h.p0, d0); }
+    if (ch.a1 != null && !h.end1) { var d1 = +ch.a1 - h.a1; if (h.p0 === h.p1 && h.n === 1) shift(h.k1 + 1, h.k1 + 1, d1); else shift(h.p0 === h.p1 ? h.p1 + 1 : h.p1, h.k1 + 1, d1); }
+    if (!rising(e)) return fail('it would run past the next corner of the outline');
+    var lo = e.a(L[0]) + (h.end0 ? 0 : legOf(L[0], e.axis)), hi = e.a(L[m]) - (h.end1 ? 0 : legOf(L[m], e.axis));
+    if ((!h.end0 && e.a(L[h.k0 - 1]) < lo - 1e-6) || (!h.end1 && e.a(L[h.k1 + 1]) > hi + 1e-6)) return fail('it would run into the corner at the end of that edge');
+    commit(P, E); return { ok: true };
+  }
+  // what a hump is made of, as a list of points along its edge: { a, o, spec, end } (end 0 or 1: it is the corner at that end)
+  function capture(e, h) {
+    var L = e.list, m = L.length - 1, prof = [], k;
+    for (k = Math.max(0, h.k0 - 1); k <= Math.min(m, h.k1 + 1); k++) {
+      var v = L[k], sp = vclone(v); delete sp.x; delete sp.y;
+      prof.push({ a: e.a(v), o: k < h.k0 || k > h.k1 ? 0 : e.out(v), spec: sp, end: k === 0 ? 0 : k === m ? 1 : null, run: k >= h.k0 && k <= h.k1 });
+    }
+    return prof;
+  }
+  function removeOn(e, h) {
+    var L = e.list, m = L.length - 1, drop = [], k;
+    for (k = h.k0; k <= h.k1; k++) { if (k === 0 || k === m) e.setOut(L[k], 0); else drop.push(k); }
+    // a root that only marked where the hump left the base line says nothing once the hump is gone
+    [h.k0 - 1, h.k1 + 1].forEach(function (rk, i) {
+      if (rk <= 0 || rk >= m) return;
+      var beyond = L[i === 0 ? rk - 1 : rk + 1];
+      if (Math.abs(e.out(L[rk])) <= HUMP_EPS && Math.abs(e.out(beyond)) <= HUMP_EPS) drop.push(rk);
+    });
+    drop.sort(function (a, b) { return b - a; }).forEach(function (j) { L.splice(j, 1); });
+  }
+  function humpRemove(P, key) {
+    var E = edgesOf(P), f = findHump(E, key); if (!f) return { ok: false, why: 'no such hump' };
+    removeOn(f.e, f.h); commit(P, E); return { ok: true };
+  }
+  // lay a captured hump on an edge. The points between its ends must fall on a clear stretch of the base line.
+  function layOn(e, prof) {
+    var L = e.list, m = L.length - 1, inner = prof.filter(function (q) { return q.end == null; }), k;
+    if (inner.length) {
+      var a0 = inner[0].a, a1 = inner[inner.length - 1].a;
+      if (a0 < e.a(L[0]) + 0.05 || a1 > e.a(L[m]) - 0.05) return 'there is no room for it on that edge';
+      for (k = m - 1; k >= 1; k--) { var ak = e.a(L[k]); if (ak > a0 - 0.05 && ak < a1 + 0.05) { if (Math.abs(e.out(L[k])) > HUMP_EPS) return 'another hump is in the way there'; L.splice(k, 1); } }
+      m = L.length - 1;
+      var at = 1; while (at < m && e.a(L[at]) < a0) at++;
+      inner.forEach(function (q, i) { var v = { x: 0, y: 0 }; for (var kk in q.spec) v[kk] = q.spec[kk]; L.splice(at + i, 0, v); e.setA(v, q.a); e.setOut(v, q.o); });
+    }
+    m = L.length - 1;
+    prof.forEach(function (q) { if (q.end === 0) e.setOut(L[0], q.o); else if (q.end === 1) e.setOut(L[m], q.o); });
+    if (!rising(e)) return 'it does not fit there';
+    return null;
+  }
+  // the same hump at the other end of its edge: mirrored along the edge, the edge's own corners staying where they are.
+  // about: mirror about this coordinate instead of the middle of the edge (the flip uses the breadboard's middle, so a hump
+  // that stays has its steps exactly where they were)
+  function humpOtherEnd(P, key, about) {
+    var saved = P.frame.outline; P.frame.outline = saved.map(vclone);
+    var E = edgesOf(P), f = findHump(E, key);
+    if (!f) { P.frame.outline = saved; return { ok: false, why: 'no such hump' }; }
+    var e = f.e, L = e.list, s = about != null ? 2 * about : e.a(L[0]) + e.a(L[L.length - 1]), prof = capture(e, f.h);
+    removeOn(e, f.h);
+    var why = layOn(e, prof.slice().reverse().map(function (q) { return { a: s - q.a, o: q.o, spec: q.spec, end: q.end == null ? null : 1 - q.end }; }));
+    if (why) { P.frame.outline = saved; return { ok: false, why: why }; }
+    commit(P, E); return { ok: true };
+  }
+  // a hump of one side on the other side, at the same height. Where that side is shorter (it ends at the breadboard's corner
+  // when there is no strip on it) the hump's lower end is pulled up to fit, its slope kept.
+  function humpOtherSide(P, key) {
+    var saved = P.frame.outline; P.frame.outline = saved.map(vclone);
+    var E = edgesOf(P), f = findHump(E, key);
+    function fail(why) { P.frame.outline = saved; return { ok: false, why: why }; }
+    if (!f || f.e.axis !== 'y') return fail('only a hump on the left or the right side can change sides');
+    var e = f.e, t = E[e.side === 'left' ? 'right' : 'left'], prof = capture(e, f.h), TL = t.list, tm = TL.length - 1, i;
+    removeOn(e, f.h);
+    var tTop = t.a(TL[0]), tBot = t.a(TL[tm]), endBot = prof.filter(function (q) { return q.end === 1; })[0], hasTop = prof.some(function (q) { return q.end === 0; });
+    if (endBot && Math.abs(endBot.a - tBot) > 0.05) return fail('it runs to the bottom corner of its side, and the other side ends at a different height');
+    // the stretch of the other side it may use: between that side's corners, less what their own shapes take
+    var inner = prof.filter(function (q) { return q.end == null; }), top = -1, bot = -1, omax = 0;
+    // (a rounded root needs a little of the edge for itself as well: half its radius)
+    var lo = tTop + (hasTop ? 0 : legOf(TL[0], 'y') + 0.2 + (inner.length ? 0.5 * (+inner[0].spec.r || 0) : 0)), hi = tBot - (endBot ? 0 : legOf(TL[tm], 'y') + 0.2 + (inner.length ? 0.5 * (+inner[inner.length - 1].spec.r || 0) : 0));
+    prof.forEach(function (q) { omax = Math.max(omax, q.o); });
+    for (i = 0; i < inner.length; i++) if (inner[i].o >= omax - 0.01) { if (top < 0) top = i; bot = i; }
+    if (inner.length) {
+      var over = inner[inner.length - 1].a - hi, under = lo - inner[0].a;
+      if (over > 1e-6) for (i = Math.max(0, bot); i < inner.length; i++) inner[i].a -= over;                        // the lower slope, moved up as it is
+      if (under > 1e-6) for (i = 0; i <= (top < 0 ? inner.length - 1 : top); i++) inner[i].a += under;             // the upper slope, moved down
+      for (i = 1; i < inner.length; i++) if (inner[i].a < inner[i - 1].a - 1e-6) return fail('that side is too short for it');
+      if (inner[0].a < lo - 1e-6 || inner[inner.length - 1].a > hi + 1e-6) return fail('that side is too short for it');
+    }
+    var why = layOn(t, prof);
+    if (why) return fail(why);
+    commit(P, E); return { ok: true };
+  }
+  // a new hump in the middle of the longest clear stretch of an edge
+  function humpAdd(P, side) {
+    var saved = P.frame.outline; P.frame.outline = saved.map(vclone);
+    var E = edgesOf(P), e = E[side], best = null, k;
+    if (!e || !e.list) { P.frame.outline = saved; return { ok: false, why: 'no such edge' }; }
+    var L = e.list, m = L.length - 1;
+    for (k = 0; k < m; k++) {
+      if (Math.abs(e.out(L[k])) > HUMP_EPS || Math.abs(e.out(L[k + 1])) > HUMP_EPS) continue;
+      var a0 = e.a(L[k]) + (k === 0 ? legOf(L[0], e.axis) + 0.3 : 0.3), a1 = e.a(L[k + 1]) - (k + 1 === m ? legOf(L[m], e.axis) + 0.3 : 0.3);
+      if (!best || a1 - a0 > best.a1 - best.a0) best = { a0: a0, a1: a1 };
+    }
+    if (!best || best.a1 - best.a0 < 6) { P.frame.outline = saved; return { ok: false, why: 'there is no clear stretch of at least 6 mm on that edge' }; }
+    var len = Math.min(14, (best.a1 - best.a0) * 0.6), mid = (best.a0 + best.a1) / 2, out = 1.5, run = 1.5;
+    var why = layOn(e, [{ a: mid - len / 2, o: 0, spec: { r: 0.8 }, end: null }, { a: mid - len / 2 + run, o: out, spec: { r: 0.8 }, end: null }, { a: mid + len / 2 - run, o: out, spec: { r: 0.8 }, end: null }, { a: mid + len / 2, o: 0, spec: { r: 0.8 }, end: null }]);
+    if (why) { P.frame.outline = saved; return { ok: false, why: why }; }
+    commit(P, E); return { ok: true };
+  }
+
+  // ---- the flip ----
+  // A part the other way round. A real part cannot be mirrored, so it is turned instead: about the axis its mouth lies on
+  // when the catalogue says where its mouth is, otherwise about whichever axis its plan is more nearly symmetric on. Its
+  // plan's middle goes to the mirror image of where it was.
+  function mirrorTurn(polys, mouth, x, y, rot, bottom, W) {
+    var A = region(polys), b = bbox(A), cx = (b.x0 + b.x1) / 2, cy = (b.y0 + b.y1) / 2, axis;
+    rot = +rot || 0;
+    if (mouth) axis = Math.abs(mouth[0]) > Math.abs(mouth[1]) ? 'y' : 'x';
+    else {
+      var kx = Math.round(2 * cx * SC), ky = Math.round(2 * cy * SC);
+      var Ax = A.map(function (p) { return p.map(function (q) { return { X: kx - q.X, Y: q.Y }; }).reverse(); }), Ay = A.map(function (p) { return p.map(function (q) { return { X: q.X, Y: ky - q.Y }; }).reverse(); });
+      axis = area(exec(CT.ctXor, A, Ax)) <= area(exec(CT.ctXor, A, Ay)) + 0.01 ? 'x' : 'y';
+    }
+    // axis 'x': the plan is its own mirror image left to right, so the turn is -rot. 'y': top to bottom, so 180 - rot.
+    var rot2 = (((axis === 'x' ? -rot : 180 - rot) % 360) + 360) % 360;
+    var was = place([[cx, cy]], +x, +y, rot, bottom)[0], off = place([[cx, cy]], 0, 0, rot2, bottom)[0];
+    return { x: r4(W - was[0] - off[0]), y: r4(was[1] - off[1]), rot: rot2, axis: axis };
+  }
+  function partMirror(u, W, ctx) {
+    var cat = Catalog.get ? Catalog.get(u, ctx || {}) : Catalog.parts[u.type], rot = +u.rot || 0, bottom = !!(u.mount && u.mount.side === 'bottom');
+    if (!cat || !cat.bodies || !cat.bodies.length) return { x: r4(W - u.x), y: u.y, rot: ((-rot % 360) + 360) % 360, axis: 'x' };
+    var polys = cat.bodies.concat(cat.ghosts || []).map(function (b) { return shapePts(b.shape); });
+    var fpx = cat.fp && Catalog.footprints && Catalog.footprints[cat.fp];
+    if (fpx && fpx.pads) fpx.pads.forEach(function (pd) { polys.push(rectPts(pd.x - pd.w / 2, pd.y - pd.h / 2, pd.x + pd.w / 2, pd.y + pd.h / 2)); });
+    return mirrorTurn(polys, cat.mouth, u.x, u.y, rot, bottom, W);
+  }
+  // what a part does when the board is flipped, unless it says otherwise (part.on_flip): a USB socket and a click wheel stay
+  // on their own side, in their corner; everything else goes with the board.
+  function flipMode(u) {
+    if (u.on_flip === 'flip' || u.on_flip === 'stay' || u.on_flip === 'corner') return u.on_flip;
+    var c = Catalog.parts && Catalog.parts[u.type];
+    return /^usb/i.test(u.type) || (c && c.group === 'wheel') ? 'corner' : 'flip';
+  }
+  function swapLR(t) { return String(t).replace(/\b(left|right|Left|Right)\b/g, function (w) { return { left: 'right', right: 'left', Left: 'Right', Right: 'Left' }[w]; }); }
+  // Flip the design left to right about the breadboard's middle: the strip and the probe's dock change sides, and the extender
+  // with them. opt: { parts: { id: 'flip' | 'stay' | 'corner' } (else flipMode), humps: { key: 'stay' } (else they flip),
+  // corners: 'stay' | 'flip', mag: false to leave the magnetometers, ctx: for the catalogue }.
+  //   flip    the part goes to the mirror image of its place, turned to face the mirrored way
+  //   corner  it stays on its own side and keeps its place measured from that side's top corner of the outline
+  //   stay    it is not touched
+  // A hump that stays keeps its side and its size: one on the top edge has its steps where they were (and still runs to the
+  // corner if it did), one on a side is at the same height on the same side, against whatever plane is there now.
+  // corners: 'stay' leaves each top corner's own shape (chamfer, radius) on its side. Flipping twice with the same choices
+  // gives the design back.
+  function ctxOf(P) {
+    var layers = [];
+    (P.stack || []).forEach(function (L, i) { var z0 = i === 0 ? -L.t : layers[i - 1].z1 + (L.gap || 0); layers.push({ id: L.id, name: L.name, t: L.t, z0: z0, z1: z0 + L.t, index: i }); });
+    return layers.length ? { zBot: layers[0].z0, zTop: layers[layers.length - 1].z1, layers: layers } : {};
+  }
+  function flip(P, opt) {
+    opt = opt || {};
+    var S = sideInfo(P), W = S.W, f = P.frame, before = edgesOf(P), hb = humps(P), ctx = opt.ctx || ctxOf(P);
+    var TL0 = before.top.list[0], TR0 = before.top.list[before.top.list.length - 1], c0 = { TL: [TL0.x, TL0.y], TR: [TR0.x, TR0.y] };
+    function mirrorVerts(list) { return normalise(list.map(function (v) { var o = vclone(v); o.x = r4(W - v.x); if (o.n) o.n = swapLR(o.n); return o; }).reverse()); }
+    f.outline = mirrorVerts(f.outline);
+    if (f.outline_drawn) f.outline_drawn = mirrorVerts(f.outline_drawn);
+    f.side = S.mir ? 'left' : 'right';
+    var report = { side: f.side, humps: [], kept: {}, parts: [], notes: [] };
+    // humps that stay: after the mirror each is on the other end or the other side; bring it back. The sides first, because
+    // a block on a side takes the top corner out with it, and the top edge's humps are then set against the corners as they end up.
+    hb.slice().sort(function (a, b) { return (a.side === 'top' ? 1 : 0) - (b.side === 'top' ? 1 : 0); }).forEach(function (h) {
+      if (!opt.humps || opt.humps[h.key] !== 'stay') return;
+      // found again by its size and by either of its ends (a corner end moves when another hump on that corner has moved)
+      var now = humps(P), want = h.side === 'top' ? 'top' : (h.side === 'left' ? 'right' : 'left'), a0 = h.side === 'top' ? W - h.a1 : h.a0, a1 = h.side === 'top' ? W - h.a0 : h.a1, hit = null;
+      now.forEach(function (q) { if (!hit && q.side === want && Math.abs(q.out - h.out) < 0.02 && ((!q.end0 && Math.abs(q.a0 - a0) < 0.02) || (!q.end1 && Math.abs(q.a1 - a1) < 0.02) || (q.end0 && q.end1))) hit = q; });
+      if (!hit) { report.notes.push('The hump "' + h.label + '" was not found after the flip and went with the board.'); return; }
+      var res = h.side === 'top' ? humpOtherEnd(P, hit.key, W / 2) : humpOtherSide(P, hit.key);
+      if (!res.ok) report.notes.push('The hump "' + h.label + '" could not stay on its side (' + res.why + ') and went with the board.');
+      else report.humps.push(h.key);        // a hump that stayed is again the one it was: same edge, same place in it
+    });
+    var after = edgesOf(P), TL1 = after.top.list[0], TR1 = after.top.list[after.top.list.length - 1];
+    if (opt.corners === 'stay') ['c', 'r', 'n'].forEach(function (k) { var a = TL1[k], b = TR1[k]; if (b === undefined) delete TL1[k]; else TL1[k] = b; if (a === undefined) delete TR1[k]; else TR1[k] = a; });
+    P.frame.outline = after.join();
+    var c1 = { TL: [TL1.x, TL1.y], TR: [TR1.x, TR1.y] };
+    (P.parts || []).forEach(function (u) {
+      var mode = (opt.parts && opt.parts[u.id]) || flipMode(u);
+      if (mode === 'stay') { report.parts.push({ id: u.id, mode: mode }); return; }
+      if (mode === 'corner') {
+        var k = Math.hypot(u.x - c0.TL[0], u.y - c0.TL[1]) <= Math.hypot(u.x - c0.TR[0], u.y - c0.TR[1]) ? 'TL' : 'TR';
+        u.x = r4(u.x + c1[k][0] - c0[k][0]); u.y = r4(u.y + c1[k][1] - c0[k][1]);
+        report.parts.push({ id: u.id, mode: mode, corner: k });
+        return;
+      }
+      var m = partMirror(u, W, ctx);
+      u.x = m.x; u.y = m.y; u.rot = m.rot;
+      if (u.tongue && u.tongue.dir != null) u.tongue.dir = (((m.axis === 'x' ? 180 - u.tongue.dir : -u.tongue.dir) % 360) + 360) % 360;
+      report.parts.push({ id: u.id, mode: 'flip', axis: m.axis });
+    });
+    if (P.probe && P.probe.dock && P.probe.dock.x != null) P.probe.dock.x = r4(W - P.probe.dock.x);
+    if (opt.mag !== false && P.mag && P.mag.list) P.mag.list.forEach(function (q) { q.x = r4(W - q.x); });
+    (P.features || []).forEach(function (ft) { ft.x = r4(W - ft.x); if (ft.rot) ft.rot = ((-ft.rot % 360) + 360) % 360; });
+    // the humps that stayed, under the names they have now (a name is the edge and the place in it)
+    var nowAll = humps(P);
+    hb.forEach(function (h) { if (report.humps.indexOf(h.key) < 0) return; nowAll.forEach(function (q) { if (q.side === h.side && Math.abs(q.out - h.out) < 0.02 && (Math.abs(q.a0 - h.a0) < 6 || Math.abs(q.a1 - h.a1) < 6 || q.end0 === h.end0 && q.end1 === h.end1)) report.kept[q.key] = true; }); });
+    return report;
+  }
+  var ops = { sideInfo: sideInfo, normalise: normalise, edges: edgesOf, humps: humps, humpSet: humpSet, humpRemove: humpRemove, humpOtherEnd: humpOtherEnd, humpOtherSide: humpOtherSide, humpAdd: humpAdd, partMirror: partMirror, flipMode: flipMode, flip: flip };
+
+  return { resolve: resolve, plain: plain, buildOutline: buildOutline, legacyOutline: legacyOutline, ops: ops, util: { region: region, union: union, diff: diff, inter: inter, offset: offset, area: area, expolys: expolys, place: place, rectPts: rectPts, circlePts: circlePts, round: round } };
 });
 
 </script>
@@ -10915,8 +11296,9 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
   // ---- SVG plan of the whole stack ----
   var LAYER_COLORS = ['#35618f', '#b9763c', '#c9a13f', '#3f8f6d', '#646a78', '#7d5a94', '#3e9aa3', '#a2535f'];
   function svg(R) {
-    var E = R.extender, xe = E ? E.x1 : R.planes.xr;        // the legend stands to the right of whatever is furthest right
-    var x0 = R.planes.xl - 8, y0 = R.planes.yt - 8, w = xe - R.planes.xl + 16 + 30, h = R.planes.yb - R.planes.yt + 16;
+    var E = R.extender, xe = Math.max(E ? E.x1 : R.planes.xr, R.planes.x1 != null ? R.planes.x1 : R.planes.xr);        // the legend stands to the right of whatever is furthest right
+    var xw = Math.min(E ? E.x0 : R.planes.xl, R.planes.x0 != null ? R.planes.x0 : R.planes.xl, R.planes.xl);              // and the sheet starts left of whatever is furthest left (an extender, when the strip is on the right)
+    var x0 = xw - 8, y0 = R.planes.yt - 8, w = xe - xw + 16 + 30, h = R.planes.yb - R.planes.yt + 16;
     var o = ['<svg xmlns="http://www.w3.org/2000/svg" viewBox="' + n(x0) + ' ' + n(y0) + ' ' + n(w) + ' ' + n(h) + '" width="' + n(w * 8) + '" height="' + n(h * 8) + '" font-family="Helvetica, Arial, sans-serif">'];
     o.push('<rect x="' + n(x0) + '" y="' + n(y0) + '" width="' + n(w) + '" height="' + n(h) + '" fill="#ffffff"/>');
     function d(pts) { return 'M' + pts.map(function (q) { return n(q[0]) + ' ' + n(q[1]); }).join('L') + 'Z'; }
@@ -10952,7 +11334,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     var c = R.checks, o = [];
     o.push('Jumperless V6 outline - ' + (R.removable ? 'removable wig' : 'integrated breadboard') + ' - ' + (R.params.meta.rev || ''));
     o.push('');
-    o.push('GRID   unit pitch ' + c.grid.pitch + ' mm = ' + Math.round(c.grid.pitch / 2.54) + ' x 2.54 (' + (c.grid.on_grid ? 'on grid' : 'OFF GRID') + '), ' + c.grid.dead_rows + ' dead row(s) between units, left strip ' + c.grid.strip_w + ' mm');
+    o.push('GRID   unit pitch ' + c.grid.pitch + ' mm = ' + Math.round(c.grid.pitch / 2.54) + ' x 2.54 (' + (c.grid.on_grid ? 'on grid' : 'OFF GRID') + '), ' + c.grid.dead_rows + ' dead row(s) between units, ' + (c.grid.strip_side || 'left') + ' strip ' + c.grid.strip_w + ' mm');
     if (c.grid.overall) o.push('       overall ' + c.grid.overall.w + ' wide x ' + c.grid.overall.h + ' high (top band ' + c.grid.overall.band + ')' + (c.grid.overall.square ? ': square' : ': not square, a top band of ' + c.grid.overall.band_square + ' would make it so') + '; height ' + c.grid.overall.rows_high + ' rows' + (c.grid.overall.v_on_grid ? ' (on the grid for a unit above)' : ' (off the grid for a unit above)') + '; widest point ' + c.grid.overall.widest);
     o.push('       grid planes x = ' + c.grid.left_plane + ' and x = ' + c.grid.right_plane + '; dead-row pin lines on this unit at x = ' + c.grid.dead_x.join(', '));
     c.neighbours.forEach(function (n) {
@@ -10964,10 +11346,10 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     if (c.grid.coupler) { var q = c.grid.coupler; o.push((q.fits ? '   ok  ' : '   !!  ') + 'edge coupler ' + q.label + ': needs ' + q.gap + ' mm between the boards, the strip leaves ' + q.have + (q.fits ? ' (' + q.spare + ' spare)' : '; first fits with a ' + q.strip_needed + ' mm strip')); }
     if (c.extender) {
       var x = c.extender, xp = x.port;
-      o.push('EXTENDER  ' + x.cols + ' columns = ' + x.rows + ' rows, ' + x.w + ' wide, against the right side: x ' + x.x0 + ' .. ' + x.x1 + ', ' + (x.dead ? x.dead + ' dead row(s)' : 'no dead row') + ' (' + x.col_gap + ' mm from column ' + R.wig.cols.length + ' to its first)');
+      o.push('EXTENDER  ' + x.cols + ' columns = ' + x.rows + ' rows, ' + x.w + ' wide, against the ' + (x.side || 'right') + ' side: x ' + x.x0 + ' .. ' + x.x1 + ', ' + (x.dead ? x.dead + ' dead row(s)' : 'no dead row') + ' (' + x.col_gap + ' mm from column ' + (x.side === 'left' ? 1 : R.wig.cols.length) + ' to its first)');
       if (x.seam_col) { var sc = x.seam_col; o.push((sc.fits ? '   ok  ' : '   !!  ') + 'its first column is on the grid plane (x ' + sc.x + '), in the edge that bows into the waist: waist ' + sc.has + ' deep (WigLEDmag ' + sc.own + '; a column there needs ' + sc.need + '), breadboard wall beside its last column ' + sc.wall + ', the ' + sc.clip + ' mm clip ' + (sc.clip_clear >= 0 ? 'clears it by ' + sc.clip_clear : 'is ' + (-sc.clip_clear) + ' INTO it') + ', ' + sc.land + ' of board under the solder tab' + (sc.face_land ? '; top boards meet on the half-pitch line, land outside the countersinks ' + sc.face_land.ext + ' (extender) and ' + sc.face_land.unit + ' (breadboard)' : '') + '; rails start ' + x.rail_skip + ' hole(s) in'); }
       o.push('       unit and extender together ' + x.pair_w + ' wide = ' + x.pair_rows + ' x 2.54' + (x.on_grid ? ' (on grid: a next unit beside it keeps the grid)' : ' (OFF GRID)'));
-      if (!xp) o.push('   !!  there is no socket in the right side for it to plug into (Side port and extender: a header socket in the right side)');
+      if (!xp) o.push('   !!  there is no socket in the ' + (x.side || 'right') + ' side for it to plug into (Side port and extender: a header socket in the ' + (x.side || 'right') + ' side)');
       else {
         o.push((xp.faces && !xp.open_seam ? '   ok  ' : '   !!  ') + 'side socket (' + xp.id + ', ' + xp.kind_label + '): 2 x ' + xp.n + ' = ' + xp.pins + ' pins, ' + xp.len + ' long, y ' + xp.y0 + ' .. ' + xp.y1 + ', mouth at x ' + xp.mouth_x
           + (!xp.faces ? ' (not facing the extender)' : Math.abs(xp.inset) < 0.005 ? ' (on the edge; the header\'s ' + xp.pin + ' mm pins go all the way in)' : xp.inset > 0 ? ' (' + xp.inset + ' inside the edge: the ' + xp.pin + ' mm pins go ' + xp.engage + ' in)' : ' (' + xp.open_seam + ' PAST the edge: the seam stands open by that)'));
@@ -11957,6 +12339,8 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     // the view controls that sit in the 3D view itself: where the strip is docked (bottom, top, left, right, off) and what is in it
     viewbar: { dock: 'bottom', items: ['explode', 'opacity', 'shell', 'mode'], fold: false },
     layout: { dock: { 'panel-design': 'left', 'panel-checks': 'right' }, w: { left: 348, right: 338 }, h: 300, ratio: { left: 0.55, right: 0.5, bottom: 0.5 }, solo: false, text: 'm' }, fold: { 'Look': true, 'Probe dock': true, 'Saved designs': true, 'Readings': true }, panels: {},
+    // the left-to-right flip (rev A12): what stays behind when the board is flipped. humps: { key: 'stay' }; corners: the two top corners' own shapes
+    flip: { humps: {}, corners: 'stay', mag: 'flip', said: '' }, humpSaid: '',
     tab: 'outline', mag: { sel: null, parts: true, ref: null } };       // tab: which of the two the page shows, 'outline' or 'mag' (the Magnetometers tab, src/magtab.js)
   if (boot.ui) Object.keys(ui).forEach(function (k) { var v = boot.ui[k]; if (v === undefined) return; if (ui[k] && typeof ui[k] === 'object') { for (var j in v) ui[k][j] = v[j]; } else ui[k] = v; });
   if (boot.from === 'link') { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* a file:// page may refuse */ } }
@@ -12030,12 +12414,13 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
   var lastMode = null;
   // the design's look plus the view's surface choices, for the materials
   function lookNow(extra) { var o = {}, k; for (k in P.look) o[k] = P.look[k]; o.texture = ui.render.texture; o.shellTex = ui.render.shellTex; for (k in (extra || {})) o[k] = extra[k]; return o; }
-  // what stands to the right of the unit: the extender, then the next unit
-  function extraWide() { return R ? (P.show.neighbour ? R.planes.pitch : 0) + (R.extender ? R.extender.x1 - R.planes.xr : 0) : 0; }
+  // what stands to the right of the unit: the extender (when it is on that side), then the next unit. extraLeft: an extender on the left
+  function extraWide() { return R ? (P.show.neighbour ? R.planes.pitch : 0) + (R.extender ? Math.max(0, R.extender.x1 - R.planes.xr) : 0) : 0; }
+  function extraLeft() { return R && R.extender ? Math.max(0, R.planes.x0 - R.extender.x0) : 0; }
   function applyRender() {
     if (!renderer || !R) return;
     var pl = R.planes, wide = extraWide();
-    Rn.apply(ui.render, { x0: pl.x0, x1: pl.x1 + wide, y0: pl.yt, y1: pl.yb, zb: R.z.bottom - (R.wig.face ? 0 : 0) - 1.5 });
+    Rn.apply(ui.render, { x0: pl.x0 - extraLeft(), x1: pl.x1 + wide, y0: pl.yt, y1: pl.yb, zb: R.z.bottom - (R.wig.face ? 0 : 0) - 1.5 });
     if (camera.fov !== ui.render.fov) { camera.fov = ui.render.fov || 30; camera.updateProjectionMatrix(); }
     if (lastMode !== ui.render.mode) { lastMode = ui.render.mode; Rn.refreshMaterials(scene); }
     view.setAttribute('data-bg', ui.render.bg);
@@ -12049,11 +12434,11 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
   function setView(name) {
     if (!camera) return;
     // look along a fixed direction and back off until the whole unit fits the viewport
-    var pl = R ? R.planes : { x0: -8.3, x1: 78.74, yt: -24.7, yb: 55 }, wide = extraWide();
-    var t = [(pl.x0 + pl.x1 + wide) / 2, 2.5, (pl.yt + pl.yb) / 2];
+    var pl = R ? R.planes : { x0: -8.3, x1: 78.74, yt: -24.7, yb: 55 }, wide = extraWide(), wl = extraLeft();
+    var t = [(pl.x0 - wl + pl.x1 + wide) / 2, 2.5, (pl.yt + pl.yb) / 2];
     var dir = { iso: [-0.42, 0.72, 0.62], top: [0, 1, 0.001], under: [-0.25, -0.85, 0.45], left: [-1, 0.22, 0.05], topedge: [0.05, 0.3, -1], bottomedge: [0, 0.3, 1] }[name] || [-0.42, 0.72, 0.62];
     var len = Math.sqrt(dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2]);
-    var rad = 0.5 * Math.sqrt(Math.pow(pl.x1 - pl.x0 + wide, 2) + Math.pow(pl.yb - pl.yt, 2)) + 6;
+    var rad = 0.5 * Math.sqrt(Math.pow(pl.x1 - pl.x0 + wide + wl, 2) + Math.pow(pl.yb - pl.yt, 2)) + 6;
     var half = camera.fov * Math.PI / 360, fit = Math.min(half, Math.atan(Math.tan(half) * camera.aspect));
     var dist = rad / Math.sin(fit) * 1.02;
     camera.position.set(t[0] + dir[0] / len * dist, t[1] + dir[1] / len * dist, t[2] + dir[2] / len * dist);
@@ -12223,7 +12608,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     var gold = real ? Rn.part(mode, 0xd9b441, { metal: 0.85 }) : mat(0xd9b441, { metal: 0.6, rough: 0.3 }), black = real ? Rn.part(mode, 0x141414, { metal: 0.05 }) : mat(0x141414, { rough: 0.6 });
     E.parts.forEach(function (p) { p.bodies.forEach(function (b) { if (b.name !== 'pins') grp.add(extrude([{ outer: b.pts, holes: [] }], b.z0, b.z1, black)); }); });
     for (var k = 0; k < E.header.n; k++) [0.95, 2.22].forEach(function (pz) {
-      var pin = new T.Mesh(new T.BoxGeometry(6.6, 0.4, 0.4), gold); pin.position.set(E.x0 - 4 + 3.3, pz, E.header.y - k * 1.27); grp.add(pin);
+      var pin = new T.Mesh(new T.BoxGeometry(6.6, 0.4, 0.4), gold); pin.position.set(E.header.pin_x, pz, E.header.pin_y + k * E.header.step); grp.add(pin);
     });
     // a staple or a jumper: a bridge lying on the top face and a leg down the hole at each end
     function wireU(x0, x1, y, dia, leg, color) {
@@ -12289,7 +12674,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
       var g = unit.clone(true);
       g.children.slice().forEach(function (ch) { if (ch.userData.ext) g.remove(ch); });      // the next unit is a unit, not a second extender
       g.traverse(function (o) { if (o.isMesh) { o.material = ghostMat; o.castShadow = false; if (o.userData.decal) o.visible = false; } if (o.isLineSegments) o.visible = false; });
-      g.position.x = R.planes.pitch + (R.extender ? R.extender.x1 - R.planes.xr : 0); ghost.add(g);      // past the extender, where there is one
+      g.position.x = R.planes.pitch + (R.extender ? Math.max(0, R.extender.x1 - R.planes.xr) : 0); ghost.add(g);      // past the extender, where there is one on that side
     }
     if (P.show.header40) deco.add(header40());
     var cp = R.checks.grid.coupler;
@@ -12305,7 +12690,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     }
     if (P.show.neighbour || P.show.header40) {       // mark where dead-row pins would land
       var zs = R.z.top + 0.04, mk = new T.MeshBasicMaterial({ color: 0xd43c2f });
-      R.checks.grid.dead_x.forEach(function (dx) { [0, R.planes.pitch].forEach(function (off) { R.wig.rows.forEach(function (cy) {
+      R.checks.grid.dead_x.forEach(function (dx) { [0, R.planes.side === 'right' ? -R.planes.pitch : R.planes.pitch].forEach(function (off) { R.wig.rows.forEach(function (cy) {
         var q = new T.Mesh(new T.PlaneGeometry(1.1, 1.1), mk); q.rotation.x = -Math.PI / 2; q.position.set(dx + off, Math.max(zs, R.z.bbTop + 0.04), cy); deco.add(q);
       }); }); });
     }
@@ -12337,7 +12722,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     if (!renderer) return;
     if (ui.clipAxis === 'off') { renderer.clippingPlanes = []; return; }
     var pl = R.planes, t = ui.clipPos;
-    if (ui.clipAxis === 'x') { clipPlane.normal.set(-1, 0, 0); clipPlane.constant = pl.x0 - 1 + t * (pl.x1 + extraWide() - pl.x0 + 2); }
+    if (ui.clipAxis === 'x') { clipPlane.normal.set(-1, 0, 0); clipPlane.constant = pl.x0 - extraLeft() - 1 + t * (pl.x1 + extraWide() - pl.x0 + extraLeft() + 2); }
     else if (ui.clipAxis === 'y') { clipPlane.normal.set(0, 0, -1); clipPlane.constant = pl.yt - 1 + t * (pl.yb - pl.yt + 2); }
     else { clipPlane.normal.set(0, -1, 0); clipPlane.constant = R.z.bottom - 6 + t * (R.z.top - R.z.bottom + 9 + R.layers.length * ui.explode); }
     renderer.clippingPlanes = [clipPlane];
@@ -12476,6 +12861,9 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
   // The header socket in the unit's right side (rev A11c: a part of its own, beside the expansion port on the top edge). It
   // goes where the top band ends: mouth in the right edge, pin 1 the lowest, just above the breadboard's corner.
   function sidePart() { return P.parts.filter(function (p) { return !!Cat.sideKinds[p.type]; })[0] || null; }
+  // rev A12: these setters are written for an extender on the right. With the strip on the right it is on the left, and a part
+  // they place goes to the mirror image of that place, turned to face the other way (Geo.ops.partMirror, as the flip does).
+  function onExtSide(u) { if (R.planes.side !== 'right') return u; var m = Geo.ops.partMirror(u, P.wig.width); u.x = m.x; u.y = m.y; u.rot = m.rot; return u; }
   // rev A11e: how the extender plugs in. 'press' takes the side socket out and puts an upright socket on the mid board, with the
   // top and the bottom board opened for it; 'side' puts the side socket back.
   function vertPart() { return P.parts.filter(function (p) { return p.type === 'skt_v_127'; })[0] || null; }
@@ -12483,7 +12871,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     var ex = P.extender, vs = vertPart(), s = sidePart(); ex.join = v;
     if (v === 'press') {
       if (s) { P.parts = P.parts.filter(function (p) { return p !== s; }); if (ui.sel === s.id) ui.sel = null; }
-      if (!vs) { var op = {}; op[R.layers[0].id] = true; op[R.layers[R.layers.length - 1].id] = true; P.parts.push({ id: 'vert', type: 'skt_v_127', x: +(R.planes.xr - 5.6).toFixed(2), y: -15.9, rot: 0, mount: { on: R.layers[Math.min(1, R.layers.length - 1)].id, side: 'top' }, dims: { n: 11, h: 2.1 }, open: op }); }
+      if (!vs) { var op = {}; op[R.layers[0].id] = true; op[R.layers[R.layers.length - 1].id] = true; P.parts.push(onExtSide({ id: 'vert', type: 'skt_v_127', x: +(P.wig.width - 5.6).toFixed(2), y: -15.9, rot: 0, mount: { on: R.layers[Math.min(1, R.layers.length - 1)].id, side: 'top' }, dims: { n: 11, h: 2.1 }, open: op })); }
     } else { if (vs) { P.parts = P.parts.filter(function (p) { return p !== vs; }); if (ui.sel === vs.id) ui.sel = null; } if (!s) setSide(true); }
   }
   function stackKey() { var S = P.stack; return S.length > 2 ? S[S.length - 1].t + '/' + S[0].t : ''; }
@@ -12493,12 +12881,18 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
   }
   function setSideKind(v) {             // another socket in the same place: its mouth stays on the edge, and its positions go to that kind's own count when the pitch changes
     var s = sidePart(), K = Cat.sideKinds[v], K0 = s && Cat.sideKinds[s.type]; if (!s || !K) return;
-    s.dims = { n: K0 && K0.pitch === K.pitch ? Cat.ra127(s.dims && s.dims.n) : K.n }; s.type = v; s.x = +(R.planes.xr - K.depth - (K.lead || 0)).toFixed(2);       // a socket with leads at its mouth end stands that far inside the edge
+    onExtSide(s);                         // (on the left: to its mirror image on the right, changed there, and back)
+    s.dims = { n: K0 && K0.pitch === K.pitch ? Cat.ra127(s.dims && s.dims.n) : K.n }; s.type = v; s.x = +(P.wig.width - K.depth - (K.lead || 0)).toFixed(2);       // a socket with leads at its mouth end stands that far inside the edge
+    onExtSide(s);
   }
   function setSide(on) {
     var s = sidePart(), d = Cat.side;
     if (!on) { if (s) { P.parts = P.parts.filter(function (p) { return p !== s; }); if (ui.sel === s.id) ui.sel = null; } return; }
-    if (!s) P.parts.push({ id: P.parts.some(function (p) { return p.id === d.id; }) ? newId(d.id) : d.id, type: d.type, x: +(R.planes.xr - d.back).toFixed(2), y: d.y, rot: d.rot, mount: { on: R.layers[0].id, side: 'top' }, dims: { n: Cat.ra127(R.extender ? R.extender.n_rows / 2 : d.n) } });
+    if (!s) {
+      // on the right: turned 180, mouth in the right edge, pin 1 the lowest. With the strip on the right the extender is on the left,
+      // and the socket goes to the mirror image of that: turned 0, mouth in the left edge, pin 1 the highest
+      P.parts.push(onExtSide({ id: P.parts.some(function (p) { return p.id === d.id; }) ? newId(d.id) : d.id, type: d.type, x: +(P.wig.width - d.back).toFixed(2), y: d.y, rot: d.rot, mount: { on: R.layers[0].id, side: 'top' }, dims: { n: Cat.ra127(R.extender ? R.extender.n_rows / 2 : d.n) } }));
+    }
   }
   function newId(type) { var n = 1, id, stem = type.split('_')[0]; do { id = stem + (n++); } while (P.parts.some(function (p) { return p.id === id; })); return id; }
   function partSize(type) {              // plan size and height of a catalogue part, from its bodies
@@ -12652,7 +13046,13 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     }
 
     c = sect('0.1 inch grid');
-    c.appendChild(row('Left strip', seg([[0, 'none'], [1, '2.54'], [2, '5.08'], [3, '7.62']], g.dead_rows_left, function (v) { var shift = (g.dead_rows_left - v) * g.pitch; g.dead_rows_left = v; [P.frame.outline, P.frame.outline_drawn || []].forEach(function (list) { list.forEach(function (q) { if (q.x < -0.01 || q.sx) { q.sx = 1; q.x = +(q.x + shift).toFixed(3); } }); }); P.parts.forEach(function (p) { if (p.x < 5) p.x = +(p.x + shift).toFixed(3); }); P.probe.dock.x = -v * g.pitch / 2; if (v === 0) P.probe.dock.enabled = false; })));
+    // the strip is on the left as drawn, on the right after a flip (frame.side); its width moves the vertices and parts on that side
+    var onR = f.side === 'right', WW = P.wig.width;
+    c.appendChild(row(onR ? 'Right strip' : 'Left strip', seg([[0, 'none'], [1, '2.54'], [2, '5.08'], [3, '7.62']], g.dead_rows_left, function (v) {
+      var shift = (g.dead_rows_left - v) * g.pitch * (onR ? -1 : 1); g.dead_rows_left = v;
+      [P.frame.outline, P.frame.outline_drawn || []].forEach(function (list) { list.forEach(function (q) { if ((onR ? q.x > WW + 0.01 : q.x < -0.01) || q.sx) { q.sx = 1; q.x = +(q.x + shift).toFixed(3); } }); });
+      P.parts.forEach(function (p) { if (onR ? p.x > WW - 5 : p.x < 5) p.x = +(p.x + shift).toFixed(3); });
+      P.probe.dock.x = onR ? +(WW + v * g.pitch / 2).toFixed(3) : -v * g.pitch / 2; if (v === 0) P.probe.dock.enabled = false; })));
     c.appendChild(el('div', { class: 'hint', text: 'Unit pitch ' + R.planes.pitch + ' mm = ' + Math.round(R.planes.pitch / g.pitch) + ' rows, ' + R.checks.grid.dead_rows + ' dead row' + (R.checks.grid.dead_rows > 1 ? 's' : '') + ' between units.' }));
     // the top band: how far the frame stands above the breadboard. Moving it moves every vertex of the top edge together (the
     // step in the edge stays), and the parts in the upper half of the band, which hang on that edge.
@@ -12673,7 +13073,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
       bandBtn('c-band-drawn', 'As drawn', drawnBand, 'top band ' + drawnBand)]));
     c.appendChild(el('div', { class: 'hint', id: 'c-overall', text: 'Overall ' + og.w + ' wide x ' + og.h + ' high' + (og.square ? ': square' : ': ' + Math.abs(+(og.h - og.w).toFixed(2)) + (og.h < og.w ? ' short of' : ' over') + ' square (top band ' + og.band_square + ')') + '. '
       + (og.v_on_grid ? 'The height is ' + Math.round(og.rows_high) + ' rows, so a unit stood above this one keeps its holes on the 0.1 inch grid.' : 'The height is ' + og.rows_high + ' rows: a unit stood above this one is off the 0.1 inch grid.')
-      + (Math.abs(og.widest - og.w) > 0.05 ? ' Widest point ' + og.widest + ' (the top-left block or the bump).' : '') + ' The top edge moves as one, with the parts in the upper half of the band.' }));
+      + (Math.abs(og.widest - og.w) > 0.05 ? ' Widest point ' + og.widest + ' (a hump on a side stands past the grid plane; see Humps).' : '') + ' The top edge moves as one, with the parts in the upper half of the band.' }));
     c.appendChild(row('Edge coupler between units', sel([['none', 'none']].concat(Object.keys(Cat.couplers).map(function (k) { return [k, Cat.couplers[k].label]; })), g.coupler || 'none', function (v) { g.coupler = v; if (v !== 'none') P.show.coupler = true; }, 'c-cpl'), '', 'c-cpl'));
     var cq = R.checks.grid.coupler;
     if (cq) c.appendChild(el('div', { class: 'hint' + (cq.fits ? '' : ' bad'), text: 'Needs ' + cq.gap + ' mm between the two boards; the strip leaves ' + cq.have + (cq.fits ? ' (' + cq.spare + ' spare).' : '. It first fits at ' + cq.strip_needed + ' mm (' + cq.rows_needed + ' rows).') }));
@@ -12686,9 +13086,36 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     var pc = el('input', { type: 'checkbox', id: 'c-planes', onchange: function (e) { ui.planes = e.target.checked; buildScene(); } }); pc.checked = ui.planes;
     c.appendChild(el('div', { class: 'row' }, [el('label', { for: 'c-planes', text: 'Show the grid planes' }), pc]));
 
-    // the header socket in the right side and the extender that plugs into it (rev A11; a part of its own since A11c)
+    // Flip left to right (rev A12): the strip and the probe's dock change sides, the extender with them. What goes with the
+    // board is chosen here: each part (part.on_flip), each hump and the top corners' shapes (ui.flip), the magnetometers.
+    c = sect('Flip left to right');
+    c.appendChild(el('div', { class: 'hint', id: 'c-flip-now', text: 'The strip with the probe\'s dock is on the ' + (onR ? 'right' : 'left') + '; the extender stands against the ' + (onR ? 'left' : 'right') + ' side. Flipping mirrors the board about the breadboard\'s middle. Choose what goes with it:' }));
+    var fl = ui.flip, modes = [['flip', 'flips'], ['corner', 'stays in its corner'], ['stay', 'stays put']];
+    P.parts.forEach(function (u, i) {
+      var cat = Cat.parts[u.type], id = 'c-flip-p' + i;
+      c.appendChild(row(u.id + (cat && cat.label ? ' (' + String(cat.label).split(/[,(]/)[0].trim().slice(0, 26) + ')' : ''), sel(modes, Geo.ops.flipMode(u), function (v) { u.on_flip = v; }, id), '', id));
+    });
+    var hl = Geo.ops.humps(P);
+    hl.forEach(function (h, i) {
+      var id = 'c-flip-h' + i;
+      c.appendChild(row('Hump: ' + h.label.split(',').slice(0, 2).join(','), sel([['flip', 'flips'], ['stay', 'stays on its side']], fl.humps[h.key] === 'stay' ? 'stay' : 'flip', function (v) { if (v === 'stay') fl.humps[h.key] = 'stay'; else delete fl.humps[h.key]; }, id), '', id));
+    });
+    c.appendChild(row('The two top corners\' shapes', sel([['stay', 'stay on their sides'], ['flip', 'flip']], fl.corners === 'flip' ? 'flip' : 'stay', function (v) { fl.corners = v; }, 'c-flip-corners'), '', 'c-flip-corners'));
+    if (P.mag && P.mag.list && P.mag.list.length) c.appendChild(row('Magnetometers', sel([['flip', 'flip'], ['stay', 'stay put']], fl.mag === 'stay' ? 'stay' : 'flip', function (v) { fl.mag = v; }, 'c-flip-mag'), '', 'c-flip-mag'));
+    c.appendChild(el('div', { class: 'acts' }, [el('button', { type: 'button', id: 'c-flip', text: 'Flip left to right', title: 'mirror the board about the breadboard\'s middle; Undo takes it back, and flipping again with the same choices does too', onclick: function () {
+      var keep = {}; hl.forEach(function (h) { if (fl.humps[h.key] === 'stay') keep[h.key] = 'stay'; });
+      var rep = Geo.ops.flip(P, { humps: keep, corners: fl.corners === 'flip' ? 'flip' : 'stay', mag: fl.mag !== 'stay' });
+      // a hump's name belongs to the edge it is on: one that stayed is the same hump on the other end or side, one that went has a new name
+      var nk = {}; Geo.ops.humps(P).forEach(function (h) { if (rep.kept[h.key]) nk[h.key] = 'stay'; }); fl.humps = nk;
+      fl.said = rep.notes.join(' ');
+      ui.vsel = null; rebuild(true); setTimeout(function () { setView('iso'); }, 0);
+    } })]));
+    c.appendChild(el('div', { class: 'hint' + (fl.said ? ' bad' : ''), id: 'c-flip-said', text: fl.said || 'Flips: the part goes to the mirror image of its place, turned to face the mirrored way (a real part cannot be mirrored). Stays in its corner: it keeps its side and its place measured from that side\'s top corner of the outline. Stays put: it is not moved. A hump that stays keeps its side; the top corners\' shapes are their chamfers. Clashes and overhangs that follow are under Checks.' }));
+
+    // the header socket in the side and the extender that plugs into it (rev A11; a part of its own since A11c)
     c = sect('Side port and extender');
     var ex = P.extender = P.extender || clone(Cat.extender), xq = R.checks.extender, sideSkt = sidePart();
+    var xside = onR ? 'left' : 'right';         // the extender stands against the side the strip is not on
     c.appendChild(row('It plugs in', seg([['side', 'sideways'], ['press', 'from the back']], ex.join === 'press' ? 'press' : 'side', function (v) { setJoin(v); })));
     c.appendChild(row('Boards top / mid / bottom', seg([['1.6/1.6', '1.6 1.6 1.6'], ['0.8/0.8', '0.8 1.6 0.8'], ['0.8/1', '0.8 1.6 1.0'], ['0.8/1.2', '0.8 1.6 1.2']], stackKey(), function (v) { setStack(v); })));
     var vertSkt = vertPart();
@@ -12697,10 +13124,10 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
       c.appendChild(row('Socket positions per row', num(Cat.ra127(vertSkt.dims && vertSkt.dims.n), 1, function (v) { vertSkt.dims = vertSkt.dims || {}; vertSkt.dims.n = Cat.ra127(v); }, { min: 2, max: 40, id: 'c-vert-n' }), 'x 2 pins', 'c-vert-n'));
       c.appendChild(el('div', { class: 'hint', text: 'An upright socket on the mid board, the top and the bottom board opened over and under it so a pin can go all the way through. A tab of the extender fills a knob-shaped cutout in the bottom board from the back, its pins going up into the socket.' }));
     }
-    if (ex.join !== 'press') c.appendChild(check('c-side', 'A header socket in the right side', !!sideSkt, function (v) { setSide(v); }));
+    if (ex.join !== 'press') c.appendChild(check('c-side', 'A header socket in the ' + xside + ' side', !!sideSkt, function (v) { setSide(v); }));
     if (sideSkt) c.appendChild(row('Socket positions per row', num(Cat.ra127(sideSkt.dims && sideSkt.dims.n), 1, function (v) { sideSkt.dims = sideSkt.dims || {}; sideSkt.dims.n = Cat.ra127(v); }, { min: 2, max: 40, id: 'c-ext-n' }), 'x 2 pins', 'c-ext-n'));
     if (sideSkt) c.appendChild(row('Socket', sel(Object.keys(Cat.sideKinds).map(function (k) { return [k, Cat.sideKinds[k].label]; }), sideSkt.type, function (v) { setSideKind(v); }, 'c-side-kind'), '', 'c-side-kind'));
-    c.appendChild(check('c-ext', 'Show the extender on the right', ex.on, function (v) { ex.on = v; setTimeout(function () { setView('iso'); }, 0); }));
+    c.appendChild(check('c-ext', 'Show the extender on the ' + xside, ex.on, function (v) { ex.on = v; setTimeout(function () { setView('iso'); }, 0); }));
     if (ex.on) {
       c.appendChild(row('Columns', num(ex.cols, 1, function (v) { ex.cols = Math.round(v); }, { min: 1, max: 40, id: 'c-ext-cols' }), '= ' + 2 * (xq ? xq.cols : ex.cols) + ' rows', 'c-ext-cols'));
       c.appendChild(row('Dead rows at the seam', seg([[0, 'none'], [1, '1'], [2, '2'], [3, '3']], ex.dead_rows, function (v) { ex.dead_rows = v; })));
@@ -12710,8 +13137,8 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
       c.appendChild(row('Head beside the band', num(ex.head, 0.5, function (v) { ex.head = v; }, { min: 0, max: 60, id: 'c-ext-head' }), 'mm', 'c-ext-head'));
       c.appendChild(check('c-ext-cover', 'A second board over its head, level with the top board', ex.cover === true, function (v) { ex.cover = v; }));
       c.appendChild(check('c-ext-key', 'Its edge fills the waist in the breadboard\'s side', ex.key !== false, function (v) { ex.key = v; }));
-      if (xq) c.appendChild(el('div', { class: 'hint' + (xq.overlap.overlap_mm2 || !xq.port || xq.spare < 0 ? ' bad' : ''), id: 'c-ext-hint', text: xq.w + ' mm wide, from x ' + xq.x0 + ' to ' + xq.x1 + '; its first column is ' + xq.col_gap + ' mm from column ' + g.cols + '. '
-        + (xq.port ? 'The socket has ' + xq.port.pins + ' pins for its ' + xq.rows + ' rows' + (xq.spare < 0 ? ': ' + (-xq.spare) + ' short.' : xq.spare === 0 ? ', with none left over.' : ', ' + xq.spare + ' left over.') : 'There is no socket in the right side for it.')
+      if (xq) c.appendChild(el('div', { class: 'hint' + (xq.overlap.overlap_mm2 || !xq.port || xq.spare < 0 ? ' bad' : ''), id: 'c-ext-hint', text: xq.w + ' mm wide, from x ' + xq.x0 + ' to ' + xq.x1 + '; its first column is ' + xq.col_gap + ' mm from column ' + (xq.side === 'left' ? 1 : g.cols) + '. '
+        + (xq.port ? 'The socket has ' + xq.port.pins + ' pins for its ' + xq.rows + ' rows' + (xq.spare < 0 ? ': ' + (-xq.spare) + ' short.' : xq.spare === 0 ? ', with none left over.' : ', ' + xq.spare + ' left over.') : 'There is no socket in the ' + xside + ' side for it.')
         + ' Unit and extender together: ' + xq.pair_w + ' mm, ' + xq.pair_rows + ' rows.' }));
     }
     c.appendChild(el('div', { class: 'hint', text: 'The general expansion port is the one on the top edge (Parts, Expansion port). This socket carries routable lanes only: each row of the extender goes to one of its pins, so the extender needs no crossbar. It lies on the main board under the top board; select it under Parts to move it.' }));
@@ -12743,16 +13170,44 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
       c.appendChild(el('div', { class: 'row' }, [el('span', { class: 'hint', text: 'Arrow keys nudge 0.1 mm, Shift 1.27.' }), el('span', {}, [
         el('button', { type: 'button', text: 'Add after', onclick: function () { var nx = ov[(ui.vsel + 1) % ov.length]; ov.splice(ui.vsel + 1, 0, { x: +((q.x + nx.x) / 2).toFixed(2), y: +((q.y + nx.y) / 2).toFixed(2) }); ui.vsel++; rebuild(true); } }), ' ',
         el('button', { type: 'button', text: 'Delete', onclick: function () { if (ov.length < 4) return; ov.splice(ui.vsel, 1); ui.vsel = null; rebuild(true); } })])]));
-    } else c.appendChild(el('div', { class: 'hint', text: ov.length + ' vertices, clockwise from the top-left corner. Pick one to edit it. The strip edge belongs on x = ' + R.planes.xl + '.' }));
-    if (P.frame.outline_drawn) c.appendChild(el('div', { class: 'row' }, [el('span', { class: 'hint', text: 'The left side has been made straight. The outline as drawn is kept.' }), el('button', { type: 'button', id: 'c-unstraight', text: 'Put it back as drawn', title: 'bring back the outline from before the left side was made straight', onclick: function () {
+    } else c.appendChild(el('div', { class: 'hint', text: ov.length + ' vertices, clockwise from the top-left corner. Pick one to edit it. The strip edge belongs on x = ' + (onR ? R.planes.xr : R.planes.xl) + '.' }));
+    if (P.frame.outline_drawn) c.appendChild(el('div', { class: 'row' }, [el('span', { class: 'hint', text: 'The strip\'s side has been made straight. The outline as drawn is kept.' }), el('button', { type: 'button', id: 'c-unstraight', text: 'Put it back as drawn', title: 'bring back the outline from before the left side was made straight', onclick: function () {
       P.frame.outline = P.frame.outline_drawn; delete P.frame.outline_drawn; ui.vsel = null; rebuild(true); } })]));
-    else if (ov.some(function (q) { return q.x < R.planes.xl - 0.01; })) c.appendChild(el('div', { class: 'row' }, [el('span', { class: 'hint', text: 'The top-left block stands ' + (+(R.planes.xl - R.planes.x0).toFixed(2)) + ' mm past the strip.' }), el('button', { type: 'button', id: 'c-straight', text: 'Make the left side straight', title: 'pull the block in to the strip edge and drop the vertices that no longer turn a corner; the outline as drawn is kept and can be put back', onclick: function () {
+    else if (ov.some(function (q) { return onR ? q.x > R.planes.xr + 0.01 : q.x < R.planes.xl - 0.01; })) c.appendChild(el('div', { class: 'row' }, [el('span', { class: 'hint', text: 'The block at the top of the strip stands ' + (+(onR ? R.planes.x1 - R.planes.xr : R.planes.xl - R.planes.x0).toFixed(2)) + ' mm past the strip.' }), el('button', { type: 'button', id: 'c-straight', text: 'Make the ' + (onR ? 'right' : 'left') + ' side straight', title: 'pull the block in to the strip edge and drop the vertices that no longer turn a corner; the outline as drawn is kept and can be put back', onclick: function () {
       P.frame.outline_drawn = clone(ov);
-      var xl = R.planes.xl; ov.forEach(function (q) { if (q.x < xl) q.x = xl; });
+      var xl = R.planes.xl, xr = R.planes.xr; ov.forEach(function (q) { if (onR) { if (q.x > xr) q.x = xr; } else if (q.x < xl) q.x = xl; });
       for (var pass = 0; pass < 3; pass++) for (var i = ov.length - 1; i >= 0 && ov.length > 4; i--) { var a = ov[(i + ov.length - 1) % ov.length], b = ov[i], n2 = ov[(i + 1) % ov.length]; if (Math.abs((b.x - a.x) * (n2.y - b.y) - (b.y - a.y) * (n2.x - b.x)) < 1e-6) ov.splice(i, 1); }
       ui.vsel = null; rebuild(true); } })]));
     if (w.mode === 'integrated') c.appendChild(row('Fill notches in the one board', num(f.fill_notches || 0, 0.25, function (v) { f.fill_notches = v; }, { min: 0, max: 6, id: 'c-fn' }), 'mm', 'c-fn'));
     if (P.stack.some(function (L) { return L.kind === 'ring'; })) c.appendChild(row('Spacer ring wall', num(f.ring_wall || 2, 0.25, function (v) { f.ring_wall = v; }, { min: 0.5, max: 12, id: 'c-ring' }), 'mm', 'c-ring'));
+
+    // Humps (rev A12): the stretches of the outline that stand out of an edge's own line. Each can be moved along its edge,
+    // made longer, shorter, higher or lower, sent to the other end of its edge or to the other side, or taken out.
+    c = sect('Humps');
+    var hs = Geo.ops.humps(P);
+    function humpDo(res) { ui.humpSaid = res && !res.ok ? 'Not done: ' + res.why + '.' : ''; ui.vsel = null; }
+    if (!hs.length) c.appendChild(el('div', { class: 'hint', text: 'The outline has no humps: every outer edge is one straight line.' }));
+    hs.forEach(function (h, i) {
+      var ax = h.axis, box = el('div', { class: 'hump', id: 'c-hump' + i });
+      box.appendChild(el('div', { class: 'hint', text: h.label }));
+      var from = h.end0 ? el('span', { class: 'u', text: 'the ' + (ax === 'x' ? 'top-left' : 'top') + ' corner' }) : num(+h.a0.toFixed(2), 0.5, function (v) { humpDo(Geo.ops.humpSet(P, h.key, { a0: v })); }, { id: 'c-hump' + i + '-a0' });
+      var to = h.end1 ? el('span', { class: 'u', text: 'the ' + (ax === 'x' ? 'top-right' : 'bottom') + ' corner' }) : num(+h.a1.toFixed(2), 0.5, function (v) { humpDo(Geo.ops.humpSet(P, h.key, { a1: v })); }, { id: 'c-hump' + i + '-a1' });
+      box.appendChild(row('From ' + ax, from, h.end0 ? '' : 'mm', 'c-hump' + i + '-a0'));
+      box.appendChild(row('To ' + ax, to, h.end1 ? '' : 'mm', 'c-hump' + i + '-a1'));
+      box.appendChild(row(h.side === 'top' ? 'Up' : 'Out', num(+h.out.toFixed(2), 0.1, function (v) { humpDo(Geo.ops.humpSet(P, h.key, { out: v })); }, { min: 0, max: 30, id: 'c-hump' + i + '-out' }), 'mm', 'c-hump' + i + '-out'));
+      var btn = function (id, text, title, fn) { return el('button', { type: 'button', id: 'c-hump' + i + '-' + id, text: text, title: title, onclick: function () { humpDo(fn()); rebuild(true); } }); };
+      var acts = [];
+      if (!(h.end0 && h.end1)) acts.push(btn('back', ax === 'x' ? '◀' : '▲', 'move it 1.27 mm ' + (ax === 'x' ? 'left' : 'up') + (h.end0 || h.end1 ? ' (its step; the other end is the corner)' : ''), function () { return Geo.ops.humpSet(P, h.key, { slide: -1.27 }); }),
+        btn('fwd', ax === 'x' ? '▶' : '▼', 'move it 1.27 mm ' + (ax === 'x' ? 'right' : 'down') + (h.end0 || h.end1 ? ' (its step; the other end is the corner)' : ''), function () { return Geo.ops.humpSet(P, h.key, { slide: 1.27 }); }));
+      acts.push(btn('end', ax === 'x' ? 'To the other end' : 'To the other end', 'the same hump mirrored along its edge: ' + (ax === 'x' ? 'left end for right end' : 'top for bottom') + '. The edge\'s own corners stay as they are.', function () { return Geo.ops.humpOtherEnd(P, h.key); }));
+      if (ax === 'y') acts.push(btn('side', 'To the ' + (h.side === 'left' ? 'right' : 'left') + ' side', 'the same hump at the same height on the other side; where that side is shorter its lower end is pulled up', function () { return Geo.ops.humpOtherSide(P, h.key); }));
+      acts.push(btn('del', 'Remove', 'take this hump out: its edge runs straight there', function () { return Geo.ops.humpRemove(P, h.key); }));
+      box.appendChild(el('div', { class: 'acts' }, acts));
+      c.appendChild(box);
+    });
+    c.appendChild(el('div', { class: 'row' }, [el('span', { class: 'hint', text: 'Add a hump on' }), el('span', {}, [['top', 'the top edge'], ['left', 'the left side'], ['right', 'the right side']].map(function (o) {
+      return el('button', { type: 'button', id: 'c-hump-add-' + o[0], text: o[1], title: 'a 1.5 mm hump in the middle of the longest clear stretch of that edge', onclick: function () { humpDo(Geo.ops.humpAdd(P, o[0])); rebuild(true); } }); }))]));
+    c.appendChild(el('div', { class: 'hint' + (ui.humpSaid ? ' bad' : ''), id: 'c-hump-said', text: ui.humpSaid || 'A hump is found in the outline, not kept beside it: drag its vertices under Outline and it is still listed here. Parts do not move with a hump.' }));
 
     c = sect('Stack, bottom to top');
     var tb = el('table', { class: 'stack' }, [el('tr', {}, [el('th', { text: '' }), el('th', { text: 'Name' }), el('th', { text: 'Kind' }), el('th', { class: 'n', text: 't' }), el('th', { class: 'n', text: 'gap' })])]);
@@ -12898,7 +13353,7 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     c.appendChild(el('div', { class: 'hint', text: 'A new part lands in the middle of the view, selected: drag it into place. Library parts carry the EasyEDA footprint for their LCSC number, which the KiCad export places with them.' }));
     c = sect('Probe dock');
     var pd = P.probe.dock;
-    c.appendChild(check('c-dock', 'Dock in the left strip, between the boards', pd.enabled, function (v) { pd.enabled = v; }));
+    c.appendChild(check('c-dock', 'Dock in the ' + (P.frame.side === 'right' ? 'right' : 'left') + ' strip, between the boards', pd.enabled, function (v) { pd.enabled = v; }));
     if (pd.enabled) {
       c.appendChild(row('Probe diameter', num(P.probe.dia, 0.1, function (v) { P.probe.dia = v; }, { min: 1, max: 12, id: 'c-pdia' }), 'mm', 'c-pdia'));
       c.appendChild(row('Probe length', num(P.probe.len, 1, function (v) { P.probe.len = v; }, { min: 10, max: 200, id: 'c-plen' }), 'mm', 'c-plen'));
@@ -12986,13 +13441,13 @@ window.V6_REF = {"source":"Testolomew/Hardware/WigLEDmag/WigLEDmag.kicad_pcb","d
     var xq = c.extender;
     if (xq) {
       box.appendChild(el('h2', { text: 'Side port and extender' }));
-      box.appendChild(line(xq.on_grid ? 'ok' : 'bad', xq.rows + ' rows', 'Extender: ' + xq.cols + ' columns, ' + xq.w + ' mm wide, ' + (xq.dead ? xq.dead + ' dead row' + (xq.dead > 1 ? 's' : '') : 'no dead row') + ' at the seam', 'Its first column is ' + xq.col_gap + ' mm from column ' + P.grid.cols + ', on the same 0.1 inch grid. Unit and extender together are ' + xq.pair_w + ' mm = ' + xq.pair_rows + ' rows, so a next unit beside them keeps the grid too.'));
+      box.appendChild(line(xq.on_grid ? 'ok' : 'bad', xq.rows + ' rows', 'Extender: ' + xq.cols + ' columns, ' + xq.w + ' mm wide, ' + (xq.dead ? xq.dead + ' dead row' + (xq.dead > 1 ? 's' : '') : 'no dead row') + ' at the seam', 'Its first column is ' + xq.col_gap + ' mm from column ' + (xq.side === 'left' ? 1 : P.grid.cols) + ', on the same 0.1 inch grid. Unit and extender together are ' + xq.pair_w + ' mm = ' + xq.pair_rows + ' rows, so a next unit beside them keeps the grid too.'));
       var sc = xq.seam_col;
-      if (sc) box.appendChild(sc.fits ? line('ok', sc.wall + ' mm wall', 'Its first column is on the grid plane, in the edge that bows into the waist', 'The waist in the breadboard\'s side is ' + sc.has + ' mm deep (the WigLEDmag\'s own is ' + sc.own + '), which leaves the breadboard a ' + sc.wall + ' mm wall beside column ' + P.grid.cols + '. The extender\'s first channel is open on that side and that wall closes it: the ' + sc.clip + ' mm clip clears it by ' + sc.clip_clear + ' mm, and its solder tab has ' + sc.land + ' mm of board to the edge.' + (sc.face_land ? ' The two top boards meet on the half-pitch line: ' + sc.face_land.ext + ' mm of land outside the ' + sc.face_land.countersink + ' mm countersinks on the extender, ' + sc.face_land.unit + ' on the breadboard.' : '') + ' The rails start ' + xq.rail_skip + ' hole' + (xq.rail_skip > 1 ? 's' : '') + ' in, where the breadboard\'s corners are.')
+      if (sc) box.appendChild(sc.fits ? line('ok', sc.wall + ' mm wall', 'Its first column is on the grid plane, in the edge that bows into the waist', 'The waist in the breadboard\'s side is ' + sc.has + ' mm deep (the WigLEDmag\'s own is ' + sc.own + '), which leaves the breadboard a ' + sc.wall + ' mm wall beside column ' + (xq.side === 'left' ? 1 : P.grid.cols) + '. The extender\'s first channel is open on that side and that wall closes it: the ' + sc.clip + ' mm clip clears it by ' + sc.clip_clear + ' mm, and its solder tab has ' + sc.land + ' mm of board to the edge.' + (sc.face_land ? ' The two top boards meet on the half-pitch line: ' + sc.face_land.ext + ' mm of land outside the ' + sc.face_land.countersink + ' mm countersinks on the extender, ' + sc.face_land.unit + ' on the breadboard.' : '') + ' The rails start ' + xq.rail_skip + ' hole' + (xq.rail_skip > 1 ? 's' : '') + ' in, where the breadboard\'s corners are.')
         : line('bad', 'no room', 'Its first column does not fit on the grid plane', !sc.bowed ? 'Its edge has to fill the waist for a column there (Side port and extender).' : 'A column there needs the waist ' + sc.need + ' mm deep and it is ' + sc.has + ': the ' + sc.clip + ' mm clip would be ' + (-sc.clip_clear) + ' mm into the breadboard\'s side, and the board ' + (sc.land < 0 ? (-sc.land) + ' mm short under its solder tab.' : 'has ' + sc.land + ' mm under its solder tab.')));
       var xp = xq.port;
       if (xp && xp.press) { var pr = xp.press; box.appendChild(line(pr.mags && pr.mags.length ? 'warn' : 'ok', '2 x ' + xp.n, 'Pressed in from the back: a tab of the extender in a knob-shaped cutout of the bottom board', 'Socket: ' + xp.kind_label + ', its top ' + (xp.room >= 0 ? xp.room + ' mm below' : (-xp.room) + ' mm ABOVE') + ' the top face, the top and the bottom board opened over and under it so a pin can go all the way through. The cutout is ' + (pr.knob[2] - pr.knob[0]).toFixed(1) + ' x ' + (pr.knob[3] - pr.knob[1]).toFixed(1) + ' mm with a ' + pr.neck + ' mm neck to the edge: ' + pr.under + ' mm of undercut each side holds the tab in the plane, cut ' + pr.gap + ' mm clear. Pins from the tab reach the socket\'s top at z ' + pr.pin_tip + ': ' + pr.pin_len + ' mm above a 1.0 mm base (the usual 1.27 mm header has 3.0).' + (pr.mags && pr.mags.length ? ' Magnetometer ' + pr.mags.join(', ') + ' is in the cutout and has to move.' : '') + (xp.price ? ' ' + xp.price + ' (read 2026-11-28).' : ''))); }
-      if (!xp) box.appendChild(line('bad', 'no socket', 'Nothing in the right side for it to plug into', 'Side port and extender: tick the header socket in the right side.'));
+      if (!xp) box.appendChild(line('bad', 'no socket', 'Nothing in the ' + (xq.side || 'right') + ' side for it to plug into', 'Side port and extender: tick the header socket in the ' + (xq.side || 'right') + ' side.'));
       else {
         if (!xp.press) box.appendChild(line(!xp.faces || xp.open_seam || !xp.pin_ok ? 'bad' : xp.inset > 0.005 || (xp.room != null && xp.room < 0) ? 'warn' : 'ok', '2 x ' + xp.n, 'Side socket: ' + xp.kind_label + ', ' + xp.pins + ' pins, ' + xp.len + ' mm long', !xp.faces ? 'It has to be on top of the main board and turned 180 for its mouth to face the extender.' : 'Mouth at x ' + xp.mouth_x + (Math.abs(xp.inset) < 0.005 ? ', on the edge: the header\'s ' + xp.pin + ' mm pins go all the way in.' : xp.inset > 0 ? ', ' + xp.inset + ' mm inside the edge: the ' + xp.pin + ' mm pins go ' + xp.engage + ' in.' : ', ' + xp.open_seam + ' mm past the edge: the seam stands open by that.') + ' It runs from y ' + xp.y0 + ' to ' + xp.y1 + '.' + (xp.takes ? ' Its maker gives ' + xp.takes[0] + ' to ' + xp.takes[1] + ' mm of insertion' + (xp.pin_ok ? ', which a ' + xp.pin + ' mm pin meets' + (xp.pin < 4 ? ' (a short-pin header, not the usual 4.0).' : '.') : ': ' + xp.engage + ' mm is outside that.') : '') + (xp.room != null && xp.room < 0 ? ' It is ' + xp.high + ' mm high, ' + (-xp.room) + ' more than there is under the top board, so the top board is opened over it.' : '') + (xp.price ? ' ' + xp.price + ' (read 2026-11-28).' : '')));
         box.appendChild(line(xq.spare < 0 ? 'bad' : xq.spare === 0 ? 'warn' : 'ok', xq.spare < 0 ? (-xq.spare) + ' short' : xq.spare + ' spare', xq.need + ' rows take ' + xq.need + ' of its ' + xp.pins + ' pins', xq.spare < 0 ? 'Fewer columns, or a longer socket.' : xq.spare === 0 ? 'None left on this side for 5 V, ground or LED data. Those are on the top port, which a board on this side does not reach, so the extender\'s rows would be dark.' : 'Left over for power or LED data on this side.'));

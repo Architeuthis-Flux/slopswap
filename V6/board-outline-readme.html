@@ -19,10 +19,10 @@
 <main class="page wide">
 <p class="eyebrow"><a href="../">slopswap</a> / <a href="./">V6</a></p>
 <h1>V6 board outline and stack</h1>
-<p class="muted">The readme of <code>JumperlessV6/v6mech</code>, rev A11e 2026-11-28. Kevin Cappuccio with Claude.</p>
+<p class="muted">The readme of <code>JumperlessV6/v6mech</code>, rev A12 2026-11-28. Kevin Cappuccio with Claude.</p>
 <ul class="get cycle">
   <li><a href="board-outline.html"><b>Open the 3D viewer</b></a></li>
-  <li><a href="board-outline-v6mech.zip" download><b>Download the folder</b> (.zip, 12.6 MB): parameters, source, KiCad and DXF outlines, STEP</a></li>
+  <li><a href="board-outline-v6mech.zip" download><b>Download the folder</b> (.zip, 12.8 MB): parameters, source, KiCad and DXF outlines, STEP</a></li>
 </ul>
 <figure><a href="board-outline-on-sketch.png"><img src="board-outline-on-sketch.png" alt="The outline (pink) laid over the notebook page it was traced from"></a><figcaption>The outline (pink) laid over the notebook page it was traced from: the viewer's sketch underlay, seen from above.</figcaption></figure>
 <figure><a href="board-outline-inputs.png"><img src="board-outline-inputs.png" alt="From the top edge"></a><figcaption>From the top edge: the click wheel under the top board at the corner, a nav switch through it, two button holes. Left, the pickers and the per-board tick boxes of the selected part.</figcaption></figure>
@@ -409,6 +409,133 @@ JumperlessFootprints; the RKJXM has no footprint yet (B25 says so too).</p>
 </div>
 <p><code>node build.mjs --check</code> exits 1 if two parts clash, a part runs into a board kept whole, or a bare
 breadboard no longer fits beside the unit.</p>
+<h2>Rev A12: humps that move, and the board flipped left to right</h2>
+<p>Asked for (2026-11-28): options to move the "humps" around (the one near the USB port and the one at the top left), and
+an option to flip the design left to right so the probe's holder is on the right, choosing which parts go with it: the
+USB socket stays right, the click wheel stays left, the expansion port and the extender flip.</p>
+<h3>Humps</h3>
+<p>A hump is a stretch of the outline that stands out of an edge's own line. It is found in the outline, not kept beside
+it, so it is still listed after its vertices have been dragged, and a design with vertices added by hand has its humps
+found the same way. The outline is read as three outer edges: the top (top-left corner to top-right corner), and the
+left and right sides (from the top corner down to the lowest vertex on that side's grid plane). A side's line is its
+grid plane; the top edge's line is its level nearest the breadboard. The default outline has three:</p>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Hump</th>
+<th>Where</th>
+<th>Size</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>the raised top edge by the USB socket and the port</td>
+<td>from the step at x 44.2 to the top-right corner</td>
+<td>1.7 up</td>
+</tr>
+<tr>
+<td>the block at the top of the strip, where the click wheel is</td>
+<td>from the top-left corner down to y 1.58</td>
+<td>3.22 out</td>
+</tr>
+<tr>
+<td>the bump on the strip</td>
+<td>y 28 to 44.29</td>
+<td>0.5 out</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Humps</strong>, in the Design panel under Outline, has for each one: From and To (an end that is the edge's corner is named,
+not editable), how far it stands out, two arrows that move it 1.27 mm along its edge, <strong>To the other end</strong> (mirrored
+along its edge; the edge's own corners keep their shapes), <strong>To the left / right side</strong> (a side hump, at the same
+height on the other side) and <strong>Remove</strong>. <strong>Add a hump on</strong> the top edge, the left side or the right side puts a
+1.5 mm one in the middle of the longest clear stretch. A change that does not fit (it would run past the next corner,
+or another hump is in the way) is refused and the page says why; nothing is changed.</p>
+<ul>
+<li>A hump that takes in a corner takes the corner out with it: the block's top end is the top-left corner itself.</li>
+<li>Sent to a side that is shorter, a block's lower end is pulled up to clear that side's bottom corner, its slope kept.
+  The right side as drawn ends at the breadboard's corner (y 0), so the block lands there ending at y -2.81, not 1.58.</li>
+<li>Parts do not move with a hump.</li>
+<li>The same operations in code: <code>Geo.ops.humps(P)</code>, <code>humpSet</code>, <code>humpOtherEnd</code>, <code>humpOtherSide</code>, <code>humpRemove</code>, <code>humpAdd</code>.</li>
+</ul>
+<h3>Flip left to right</h3>
+<p><strong>Flip left to right</strong> (Design panel, under 0.1 inch grid) mirrors the board about the breadboard's middle, x = 39.37.
+The breadboard stays where it is; the strip and the probe's dock go to the other side, and the extender, which stands
+against the side the strip is not on, goes to the first. <code>frame.side</code> records it (<code>left</code> as drawn, <code>right</code>), and the
+engine works with the strip on either side: grid planes, seam fill, the joint with the breadboard's chamfer, probe
+walls and dead-row lines. Everything on the extender's side (the waist cut for it, its socket, the press-in cutout, the
+extender and its checks) is worked out on the mirror image by the same code as before and mirrored back, so what is
+added there later needs no second version. What goes with the board is chosen in the list above the button:</p>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>For</th>
+<th>Choices</th>
+<th>Starts as</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>each part (<code>on_flip</code> on the part)</td>
+<td><strong>flips</strong>: to the mirror image of its place, turned to face the mirrored way. <strong>stays in its corner</strong>: keeps its side and its place measured from that side's top corner of the outline. <strong>stays put</strong>: not moved</td>
+<td>flips; a USB socket and a click wheel stay in their corners</td>
+</tr>
+<tr>
+<td>each hump</td>
+<td>flips, or <strong>stays on its side</strong>: a top hump has its steps where they were, a side hump is at the same height on the same side</td>
+<td>flips</td>
+</tr>
+<tr>
+<td>the two top corners' shapes (their chamfers)</td>
+<td>stay on their sides, or flip</td>
+<td>stay</td>
+</tr>
+<tr>
+<td>the magnetometers</td>
+<td>flip, or stay put</td>
+<td>flip</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>A real part cannot be mirrored, so a part that flips is turned: about the axis its mouth lies on where the catalogue
+says where its mouth is (ports), otherwise about whichever axis its plan is more nearly symmetric on; the middle of its
+plan goes to the mirror image of where it was. The side socket comes out turned to 0 with its mouth in the left edge
+and its pin 1 at the top, and the extender's header the same, which is the pair turned half round, as it would be made.</p>
+<p>Flipping again with the same choices gives the design back (the exception: a block that had to be shortened to fit a
+shorter side stays shortened). Undo takes a flip back as it does anything else.</p>
+<p><strong>What the first flip of the default design gives</strong> (USB socket and click wheel in their corners, the rest flipped):</p>
+<ul>
+<li>Strip on the right: plane x 83.82, block out to 87.04, probe's dock at x 81.28. Unit pitch still 83.82, on the grid.</li>
+<li>Extender on the left, x -27.94 to 0, plugged into the side socket at (5.82, -15.9), mouth on the edge, pins fully in.
+  Its first column is on the unit's left grid plane (x 0), in the edge that bows into the breadboard's left waist: the
+  deeper waist of rev A11d is cut on whichever side the extender is on. The press-in joint of rev A11e mirrors too.</li>
+<li>USB socket at (81.2, -21.289), on the top-right corner's chamfer as before. Click wheel at (5.83, -22.999), 5.83 mm
+  from the top and left edges, which is its V5 place.</li>
+<li>M.2 socket at (22.74, -19.329); display at x 37.995 turned 270, its picture still centred on the breadboard.</li>
+<li><strong>Two clashes follow</strong>, both with the click wheel, because the block it lived in went right with the strip: with the
+  M.2 socket (7.96 mm² in plan over 2 mm of height) and with the side socket (2.4 mm² over 1.1 mm). The mid board is
+  in 4 pieces, one more than before. Nothing was moved to clear them.</li>
+<li>With every part flipped and the corners flipped too, each board is the mirror image of the original to within
+  hairlines (0.09 mm² in all, the widest a few µm): <code>node tools/flipcheck.mjs</code>.</li>
+</ul>
+<p>Calls made without asking:</p>
+<ul>
+<li>"Stays on the right / left" was read as staying in that side's top corner, not at the same x: the corner itself
+  moves 5.08 to 8.3 mm when the strip changes sides, and a USB socket has to be on the edge. <strong>Stays put</strong> is the other
+  reading and is in the list.</li>
+<li>The extender cannot be chosen separately: it is always on the side without the strip. The side socket is an
+  ordinary part and can be told to stay, in which case the checks say the extender's header does not meet it.</li>
+<li>Humps flip unless told to stay. The raised top edge goes with the M.2 socket, whose mouth is on it.</li>
+<li>The left strip's control is called Right strip when it is on the right; <code>grid.dead_rows_left</code> keeps its name.</li>
+</ul>
+<p>Not checked: the flipped files in KiCad (they pass <code>tools/verify.py</code>: Edge.Cuts closed on every board, both variants);
+the turn chosen for a library part that has no mouth and a plan that is its own mirror image both ways (it is turned
+about its own vertical axis, which is right for a button and may be wrong for a connector); the magnetometer tab's
+numbers on a design where the magnetometers were told to stay.</p>
 <h2>Rev A11e: pressing in from the back, upright sockets on the mid board, thin outer boards</h2>
 <p>Kevin, 2026-11-28: "there's also the option of using vertical headers with some cutout in the main V6 bottom board so
 the extension has vertical pins and presses in from the back, and the cutout's shape is tight enough that it holds",
@@ -1297,6 +1424,10 @@ percentile / worst hole, and how far a 10 µT ambient change moves the fix (medi
 <tr>
 <td><code>tools/extcheck.mjs</code></td>
 <td>the socket in the right side and the extender (rev A11 to A11d): the two ports clear of each other, the column on the seam and the waist it needs, the three sockets for the side, on the grid, header against socket, no plan shared with the unit, nothing tied unless a design asks, the socket's length against the USB-C, what a saved design keeps</td>
+</tr>
+<tr>
+<td><code>tools/flipcheck.mjs</code></td>
+<td>the flip and the humps (rev A12): a flipped design resolves to the mirror image of the original, board by board, in both variants; flipped twice it is the original; parts that stay in their corners; every hump operation</td>
 </tr>
 <tr>
 <td><code>src/catalog.js</code></td>
